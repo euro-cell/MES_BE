@@ -12,7 +12,7 @@ declare module 'express-session' {
   }
 }
 
-@Controller('api/auth')
+@Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
@@ -25,14 +25,8 @@ export class AuthController {
 
   @Post('login')
   @Redirect('/dashboard')
-  async login(
-    @Body() body: { username: string; password: string },
-    @Req() req: express.Request,
-  ) {
-    const user = await this.authService.validateUser(
-      body.username,
-      body.password,
-    );
+  async login(@Body() body: { username: string; password: string }, @Req() req: express.Request) {
+    const user = await this.authService.validateUser(body.username, body.password);
     if (!user) return { url: '/login' };
 
     req.session.user = {

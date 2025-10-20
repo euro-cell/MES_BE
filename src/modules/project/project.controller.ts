@@ -1,16 +1,7 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  ParseIntPipe,
-  Post,
-  Redirect,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Redirect } from '@nestjs/common';
 import { ProjectService } from './project.service';
 
-@Controller('api/project')
+@Controller('project')
 export class ProjectController {
   constructor(private readonly projectService: ProjectService) {}
 
