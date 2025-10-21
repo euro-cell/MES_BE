@@ -3,6 +3,7 @@ import { AppModule } from './app/app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { ConfigService } from '@nestjs/config';
 import session from 'express-session';
+import { setupSwagger } from './common/configs/swagger.config';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -22,6 +23,8 @@ async function bootstrap() {
       cookie: { maxAge: 1000 * 60 * 30 }, // 30분 유지
     }),
   );
+
+  setupSwagger(app);
 
   await app.listen(PORT ?? 3000, '0.0.0.0');
   console.log('🚀 Server ON: ', await app.getUrl());
