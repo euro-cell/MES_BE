@@ -4,16 +4,14 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { ConfigService } from '@nestjs/config';
 import session from 'express-session';
 import { setupSwagger } from './common/configs/swagger.config';
+import { createCorsConfig } from './common/configs/cors.config';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const configService = app.get(ConfigService);
   const PORT = configService.get<number>('PORT');
 
-  app.enableCors({
-    origin: 'http://localhost:5173',
-    credentials: true,
-  });
+  app.enableCors(createCorsConfig(configService));
 
   app.use(
     session({
