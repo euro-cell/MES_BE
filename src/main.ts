@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import session from 'express-session';
 import { setupSwagger } from './common/configs/swagger.config';
 import { createCorsConfig } from './common/configs/cors.config';
+import { createSessionConfig } from './common/configs/session.config';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -13,14 +14,7 @@ async function bootstrap() {
 
   app.enableCors(createCorsConfig(configService));
 
-  app.use(
-    session({
-      secret: 'eurocell_secret_key',
-      resave: false,
-      saveUninitialized: false,
-      cookie: { maxAge: 1000 * 60 * 30 }, // 30분 유지
-    }),
-  );
+  app.use(session(createSessionConfig(configService)));
 
   setupSwagger(app);
 
