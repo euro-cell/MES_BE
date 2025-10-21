@@ -12,9 +12,7 @@ export class AuthService {
 
   async register(employeeNumber: string, name: string, password: string) {
     const existing = await this.userRepo.findOne({ where: { employeeNumber } });
-    if (existing) {
-      throw new ConflictException('이미 등록된 사번입니다.');
-    }
+    if (existing) throw new ConflictException('이미 등록된 사번입니다.');
 
     const user = this.userRepo.create({
       employeeNumber,
@@ -31,6 +29,11 @@ export class AuthService {
     // 패스워드 임시 구현
     if (user.password !== password) return null;
 
-    return user;
+    const { password: _pw, ...result } = user;
+    return result;
+  }
+
+  async findById(id: number) {
+    return this.userRepo.findOne({ where: { id } });
   }
 }

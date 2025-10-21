@@ -1,7 +1,10 @@
 import * as session from 'express-session';
 import { ConfigService } from '@nestjs/config';
 
+export const memoryStore = new session.MemoryStore();
+
 export const createSessionConfig = (configService: ConfigService): session.SessionOptions => ({
+  store: memoryStore,
   secret: configService.get<string>('SESSION_SECRET') || 'eurocell_secret_key',
   resave: false,
   saveUninitialized: false,
