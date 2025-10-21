@@ -1,13 +1,15 @@
 import { Controller, Post, Body, Redirect, Req } from '@nestjs/common';
 import express from 'express';
 import { AuthService } from './auth.service';
+import { UserRole } from '../../common/enums/user-role.enum';
 
 declare module 'express-session' {
   interface SessionData {
     user?: {
       id: number;
-      username: string;
-      role: string;
+      employeeNumber: string;
+      name: string;
+      role: UserRole;
     };
   }
 }
@@ -18,20 +20,23 @@ export class AuthController {
 
   @Post('register')
   @Redirect('/login')
-  async register(@Body() body: { username: string; password: string }) {
-    await this.authService.register(body.username, body.password);
+  async register(@Body() body: { employeeNumber: string; name: string; password: string }) {
+    const { employeeNumber, name, password } = body;
+    await this.authService.register(employeeNumber, name, password);
     return;
   }
 
   @Post('login')
   @Redirect('/dashboard')
-  async login(@Body() body: { username: string; password: string }, @Req() req: express.Request) {
-    const user = await this.authService.validateUser(body.username, body.password);
+  async login(@Body() body: { employeeNumber: string; password: string }, @Req() req: express.Request) {
+    const { employeeNumber, password } = body;
+    const user = await this.authService.validateUser(employeeNumber, password);
     if (!user) return { url: '/login' };
 
     req.session.user = {
       id: user.id,
-      username: user.username,
+      employeeNumber: user.employeeNumber,
+      name: user.name,
       role: user.role,
     };
 
