@@ -31,11 +31,11 @@ export class AuthController {
   }
 
   @Get('status')
-  status(@Req() req) {
-    if (req.isAuthenticated()) {
-      return { loggedIn: true, user: req.user };
+  status(@Req() req: Request) {
+    if (req.isAuthenticated && req.isAuthenticated()) {
+      return { authenticated: true, user: req.user };
     }
-    return { loggedIn: false };
+    return { authenticated: false };
   }
 
   @Post('logout')
