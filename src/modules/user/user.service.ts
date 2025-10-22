@@ -19,4 +19,10 @@ export class UserService {
     await this.UserRepository.update(id, dto);
     return await this.UserRepository.findOneBy({ id });
   }
+
+  async deleteUser(id: number) {
+    const user = await this.UserRepository.findOne({ where: { id } });
+    if (!user) throw new NotFoundException('사용자를 찾을 수 없습니다.');
+    await this.UserRepository.softDelete(user.id);
+  }
 }
