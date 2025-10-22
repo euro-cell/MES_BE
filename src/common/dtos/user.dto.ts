@@ -1,5 +1,5 @@
 import { ApiProperty, OmitType, PickType } from '@nestjs/swagger';
-import { UserRole } from '../enums/user-role.enum';
+import { UserRole } from '../enums/user.enum';
 import { IsNotEmpty, IsString } from 'class-validator';
 
 export class UserDto {
