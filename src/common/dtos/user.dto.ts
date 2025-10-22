@@ -16,6 +16,9 @@ export class UserDto {
   @IsString()
   password: string;
 
+  @ApiProperty({ example: '전지사업팀', description: '부서' })
+  department: string;
+
   @ApiProperty({ enum: UserRole, default: UserRole.STAFF })
   role: UserRole;
 }
