@@ -1,4 +1,4 @@
-import { ApiProperty, OmitType, PickType } from '@nestjs/swagger';
+import { ApiProperty, OmitType, PartialType, PickType } from '@nestjs/swagger';
 import { UserRole } from '../enums/user.enum';
 import { IsNotEmpty, IsString } from 'class-validator';
 
@@ -21,8 +21,13 @@ export class UserDto {
 
   @ApiProperty({ enum: UserRole, default: UserRole.STAFF })
   role: UserRole;
+
+  @ApiProperty({ example: false, description: '활성화 여부' })
+  isActive: boolean;
 }
 
 export class LoginDto extends PickType(UserDto, ['employeeNumber', 'password'] as const) {}
 
-export class RegisterDto extends OmitType(UserDto, ['role'] as const) {}
+export class RegisterDto extends OmitType(UserDto, ['role', 'isActive'] as const) {}
+
+export class UpdateUserDto extends PartialType(UserDto) {}
