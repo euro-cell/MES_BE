@@ -2,7 +2,7 @@ import { Controller, Post, Get, UseGuards, Req, Body, Res } from '@nestjs/common
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { ApiBody } from '@nestjs/swagger';
-import { LoginDto } from 'src/common/dtos/login.dto';
+import { LoginDto, RegisterDto } from 'src/common/dtos/user.dto';
 import { memoryStore } from 'src/common/configs/session.config';
 import { promisify } from 'util';
 import type { Request, Response } from 'express';
@@ -12,22 +12,17 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
-  async register(@Body() body: { employeeNumber: string; name: string; password: string }) {
-    const { employeeNumber, name, password } = body;
-    await this.authService.register(employeeNumber, name, password);
+  @ApiBody({ type: RegisterDto })
+  async register(@Body() dto: RegisterDto) {
+    await this.authService.register(dto);
     return { message: '회원 등록 완료' };
   }
 
   @Post('login')
   @ApiBody({ type: LoginDto })
   @UseGuards(AuthGuard('local'))
-  async login(@Req() req) {
-    return new Promise((resolve, reject) => {
-      req.login(req.user, (err) => {
-        if (err) return reject(err);
-        resolve({ message: '로그인 성공', user: req.user });
-      });
-    });
+  async login(@Req() req: any) {
+    return this.authService.login(req, req.user);
   }
 
   @Get('status')
@@ -40,10 +35,7 @@ export class AuthController {
 
   @Post('logout')
   async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    await new Promise<void>((resolve) => req.logout?.(() => resolve()));
-    await new Promise<void>((resolve) => req.session?.destroy(() => resolve()));
-    res.clearCookie('connect.sid');
-    return { message: '로그아웃 완료' };
+    return await this.authService.logout(req, res);
   }
 
   //Todo: 세션 확인용, 추후 삭제 예정
