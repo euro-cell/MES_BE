@@ -1,30 +1,30 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ProjectPlan } from '../../../common/entities/project-plan.entity';
-import { Project } from '../../../common/entities/project.entity';
+import { ProductionPlan } from '../../../common/entities/production-plan.entity';
+import { Production } from '../../../common/entities/production.entity';
 import { Between, Like, Repository } from 'typeorm';
 
 @Injectable()
 export class PlanService {
   constructor(
-    @InjectRepository(ProjectPlan)
-    private readonly planRepository: Repository<ProjectPlan>,
-    @InjectRepository(Project)
-    private readonly projectRepository: Repository<Project>,
+    @InjectRepository(ProductionPlan)
+    private readonly planRepository: Repository<ProductionPlan>,
+    @InjectRepository(Production)
+    private readonly ProductionRepository: Repository<Production>,
   ) {}
 
-  async savePlan(projectId: number, data: Record<string, string>) {
-    const project = await this.projectRepository.findOne({
-      where: { id: projectId },
+  async savePlan(productionId: number, data: Record<string, string>) {
+    const project = await this.ProductionRepository.findOne({
+      where: { id: productionId },
     });
     if (!project) throw new Error('프로젝트를 찾을 수 없습니다.');
 
     let plan = await this.planRepository.findOne({
-      where: { project: { id: projectId } },
+      where: { production: { id: productionId } },
     });
     if (!plan) {
-      plan = new ProjectPlan();
-      plan.project = project;
+      plan = new ProductionPlan();
+      plan.production = project;
     }
 
     plan.startDate = data.startDate;
@@ -77,13 +77,13 @@ export class PlanService {
     return { success: true, message: '프로젝트 일정이 저장되었습니다 ✅' };
   }
 
-  async searchPlans(filters: { projectId?: number }) {
-    const { projectId } = filters;
-    if (!projectId) return [];
+  async searchPlans(filters: { productionId?: number }) {
+    const { productionId } = filters;
+    if (!productionId) return [];
 
     return this.planRepository.find({
-      where: { project: { id: projectId } },
-      relations: ['project'],
+      where: { production: { id: productionId } },
+      relations: ['production'],
       order: { startDate: 'ASC' },
     });
   }

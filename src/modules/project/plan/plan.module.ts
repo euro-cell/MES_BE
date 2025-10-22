@@ -2,11 +2,11 @@ import { Module } from '@nestjs/common';
 import { PlanService } from './plan.service';
 import { PlanController } from './plan.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ProjectPlan } from '../../../common/entities/project-plan.entity';
-import { Project } from '../../../common/entities/project.entity';
+import { ProductionPlan } from '../../../common/entities/production-plan.entity';
+import { Production } from '../../../common/entities/production.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ProjectPlan, Project])],
+  imports: [TypeOrmModule.forFeature([ProductionPlan, Production])],
   controllers: [PlanController],
   providers: [PlanService],
 })

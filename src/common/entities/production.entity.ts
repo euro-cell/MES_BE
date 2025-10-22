@@ -1,16 +1,8 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  CreateDateColumn,
-  UpdateDateColumn,
-  DeleteDateColumn,
-  OneToOne,
-} from 'typeorm';
-import { ProjectPlan } from './project-plan.entity';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, OneToOne } from 'typeorm';
+import { ProductionPlan } from './production-plan.entity';
 
-@Entity('projects')
-export class Project {
+@Entity('productions')
+export class Production {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -47,6 +39,6 @@ export class Project {
   @DeleteDateColumn()
   deletedAt?: Date;
 
-  @OneToOne(() => ProjectPlan, (plan) => plan.project)
-  plan: ProjectPlan;
+  @OneToOne(() => ProductionPlan, (plan) => plan.production)
+  plan: ProductionPlan;
 }

@@ -1,23 +1,15 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  OneToOne,
-  JoinColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
-} from 'typeorm';
-import { Project } from './project.entity';
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Production } from './production.entity';
 
-@Entity('project_plans')
-export class ProjectPlan {
+@Entity('production_plans')
+export class ProductionPlan {
   @PrimaryGeneratedColumn()
   id: number;
 
   // ✅ 1:1 관계
-  @OneToOne(() => Project, (project) => project.plan, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'project_id' })
-  project: Project;
+  @OneToOne(() => Production, (production) => production.plan, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'production_id' })
+  production: Production;
 
   // ✅ 프로젝트 전체 일정
   @Column({ type: 'date', nullable: true })

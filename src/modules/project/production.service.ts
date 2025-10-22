@@ -1,17 +1,17 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Project } from '../../common/entities/project.entity';
+import { Production } from '../../common/entities/production.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()
-export class ProjectService {
+export class ProductionService {
   constructor(
-    @InjectRepository(Project)
-    private readonly projectRepo: Repository<Project>,
+    @InjectRepository(Production)
+    private readonly ProductionRepository: Repository<Production>,
   ) {}
 
   findAll() {
-    return this.projectRepo.find({ order: { id: 'DESC' } });
+    return this.ProductionRepository.find({ order: { id: 'DESC' } });
   }
 
   private generateProjectName({
@@ -35,10 +35,7 @@ export class ProjectService {
 
     // 1~12 → A~L 변환, 이외는 'X'
     const monthNum = Number(month);
-    const monthCode =
-      monthNum >= 1 && monthNum <= 12
-        ? String.fromCharCode(64 + monthNum)
-        : 'X';
+    const monthCode = monthNum >= 1 && monthNum <= 12 ? String.fromCharCode(64 + monthNum) : 'X';
 
     // 용량 앞 2자리 (예: 3800 → 38)
     const capShort = String(capacity).slice(0, 2);
@@ -72,7 +69,7 @@ export class ProjectService {
       capacity: Number(data.capacity),
     });
 
-    const project = this.projectRepo.create({
+    const project = this.ProductionRepository.create({
       name,
       company,
       mode,
@@ -83,15 +80,15 @@ export class ProjectService {
       capacity: data.capacity,
     });
 
-    return this.projectRepo.save(project);
+    return this.ProductionRepository.save(project);
   }
 
   async remove(id: number) {
-    const project = await this.projectRepo.findOne({ where: { id } });
+    const project = await this.ProductionRepository.findOne({ where: { id } });
     if (!project) {
       throw new NotFoundException('해당 프로젝트를 찾을 수 없습니다.');
     }
-    await this.projectRepo.remove(project);
+    await this.ProductionRepository.remove(project);
     return { success: true };
   }
 }
