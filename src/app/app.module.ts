@@ -5,7 +5,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TypeOrmConfig } from 'src/common/configs/typeorm.config';
 import { AuthModule } from 'src/modules/auth/auth.module';
-import { ProductionModule } from 'src/modules/project/production.module';
+import { ProductionModule } from 'src/modules/production/production.module';
 
 @Module({
   imports: [
