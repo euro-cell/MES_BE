@@ -7,6 +7,7 @@ import { TypeOrmConfig } from 'src/common/configs/typeorm.config';
 import { AuthModule } from 'src/modules/auth/auth.module';
 import { ProductionModule } from 'src/modules/production/production.module';
 import { UserModule } from 'src/modules/user/user.module';
+import { MenuAccessModule } from 'src/modules/menu-access/menu-access.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { UserModule } from 'src/modules/user/user.module';
     AuthModule,
     ProductionModule,
     UserModule,
+    MenuAccessModule,
   ],
   controllers: [AppController],
   providers: [AppService],
