@@ -6,37 +6,50 @@ export class ProductionPlan {
   @PrimaryGeneratedColumn()
   id: number;
 
-  // ✅ 1:1 관계
   @OneToOne(() => Production, (production) => production.plan, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'production_id' })
   production: Production;
 
-  // ✅ 프로젝트 전체 일정
   @Column({ type: 'date', nullable: true })
   startDate: string;
-
   @Column({ type: 'date', nullable: true })
   endDate: string;
 
-  // ✅ 공정별 일정
-  @Column({ nullable: true }) mixing_cathode: string;
-  @Column({ nullable: true }) mixing_anode: string;
-  @Column({ nullable: true }) coating_cathode: string;
-  @Column({ nullable: true }) coating_anode: string;
-  @Column({ nullable: true }) calendering_cathode: string;
-  @Column({ nullable: true }) calendering_anode: string;
-  @Column({ nullable: true }) notching_cathode: string;
-  @Column({ nullable: true }) notching_anode: string;
+  @Column({ nullable: true })
+  mixingCathode: string;
+  @Column({ nullable: true })
+  mixingAnode: string;
+  @Column({ nullable: true })
+  coatingCathode: string;
+  @Column({ nullable: true })
+  coatingAnode: string;
+  @Column({ nullable: true })
+  calenderingCathode: string;
+  @Column({ nullable: true })
+  calenderingAnode: string;
+  @Column({ nullable: true })
+  notchingCathode: string;
+  @Column({ nullable: true })
+  notchingAnode: string;
 
-  @Column({ nullable: true }) pouch_forming: string;
-  @Column({ nullable: true }) vacuum_drying_cathode: string;
-  @Column({ nullable: true }) vacuum_drying_anode: string;
-  @Column({ nullable: true }) stacking: string;
-  @Column({ nullable: true }) tab_welding: string;
-  @Column({ nullable: true }) sealing: string;
-  @Column({ nullable: true }) el_filling: string;
-  @Column({ nullable: true }) pf_mf: string;
-  @Column({ nullable: true }) grading: string;
+  @Column({ nullable: true })
+  pouch_forming: string;
+  @Column({ nullable: true })
+  vacuumDryingCathode: string;
+  @Column({ nullable: true })
+  vacuumDryingAnode: string;
+  @Column({ nullable: true })
+  stacking: string;
+  @Column({ nullable: true })
+  tabWelding: string;
+  @Column({ nullable: true })
+  sealing: string;
+  @Column({ nullable: true })
+  elFilling: string;
+  @Column({ nullable: true })
+  pfMf: string;
+  @Column({ nullable: true })
+  grading: string;
 
   @CreateDateColumn()
   createdAt: Date;
