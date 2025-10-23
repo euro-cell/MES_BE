@@ -8,6 +8,9 @@ import { AuthModule } from 'src/modules/auth/auth.module';
 import { ProductionModule } from 'src/modules/production/production.module';
 import { UserModule } from 'src/modules/user/user.module';
 import { MenuAccessModule } from 'src/modules/menu-access/menu-access.module';
+import { APP_GUARD, Reflector } from '@nestjs/core';
+import { PermissionGuard } from 'src/common/guards/permission.guard';
+import { PermissionGuardModule } from 'src/common/guards/permission-guard.module';
 
 @Module({
   imports: [
@@ -17,12 +20,20 @@ import { MenuAccessModule } from 'src/modules/menu-access/menu-access.module';
       inject: [ConfigService],
       useClass: TypeOrmConfig,
     }),
+    PermissionGuardModule,
     AuthModule,
     ProductionModule,
     UserModule,
     MenuAccessModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    Reflector,
+    {
+      provide: APP_GUARD,
+      useClass: PermissionGuard,
+    },
+  ],
 })
 export class AppModule {}
