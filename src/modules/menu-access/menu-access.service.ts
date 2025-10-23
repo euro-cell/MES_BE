@@ -110,4 +110,33 @@ export class MenuAccessService {
     });
     return { menus: menus.map((m) => m.name), roles: rolePermissions };
   }
+
+  /** ✅ 직급별 권한 저장 */
+  async updateRolePermissions(rolesData: any[]) {
+    const allMenus = await this.menuRepo.find();
+
+    for (const roleData of rolesData) {
+      const { role, menus } = roleData;
+
+      if (role === UserRole.ADMIN) continue;
+
+      for (const [menuName, perm] of Object.entries(menus)) {
+        const menu = allMenus.find((m) => m.name === menuName);
+        if (!menu) continue;
+
+        let record = await this.rolePermRepo.findOne({ where: { menu: { id: menu.id }, role }, relations: ['menu'] });
+
+        if (!record) {
+          record = this.rolePermRepo.create({ menu, role });
+        }
+
+        record.canCreate = !!(perm as any).canCreate;
+        record.canUpdate = !!(perm as any).canUpdate;
+        record.canDelete = !!(perm as any).canDelete;
+
+        await this.rolePermRepo.save(record);
+      }
+    }
+    return { message: '✅ 직급별 메뉴 권한이 저장되었습니다.' };
+  }
 }
