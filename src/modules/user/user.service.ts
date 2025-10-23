@@ -20,7 +20,7 @@ export class UserService {
   }
 
   async findAll() {
-    return await this.UserRepository.find();
+    return await this.UserRepository.find({ order: { id: 'ASC' } });
   }
 
   async updateUser(id: number, dto: UpdateUserDto) {
