@@ -4,6 +4,8 @@ import { Repository } from 'typeorm';
 import { Menu } from 'src/common/entities/menu.entity';
 import { User } from 'src/common/entities/user.entity';
 import { MenuPermissionByUser } from 'src/common/entities/menu-permission-user.entity';
+import { MenuPermissionByRole } from 'src/common/entities/menu-permission-role.entity';
+import { UserRole } from 'src/common/enums/user.enum';
 
 @Injectable()
 export class MenuAccessService {
@@ -14,6 +16,8 @@ export class MenuAccessService {
     private readonly menuRepo: Repository<Menu>,
     @InjectRepository(MenuPermissionByUser)
     private readonly permRepo: Repository<MenuPermissionByUser>,
+    @InjectRepository(MenuPermissionByRole)
+    private readonly rolePermRepo: Repository<MenuPermissionByRole>,
   ) {}
 
   /** ✅ 사용자별 권한 테이블 조회 */
@@ -73,5 +77,37 @@ export class MenuAccessService {
       }
     }
     return { message: '✅ 사용자별 메뉴 권한이 저장되었습니다.' };
+  }
+
+  /** ✅ 직급별 권한 테이블 조회 */
+  async getAllRolePermissions() {
+    const menus = await this.menuRepo.find({ order: { id: 'ASC' } });
+
+    const permissions = await this.rolePermRepo.find({ relations: ['menu'] });
+
+    const allRoles: UserRole[] = [UserRole.ADMIN, UserRole.CEO, UserRole.DIRECTOR, UserRole.MANAGER, UserRole.ASSISTANT, UserRole.STAFF];
+
+    const rolePermissions = allRoles.map((role) => {
+      const roleMenus: Record<string, { canCreate: boolean; canUpdate: boolean; canDelete: boolean }> = {};
+
+      for (const menu of menus) {
+        if (role === UserRole.ADMIN) {
+          roleMenus[menu.name] = {
+            canCreate: true,
+            canUpdate: true,
+            canDelete: true,
+          };
+        } else {
+          const found = permissions.find((p) => p.role === role && p.menu.id === menu.id);
+          roleMenus[menu.name] = {
+            canCreate: found?.canCreate ?? false,
+            canUpdate: found?.canUpdate ?? false,
+            canDelete: found?.canDelete ?? false,
+          };
+        }
+      }
+      return { role, menus: roleMenus };
+    });
+    return { menus: menus.map((m) => m.name), roles: rolePermissions };
   }
 }

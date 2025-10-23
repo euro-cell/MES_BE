@@ -14,4 +14,9 @@ export class MenuAccessController {
   async updateUserPermissions(@Body() users: any[]) {
     return this.service.updateUserPermissions(users);
   }
+
+  @Get('role')
+  async getAllRolePermissions() {
+    return this.service.getAllRolePermissions();
+  }
 }
