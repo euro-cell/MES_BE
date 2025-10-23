@@ -10,7 +10,7 @@ export const PRODUCTION_PLAN_MAPPING: Record<string, keyof ProductionPlan> = {
   Electrode_Notching_Cathode: 'notchingCathode',
   Electrode_Notching_Anode: 'notchingAnode',
 
-  'Cell Assembly_Pouch Forming': 'pouch_forming',
+  'Cell Assembly_Pouch Forming': 'pouchForming',
   'Cell Assembly_Vacuum Drying_Cathode': 'vacuumDryingCathode',
   'Cell Assembly_Vacuum Drying_Anode': 'vacuumDryingAnode',
   'Cell Assembly_Stacking': 'stacking',

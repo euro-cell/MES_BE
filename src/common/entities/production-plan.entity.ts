@@ -33,7 +33,7 @@ export class ProductionPlan {
   notchingAnode: string;
 
   @Column({ nullable: true })
-  pouch_forming: string;
+  pouchForming: string;
   @Column({ nullable: true })
   vacuumDryingCathode: string;
   @Column({ nullable: true })
