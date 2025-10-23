@@ -40,4 +40,38 @@ export class MenuAccessService {
     });
     return { menus: menus.map((m) => m.name), users: result };
   }
+
+  /** ✅ 사용자별 권한 저장 */
+  async updateUserPermissions(users: any[]) {
+    const allMenus = await this.menuRepo.find();
+
+    for (const user of users) {
+      const dbUser = await this.userRepo.findOne({ where: { id: user.userId } });
+      if (!dbUser) continue;
+
+      for (const [menuName, perm] of Object.entries(user.menus)) {
+        const menu = allMenus.find((m) => m.name === menuName);
+        if (!menu) continue;
+
+        let record = await this.permRepo.findOne({
+          where: { user: { id: dbUser.id }, menu: { id: menu.id } },
+          relations: ['user', 'menu'],
+        });
+
+        if (!record) {
+          record = this.permRepo.create({
+            user: dbUser,
+            menu,
+          });
+        }
+
+        record.canCreate = !!(perm as any).canCreate;
+        record.canUpdate = !!(perm as any).canUpdate;
+        record.canDelete = !!(perm as any).canDelete;
+
+        await this.permRepo.save(record);
+      }
+    }
+    return { message: '✅ 사용자별 메뉴 권한이 저장되었습니다.' };
+  }
 }
