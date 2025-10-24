@@ -11,6 +11,7 @@ import { MenuAccessModule } from 'src/modules/menu-access/menu-access.module';
 import { APP_GUARD, Reflector } from '@nestjs/core';
 import { PermissionGuard } from 'src/common/guards/permission.guard';
 import { PermissionGuardModule } from 'src/common/guards/permission-guard.module';
+import { SpecificationModule } from 'src/modules/specification/specification.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { PermissionGuardModule } from 'src/common/guards/permission-guard.module
     ProductionModule,
     UserModule,
     MenuAccessModule,
+    SpecificationModule,
   ],
   controllers: [AppController],
   providers: [
