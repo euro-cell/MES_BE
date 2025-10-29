@@ -21,9 +21,13 @@ export class SpecificationService {
 
     let specification = await this.specificationRepository.findOne({
       where: { production: { id: productionId } },
+      withDeleted: true,
     });
 
     if (specification) {
+      if (specification.deletedAt) {
+        specification.deletedAt = null;
+      }
       specification.cathode = dto.cathode;
       specification.anode = dto.anode;
       specification.assembly = dto.assembly;

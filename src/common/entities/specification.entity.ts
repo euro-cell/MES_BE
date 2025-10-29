@@ -35,7 +35,7 @@ export class Specification {
   updatedAt: Date;
 
   @DeleteDateColumn()
-  deletedAt?: Date;
+  deletedAt?: Date | null;
 
   @OneToOne(() => Production, (production) => production.specification, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'productionId' })
