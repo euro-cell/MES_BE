@@ -12,6 +12,7 @@ import { APP_GUARD, Reflector } from '@nestjs/core';
 import { PermissionGuard } from 'src/common/guards/permission.guard';
 import { PermissionGuardModule } from 'src/common/guards/permission-guard.module';
 import { SpecificationModule } from 'src/modules/specification/specification.module';
+import { MaterialModule } from 'src/modules/material/material.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { SpecificationModule } from 'src/modules/specification/specification.mod
     UserModule,
     MenuAccessModule,
     SpecificationModule,
+    MaterialModule,
   ],
   controllers: [AppController],
   providers: [
