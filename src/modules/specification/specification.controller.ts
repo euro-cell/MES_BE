@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
 import { SpecificationService } from './specification.service';
 import { CreateBatteryDesignDto } from 'src/common/dtos/specification.dto';
 
@@ -14,5 +14,10 @@ export class SpecificationController {
   @Get(':productionId')
   async findSpecification(@Param('productionId', ParseIntPipe) productionId: number) {
     return this.specificationService.findSpecification(productionId);
+  }
+
+  @Delete(':productionId')
+  async softDeleteSpecification(@Param('productionId', ParseIntPipe) productionId: number) {
+    return this.specificationService.softDeleteSpecification(productionId);
   }
 }

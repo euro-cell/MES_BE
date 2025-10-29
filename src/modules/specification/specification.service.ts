@@ -45,4 +45,18 @@ export class SpecificationService {
     if (!specification) throw new NotFoundException('해당 생산 정보의 전지 설계 정보를 찾을 수 없습니다.');
     return specification;
   }
+
+  async softDeleteSpecification(productionId: number) {
+    const specification = await this.specificationRepository.findOne({
+      where: { production: { id: productionId } },
+      relations: ['production'],
+    });
+
+    if (!specification) {
+      throw new NotFoundException('해당 프로덕션에 대한 전지 설계를 찾을 수 없습니다.');
+    }
+
+    await this.specificationRepository.softRemove(specification);
+    return { message: '해당 프로젝트의 전지 설계가 삭제되었습니다.' };
+  }
 }
