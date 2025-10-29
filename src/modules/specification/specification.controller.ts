@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Param, ParseIntPipe, Post } from '@nestjs/common';
 import { SpecificationService } from './specification.service';
 import { CreateBatteryDesignDto } from 'src/common/dtos/specification.dto';
 
@@ -6,8 +6,8 @@ import { CreateBatteryDesignDto } from 'src/common/dtos/specification.dto';
 export class SpecificationController {
   constructor(private readonly specificationService: SpecificationService) {}
 
-  @Post()
-  async createSpecification(@Body() dto: CreateBatteryDesignDto) {
-    return this.specificationService.createSpecification(dto);
+  @Post(':productionId')
+  async createSpecification(@Param('productionId', ParseIntPipe) productionId: number, @Body() dto: CreateBatteryDesignDto) {
+    return this.specificationService.createSpecification(productionId, dto);
   }
 }
