@@ -9,4 +9,9 @@ export class MaterialController {
   async findAllMaterials() {
     return this.materialService.findAllMaterials();
   }
+
+  @Get('electrode')
+  findElectrode() {
+    return this.materialService.findByElectrode();
+  }
 }
