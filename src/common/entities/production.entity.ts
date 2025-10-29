@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, OneToOne } from 'typeorm';
 import { ProductionPlan } from './production-plan.entity';
+import { Specification } from './specification.entity';
 
 @Entity('productions')
 export class Production {
@@ -41,4 +42,7 @@ export class Production {
 
   @OneToOne(() => ProductionPlan, (plan) => plan.production)
   plan: ProductionPlan;
+
+  @OneToOne(() => Specification, (specification) => specification.production)
+  specification: Specification;
 }

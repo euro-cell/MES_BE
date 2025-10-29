@@ -1,12 +1,10 @@
 import { Transform, Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import camelcaseKeys from 'camelcase-keys';
 import { IsNumber, IsString } from 'class-validator';
 
 class ValueRemarkDto {
   @ApiProperty()
   @IsNumber()
-  @Transform(({ value }) => (value === '' ? 0 : Number(value)))
   value: number;
 
   @ApiProperty()
@@ -39,7 +37,6 @@ class EnergyDensityDto {
 class CathodeDto {
   @ApiProperty()
   @Type(() => ValueRemarkDto)
-  @Transform(({ value }) => ({ ...value, value: Number(value?.value || 0) }))
   activeMaterial1: ValueRemarkDto;
 
   @ApiProperty()
@@ -131,28 +128,18 @@ class CellDto {
 
 export class CreateBatteryDesignDto {
   @ApiProperty()
-  @Transform(({ value }) =>
-    camelcaseKeys(value, {
-      deep: true,
-      stopPaths: [],
-      process: (key, val) => (key === 'value' && val !== '' ? Number(val) : val),
-    }),
-  )
   @Type(() => CathodeDto)
   cathode: CathodeDto;
 
   @ApiProperty()
-  @Transform(({ value }) => camelcaseKeys(value, { deep: true }))
   @Type(() => AnodeDto)
   anode: AnodeDto;
 
   @ApiProperty()
-  @Transform(({ value }) => camelcaseKeys(value, { deep: true }))
   @Type(() => AssemblyDto)
   assembly: AssemblyDto;
 
   @ApiProperty()
-  @Transform(({ value }) => camelcaseKeys(value, { deep: true }))
   @Type(() => CellDto)
   cell: CellDto;
 }
