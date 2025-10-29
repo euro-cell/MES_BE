@@ -39,4 +39,10 @@ export class SpecificationService {
     }
     return await this.specificationRepository.save(specification);
   }
+
+  async findSpecification(productionId: number) {
+    const specification = await this.specificationRepository.findOne({ where: { production: { id: productionId } } });
+    if (!specification) throw new NotFoundException('해당 생산 정보의 전지 설계 정보를 찾을 수 없습니다.');
+    return specification;
+  }
 }
