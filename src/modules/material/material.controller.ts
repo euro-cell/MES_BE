@@ -14,4 +14,9 @@ export class MaterialController {
   findElectrode() {
     return this.materialService.findByElectrode();
   }
+
+  @Get('assembly')
+  findByAssembly() {
+    return this.materialService.findByAssembly();
+  }
 }

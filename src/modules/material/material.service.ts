@@ -18,4 +18,8 @@ export class MaterialService {
   async findByElectrode() {
     return this.materialRepository.find({ where: { process: MaterialProcess.ELECTRODE } });
   }
+
+  async findByAssembly() {
+    return this.materialRepository.find({ where: { process: MaterialProcess.ASSEMBLY } });
+  }
 }
