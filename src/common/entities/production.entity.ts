@@ -1,6 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, OneToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, OneToOne, OneToMany } from 'typeorm';
 import { ProductionPlan } from './production-plan.entity';
 import { Specification } from './specification.entity';
+import { ProductionMaterial } from './production-material.entity';
 
 @Entity('productions')
 export class Production {
@@ -45,4 +46,7 @@ export class Production {
 
   @OneToOne(() => Specification, (specification) => specification.production)
   specification: Specification;
+
+  @OneToMany(() => ProductionMaterial, (prodMaterial: ProductionMaterial) => prodMaterial.production)
+  productionMaterials: ProductionMaterial[];
 }
