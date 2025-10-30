@@ -19,4 +19,9 @@ export class MaterialController {
   findByAssembly() {
     return this.materialService.findByAssembly();
   }
+
+  @Get('production')
+  findByMaterialProduction() {
+    return this.materialService.findByMaterialProduction();
+  }
 }
