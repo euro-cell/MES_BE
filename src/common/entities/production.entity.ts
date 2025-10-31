@@ -32,6 +32,9 @@ export class Production {
   @Column({ type: 'int' })
   capacity: number;
 
+  @Column({ type: 'int' })
+  targetQuantity: number;
+
   @CreateDateColumn()
   createdAt: Date;
 

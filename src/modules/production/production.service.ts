@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Production } from '../../common/entities/production.entity';
 import { Repository } from 'typeorm';
+import { CreateProductionDto } from 'src/common/dtos/production.dto';
 
 @Injectable()
 export class ProductionService {
@@ -44,40 +45,33 @@ export class ProductionService {
     return `${company}${type}${yearShort}${monthCode}${round}-${batteryType}${capShort}`;
   }
 
-  async create(data: {
-    company: string;
-    mode: 'OME' | 'ODM';
-    year: number;
-    month: number;
-    round: number;
-    batteryType: string;
-    capacity: number;
-  }) {
-    const company = data.company.toUpperCase();
-    const mode = data.mode.toUpperCase() as 'OME' | 'ODM';
-    const batteryType = data.batteryType.toUpperCase();
+  async create(dto: CreateProductionDto) {
+    const company = dto.company.toUpperCase();
+    const mode = dto.mode.toUpperCase() as 'OME' | 'ODM';
+    const batteryType = dto.batteryType.toUpperCase();
     const type = mode === 'OME' ? 'E' : 'D';
 
     // 이름 규칙: NA + E + 25 + A + 1 + TNP + 38
     const name = this.generateProjectName({
       company,
       type,
-      year: data.year,
-      month: data.month,
-      round: Number(data.round),
+      year: dto.year,
+      month: dto.month,
+      round: Number(dto.round),
       batteryType,
-      capacity: Number(data.capacity),
+      capacity: Number(dto.capacity),
     });
 
     const project = this.ProductionRepository.create({
       name,
       company,
       mode,
-      year: data.year,
-      month: data.month,
-      round: data.round,
+      year: dto.year,
+      month: dto.month,
+      round: dto.round,
       batteryType,
-      capacity: data.capacity,
+      capacity: dto.capacity,
+      targetQuantity: dto.targetQuantity,
     });
 
     return this.ProductionRepository.save(project);

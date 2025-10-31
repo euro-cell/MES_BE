@@ -1,5 +1,6 @@
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
 import { ProductionService } from './production.service';
+import { CreateProductionDto } from 'src/common/dtos/production.dto';
 
 @Controller('production')
 export class ProductionController {
@@ -11,8 +12,8 @@ export class ProductionController {
   }
 
   @Post()
-  async createProduction(@Body() body) {
-    await this.productionService.create(body);
+  async createProduction(@Body() dto: CreateProductionDto) {
+    await this.productionService.create(dto);
   }
 
   @Delete(':id')
