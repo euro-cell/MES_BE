@@ -43,4 +43,13 @@ export class MaterialService {
     }));
     return result;
   }
+
+  async getDistinctCategories() {
+    const categories = await this.materialRepository
+      .createQueryBuilder('material')
+      .select('DISTINCT material.category', 'category')
+      .orderBy('material.category', 'ASC')
+      .getRawMany();
+    return categories.map((c) => c.category);
+  }
 }

@@ -24,4 +24,9 @@ export class MaterialController {
   findByMaterialProduction() {
     return this.materialService.findByMaterialProduction();
   }
+
+  @Get('categories')
+  getDistinctCategories() {
+    return this.materialService.getDistinctCategories();
+  }
 }
