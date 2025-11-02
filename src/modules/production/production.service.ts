@@ -11,8 +11,9 @@ export class ProductionService {
     private readonly ProductionRepository: Repository<Production>,
   ) {}
 
-  findAll() {
-    return this.ProductionRepository.find({ order: { id: 'DESC' } });
+  async findAll() {
+    const productions = await this.ProductionRepository.find({ order: { id: 'DESC' }, relations: ['plan'] });
+    return productions.map(({ plan, ...rest }) => ({ ...rest, isPlan: !!plan }));
   }
 
   private generateProjectName({
