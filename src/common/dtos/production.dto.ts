@@ -1,4 +1,4 @@
-import { ApiProperty, OmitType } from '@nestjs/swagger';
+import { ApiProperty, OmitType, PartialType } from '@nestjs/swagger';
 
 class ProductionDto {
   @ApiProperty()
@@ -33,3 +33,5 @@ class ProductionDto {
 }
 
 export class CreateProductionDto extends OmitType(ProductionDto, ['id'] as const) {}
+
+export class UpdateProductionDto extends PartialType(OmitType(ProductionDto, ['id'] as const)) {}

@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Production } from '../../common/entities/production.entity';
 import { Repository } from 'typeorm';
-import { CreateProductionDto } from 'src/common/dtos/production.dto';
+import { CreateProductionDto, UpdateProductionDto } from 'src/common/dtos/production.dto';
 
 @Injectable()
 export class ProductionService {
@@ -76,6 +76,15 @@ export class ProductionService {
     });
 
     return this.ProductionRepository.save(project);
+  }
+
+  async update(id: number, dto: UpdateProductionDto) {
+    const production = await this.ProductionRepository.findOne({ where: { id } });
+    if (!production) {
+      throw new NotFoundException(`ID ${id}번 생산 항목을 찾을 수 없습니다.`);
+    }
+    const updated = Object.assign(production, dto);
+    return await this.ProductionRepository.save(updated);
   }
 
   async remove(id: number) {
