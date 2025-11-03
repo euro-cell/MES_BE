@@ -1,6 +1,6 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { PlanService } from './plan.service';
-import { CreateProductionPlanDto } from 'src/common/dtos/production-plan.dto';
+import { CreateProductionPlanDto, UpdateProductionPlanDto } from 'src/common/dtos/production-plan.dto';
 
 @Controller(':projectId/plan')
 export class PlanController {
@@ -14,5 +14,10 @@ export class PlanController {
   @Get()
   async searchPlans(@Param('projectId') productionId: number) {
     return this.planService.searchPlans({ productionId });
+  }
+
+  @Patch()
+  async updatePlan(@Param('projectId') productionId: number, @Body() dto: UpdateProductionPlanDto) {
+    return this.planService.updatePlan(productionId, dto);
   }
 }

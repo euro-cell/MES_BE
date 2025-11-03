@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ProductionPlan } from '../../../common/entities/production-plan.entity';
 import { Production } from '../../../common/entities/production.entity';
 import { Repository } from 'typeorm';
-import { CreateProductionPlanDto } from 'src/common/dtos/production-plan.dto';
+import { CreateProductionPlanDto, UpdateProductionPlanDto } from 'src/common/dtos/production-plan.dto';
 import { PRODUCTION_PLAN_MAPPING } from 'src/common/types/production-plan.mapping';
 
 @Injectable()
@@ -67,5 +67,10 @@ export class PlanService {
       relations: ['production'],
       order: { startDate: 'ASC' },
     });
+  }
+
+  async updatePlan(productionId: number, dto: UpdateProductionPlanDto) {
+    console.log('🚀 ~ dto:', dto);
+    console.log('🚀 ~ productionId:', productionId);
   }
 }

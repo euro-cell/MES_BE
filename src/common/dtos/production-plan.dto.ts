@@ -1,3 +1,4 @@
+import { PartialType } from '@nestjs/swagger';
 import { IsNotEmpty, IsObject, IsString } from 'class-validator';
 
 class ProcessDateRange {
@@ -25,3 +26,5 @@ export class CreateProductionPlanDto {
   @IsObject()
   processPlans: Record<string, ProcessDateRange>;
 }
+
+export class UpdateProductionPlanDto extends PartialType(CreateProductionPlanDto) {}
