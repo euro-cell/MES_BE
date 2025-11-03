@@ -92,7 +92,7 @@ export class ProductionService {
     if (!project) {
       throw new NotFoundException('해당 프로젝트를 찾을 수 없습니다.');
     }
-    await this.ProductionRepository.remove(project);
+    await this.ProductionRepository.softDelete(id);
     return { success: true };
   }
 }
