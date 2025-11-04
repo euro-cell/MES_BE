@@ -5,6 +5,7 @@ import { Production } from '../../../common/entities/production.entity';
 import { Repository } from 'typeorm';
 import { CreateProductionPlanDto, UpdateProductionPlanDto } from 'src/common/dtos/production-plan.dto';
 import { PRODUCTION_PLAN_MAPPING } from 'src/common/types/production-plan.mapping';
+import { PlanTransformerUtil } from 'src/common/utils/plan-transformer.util';
 
 @Injectable()
 export class PlanService {
@@ -62,11 +63,12 @@ export class PlanService {
     const { productionId } = filters;
     if (!productionId) return [];
 
-    return this.planRepository.find({
+    const plans = await this.planRepository.find({
       where: { production: { id: productionId } },
       relations: ['production'],
       order: { startDate: 'ASC' },
     });
+    return plans.map((plan) => PlanTransformerUtil.transformPlanData(plan));
   }
 
   async updatePlan(productionId: number, dto: UpdateProductionPlanDto) {
