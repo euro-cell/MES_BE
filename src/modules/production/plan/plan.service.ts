@@ -109,4 +109,12 @@ export class PlanService {
 
     return await this.planRepository.save(plan);
   }
+
+  async deletePlan(projectId: number) {
+    const plan = await this.planRepository.findOne({ where: { production: { id: projectId } } });
+    if (!plan) {
+      throw new NotFoundException('해당 생산에 등록된 계획이 없습니다.');
+    }
+    return await this.planRepository.delete(plan.id);
+  }
 }

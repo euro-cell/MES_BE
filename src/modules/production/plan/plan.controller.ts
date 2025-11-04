@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
 import { PlanService } from './plan.service';
 import { CreateProductionPlanDto, UpdateProductionPlanDto } from 'src/common/dtos/production-plan.dto';
 
@@ -19,5 +19,10 @@ export class PlanController {
   @Patch()
   async updatePlan(@Param('projectId') productionId: number, @Body() dto: UpdateProductionPlanDto) {
     return this.planService.updatePlan(productionId, dto);
+  }
+
+  @Delete()
+  async deletePlan(@Param('projectId', ParseIntPipe) projectId: number) {
+    return await this.planService.deletePlan(projectId);
   }
 }
