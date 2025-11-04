@@ -250,6 +250,7 @@ export class PlanTransformerUtil {
       production: plan.production,
       weekHeaders,
       processes,
+      planData: processData,
     };
   }
 }
