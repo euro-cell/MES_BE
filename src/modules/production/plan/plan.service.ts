@@ -72,7 +72,41 @@ export class PlanService {
   }
 
   async updatePlan(productionId: number, dto: UpdateProductionPlanDto) {
-    console.log('🚀 ~ dto:', dto);
-    console.log('🚀 ~ productionId:', productionId);
+    const production = await this.ProductionRepository.findOne({
+      where: { id: productionId },
+    });
+    if (!production) throw new NotFoundException('프로젝트를 찾을 수 없습니다.');
+
+    const plan = await this.planRepository.findOne({
+      where: { production: { id: productionId } },
+    });
+
+    if (!plan) throw new NotFoundException('등록된 생산계획이 없습니다.');
+
+    const { startDate, endDate, processPlans } = dto;
+
+    const updateData: Partial<Record<keyof ProductionPlan, any>> = {
+      startDate,
+      endDate,
+    };
+
+    for (const [key, value] of Object.entries(processPlans || {})) {
+      const field = PRODUCTION_PLAN_MAPPING[key];
+      if (!field) continue;
+
+      const { start, end } = value;
+
+      let dateValue = '';
+      if (start && end) dateValue = `${start}~${end}`;
+      else if (start) dateValue = start;
+      else if (end) dateValue = end;
+      else continue;
+
+      updateData[field] = dateValue;
+    }
+
+    Object.assign(plan, updateData);
+
+    return await this.planRepository.save(plan);
   }
 }
