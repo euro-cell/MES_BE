@@ -5,9 +5,18 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Production } from '../../common/entities/production.entity';
 import { PlanModule } from './plan/plan.module';
 import { RouterModule } from '@nestjs/core';
+import { ProductMaterialModule } from './material/material.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Production]), RouterModule.register([{ path: 'production', module: PlanModule }]), PlanModule],
+  imports: [
+    TypeOrmModule.forFeature([Production]),
+    RouterModule.register([
+      { path: 'production', module: PlanModule },
+      { path: 'production', module: ProductMaterialModule },
+    ]),
+    PlanModule,
+    ProductMaterialModule,
+  ],
   controllers: [ProductionController],
   providers: [ProductionService],
   exports: [ProductionService],
