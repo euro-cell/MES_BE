@@ -95,4 +95,18 @@ export class ProductionService {
     await this.ProductionRepository.softDelete(id);
     return { success: true };
   }
+
+  async getSpecificationSummary() {
+    const productions = await this.ProductionRepository.find({
+      select: { id: true, name: true },
+      relations: ['productionSpecifications', 'productionMaterials'],
+    });
+
+    return productions.map((p) => ({
+      id: p.id,
+      name: p.name,
+      specStatus: !!p.productionSpecifications,
+      materialStatus: (p.productionMaterials?.length ?? 0) > 0,
+    }));
+  }
 }

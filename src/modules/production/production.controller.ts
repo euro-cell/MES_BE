@@ -25,4 +25,9 @@ export class ProductionController {
   async deleteProduction(@Param('id', ParseIntPipe) id: number) {
     return this.productionService.remove(id);
   }
+
+  @Get('specification')
+  async getSpecificationSummary() {
+    return await this.productionService.getSpecificationSummary();
+  }
 }
