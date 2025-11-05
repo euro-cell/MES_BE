@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateCol
 import { ProductionPlan } from './production-plan.entity';
 import { Specification } from './specification.entity';
 import { ProductionMaterial } from './production-material.entity';
+import { ProductionSpecification } from './production-specifications.entity';
 
 @Entity('productions')
 export class Production {
@@ -49,6 +50,9 @@ export class Production {
 
   @OneToOne(() => Specification, (specification) => specification.production)
   specification: Specification;
+
+  @OneToOne(() => ProductionSpecification, (productionSpecification) => productionSpecification.production)
+  productionSpecifications: ProductionSpecification;
 
   @OneToMany(() => ProductionMaterial, (prodMaterial: ProductionMaterial) => prodMaterial.production)
   productionMaterials: ProductionMaterial[];
