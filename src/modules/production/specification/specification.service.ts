@@ -54,4 +54,11 @@ export class ProductSpecificationService {
     });
     return await this.productionSpecRepossitory.save(spec);
   }
+
+  async removeSpecification(productionId: number) {
+    const spec = await this.productionSpecRepossitory.findOne({ where: { production: { id: productionId } } });
+    if (!spec) throw new NotFoundException('삭제할 설계 정보를 찾을 수 없습니다.');
+
+    return await this.productionSpecRepossitory.softRemove(spec);
+  }
 }
