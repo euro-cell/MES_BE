@@ -1,13 +1,15 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
 import { MaterialService } from './material.service';
+import { ApiQuery } from '@nestjs/swagger';
 
 @Controller('material')
 export class MaterialController {
   constructor(private readonly materialService: MaterialService) {}
 
   @Get()
-  async findAllMaterials() {
-    return this.materialService.findAllMaterials();
+  @ApiQuery({ name: 'category', required: false, description: '자재 분류명' })
+  async findAllMaterials(@Query('category') category?: string) {
+    return this.materialService.findAllMaterials(category);
   }
 
   @Get('electrode')

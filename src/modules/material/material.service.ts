@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Material } from 'src/common/entities/material.entity';
-import { ProductionMaterial } from 'src/common/entities/production-material.entity';
 import { Production } from 'src/common/entities/production.entity';
 import { MaterialProcess } from 'src/common/enums/material.enum';
 import { Repository } from 'typeorm';
@@ -15,7 +14,10 @@ export class MaterialService {
     private readonly productionRepository: Repository<Production>,
   ) {}
 
-  async findAllMaterials() {
+  async findAllMaterials(category?: string) {
+    if (category) {
+      return this.materialRepository.find({ where: { category }, order: { name: 'ASC' } });
+    }
     return this.materialRepository.find({ order: { id: 'ASC' } });
   }
 
