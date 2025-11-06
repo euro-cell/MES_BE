@@ -13,6 +13,7 @@ export class ProductSpecificationService {
     @InjectRepository(ProductionSpecification)
     private readonly productionSpecRepossitory: Repository<ProductionSpecification>,
   ) {}
+
   async createSpecification(productionId: number, dto: CreateSpecificationDto) {
     try {
       const production = await this.productionRepository.findOneByOrFail({ id: productionId });
@@ -28,6 +29,14 @@ export class ProductSpecificationService {
       if (error instanceof EntityNotFoundError) throw new NotFoundException('해당 프로젝트를 찾을 수 없습니다.');
       if (error instanceof QueryFailedError) throw new ConflictException('이미 등록된 생산 계획이 있습니다.');
       throw error;
+    }
+  }
+
+  async findOneSpecification(productionId: number) {
+    try {
+      return await this.productionSpecRepossitory.findOneOrFail({ where: { production: { id: productionId } } });
+    } catch (error) {
+      if (error instanceof EntityNotFoundError) throw new NotFoundException('해당 생산 계횔을 찾을 수 없습니다.');
     }
   }
 }

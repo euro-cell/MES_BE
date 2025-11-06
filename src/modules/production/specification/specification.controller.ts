@@ -1,4 +1,4 @@
-import { Body, Controller, Param, ParseIntPipe, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
 import { ProductSpecificationService } from './specification.service';
 import { CreateSpecificationDto } from 'src/common/dtos/specification.dto';
 
@@ -9,5 +9,10 @@ export class ProductSpecificationController {
   @Post()
   async createSpecification(@Param('projectId', ParseIntPipe) productionId: number, @Body() dto: CreateSpecificationDto) {
     return await this.productSpecificationService.createSpecification(productionId, dto);
+  }
+
+  @Get()
+  async findOneSpecification(@Param('projectId', ParseIntPipe) productionId: number) {
+    return await this.productSpecificationService.findOneSpecification(productionId);
   }
 }
