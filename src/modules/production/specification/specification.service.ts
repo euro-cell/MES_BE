@@ -1,6 +1,6 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateSpecificationDto } from 'src/common/dtos/specification.dto';
+import { CreateSpecificationDto, UpdateSpecificationDto } from 'src/common/dtos/specification.dto';
 import { ProductionSpecification } from 'src/common/entities/production-specifications.entity';
 import { Production } from 'src/common/entities/production.entity';
 import { EntityNotFoundError, QueryFailedError, Repository } from 'typeorm';
@@ -38,5 +38,20 @@ export class ProductSpecificationService {
     } catch (error) {
       if (error instanceof EntityNotFoundError) throw new NotFoundException('해당 생산 계횔을 찾을 수 없습니다.');
     }
+  }
+
+  async updateSpecification(productionId: number, dto: UpdateSpecificationDto) {
+    const spec = await this.productionSpecRepossitory.findOne({
+      where: { production: { id: productionId } },
+    });
+    if (!spec) throw new NotFoundException('해당 프로젝트의 설계 정보가 없습니다.');
+
+    Object.assign(spec, {
+      cathode: dto.cathode ?? spec.cathode,
+      anode: dto.anode ?? spec.anode,
+      assembly: dto.assembly ?? spec.assembly,
+      cell: dto.cell ?? spec.cell,
+    });
+    return await this.productionSpecRepossitory.save(spec);
   }
 }

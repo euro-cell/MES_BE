@@ -1,6 +1,6 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
 import { ProductSpecificationService } from './specification.service';
-import { CreateSpecificationDto } from 'src/common/dtos/specification.dto';
+import { CreateSpecificationDto, UpdateSpecificationDto } from 'src/common/dtos/specification.dto';
 
 @Controller(':projectId/specification')
 export class ProductSpecificationController {
@@ -14,5 +14,10 @@ export class ProductSpecificationController {
   @Get()
   async findOneSpecification(@Param('projectId', ParseIntPipe) productionId: number) {
     return await this.productSpecificationService.findOneSpecification(productionId);
+  }
+
+  @Patch()
+  async updateSpecification(@Param('projectId', ParseIntPipe) productionId: number, @Body() dto: UpdateSpecificationDto) {
+    return await this.productSpecificationService.updateSpecification(productionId, dto);
   }
 }

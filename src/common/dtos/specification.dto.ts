@@ -1,6 +1,6 @@
 import { Type } from 'class-transformer';
 import { IsString, IsOptional, ValidateNested, IsArray } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, PartialType } from '@nestjs/swagger';
 
 export class ValueRemarkDto {
   @ApiProperty({ example: '1' })
@@ -144,3 +144,5 @@ export class CreateBatteryDesignDto {
   @Type(() => CellDto)
   cell: CellDto;
 }
+
+export class UpdateSpecificationDto extends PartialType(CreateSpecificationDto) {}
