@@ -1,7 +1,13 @@
-import { Controller } from '@nestjs/common';
+import { Body, Controller, Param, ParseIntPipe, Post } from '@nestjs/common';
 import { ProductSpecificationService } from './specification.service';
+import { CreateSpecificationDto } from 'src/common/dtos/specification.dto';
 
 @Controller(':projectId/specification')
 export class ProductSpecificationController {
   constructor(private readonly productSpecificationService: ProductSpecificationService) {}
+
+  @Post()
+  async createSpecification(@Param('projectId', ParseIntPipe) productionId: number, @Body() dto: CreateSpecificationDto) {
+    return await this.productSpecificationService.createSpecification(productionId, dto);
+  }
 }

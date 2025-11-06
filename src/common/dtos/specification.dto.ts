@@ -1,145 +1,146 @@
-import { Transform, Type } from 'class-transformer';
+import { Type } from 'class-transformer';
+import { IsString, IsOptional, ValidateNested, IsArray } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsString } from 'class-validator';
 
-class ValueRemarkDto {
-  @ApiProperty()
-  @IsNumber()
-  value: number;
-
-  @ApiProperty()
+export class ValueRemarkDto {
+  @ApiProperty({ example: '1' })
   @IsString()
-  @Type(() => String)
+  @IsOptional()
+  value: string;
+
+  @ApiProperty({ example: '' })
+  @IsString()
+  @IsOptional()
   remark: string;
 }
 
-class ValuePairRemarkDto {
-  @ApiProperty()
-  value1: number;
-
-  @ApiProperty()
-  value2: number;
-
-  @ApiProperty()
-  remark: string;
-}
-
-class EnergyDensityDto {
-  @ApiProperty()
+export class ElectrodeGroupDto {
+  @ApiProperty({ type: [ValueRemarkDto] })
+  @IsArray()
+  @ValidateNested({ each: true })
   @Type(() => ValueRemarkDto)
-  gravimetric: ValueRemarkDto;
+  activeMaterial: ValueRemarkDto[];
 
-  @ApiProperty()
+  @ApiProperty({ type: [ValueRemarkDto] })
+  @IsArray()
+  @ValidateNested({ each: true })
   @Type(() => ValueRemarkDto)
-  volumetric: ValueRemarkDto;
-}
+  conductor: ValueRemarkDto[];
 
-class CathodeDto {
-  @ApiProperty()
+  @ApiProperty({ type: [ValueRemarkDto] })
+  @IsArray()
+  @ValidateNested({ each: true })
   @Type(() => ValueRemarkDto)
-  activeMaterial1: ValueRemarkDto;
+  binder: ValueRemarkDto[];
 
-  @ApiProperty()
-  @Type(() => ValueRemarkDto)
-  activeMaterial2: ValueRemarkDto;
-
-  @ApiProperty()
-  @Type(() => ValueRemarkDto)
-  conductor: ValueRemarkDto;
-
-  @ApiProperty()
-  @Type(() => ValueRemarkDto)
-  binder: ValueRemarkDto;
-
-  @ApiProperty()
+  @ApiProperty({ type: ValueRemarkDto })
   @Type(() => ValueRemarkDto)
   loadingLevel: ValueRemarkDto;
 
-  @ApiProperty()
+  @ApiProperty({ type: ValueRemarkDto })
   @Type(() => ValueRemarkDto)
   thickness: ValueRemarkDto;
 
-  @ApiProperty()
+  @ApiProperty({ type: ValueRemarkDto })
   @Type(() => ValueRemarkDto)
   electrodeDensity: ValueRemarkDto;
 }
 
-class AnodeDto {
-  @ApiProperty()
-  @Type(() => ValueRemarkDto)
-  activeMaterial: ValueRemarkDto;
+export class StackNoDto {
+  @ApiProperty({ example: '' })
+  @IsString()
+  @IsOptional()
+  value1: string;
 
-  @ApiProperty()
-  @Type(() => ValueRemarkDto)
-  conductor: ValueRemarkDto;
+  @ApiProperty({ example: '' })
+  @IsString()
+  @IsOptional()
+  value2: string;
 
-  @ApiProperty()
-  @Type(() => ValueRemarkDto)
-  binder: ValueRemarkDto;
-
-  @ApiProperty()
-  @Type(() => ValueRemarkDto)
-  loadingLevel: ValueRemarkDto;
-
-  @ApiProperty()
-  @Type(() => ValueRemarkDto)
-  thickness: ValueRemarkDto;
-
-  @ApiProperty()
-  @Type(() => ValueRemarkDto)
-  electrodeDensity: ValueRemarkDto;
+  @ApiProperty({ example: '' })
+  @IsString()
+  @IsOptional()
+  remark: string;
 }
 
-class AssemblyDto {
-  @ApiProperty()
-  @Type(() => ValuePairRemarkDto)
-  stackNo: ValuePairRemarkDto;
+export class AssemblyDto {
+  @ApiProperty({ type: StackNoDto })
+  @Type(() => StackNoDto)
+  stackNo: StackNoDto;
 
-  @ApiProperty()
+  @ApiProperty({ type: ValueRemarkDto })
   @Type(() => ValueRemarkDto)
   separator: ValueRemarkDto;
 
-  @ApiProperty()
+  @ApiProperty({ type: ValueRemarkDto })
   @Type(() => ValueRemarkDto)
   electrolyte: ValueRemarkDto;
 }
 
-class CellDto {
-  @ApiProperty()
+export class EnergyDensityDto {
+  @ApiProperty({ type: ValueRemarkDto })
+  @Type(() => ValueRemarkDto)
+  gravimetric: ValueRemarkDto;
+
+  @ApiProperty({ type: ValueRemarkDto })
+  @Type(() => ValueRemarkDto)
+  volumetric: ValueRemarkDto;
+}
+
+export class CellDto {
+  @ApiProperty({ type: ValueRemarkDto })
   @Type(() => ValueRemarkDto)
   npRatio: ValueRemarkDto;
 
-  @ApiProperty()
+  @ApiProperty({ type: ValueRemarkDto })
   @Type(() => ValueRemarkDto)
   nominalCapacity: ValueRemarkDto;
 
-  @ApiProperty()
+  @ApiProperty({ type: ValueRemarkDto })
   @Type(() => ValueRemarkDto)
   weight: ValueRemarkDto;
 
-  @ApiProperty()
+  @ApiProperty({ type: ValueRemarkDto })
   @Type(() => ValueRemarkDto)
   thickness: ValueRemarkDto;
 
-  @ApiProperty()
+  @ApiProperty({ type: EnergyDensityDto })
   @Type(() => EnergyDensityDto)
   energyDensity: EnergyDensityDto;
 }
 
-export class CreateBatteryDesignDto {
-  @ApiProperty()
-  @Type(() => CathodeDto)
-  cathode: CathodeDto;
+export class CreateSpecificationDto {
+  @ApiProperty({ type: ElectrodeGroupDto })
+  @Type(() => ElectrodeGroupDto)
+  cathode: ElectrodeGroupDto;
 
-  @ApiProperty()
-  @Type(() => AnodeDto)
-  anode: AnodeDto;
+  @ApiProperty({ type: ElectrodeGroupDto })
+  @Type(() => ElectrodeGroupDto)
+  anode: ElectrodeGroupDto;
 
-  @ApiProperty()
+  @ApiProperty({ type: AssemblyDto })
   @Type(() => AssemblyDto)
   assembly: AssemblyDto;
 
-  @ApiProperty()
+  @ApiProperty({ type: CellDto })
+  @Type(() => CellDto)
+  cell: CellDto;
+}
+
+export class CreateBatteryDesignDto {
+  @ApiProperty({ type: ElectrodeGroupDto })
+  @Type(() => ElectrodeGroupDto)
+  cathode: ElectrodeGroupDto;
+
+  @ApiProperty({ type: ElectrodeGroupDto })
+  @Type(() => ElectrodeGroupDto)
+  anode: ElectrodeGroupDto;
+
+  @ApiProperty({ type: AssemblyDto })
+  @Type(() => AssemblyDto)
+  assembly: AssemblyDto;
+
+  @ApiProperty({ type: CellDto })
   @Type(() => CellDto)
   cell: CellDto;
 }
