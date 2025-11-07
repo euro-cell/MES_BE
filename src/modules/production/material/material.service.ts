@@ -37,4 +37,29 @@ export class ProductMaterialService {
       if (e instanceof EntityNotFoundError) throw new NotFoundException('해당 프로젝트를 찾을 수 없습니다.');
     }
   }
+
+  async findOneMaterial(productionId: number) {
+    const materials = await this.productionMaterRepossitory.find({
+      where: { production: { id: productionId } },
+      order: { classification: 'ASC', category: 'ASC' },
+    });
+    if (!materials.length) throw new NotFoundException('해당 생산 자재 소요량을 찾을 수 없습니다.');
+
+    const grouped = materials.reduce(
+      (acc, item) => {
+        acc[item.classification] = acc[item.classification] || [];
+        acc[item.classification].push({
+          category: item.category,
+          material: item.material,
+          model: item.model,
+          company: item.company,
+          unit: item.unit,
+          requiredAmount: item.requiredAmount,
+        });
+        return acc;
+      },
+      {} as Record<string, any[]>,
+    );
+    return { productionId, materials: grouped };
+  }
 }
