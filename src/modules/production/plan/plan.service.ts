@@ -110,8 +110,8 @@ export class PlanService {
     return await this.planRepository.save(plan);
   }
 
-  async deletePlan(projectId: number) {
-    const plan = await this.planRepository.findOne({ where: { production: { id: projectId } } });
+  async deletePlan(productionId: number) {
+    const plan = await this.planRepository.findOne({ where: { production: { id: productionId } } });
     if (!plan) {
       throw new NotFoundException('해당 생산에 등록된 계획이 없습니다.');
     }

@@ -2,27 +2,27 @@ import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post } from 
 import { PlanService } from './plan.service';
 import { CreateProductionPlanDto, UpdateProductionPlanDto } from 'src/common/dtos/production-plan.dto';
 
-@Controller(':projectId/plan')
+@Controller(':productionId/plan')
 export class PlanController {
   constructor(private readonly planService: PlanService) {}
 
   @Post()
-  async saveProjectPlan(@Param('projectId') productionId: number, @Body() dto: CreateProductionPlanDto) {
+  async saveProjectPlan(@Param('productionId') productionId: number, @Body() dto: CreateProductionPlanDto) {
     return this.planService.savePlan(productionId, dto);
   }
 
   @Get()
-  async searchPlans(@Param('projectId') productionId: number) {
+  async searchPlans(@Param('productionId') productionId: number) {
     return this.planService.searchPlans({ productionId });
   }
 
   @Patch()
-  async updatePlan(@Param('projectId') productionId: number, @Body() dto: UpdateProductionPlanDto) {
+  async updatePlan(@Param('productionId') productionId: number, @Body() dto: UpdateProductionPlanDto) {
     return this.planService.updatePlan(productionId, dto);
   }
 
   @Delete()
-  async deletePlan(@Param('projectId', ParseIntPipe) projectId: number) {
-    return await this.planService.deletePlan(projectId);
+  async deletePlan(@Param('productionId', ParseIntPipe) productionId: number) {
+    return await this.planService.deletePlan(productionId);
   }
 }
