@@ -4,7 +4,7 @@ import { CreateMaterialDto } from 'src/common/dtos/production-material.dto';
 import { Material } from 'src/common/entities/material.entity';
 import { ProductionMaterial } from 'src/common/entities/production-material.entity';
 import { Production } from 'src/common/entities/production.entity';
-import { EntityNotFoundError, Not, Repository } from 'typeorm';
+import { EntityNotFoundError, Repository } from 'typeorm';
 
 @Injectable()
 export class ProductMaterialService {
@@ -12,7 +12,7 @@ export class ProductMaterialService {
     @InjectRepository(Production)
     private readonly productionRepository: Repository<Production>,
     @InjectRepository(ProductionMaterial)
-    private readonly productionMaterRepossitory: Repository<ProductionMaterial>,
+    private readonly productionMaterRepository: Repository<ProductionMaterial>,
     @InjectRepository(Material)
     private readonly materialRepository: Repository<Material>,
   ) {}
@@ -21,10 +21,10 @@ export class ProductMaterialService {
     try {
       const production = await this.productionRepository.findOneByOrFail({ id: productionId });
 
-      await this.productionMaterRepossitory.delete({ production: { id: productionId } });
+      await this.productionMaterRepository.delete({ production: { id: productionId } });
 
       const materials = dto.materials.map((item) =>
-        this.productionMaterRepossitory.create({
+        this.productionMaterRepository.create({
           production,
           classification: item.classification,
           category: item.category,
@@ -35,21 +35,21 @@ export class ProductMaterialService {
           unit: item.unit,
         }),
       );
-      return await this.productionMaterRepossitory.save(materials);
+      return await this.productionMaterRepository.save(materials);
     } catch (e) {
       if (e instanceof EntityNotFoundError) throw new NotFoundException('해당 프로젝트를 찾을 수 없습니다.');
     }
   }
 
   async findOneMaterial(productionId: number) {
-    const currentMaterials = await this.productionMaterRepossitory.find({
+    const currentMaterials = await this.productionMaterRepository.find({
       where: { production: { id: productionId } },
       order: { classification: 'ASC', category: 'ASC' },
     });
 
     if (!currentMaterials.length) throw new NotFoundException('해당 생산 자재 소요량을 찾을 수 없습니다.');
 
-    const allProductionMaterials = await this.productionMaterRepossitory.find({ relations: ['production'] });
+    const allProductionMaterials = await this.productionMaterRepository.find({ relations: ['production'] });
 
     const allMaterials = await this.materialRepository.find();
 
