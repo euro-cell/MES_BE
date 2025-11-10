@@ -1,10 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateMaterialDto } from 'src/common/dtos/production-material.dto';
+import { CreateMaterialDto, UpdateMaterialDto } from 'src/common/dtos/production-material.dto';
 import { Material } from 'src/common/entities/material.entity';
 import { ProductionMaterial } from 'src/common/entities/production-material.entity';
 import { Production } from 'src/common/entities/production.entity';
-import { EntityNotFoundError, Repository } from 'typeorm';
+import { DataSource, EntityNotFoundError, Repository } from 'typeorm';
 
 @Injectable()
 export class ProductMaterialService {
@@ -15,6 +15,8 @@ export class ProductMaterialService {
     private readonly productionMaterRepository: Repository<ProductionMaterial>,
     @InjectRepository(Material)
     private readonly materialRepository: Repository<Material>,
+
+    private readonly dataSource: DataSource,
   ) {}
 
   async createMaterial(productionId: number, dto: CreateMaterialDto) {
@@ -97,5 +99,44 @@ export class ProductMaterialService {
       {} as Record<string, any[]>,
     );
     return { productionId, materials: grouped };
+  }
+
+  async updateMaterial(productionId: number, dto: UpdateMaterialDto) {
+    const production = await this.productionRepository.findOne({ where: { id: productionId } });
+    if (!production) throw new NotFoundException('해당 생산 자재 소요량을 찾을 수 없습니다.');
+
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      await queryRunner.manager.delete(ProductionMaterial, { production: { id: productionId } });
+
+      const newMaterials = (dto.materials ?? []).map((m) =>
+        queryRunner.manager.create(ProductionMaterial, {
+          production,
+          classification: m.classification,
+          category: m.category,
+          material: m.type,
+          model: m.name,
+          company: m.company,
+          unit: m.unit,
+          requiredAmount: m.quantity,
+        }),
+      );
+
+      await queryRunner.manager.save(ProductionMaterial, newMaterials);
+
+      await queryRunner.commitTransaction();
+
+      console.log('✅ [자재 수정 완료]', newMaterials.length, '건 갱신됨');
+      return { message: '자재 소요량이 수정되었습니다.', count: newMaterials.length };
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      console.error('❌ 자재 수정 중 오류 발생:', error);
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
   }
 }

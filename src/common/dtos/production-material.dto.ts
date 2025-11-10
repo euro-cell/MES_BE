@@ -1,6 +1,6 @@
 import { Type } from 'class-transformer';
 import { IsArray, IsEnum, IsNumber, IsString, ValidateNested } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, PartialType } from '@nestjs/swagger';
 import { MaterialCategory, MaterialClassification } from '../enums/material.enum';
 
 export class MaterialItemDto {
@@ -66,3 +66,5 @@ export class CreateMaterialDto {
   @Type(() => MaterialItemDto)
   materials: MaterialItemDto[];
 }
+
+export class UpdateMaterialDto extends PartialType(CreateMaterialDto) {}
