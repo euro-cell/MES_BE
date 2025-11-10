@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
 import { ProductMaterialService } from './material.service';
 import { CreateMaterialDto, UpdateMaterialDto } from 'src/common/dtos/production-material.dto';
 
@@ -19,5 +19,10 @@ export class ProductMaterialController {
   @Patch()
   async updateMaterial(@Param('productionId', ParseIntPipe) productionId: number, @Body() dto: UpdateMaterialDto) {
     return await this.productMaterialService.updateMaterial(productionId, dto);
+  }
+
+  @Delete()
+  async deleteMaterial(@Param('productionId', ParseIntPipe) productionId: number) {
+    return await this.productMaterialService.removeMaterial(productionId);
   }
 }

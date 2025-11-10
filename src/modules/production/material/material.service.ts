@@ -139,4 +139,10 @@ export class ProductMaterialService {
       await queryRunner.release();
     }
   }
+
+  async removeMaterial(productionId: number) {
+    const existing = await this.productionMaterRepository.find({ where: { production: { id: productionId } } });
+    if (!existing.length) throw new NotFoundException('삭제할 자재 소요량을 찾을 수 없습니다.');
+    return await this.productionMaterRepository.remove(existing);
+  }
 }
