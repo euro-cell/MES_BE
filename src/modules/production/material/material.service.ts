@@ -1,9 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateMaterialDto } from 'src/common/dtos/production-material.dto';
+import { Material } from 'src/common/entities/material.entity';
 import { ProductionMaterial } from 'src/common/entities/production-material.entity';
 import { Production } from 'src/common/entities/production.entity';
-import { EntityNotFoundError, Repository } from 'typeorm';
+import { EntityNotFoundError, Not, Repository } from 'typeorm';
 
 @Injectable()
 export class ProductMaterialService {
@@ -12,6 +13,8 @@ export class ProductMaterialService {
     private readonly productionRepository: Repository<Production>,
     @InjectRepository(ProductionMaterial)
     private readonly productionMaterRepossitory: Repository<ProductionMaterial>,
+    @InjectRepository(Material)
+    private readonly materialRepository: Repository<Material>,
   ) {}
 
   async createMaterial(productionId: number, dto: CreateMaterialDto) {
@@ -39,14 +42,45 @@ export class ProductMaterialService {
   }
 
   async findOneMaterial(productionId: number) {
-    const materials = await this.productionMaterRepossitory.find({
+    const currentMaterials = await this.productionMaterRepossitory.find({
       where: { production: { id: productionId } },
       order: { classification: 'ASC', category: 'ASC' },
     });
-    if (!materials.length) throw new NotFoundException('해당 생산 자재 소요량을 찾을 수 없습니다.');
 
-    const grouped = materials.reduce(
+    if (!currentMaterials.length) throw new NotFoundException('해당 생산 자재 소요량을 찾을 수 없습니다.');
+
+    const allProductionMaterials = await this.productionMaterRepossitory.find({ relations: ['production'] });
+
+    const allMaterials = await this.materialRepository.find();
+
+    const stockMap = allMaterials.reduce(
+      (acc, mat) => {
+        const key = mat.name.trim();
+        acc[key] = (acc[key] || 0) + (mat.stock || 0);
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
+
+    const localUsage: Record<string, number> = {};
+
+    const grouped = currentMaterials.reduce(
       (acc, item) => {
+        const key = item.model.trim();
+        const totalStock = stockMap[key] ?? 0;
+
+        const otherProductsUsage = allProductionMaterials
+          .filter((p) => p.model.trim() === key && p.production?.id !== productionId)
+          .reduce((sum, p) => sum + p.requiredAmount, 0);
+
+        const usedBefore = localUsage[key] ?? 0;
+
+        const availableStock = totalStock - (otherProductsUsage + usedBefore + item.requiredAmount);
+
+        localUsage[key] = usedBefore + item.requiredAmount;
+
+        const shortage = availableStock;
+
         acc[item.classification] = acc[item.classification] || [];
         acc[item.classification].push({
           category: item.category,
@@ -55,6 +89,8 @@ export class ProductMaterialService {
           company: item.company,
           unit: item.unit,
           requiredAmount: item.requiredAmount,
+          availableStock,
+          shortage,
         });
         return acc;
       },
