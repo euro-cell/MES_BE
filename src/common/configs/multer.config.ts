@@ -2,6 +2,10 @@ import { MulterOptions } from '@nestjs/platform-express/multer/interfaces/multer
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 
+function decodeFilename(filename: string) {
+  return Buffer.from(filename, 'latin1').toString('utf8');
+}
+
 export const multerConfig: MulterOptions = {
   storage: diskStorage({
     destination: (req, file, callback) => {
@@ -9,10 +13,10 @@ export const multerConfig: MulterOptions = {
     },
     filename: (req, file, callback) => {
       const timestamp = Date.now();
-      const random = Math.round(Math.random() * 1e9);
-      const ext = extname(file.originalname);
-
-      callback(null, `${timestamp}-${random}${ext}`);
+      const utf8Name = decodeFilename(file.originalname);
+      const ext = extname(utf8Name);
+      const baseName = utf8Name.replace(ext, '');
+      callback(null, `${timestamp}_${baseName}${ext}`);
     },
   }),
   limits: { fileSize: 10 * 1024 * 1024 },
