@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { WorklogBinder } from 'src/common/entities/worklogs/worklog-binder.entity';
-import { CreateBinderWorklogDto } from 'src/common/dtos/worklog/binder.dto';
+import { CreateBinderWorklogDto, BinderWorklogListResponseDto } from 'src/common/dtos/worklog/binder.dto';
 
 @Injectable()
 export class BinderService {
@@ -10,6 +10,29 @@ export class BinderService {
     @InjectRepository(WorklogBinder)
     private readonly worklogBinderRepository: Repository<WorklogBinder>,
   ) {}
+
+  async getWorklogs(productionId: string): Promise<BinderWorklogListResponseDto[]> {
+    const worklogs = await this.worklogBinderRepository.find({
+      where: { productionId },
+      order: { manufactureDate: 'ASC', createdAt: 'ASC' },
+    });
+    const dateRoundMap = new Map<string, number>();
+
+    const worklogsWithRound = worklogs.map((worklog) => {
+      const dateKey = worklog.manufactureDate.toString();
+      const currentRound = dateRoundMap.get(dateKey) || 0;
+      const round = currentRound + 1;
+      dateRoundMap.set(dateKey, round);
+
+      return {
+        id: worklog.id,
+        workDate: worklog.manufactureDate.toString(),
+        round: round,
+        writer: worklog.writer || '',
+      };
+    });
+    return worklogsWithRound.reverse();
+  }
 
   async createBinderWorklog(productionId: string, createBinderWorklogDto: CreateBinderWorklogDto): Promise<WorklogBinder> {
     const worklog = this.worklogBinderRepository.create({

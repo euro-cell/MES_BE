@@ -332,3 +332,17 @@ export class CreateBinderWorklogDto {
   @IsString()
   stabilizationEndTime?: string;
 }
+
+export class BinderWorklogListResponseDto {
+  @ApiProperty({ description: 'ID', example: 1 })
+  id: number;
+
+  @ApiProperty({ description: '작업일 (제조일자)', example: '2025-12-01' })
+  workDate: string;
+
+  @ApiProperty({ description: '회차', example: 1 })
+  round: number;
+
+  @ApiProperty({ description: '작성자', example: '박호언' })
+  writer: string;
+}
