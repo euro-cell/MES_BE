@@ -41,4 +41,10 @@ export class BinderService {
     });
     return worklogsWithRound.reverse();
   }
+
+  async findWorklogById(worklogId: string): Promise<WorklogBinder | null> {
+    return await this.worklogBinderRepository.findOne({
+      where: { id: +worklogId },
+    });
+  }
 }

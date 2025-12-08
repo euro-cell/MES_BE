@@ -18,4 +18,9 @@ export class BinderController {
   async getWorklogs(@Param('productionId') productionId: string): Promise<BinderWorklogListResponseDto[]> {
     return await this.binderService.getWorklogs(productionId);
   }
+
+  @Get(':worklogId/binder')
+  async getWorklogById(@Param('productionId') productionId: string, @Param('worklogId') worklogId: string) {
+    return await this.binderService.findWorklogById(worklogId);
+  }
 }
