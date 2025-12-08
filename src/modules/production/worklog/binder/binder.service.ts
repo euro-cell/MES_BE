@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { WorklogBinder } from 'src/common/entities/worklogs/worklog-binder.entity';
-import { CreateBinderWorklogDto, BinderWorklogListResponseDto } from 'src/common/dtos/worklog/binder.dto';
+import { CreateBinderWorklogDto, BinderWorklogListResponseDto, UpdateBinderWorklogDto } from 'src/common/dtos/worklog/binder.dto';
 
 @Injectable()
 export class BinderService {
@@ -46,5 +46,16 @@ export class BinderService {
     return await this.worklogBinderRepository.findOne({
       where: { id: +worklogId },
     });
+  }
+
+  async updateBinderWorklog(worklogId: string, updateBinderWorklogDto: UpdateBinderWorklogDto): Promise<WorklogBinder> {
+    const worklog = await this.worklogBinderRepository.findOne({ where: { id: +worklogId } });
+
+    if (!worklog) {
+      throw new NotFoundException('작업일지를 찾을 수 없습니다.');
+    }
+    Object.assign(worklog, updateBinderWorklogDto);
+
+    return await this.worklogBinderRepository.save(worklog);
   }
 }

@@ -1,7 +1,7 @@
-import { Controller, Post, Body, Param, Get } from '@nestjs/common';
+import { Controller, Post, Body, Param, Get, Put, Patch } from '@nestjs/common';
 import { BinderService } from './binder.service';
 import { ApiTags, ApiOkResponse } from '@nestjs/swagger';
-import { CreateBinderWorklogDto, BinderWorklogListResponseDto } from 'src/common/dtos/worklog/binder.dto';
+import { CreateBinderWorklogDto, BinderWorklogListResponseDto, UpdateBinderWorklogDto } from 'src/common/dtos/worklog/binder.dto';
 
 @ApiTags('Production Worklog - Binder')
 @Controller(':productionId/worklog')
@@ -22,5 +22,14 @@ export class BinderController {
   @Get(':worklogId/binder')
   async getWorklogById(@Param('productionId') productionId: string, @Param('worklogId') worklogId: string) {
     return await this.binderService.findWorklogById(worklogId);
+  }
+
+  @Patch(':worklogId/binder')
+  async updateBinderWorklog(
+    @Param('productionId') productionId: string,
+    @Param('worklogId') worklogId: string,
+    @Body() updateBinderWorklogDto: UpdateBinderWorklogDto,
+  ) {
+    return await this.binderService.updateBinderWorklog(worklogId, updateBinderWorklogDto);
   }
 }
