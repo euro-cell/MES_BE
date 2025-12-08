@@ -10,7 +10,7 @@ export class WorklogController {
   @Get('binder')
   async getBinderTemplate(@Res() res: Response) {
     const dirPath = await this.worklogService.getTemplateFilePath();
-    const filePath = join(dirPath, 'Binder.xlsx');
-    return res.download(filePath, 'Binder.xlsx');
+    const filePath = join(dirPath, '01.Binder.xlsx');
+    return res.download(filePath, '01.Binder.xlsx');
   }
 }
