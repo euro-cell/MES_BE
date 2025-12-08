@@ -6,13 +6,13 @@ export abstract class WorklogBase {
   id: number;
 
   @Column({ type: 'date' })
-  manufacture_date: Date;
+  manufactureDate: Date;
 
   @Column({ type: 'bigint' })
-  production_id: string;
+  productionId: string;
 
   @ManyToOne(() => Production, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'production_id' })
+  @JoinColumn({ name: 'productionId' })
   production: Production;
 
   @Column({ type: 'varchar', length: 50 })
@@ -28,19 +28,19 @@ export abstract class WorklogBase {
   shift: string;
 
   @Column({ type: 'boolean', default: false })
-  equipment_check_result: boolean;
+  equipmentCheckResult: boolean;
 
   @Column({ type: 'varchar', length: 50, nullable: true })
-  jig_number: string;
+  jigNumber: string;
 
   @Column({ type: 'boolean', default: false })
-  equipment_issue: boolean;
+  equipmentIssue: boolean;
 
   @Column({ type: 'varchar', length: 100, nullable: true })
-  temp_humi: string;
+  tempHumi: string;
 
   @Column({ type: 'varchar', length: 50, nullable: true })
-  clean_check: string;
+  cleanCheck: string;
 
   @Column({ type: 'boolean', default: false })
   safety: boolean;
@@ -58,14 +58,14 @@ export abstract class WorklogBase {
   approver: string;
 
   @CreateDateColumn()
-  created_at: Date;
+  createdAt: Date;
 
   @UpdateDateColumn()
-  updated_at: Date;
+  updatedAt: Date;
 
   @Column({ type: 'varchar', length: 50, nullable: true })
-  created_by: string;
+  createdBy: string;
 
   @Column({ type: 'varchar', length: 50, nullable: true })
-  updated_by: string;
+  updatedBy: string;
 }
