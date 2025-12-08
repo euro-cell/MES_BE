@@ -4,37 +4,37 @@ import { WorklogBase } from './worklog-base.entity';
 @Entity('worklog_binders')
 export class WorklogBinder extends WorklogBase {
   @Column({ type: 'varchar', length: 50, nullable: true })
-  material_1_name: string;
+  material1Name: string;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  material_1_composition: number;
+  material1Composition: number;
 
   @Column({ type: 'varchar', length: 100, nullable: true })
-  material_1_lot: string;
+  material1Lot: string;
 
   @Column({ type: 'decimal', precision: 15, scale: 2, nullable: true })
-  material_1_planned_input: number;
+  material1PlannedInput: number;
 
   @Column({ type: 'decimal', precision: 15, scale: 2, nullable: true })
-  material_1_actual_input: number;
+  material1ActualInput: number;
 
   @Column({ type: 'varchar', length: 50, nullable: true })
-  material_2_name: string;
+  material2Name: string;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  material_2_composition: number;
+  material2Composition: number;
 
   @Column({ type: 'varchar', length: 100, nullable: true })
-  material_2_lot: string;
+  material2Lot: string;
 
   @Column({ type: 'decimal', precision: 15, scale: 2, nullable: true })
-  material_2_planned_input: number;
+  material2PlannedInput: number;
 
   @Column({ type: 'decimal', precision: 15, scale: 2, nullable: true })
-  material_2_actual_input: number;
+  material2ActualInput: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  binder_solution: number;
+  binderSolution: number;
 
   @Column({ type: 'varchar', length: 100, nullable: true })
   lot: string;
@@ -43,119 +43,119 @@ export class WorklogBinder extends WorklogBase {
   viscosity: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  solid_content_1: number;
+  solidContent1: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  solid_content_2: number;
+  solidContent2: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  solid_content_3: number;
+  solidContent3: number;
 
   @Column({ type: 'decimal', precision: 15, scale: 2, nullable: true })
-  nmp_weight_input: number;
+  nmpWeightInput: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  nmp_weight_temp: number;
+  nmpWeightTemp: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  nmp_weight_rpm_low: number;
+  nmpWeightRpmLow: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  nmp_weight_rpm_high: number;
+  nmpWeightRpmHigh: number;
 
   @Column({ type: 'time', nullable: true })
-  nmp_weight_start_time: string;
+  nmpWeightStartTime: string;
 
   @Column({ type: 'time', nullable: true })
-  nmp_weight_end_time: string;
+  nmpWeightEndTime: string;
 
   @Column({ type: 'decimal', precision: 15, scale: 2, nullable: true })
-  binder_weight_input: number;
+  binderWeightInput: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  binder_weight_temp: number;
+  binderWeightTemp: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  binder_weight_rpm_low: number;
+  binderWeightRpmLow: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  binder_weight_rpm_high: number;
+  binderWeightRpmHigh: number;
 
   @Column({ type: 'time', nullable: true })
-  binder_weight_start_time: string;
+  binderWeightStartTime: string;
 
   @Column({ type: 'time', nullable: true })
-  binder_weight_end_time: string;
+  binderWeightEndTime: string;
 
   @Column({ type: 'decimal', precision: 15, scale: 2, nullable: true })
-  mixing_1_input: number;
+  mixing1Input: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  mixing_1_temp: number;
+  mixing1Temp: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  mixing_1_rpm_low: number;
+  mixing1RpmLow: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  mixing_1_rpm_high: number;
+  mixing1RpmHigh: number;
 
   @Column({ type: 'time', nullable: true })
-  mixing_1_start_time: string;
+  mixing1StartTime: string;
 
   @Column({ type: 'time', nullable: true })
-  mixing_1_end_time: string;
+  mixing1EndTime: string;
 
   @Column({ type: 'decimal', precision: 15, scale: 2, nullable: true })
-  scrapping_input: number;
+  scrappingInput: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  scrapping_temp: number;
+  scrappingTemp: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  scrapping_rpm_low: number;
+  scrappingRpmLow: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  scrapping_rpm_high: number;
+  scrappingRpmHigh: number;
 
   @Column({ type: 'time', nullable: true })
-  scrapping_start_time: string;
+  scrappingStartTime: string;
 
   @Column({ type: 'time', nullable: true })
-  scrapping_end_time: string;
+  scrappingEndTime: string;
 
   @Column({ type: 'decimal', precision: 15, scale: 2, nullable: true })
-  mixing_2_input: number;
+  mixing2Input: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  mixing_2_temp: number;
+  mixing2Temp: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  mixing_2_rpm_low: number;
+  mixing2RpmLow: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  mixing_2_rpm_high: number;
+  mixing2RpmHigh: number;
 
   @Column({ type: 'time', nullable: true })
-  mixing_2_start_time: string;
+  mixing2StartTime: string;
 
   @Column({ type: 'time', nullable: true })
-  mixing_2_end_time: string;
+  mixing2EndTime: string;
 
   @Column({ type: 'decimal', precision: 15, scale: 2, nullable: true })
-  stabilization_input: number;
+  stabilizationInput: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  stabilization_temp: number;
+  stabilizationTemp: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  stabilization_rpm_low: number;
+  stabilizationRpmLow: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  stabilization_rpm_high: number;
+  stabilizationRpmHigh: number;
 
   @Column({ type: 'time', nullable: true })
-  stabilization_start_time: string;
+  stabilizationStartTime: string;
 
   @Column({ type: 'time', nullable: true })
-  stabilization_end_time: string;
+  stabilizationEndTime: string;
 }
