@@ -27,23 +27,23 @@ export abstract class WorklogBase {
   @Column({ type: 'varchar', length: 20 })
   shift: string;
 
-  @Column({ type: 'boolean', default: false })
-  equipmentCheckResult: boolean;
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  equipmentCheckResult: string;
 
   @Column({ type: 'varchar', length: 50, nullable: true })
   jigNumber: string;
 
-  @Column({ type: 'boolean', default: false })
-  equipmentIssue: boolean;
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  equipmentIssue: string;
 
-  @Column({ type: 'varchar', length: 100, nullable: true })
+  @Column({ type: 'varchar', length: 50, nullable: true })
   tempHumi: string;
 
   @Column({ type: 'varchar', length: 50, nullable: true })
   cleanCheck: string;
 
-  @Column({ type: 'boolean', default: false })
-  safety: boolean;
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  safety: string;
 
   @Column({ type: 'text', nullable: true })
   remark: string;
