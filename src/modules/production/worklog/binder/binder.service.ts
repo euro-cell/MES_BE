@@ -11,6 +11,14 @@ export class BinderService {
     private readonly worklogBinderRepository: Repository<WorklogBinder>,
   ) {}
 
+  async createBinderWorklog(productionId: string, createBinderWorklogDto: CreateBinderWorklogDto): Promise<WorklogBinder> {
+    const worklog = this.worklogBinderRepository.create({
+      ...createBinderWorklogDto,
+      productionId,
+    });
+    return await this.worklogBinderRepository.save(worklog);
+  }
+
   async getWorklogs(productionId: string): Promise<BinderWorklogListResponseDto[]> {
     const worklogs = await this.worklogBinderRepository.find({
       where: { productionId },
@@ -32,13 +40,5 @@ export class BinderService {
       };
     });
     return worklogsWithRound.reverse();
-  }
-
-  async createBinderWorklog(productionId: string, createBinderWorklogDto: CreateBinderWorklogDto): Promise<WorklogBinder> {
-    const worklog = this.worklogBinderRepository.create({
-      ...createBinderWorklogDto,
-      productionId,
-    });
-    return await this.worklogBinderRepository.save(worklog);
   }
 }
