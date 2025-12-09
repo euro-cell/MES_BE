@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Param, Get, Patch, Delete } from '@nestjs/common';
+import { Controller, Post, Body, Param, Get, Patch, Delete, ParseIntPipe } from '@nestjs/common';
 import { BinderService } from './binder.service';
 import { ApiTags, ApiOkResponse } from '@nestjs/swagger';
 import { CreateBinderWorklogDto, BinderWorklogListResponseDto, UpdateBinderWorklogDto } from 'src/common/dtos/worklog/binder.dto';
@@ -9,24 +9,24 @@ export class BinderController {
   constructor(private readonly binderService: BinderService) {}
 
   @Post('binder')
-  async createBinderWorklog(@Param('productionId') productionId: string, @Body() createBinderWorklogDto: CreateBinderWorklogDto) {
-    return await this.binderService.createBinderWorklog(productionId, createBinderWorklogDto);
+  async createBinderWorklog(@Param('productionId', ParseIntPipe) productionId: number, @Body() dto: CreateBinderWorklogDto) {
+    return await this.binderService.createBinderWorklog(productionId, dto);
   }
 
   @Get('binder')
   @ApiOkResponse({ description: '작업일지-바인더 목록', type: [BinderWorklogListResponseDto] })
-  async getWorklogs(@Param('productionId') productionId: string): Promise<BinderWorklogListResponseDto[]> {
+  async getWorklogs(@Param('productionId', ParseIntPipe) productionId: number): Promise<BinderWorklogListResponseDto[]> {
     return await this.binderService.getWorklogs(productionId);
   }
 
   @Get(':worklogId/binder')
-  async getWorklogById(@Param('productionId') productionId: string, @Param('worklogId') worklogId: string) {
+  async getWorklogById(@Param('productionId', ParseIntPipe) productionId: number, @Param('worklogId') worklogId: string) {
     return await this.binderService.findWorklogById(worklogId);
   }
 
   @Patch(':worklogId/binder')
   async updateBinderWorklog(
-    @Param('productionId') productionId: string,
+    @Param('productionId', ParseIntPipe) productionId: number,
     @Param('worklogId') worklogId: string,
     @Body() updateBinderWorklogDto: UpdateBinderWorklogDto,
   ) {
@@ -34,7 +34,7 @@ export class BinderController {
   }
 
   @Delete(':worklogId/binder')
-  async deleteBinderWorklog(@Param('productionId') productionId: string, @Param('worklogId') worklogId: string) {
+  async deleteBinderWorklog(@Param('productionId', ParseIntPipe) productionId: number, @Param('worklogId') worklogId: string) {
     return await this.binderService.deleteBinderWorklog(worklogId);
   }
 }

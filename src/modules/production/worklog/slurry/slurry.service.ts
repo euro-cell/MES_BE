@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { WorklogSlurry } from 'src/common/entities/worklogs/worklog-slurry.entity';
+import { WorklogSlurry } from 'src/common/entities/worklogs/worklog-02-slurry.entity';
 import { CreateSlurryWorklogDto, SlurryWorklogListResponseDto, UpdateSlurryWorklogDto } from 'src/common/dtos/worklog/slurry.dto';
 
 @Injectable()
@@ -11,7 +11,7 @@ export class SlurryService {
     private readonly worklogSlurryRepository: Repository<WorklogSlurry>,
   ) {}
 
-  async createSlurryWorklog(productionId: string, createSlurryWorklogDto: CreateSlurryWorklogDto): Promise<WorklogSlurry> {
+  async createSlurryWorklog(productionId: number, createSlurryWorklogDto: CreateSlurryWorklogDto): Promise<WorklogSlurry> {
     const worklog = this.worklogSlurryRepository.create({
       ...createSlurryWorklogDto,
       productionId,
@@ -19,7 +19,7 @@ export class SlurryService {
     return await this.worklogSlurryRepository.save(worklog);
   }
 
-  async getWorklogs(productionId: string): Promise<SlurryWorklogListResponseDto[]> {
+  async getWorklogs(productionId: number): Promise<SlurryWorklogListResponseDto[]> {
     const worklogs = await this.worklogSlurryRepository.find({
       where: { productionId },
       order: { manufactureDate: 'ASC', createdAt: 'ASC' },

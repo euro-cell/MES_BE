@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { WorklogBinder } from 'src/common/entities/worklogs/worklog-binder.entity';
+import { WorklogBinder } from 'src/common/entities/worklogs/worklog-01-binder.entity';
 import { CreateBinderWorklogDto, BinderWorklogListResponseDto, UpdateBinderWorklogDto } from 'src/common/dtos/worklog/binder.dto';
 
 @Injectable()
@@ -11,15 +11,15 @@ export class BinderService {
     private readonly worklogBinderRepository: Repository<WorklogBinder>,
   ) {}
 
-  async createBinderWorklog(productionId: string, createBinderWorklogDto: CreateBinderWorklogDto): Promise<WorklogBinder> {
+  async createBinderWorklog(productionId: number, dto: CreateBinderWorklogDto): Promise<WorklogBinder> {
     const worklog = this.worklogBinderRepository.create({
-      ...createBinderWorklogDto,
+      ...dto,
       productionId,
     });
     return await this.worklogBinderRepository.save(worklog);
   }
 
-  async getWorklogs(productionId: string): Promise<BinderWorklogListResponseDto[]> {
+  async getWorklogs(productionId: number): Promise<BinderWorklogListResponseDto[]> {
     const worklogs = await this.worklogBinderRepository.find({
       where: { productionId },
       order: { manufactureDate: 'ASC', createdAt: 'ASC' },
