@@ -1,5 +1,5 @@
 import { Entity, Column } from 'typeorm';
-import { WorklogBase } from './worklog-base.entity';
+import { WorklogBase } from './worklog-00-base.entity';
 
 @Entity('worklog_binders')
 export class WorklogBinder extends WorklogBase {
