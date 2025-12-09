@@ -1,23 +1,32 @@
-import { Controller, Get, Res } from '@nestjs/common';
+import { Controller, Get, Param, Res } from '@nestjs/common';
 import type { Response } from 'express';
 import { WorklogService } from './worklog.service';
 import { join } from 'path';
+
+const processTemplateFile = {
+  binder: '01.Binder.xlsx',
+  slurry: '02.Slurry.xlsx',
+  coating: '03.Coating.xlsx',
+  press: '04.Press.xlsx',
+  notching: '06.Notching.xlsx',
+  vd: '07.VD.xlsx',
+  forming: '08.Forming.xlsx',
+  stacking: '09.Stacking.xlsx',
+  welding: '10.Welding.xlsx',
+  sealing: '11.Sealing.xlsx',
+  formation: '13.Formation.xlsx',
+  grading: '14.Grading.xlsx',
+};
 
 @Controller()
 export class WorklogController {
   constructor(private readonly worklogService: WorklogService) {}
 
-  @Get('binder')
-  async getBinderTemplate(@Res() res: Response) {
+  @Get(':process')
+  async getProcessTemplate(@Res() res: Response, @Param('process') process: string) {
     const dirPath = await this.worklogService.getTemplateFilePath();
-    const filePath = join(dirPath, '01.Binder.xlsx');
-    return res.download(filePath, '01.Binder.xlsx');
-  }
-
-  @Get('slurry')
-  async getSlurryTemplate(@Res() res: Response) {
-    const dirPath = await this.worklogService.getTemplateFilePath();
-    const filePath = join(dirPath, '02.Slurry.xlsx');
-    return res.download(filePath, '02.Slurry.xlsx');
+    const fileName = processTemplateFile[process.toLowerCase()];
+    const filePath = join(dirPath, fileName);
+    return res.download(filePath, fileName);
   }
 }
