@@ -58,4 +58,13 @@ export class BinderService {
 
     return await this.worklogBinderRepository.save(worklog);
   }
+
+  async deleteBinderWorklog(worklogId: string): Promise<void> {
+    const worklog = await this.worklogBinderRepository.findOne({ where: { id: +worklogId } });
+
+    if (!worklog) {
+      throw new NotFoundException('작업일지를 찾을 수 없습니다.');
+    }
+    await this.worklogBinderRepository.remove(worklog);
+  }
 }
