@@ -2,8 +2,8 @@ import { Module } from '@nestjs/common';
 import { RouterModule } from '@nestjs/core';
 import { WorklogService } from './worklog.service';
 import { WorklogController } from './worklog.controller';
-import { BinderModule } from './binder/binder.module';
-import { SlurryModule } from './slurry/slurry.module';
+import { BinderModule } from './01-binder/binder.module';
+import { SlurryModule } from './02-slurry/slurry.module';
 
 @Module({
   imports: [
