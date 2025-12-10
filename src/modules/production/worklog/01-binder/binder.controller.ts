@@ -1,7 +1,7 @@
 import { Controller, Post, Body, Param, Get, Patch, Delete, ParseIntPipe } from '@nestjs/common';
 import { BinderService } from './binder.service';
 import { ApiTags, ApiOkResponse } from '@nestjs/swagger';
-import { CreateBinderWorklogDto, BinderWorklogListResponseDto, UpdateBinderWorklogDto } from 'src/common/dtos/worklog/binder.dto';
+import { CreateBinderWorklogDto, BinderWorklogListResponseDto, UpdateBinderWorklogDto } from 'src/common/dtos/worklog/01-binder.dto';
 
 @ApiTags('Production Worklog - Binder')
 @Controller(':productionId/worklog')

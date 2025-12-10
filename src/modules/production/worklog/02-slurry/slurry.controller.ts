@@ -1,7 +1,7 @@
 import { Controller, Post, Body, Param, Get, Patch, Delete, ParseIntPipe } from '@nestjs/common';
 import { SlurryService } from './slurry.service';
 import { ApiTags, ApiOkResponse } from '@nestjs/swagger';
-import { CreateSlurryWorklogDto, SlurryWorklogListResponseDto, UpdateSlurryWorklogDto } from 'src/common/dtos/worklog/slurry.dto';
+import { CreateSlurryWorklogDto, SlurryWorklogListResponseDto, UpdateSlurryWorklogDto } from 'src/common/dtos/worklog/02-slurry.dto';
 
 @ApiTags('Production Worklog - Slurry')
 @Controller(':productionId/worklog')
