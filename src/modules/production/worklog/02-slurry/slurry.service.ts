@@ -14,14 +14,14 @@ export class SlurryService {
   async createSlurryWorklog(productionId: number, createSlurryWorklogDto: CreateSlurryWorklogDto): Promise<WorklogSlurry> {
     const worklog = this.worklogSlurryRepository.create({
       ...createSlurryWorklogDto,
-      productionId,
+      production: { id: productionId },
     });
     return await this.worklogSlurryRepository.save(worklog);
   }
 
   async getWorklogs(productionId: number): Promise<SlurryWorklogListResponseDto[]> {
     const worklogs = await this.worklogSlurryRepository.find({
-      where: { productionId },
+      where: { production: { id: productionId } },
       order: { manufactureDate: 'ASC', createdAt: 'ASC' },
     });
     const dateRoundMap = new Map<string, number>();
@@ -42,10 +42,21 @@ export class SlurryService {
     return worklogsWithRound.reverse();
   }
 
-  async findWorklogById(worklogId: string): Promise<WorklogSlurry | null> {
-    return await this.worklogSlurryRepository.findOne({
+  async findWorklogById(worklogId: string) {
+    const worklog = await this.worklogSlurryRepository.findOne({
       where: { id: +worklogId },
+      relations: ['production'],
     });
+
+    if (!worklog) {
+      return null;
+    }
+
+    const { production, ...rest } = worklog;
+    return {
+      ...rest,
+      productionId: production?.name || '',
+    };
   }
 
   async updateSlurryWorklog(worklogId: string, updateSlurryWorklogDto: UpdateSlurryWorklogDto): Promise<WorklogSlurry> {

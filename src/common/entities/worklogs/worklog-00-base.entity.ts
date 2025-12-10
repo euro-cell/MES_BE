@@ -8,11 +8,8 @@ export abstract class WorklogBase {
   @Column({ type: 'date' })
   manufactureDate: Date;
 
-  @Column({ type: 'int' })
-  productionId: number;
-
   @ManyToOne(() => Production, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'productionId' })
+  @JoinColumn({ name: 'production_id' })
   production: Production;
 
   @Column({ type: 'varchar', length: 50 })

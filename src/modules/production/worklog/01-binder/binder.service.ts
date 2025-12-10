@@ -14,14 +14,14 @@ export class BinderService {
   async createBinderWorklog(productionId: number, dto: CreateBinderWorklogDto): Promise<WorklogBinder> {
     const worklog = this.worklogBinderRepository.create({
       ...dto,
-      productionId,
+      production: { id: productionId },
     });
     return await this.worklogBinderRepository.save(worklog);
   }
 
   async getWorklogs(productionId: number): Promise<BinderWorklogListResponseDto[]> {
     const worklogs = await this.worklogBinderRepository.find({
-      where: { productionId },
+      where: { production: { id: productionId } },
       order: { manufactureDate: 'ASC', createdAt: 'ASC' },
     });
     const dateRoundMap = new Map<string, number>();
@@ -42,10 +42,21 @@ export class BinderService {
     return worklogsWithRound.reverse();
   }
 
-  async findWorklogById(worklogId: string): Promise<WorklogBinder | null> {
-    return await this.worklogBinderRepository.findOne({
+  async findWorklogById(worklogId: string) {
+    const worklog = await this.worklogBinderRepository.findOne({
       where: { id: +worklogId },
+      relations: ['production'],
     });
+
+    if (!worklog) {
+      return null;
+    }
+
+    const { production, ...rest } = worklog;
+    return {
+      ...rest,
+      productionId: production?.name || '',
+    };
   }
 
   async updateBinderWorklog(worklogId: string, updateBinderWorklogDto: UpdateBinderWorklogDto): Promise<WorklogBinder> {
