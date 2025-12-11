@@ -12,6 +12,7 @@ export enum ProcessTemplateFile {
   stacking = '09.Stacking.xlsx',
   welding = '10.Welding.xlsx',
   sealing = '11.Sealing.xlsx',
+  filling = '12.Filling.xlsx',
   formation = '13.Formation.xlsx',
   grading = '14.Grading.xlsx',
 }
