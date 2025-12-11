@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { RouterModule } from '@nestjs/core';
 import { WorklogService } from './worklog.service';
 import { WorklogController } from './worklog.controller';
-import { BinderModule, SlurryModule, CoatingModule, PressModule, NotchingModule, VdModule, FormingModule, StackingModule } from './index';
+import { BinderModule, SlurryModule, CoatingModule, PressModule, NotchingModule, VdModule, FormingModule, StackingModule, WeldingModule } from './index';
 
 @Module({
   imports: [
@@ -15,6 +15,7 @@ import { BinderModule, SlurryModule, CoatingModule, PressModule, NotchingModule,
       { path: 'production', module: VdModule },
       { path: 'production', module: FormingModule },
       { path: 'production', module: StackingModule },
+      { path: 'production', module: WeldingModule },
     ]),
     BinderModule,
     SlurryModule,
@@ -24,6 +25,7 @@ import { BinderModule, SlurryModule, CoatingModule, PressModule, NotchingModule,
     VdModule,
     FormingModule,
     StackingModule,
+    WeldingModule,
   ],
   controllers: [WorklogController],
   providers: [WorklogService],
