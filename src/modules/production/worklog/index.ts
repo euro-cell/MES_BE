@@ -7,5 +7,6 @@ import { VdModule } from './07-vd/vd.module';
 import { FormingModule } from './08-forming/forming.module';
 import { StackingModule } from './09-stacking/stacking.module';
 import { WeldingModule } from './10-welding/welding.module';
+import { SealingModule } from './11-sealing/sealing.module';
 
-export { BinderModule, SlurryModule, CoatingModule, PressModule, NotchingModule, VdModule, FormingModule, StackingModule, WeldingModule };
+export { BinderModule, SlurryModule, CoatingModule, PressModule, NotchingModule, VdModule, FormingModule, StackingModule, WeldingModule, SealingModule };
