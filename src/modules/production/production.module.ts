@@ -8,6 +8,7 @@ import { RouterModule } from '@nestjs/core';
 import { ProductMaterialModule } from './material/material.module';
 import { ProductSpecificationModule } from './specification/specification.module';
 import { WorklogModule } from './worklog/worklog.module';
+import { StatusModule } from './status/status.module';
 
 @Module({
   imports: [
@@ -17,11 +18,13 @@ import { WorklogModule } from './worklog/worklog.module';
       { path: 'production', module: ProductMaterialModule },
       { path: 'production', module: ProductSpecificationModule },
       { path: 'worklog', module: WorklogModule },
+      { path: 'production', module: StatusModule },
     ]),
     PlanModule,
     ProductMaterialModule,
     ProductSpecificationModule,
     WorklogModule,
+    StatusModule,
   ],
   controllers: [ProductionController],
   providers: [ProductionService],
