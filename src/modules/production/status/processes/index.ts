@@ -1,0 +1,4 @@
+export { MixingProcessService } from './01-mixing.service';
+export { CoatingProcessService } from './02-coating.service';
+export { PressProcessService } from './03-press.service';
+export { NotchingProcessService } from './05-notching.service';
