@@ -9,4 +9,16 @@ export class NotchingProcessService {
     @InjectRepository(WorklogNotching)
     private readonly notchingRepository: Repository<WorklogNotching>,
   ) {}
+
+  async getMonthlyData(_productionId: number, _month: string, _type: 'cathode' | 'anode') {
+    // TODO: 구현 예정
+    return {
+      data: [],
+      total: {
+        totalOutput: 0,
+        targetQuantity: null,
+        progress: null,
+      },
+    };
+  }
 }

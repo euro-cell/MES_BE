@@ -9,4 +9,16 @@ export class PressProcessService {
     @InjectRepository(WorklogPress)
     private readonly pressRepository: Repository<WorklogPress>,
   ) {}
+
+  async getMonthlyData(_productionId: number, _month: string, _type: 'cathode' | 'anode') {
+    // TODO: 구현 예정
+    return {
+      data: [],
+      total: {
+        totalOutput: 0,
+        targetQuantity: null,
+        progress: null,
+      },
+    };
+  }
 }

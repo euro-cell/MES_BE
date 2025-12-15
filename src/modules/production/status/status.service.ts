@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ProductionPlan } from 'src/common/entities/production-plan.entity';
 import { Repository } from 'typeorm';
-import { MixingProcessService } from './processes';
+import { MixingProcessService, CoatingProcessService, PressProcessService, SlittingProcessService, NotchingProcessService } from './processes';
 import { ProductionTargetDto } from 'src/common/dtos/production-target.dto';
 import { ProductionTarget } from 'src/common/entities/production-target.entity';
 
@@ -14,6 +14,10 @@ export class StatusService {
     @InjectRepository(ProductionTarget)
     private readonly productionTargetRepository: Repository<ProductionTarget>,
     private readonly mixingProcessService: MixingProcessService,
+    private readonly coatingProcessService: CoatingProcessService,
+    private readonly pressProcessService: PressProcessService,
+    private readonly slittingProcessService: SlittingProcessService,
+    private readonly notchingProcessService: NotchingProcessService,
   ) {}
 
   async targetStatus(productionId: number, dto: ProductionTargetDto) {
@@ -57,7 +61,26 @@ export class StatusService {
   }
 
   async getElectrodeStatus(productionId: number, month: string, type: 'cathode' | 'anode') {
-    const mixing = await this.mixingProcessService.getMonthlyData(productionId, month, type);
-    return mixing;
+    const [mixing, coating, press, slitting, notching] = await Promise.all([
+      this.mixingProcessService.getMonthlyData(productionId, month, type),
+      this.coatingProcessService.getMonthlyData(productionId, month, type),
+      this.pressProcessService.getMonthlyData(productionId, month, type),
+      this.slittingProcessService.getMonthlyData(productionId, month, type),
+      this.notchingProcessService.getMonthlyData(productionId, month, type),
+    ]);
+
+    return {
+      category: 'electrode',
+      type,
+      month,
+      processes: {
+        mixing,
+        coatingSingle: coating.single,
+        coatingDouble: coating.double,
+        press,
+        slitting,
+        notching,
+      },
+    };
   }
 }

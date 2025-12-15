@@ -12,6 +12,7 @@ import {
   MixingProcessService,
   CoatingProcessService,
   PressProcessService,
+  SlittingProcessService,
   NotchingProcessService,
 } from '.';
 
@@ -32,12 +33,14 @@ import {
     MixingProcessService,
     CoatingProcessService,
     PressProcessService,
+    SlittingProcessService,
     NotchingProcessService,
   ],
   exports: [
     MixingProcessService,
     CoatingProcessService,
     PressProcessService,
+    SlittingProcessService,
     NotchingProcessService,
   ],
 })
