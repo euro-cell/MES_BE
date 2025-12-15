@@ -40,9 +40,20 @@ export class StatusService {
   }
 
   async getStatusData(productionId: number) {
-    const productionPlan = await this.productionPlanRepository.findOne({ where: { production: { id: productionId } } });
-    if (!productionPlan) return { startDate: null, endDate: null };
-    return { startDate: productionPlan.startDate, endDate: productionPlan.endDate };
+    const productionPlan = await this.productionPlanRepository.findOne({
+      where: { production: { id: productionId } },
+      relations: ['production'],
+    });
+
+    if (!productionPlan) {
+      return { name: null, startDate: null, endDate: null };
+    }
+
+    return {
+      name: productionPlan.production.name,
+      startDate: productionPlan.startDate,
+      endDate: productionPlan.endDate,
+    };
   }
 
   async getElectrodeStatus(productionId: number, month: string, type: 'cathode' | 'anode') {
