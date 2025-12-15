@@ -13,15 +13,25 @@ export class ProductionTargetDto {
   @IsNumber()
   mixingAnode: number;
 
-  @ApiPropertyOptional({ description: '코팅 공정 - 양극', example: 1000 })
+  @ApiPropertyOptional({ description: '코팅 단면 공정 - 양극', example: 1000 })
   @IsOptional()
   @IsNumber()
-  coatingCathode: number;
+  coatingSingleCathode: number;
 
-  @ApiPropertyOptional({ description: '코팅 공정 - 음극', example: 1000 })
+  @ApiPropertyOptional({ description: '코팅 단면 공정 - 음극', example: 1000 })
   @IsOptional()
   @IsNumber()
-  coatingAnode: number;
+  coatingSingleAnode: number;
+
+  @ApiPropertyOptional({ description: '코팅 양면 공정 - 양극', example: 1000 })
+  @IsOptional()
+  @IsNumber()
+  coatingDoubleCathode: number;
+
+  @ApiPropertyOptional({ description: '코팅 양면 공정 - 음극', example: 1000 })
+  @IsOptional()
+  @IsNumber()
+  coatingDoubleAnode: number;
 
   @ApiPropertyOptional({ description: '프레스 공정 - 양극', example: 1000 })
   @IsOptional()

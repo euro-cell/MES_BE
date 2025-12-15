@@ -18,10 +18,16 @@ export class ProductionTarget {
   mixingAnode: number;
 
   @Column({ type: 'int', nullable: true })
-  coatingCathode: number;
+  coatingSingleCathode: number;
 
   @Column({ type: 'int', nullable: true })
-  coatingAnode: number;
+  coatingSingleAnode: number;
+
+  @Column({ type: 'int', nullable: true })
+  coatingDoubleCathode: number;
+
+  @Column({ type: 'int', nullable: true })
+  coatingDoubleAnode: number;
 
   @Column({ type: 'int', nullable: true })
   pressCathode: number;
