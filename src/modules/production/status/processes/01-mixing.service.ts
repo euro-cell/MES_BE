@@ -1,12 +1,88 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Between } from 'typeorm';
 import { WorklogSlurry } from 'src/common/entities/worklogs/worklog-02-slurry.entity';
+import { Material } from 'src/common/entities/material.entity';
+import { ProductionPlan } from 'src/common/entities/production-plan.entity';
 
 @Injectable()
 export class MixingProcessService {
   constructor(
     @InjectRepository(WorklogSlurry)
     private readonly slurryRepository: Repository<WorklogSlurry>,
+    @InjectRepository(Material)
+    private readonly materialRepository: Repository<Material>,
+    @InjectRepository(ProductionPlan)
+    private readonly productionPlanRepository: Repository<ProductionPlan>,
   ) {}
+
+  async getMonthlyData(productionId: number, month: string, type: 'cathode' | 'anode') {
+    const productionPlan = await this.productionPlanRepository.findOne({
+      where: { production: { id: productionId } },
+    });
+    if (!productionPlan) throw new NotFoundException('생산 계획이 존재하지 않습니다.');
+
+    const { endDate } = this.getMonthRange(month);
+    const projectStartDate = new Date(productionPlan.startDate);
+
+    const targetCategory = type === 'cathode' ? '양극재' : '음극재';
+
+    const materials = await this.materialRepository.find({
+      where: { category: targetCategory },
+    });
+    const materialLotNos = new Set(materials.map((m) => m.lotNo));
+
+    const slurryLogs = await this.slurryRepository.find({
+      where: {
+        production: { id: productionId },
+        manufactureDate: Between(projectStartDate, endDate),
+      },
+      order: { manufactureDate: 'ASC' },
+    });
+
+    const dailyMap = new Map<number, number>();
+
+    for (const log of slurryLogs) {
+      const day = new Date(log.manufactureDate).getDate();
+      const current = dailyMap.get(day) || 0;
+
+      const materialFields = [
+        { lot: log.material1Lot, input: log.material1ActualInput },
+        { lot: log.material2Lot, input: log.material2ActualInput },
+        { lot: log.material3Lot, input: log.material3ActualInput },
+        { lot: log.material4Lot, input: log.material4ActualInput },
+        { lot: log.material5Lot, input: log.material5ActualInput },
+        { lot: log.material6Lot, input: log.material6ActualInput },
+        { lot: log.material7Lot, input: log.material7ActualInput },
+        { lot: log.material8Lot, input: log.material8ActualInput },
+      ];
+
+      let dayTotal = current;
+      for (const field of materialFields) {
+        if (field.lot && materialLotNos.has(field.lot)) {
+          dayTotal += Number(field.input) || 0;
+        }
+      }
+      dailyMap.set(day, dayTotal);
+    }
+
+    const daysInMonth = new Date(parseInt(month.split('-')[0]), parseInt(month.split('-')[1]), 0).getDate();
+    const data: Array<{ day: number; output: number; ng: number | null; yield: number | null }> = [];
+    let totalOutput = 0;
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      const output = dailyMap.get(day) || 0;
+
+      data.push({ day, output, ng: null, yield: null });
+      totalOutput += output;
+    }
+    return { data, total: { totalOutput } };
+  }
+
+  private getMonthRange(month: string): { startDate: Date; endDate: Date } {
+    const [year, monthNum] = month.split('-').map(Number);
+    const startDate = new Date(year, monthNum - 1, 1);
+    const endDate = new Date(year, monthNum, 0, 23, 59, 59, 999);
+    return { startDate, endDate };
+  }
 }
