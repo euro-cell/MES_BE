@@ -7,6 +7,7 @@ import { WorklogPress } from 'src/common/entities/worklogs/worklog-04-press.enti
 import { WorklogNotching } from 'src/common/entities/worklogs/worklog-06-notching.entity';
 import { Material } from 'src/common/entities/material.entity';
 import { ProductionPlan } from 'src/common/entities/production-plan.entity';
+import { ProductionTarget } from 'src/common/entities/production-target.entity';
 import {
   MixingProcessService,
   CoatingProcessService,
@@ -24,6 +25,7 @@ import {
       WorklogNotching,
       Material,
       ProductionPlan,
+      ProductionTarget,
     ]),
   ],
   providers: [

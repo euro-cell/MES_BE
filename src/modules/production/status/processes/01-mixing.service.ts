@@ -4,6 +4,7 @@ import { Repository, Between } from 'typeorm';
 import { WorklogSlurry } from 'src/common/entities/worklogs/worklog-02-slurry.entity';
 import { Material } from 'src/common/entities/material.entity';
 import { ProductionPlan } from 'src/common/entities/production-plan.entity';
+import { ProductionTarget } from 'src/common/entities/production-target.entity';
 
 @Injectable()
 export class MixingProcessService {
@@ -14,12 +15,20 @@ export class MixingProcessService {
     private readonly materialRepository: Repository<Material>,
     @InjectRepository(ProductionPlan)
     private readonly productionPlanRepository: Repository<ProductionPlan>,
+    @InjectRepository(ProductionTarget)
+    private readonly productionTargetRepository: Repository<ProductionTarget>,
   ) {}
 
   async getMonthlyData(productionId: number, month: string, type: 'cathode' | 'anode') {
-    const productionPlan = await this.productionPlanRepository.findOne({
-      where: { production: { id: productionId } },
-    });
+    const [productionPlan, productionTarget] = await Promise.all([
+      this.productionPlanRepository.findOne({
+        where: { production: { id: productionId } },
+      }),
+      this.productionTargetRepository.findOne({
+        where: { production: { id: productionId } },
+      }),
+    ]);
+
     if (!productionPlan) throw new NotFoundException('생산 계획이 존재하지 않습니다.');
 
     const { endDate } = this.getMonthRange(month);
@@ -76,7 +85,20 @@ export class MixingProcessService {
       data.push({ day, output, ng: null, yield: null });
       totalOutput += output;
     }
-    return { data, total: { totalOutput } };
+
+    const targetField = type === 'cathode' ? 'mixingCathode' : 'mixingAnode';
+    const targetQuantity = productionTarget?.[targetField] || null;
+
+    const progress = targetQuantity ? Math.round((totalOutput / targetQuantity) * 100 * 100) / 100 : null;
+
+    return {
+      data,
+      total: {
+        totalOutput,
+        targetQuantity,
+        progress,
+      },
+    };
   }
 
   private getMonthRange(month: string): { startDate: Date; endDate: Date } {
