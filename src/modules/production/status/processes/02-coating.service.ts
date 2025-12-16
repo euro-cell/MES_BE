@@ -30,10 +30,7 @@ export class CoatingProcessService {
 
     const { endDate } = this.getMonthRange(month);
     const projectStartDate = new Date(productionPlan.startDate);
-
-    // type에 따라 5번째 문자 결정 (C: 양극(cathode), A: 음극(anode))
     const targetChar = type === 'cathode' ? 'C' : 'A';
-
     const coatingLogs = await this.coatingRepository.find({
       where: {
         production: { id: productionId },
@@ -42,29 +39,52 @@ export class CoatingProcessService {
       order: { manufactureDate: 'ASC' },
     });
 
-    // 단면/양면 분리
-    const singleData = this.processCoatingData(coatingLogs, targetChar, '단면', month, productionTarget, type);
-    const doubleData = this.processCoatingData(coatingLogs, targetChar, '양면', month, productionTarget, type);
+    const singleLotQuantityMap = this.buildSingleLotQuantityMap(coatingLogs, targetChar);
+    const singleData = this.processSingleCoatingData(coatingLogs, targetChar, month, productionTarget, type);
+    const doubleData = this.processDoubleCoatingData(coatingLogs, targetChar, month, productionTarget, type, singleLotQuantityMap);
 
-    return {
-      single: singleData,
-      double: doubleData,
-    };
+    return { single: singleData, double: doubleData };
   }
 
-  private processCoatingData(
+  private buildSingleLotQuantityMap(logs: WorklogCoating[], targetChar: string): Map<string, number> {
+    const lotQuantityMap = new Map<string, number>();
+
+    for (const log of logs) {
+      const coatingFields = [
+        { lot: log.coatingLot1, quantity: log.productionQuantity1, side: log.coatingSide1 },
+        { lot: log.coatingLot2, quantity: log.productionQuantity2, side: log.coatingSide2 },
+        { lot: log.coatingLot3, quantity: log.productionQuantity3, side: log.coatingSide3 },
+        { lot: log.coatingLot4, quantity: log.productionQuantity4, side: log.coatingSide4 },
+      ];
+
+      for (const field of coatingFields) {
+        if (field.lot && field.lot.length >= 5 && field.lot[4] === targetChar && field.side === '단면') {
+          const currentQty = lotQuantityMap.get(field.lot) || 0;
+          lotQuantityMap.set(field.lot, currentQty + (Number(field.quantity) || 0));
+        }
+      }
+    }
+    return lotQuantityMap;
+  }
+
+  private extractSingleLotFromDouble(doubleLot: string): string | null {
+    const bIndex = doubleLot.lastIndexOf('B');
+    if (bIndex === -1) return null;
+    return doubleLot.substring(0, bIndex);
+  }
+
+  private processSingleCoatingData(
     logs: WorklogCoating[],
     targetChar: string,
-    coatingType: '단면' | '양면',
     month: string,
     productionTarget: ProductionTarget | null,
     type: 'cathode' | 'anode',
   ) {
-    const dailyMap = new Map<number, number>();
+    const dailyMap = new Map<number, { output: number; ng: number }>();
 
     for (const log of logs) {
       const day = new Date(log.manufactureDate).getDate();
-      const current = dailyMap.get(day) || 0;
+      const current = dailyMap.get(day) || { output: 0, ng: 0 };
 
       const coatingFields = [
         { lot: log.coatingLot1, quantity: log.productionQuantity1, side: log.coatingSide1 },
@@ -73,27 +93,102 @@ export class CoatingProcessService {
         { lot: log.coatingLot4, quantity: log.productionQuantity4, side: log.coatingSide4 },
       ];
 
-      let dayTotal = current;
       for (const field of coatingFields) {
-        // lot의 5번째 문자가 targetChar이고, coatingSide가 coatingType과 일치하는지 확인
-        if (field.lot && field.lot.length >= 5 && field.lot[4] === targetChar && field.side === coatingType) {
-          dayTotal += Number(field.quantity) || 0;
+        if (field.lot && field.lot.length >= 5 && field.lot[4] === targetChar && field.side === '단면') {
+          current.output += Number(field.quantity) || 0;
         }
       }
-      dailyMap.set(day, dayTotal);
+      dailyMap.set(day, current);
+    }
+    return this.buildResult(dailyMap, month, productionTarget, type, '단면');
+  }
+
+  private processDoubleCoatingData(
+    logs: WorklogCoating[],
+    targetChar: string,
+    month: string,
+    productionTarget: ProductionTarget | null,
+    type: 'cathode' | 'anode',
+    singleLotQuantityMap: Map<string, number>,
+  ) {
+    const dailyMap = new Map<number, { output: number; ng: number }>();
+    const doubleLotQuantityMap = new Map<string, number>();
+    const singleLotLastDay = new Map<string, number>();
+    const processedSingleLots = new Set<string>();
+
+    for (const log of logs) {
+      const day = new Date(log.manufactureDate).getDate();
+      const current = dailyMap.get(day) || { output: 0, ng: 0 };
+
+      const coatingFields = [
+        { lot: log.coatingLot1, quantity: log.productionQuantity1, side: log.coatingSide1 },
+        { lot: log.coatingLot2, quantity: log.productionQuantity2, side: log.coatingSide2 },
+        { lot: log.coatingLot3, quantity: log.productionQuantity3, side: log.coatingSide3 },
+        { lot: log.coatingLot4, quantity: log.productionQuantity4, side: log.coatingSide4 },
+      ];
+
+      for (const field of coatingFields) {
+        if (field.lot && field.lot.length >= 5 && field.lot[4] === targetChar && field.side === '양면') {
+          const qty = Number(field.quantity) || 0;
+          current.output += qty;
+
+          const singleLot = this.extractSingleLotFromDouble(field.lot);
+
+          if (singleLot) {
+            const currentDoubleQty = doubleLotQuantityMap.get(singleLot) || 0;
+            const newDoubleQty = currentDoubleQty + qty;
+            doubleLotQuantityMap.set(singleLot, newDoubleQty);
+
+            singleLotLastDay.set(singleLot, day);
+
+            const singleQty = singleLotQuantityMap.get(singleLot) || 0;
+
+            if (!processedSingleLots.has(singleLot) && newDoubleQty >= singleQty && singleQty > 0) {
+              const ng = singleQty - newDoubleQty;
+              if (ng > 0) {
+                current.ng += ng;
+              }
+              processedSingleLots.add(singleLot);
+            }
+          }
+        }
+      }
+      dailyMap.set(day, current);
     }
 
+    for (const [singleLot, singleQty] of singleLotQuantityMap) {
+      if (!processedSingleLots.has(singleLot)) {
+        const doubleQty = doubleLotQuantityMap.get(singleLot) || 0;
+        const ng = singleQty - doubleQty;
+        const lastDay = singleLotLastDay.get(singleLot);
+
+        if (ng > 0 && lastDay) {
+          const dayData = dailyMap.get(lastDay) || { output: 0, ng: 0 };
+          dayData.ng += ng;
+          dailyMap.set(lastDay, dayData);
+        }
+      }
+    }
+    return this.buildResultWithNg(dailyMap, month, productionTarget, type, '양면', 0);
+  }
+
+  private buildResult(
+    dailyMap: Map<number, { output: number; ng: number }>,
+    month: string,
+    productionTarget: ProductionTarget | null,
+    type: 'cathode' | 'anode',
+    coatingType: '단면' | '양면',
+  ) {
     const daysInMonth = new Date(parseInt(month.split('-')[0]), parseInt(month.split('-')[1]), 0).getDate();
     const data: Array<{ day: number; output: number; ng: number | null; yield: number | null }> = [];
     let totalOutput = 0;
 
     for (let day = 1; day <= daysInMonth; day++) {
-      const output = dailyMap.get(day) || 0;
-      data.push({ day, output, ng: null, yield: null });
-      totalOutput += output;
+      const dayData = dailyMap.get(day) || { output: 0, ng: 0 };
+      data.push({ day, output: dayData.output, ng: null, yield: null });
+      totalOutput += dayData.output;
     }
 
-    // targetQuantity 설정
     const targetField =
       coatingType === '단면'
         ? type === 'cathode'
@@ -108,11 +203,50 @@ export class CoatingProcessService {
 
     return {
       data,
-      total: {
-        totalOutput,
-        targetQuantity,
-        progress,
-      },
+      total: { totalOutput, targetQuantity, progress, totalNg: null, totalYield: null },
+    };
+  }
+
+  private buildResultWithNg(
+    dailyMap: Map<number, { output: number; ng: number }>,
+    month: string,
+    productionTarget: ProductionTarget | null,
+    type: 'cathode' | 'anode',
+    coatingType: '단면' | '양면',
+    remainingNg: number,
+  ) {
+    const daysInMonth = new Date(parseInt(month.split('-')[0]), parseInt(month.split('-')[1]), 0).getDate();
+    const data: Array<{ day: number; output: number; ng: number | null; yield: number | null }> = [];
+    let totalOutput = 0;
+    let totalNg = remainingNg;
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dayData = dailyMap.get(day) || { output: 0, ng: 0 };
+      const dayNg = dayData.ng > 0 ? dayData.ng : null;
+      const dayYield =
+        dayData.output + dayData.ng > 0 ? Math.round((dayData.output / (dayData.output + dayData.ng)) * 100 * 100) / 100 : null;
+      data.push({ day, output: dayData.output, ng: dayNg, yield: dayYield });
+      totalOutput += dayData.output;
+      totalNg += dayData.ng;
+    }
+
+    const targetField =
+      coatingType === '단면'
+        ? type === 'cathode'
+          ? 'coatingSingleCathode'
+          : 'coatingSingleAnode'
+        : type === 'cathode'
+          ? 'coatingDoubleCathode'
+          : 'coatingDoubleAnode';
+
+    const targetQuantity = productionTarget?.[targetField] || null;
+    const progress = targetQuantity ? Math.round((totalOutput / targetQuantity) * 100 * 100) / 100 : null;
+
+    const totalYield = totalOutput + totalNg > 0 ? Math.round((totalOutput / (totalOutput + totalNg)) * 100 * 100) / 100 : null;
+
+    return {
+      data,
+      total: { totalOutput, targetQuantity, progress, totalNg, totalYield },
     };
   }
 
