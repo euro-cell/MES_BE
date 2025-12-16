@@ -9,6 +9,7 @@ import {
   SlittingProcessService,
   NotchingProcessService,
   VdProcessService,
+  FormingProcessService,
 } from './processes';
 import { ProductionTargetDto } from 'src/common/dtos/production-target.dto';
 import { ProductionTarget } from 'src/common/entities/production-target.entity';
@@ -26,6 +27,7 @@ export class StatusService {
     private readonly slittingProcessService: SlittingProcessService,
     private readonly notchingProcessService: NotchingProcessService,
     private readonly vdProcessService: VdProcessService,
+    private readonly formingProcessService: FormingProcessService,
   ) {}
 
   async targetStatus(productionId: number, dto: ProductionTargetDto) {
@@ -93,14 +95,17 @@ export class StatusService {
   }
 
   async getAssemblyStatus(productionId: number, month: string) {
-    const vd = await this.vdProcessService.getMonthlyData(productionId, month);
+    const [vd, forming] = await Promise.all([
+      this.vdProcessService.getMonthlyData(productionId, month),
+      this.formingProcessService.getMonthlyData(productionId, month),
+    ]);
 
     return {
       category: 'assembly',
       month,
       processes: {
         vd,
-        forming: null,
+        forming,
         stacking: null,
         preWelding: null,
         mainWelding: null,
