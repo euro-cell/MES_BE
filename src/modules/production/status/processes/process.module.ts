@@ -5,6 +5,7 @@ import { WorklogSlurry } from 'src/common/entities/worklogs/worklog-02-slurry.en
 import { WorklogCoating } from 'src/common/entities/worklogs/worklog-03-coating.entity';
 import { WorklogPress } from 'src/common/entities/worklogs/worklog-04-press.entity';
 import { WorklogNotching } from 'src/common/entities/worklogs/worklog-06-notching.entity';
+import { WorklogVd } from 'src/common/entities/worklogs/worklog-07-vd.entity';
 import { Material } from 'src/common/entities/material.entity';
 import { ProductionPlan } from 'src/common/entities/production-plan.entity';
 import { ProductionTarget } from 'src/common/entities/production-target.entity';
@@ -14,6 +15,7 @@ import {
   PressProcessService,
   SlittingProcessService,
   NotchingProcessService,
+  VdProcessService,
 } from '.';
 
 @Module({
@@ -24,6 +26,7 @@ import {
       WorklogCoating,
       WorklogPress,
       WorklogNotching,
+      WorklogVd,
       Material,
       ProductionPlan,
       ProductionTarget,
@@ -35,6 +38,7 @@ import {
     PressProcessService,
     SlittingProcessService,
     NotchingProcessService,
+    VdProcessService,
   ],
   exports: [
     MixingProcessService,
@@ -42,6 +46,7 @@ import {
     PressProcessService,
     SlittingProcessService,
     NotchingProcessService,
+    VdProcessService,
   ],
 })
 export class ProcessModule {}

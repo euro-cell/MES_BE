@@ -3,3 +3,4 @@ export { CoatingProcessService } from './02-coating.service';
 export { PressProcessService } from './03-press.service';
 export { SlittingProcessService } from './04-slitting.service';
 export { NotchingProcessService } from './05-notching.service';
+export { VdProcessService } from './06-vd.service';
