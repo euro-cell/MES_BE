@@ -2,7 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ProductionPlan } from 'src/common/entities/production-plan.entity';
 import { Repository } from 'typeorm';
-import { MixingProcessService, CoatingProcessService, PressProcessService, SlittingProcessService, NotchingProcessService } from './processes';
+import {
+  MixingProcessService,
+  CoatingProcessService,
+  PressProcessService,
+  SlittingProcessService,
+  NotchingProcessService,
+} from './processes';
 import { ProductionTargetDto } from 'src/common/dtos/production-target.dto';
 import { ProductionTarget } from 'src/common/entities/production-target.entity';
 
@@ -80,6 +86,23 @@ export class StatusService {
         press,
         slitting,
         notching,
+      },
+    };
+  }
+
+  async getAssemblyStatus(_productionId: number, month: string) {
+    return {
+      category: 'assembly',
+      month,
+      processes: {
+        vdCathode: null,
+        vdAnode: null,
+        forming: null,
+        stacking: null,
+        preWelding: null,
+        mainWelding: null,
+        sealing: null,
+        filling: null,
       },
     };
   }

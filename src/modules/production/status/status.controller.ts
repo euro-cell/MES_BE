@@ -27,4 +27,13 @@ export class StatusController {
   ) {
     return await this.statusService.getElectrodeStatus(productionId, month, type);
   }
+
+  @Get('Assembly')
+  @ApiQuery({ name: 'month', required: true, type: String, description: 'YYYY-MM 형식 (예: 2025-01)' })
+  async getAssemblyStatus(
+    @Param('productionId', ParseIntPipe) productionId: number,
+    @Query('month') month: string,
+  ) {
+    return await this.statusService.getAssemblyStatus(productionId, month);
+  }
 }
