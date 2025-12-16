@@ -51,18 +51,7 @@ export class VdProcessService {
       }),
     ]);
 
-    console.log('=== VD DEBUG ===');
-    console.log('productionId:', productionId);
-    console.log('month:', month);
-    console.log('vdLogs count:', vdLogs.length);
-    console.log('notchingLogs count:', notchingLogs.length);
-
     const notchingLotMap = this.buildNotchingLotMap(notchingLogs);
-
-    console.log('=== 노칭 LOT별 양품 수량 ===');
-    for (const [lot, qty] of notchingLotMap) {
-      console.log(`  ${lot}: ${qty}`);
-    }
 
     return this.processVdData(vdLogs, month, productionTarget, notchingLotMap);
   }
@@ -99,12 +88,7 @@ export class VdProcessService {
     return lotMap;
   }
 
-  private processVdData(
-    logs: WorklogVd[],
-    month: string,
-    productionTarget: ProductionTarget | null,
-    notchingLotMap: Map<string, number>,
-  ) {
+  private processVdData(logs: WorklogVd[], month: string, productionTarget: ProductionTarget | null, notchingLotMap: Map<string, number>) {
     const [targetYear, targetMonth] = month.split('-').map(Number);
 
     const dailyMap = new Map<
@@ -155,15 +139,12 @@ export class VdProcessService {
           const notchingQty = notchingLotMap.get(field.lot) || 0;
           const newVdQty = currentVdQty + qty;
 
-          console.log(`  cathode lot: ${field.lot}, vdQty: ${qty}, vdTotal: ${newVdQty}, notchingQty: ${notchingQty}, isCurrentMonth: ${isCurrentMonth}`);
-
           if (isCurrentMonth && current) {
             current.cathodeOutput += qty;
 
             if (!processedLots.has(field.lot) && newVdQty >= notchingQty && notchingQty > 0) {
               current.cathodeNotching += notchingQty;
               processedLots.add(field.lot);
-              console.log(`    -> cathodeNotching 추가: ${notchingQty}`);
             }
           }
         }
@@ -188,15 +169,12 @@ export class VdProcessService {
           const notchingQty = notchingLotMap.get(field.lot) || 0;
           const newVdQty = currentVdQty + qty;
 
-          console.log(`  anode lot: ${field.lot}, vdQty: ${qty}, vdTotal: ${newVdQty}, notchingQty: ${notchingQty}, isCurrentMonth: ${isCurrentMonth}`);
-
           if (isCurrentMonth && current) {
             current.anodeOutput += qty;
 
             if (!processedLots.has(field.lot) && newVdQty >= notchingQty && notchingQty > 0) {
               current.anodeNotching += notchingQty;
               processedLots.add(field.lot);
-              console.log(`    -> anodeNotching 추가: ${notchingQty}`);
             }
           }
         }
@@ -207,7 +185,6 @@ export class VdProcessService {
       }
     }
 
-    console.log('=== 미처리 LOT notching 처리 ===');
     for (const [lot, notchingQty] of notchingLotMap) {
       if (!processedLots.has(lot) && vdLotQuantityMap.has(lot)) {
         const lastDayInfo = lotLastDay.get(lot);
@@ -221,22 +198,13 @@ export class VdProcessService {
 
           if (lot.length >= 5 && lot[4] === 'C') {
             dayData.cathodeNotching += notchingQty;
-            console.log(`  cathode lot: ${lot}, notchingQty: ${notchingQty} -> day ${lastDayInfo.day}`);
           } else if (lot.length >= 5 && lot[4] === 'A') {
             dayData.anodeNotching += notchingQty;
-            console.log(`  anode lot: ${lot}, notchingQty: ${notchingQty} -> day ${lastDayInfo.day}`);
           }
 
           dailyMap.set(lastDayInfo.day, dayData);
         }
       }
-    }
-
-    console.log('=== VD 일별 결과 ===');
-    for (const [day, data] of dailyMap) {
-      console.log(
-        `  day ${day}: cathodeOutput=${data.cathodeOutput}, cathodeNotching=${data.cathodeNotching}, anodeOutput=${data.anodeOutput}, anodeNotching=${data.anodeNotching}`,
-      );
     }
 
     return this.buildResult(dailyMap, month, productionTarget);
@@ -278,18 +246,12 @@ export class VdProcessService {
         anodeNotching: 0,
       };
 
-      const cathodeNg =
-        dayData.cathodeNotching > 0 ? Math.max(0, dayData.cathodeNotching - dayData.cathodeOutput) : null;
+      const cathodeNg = dayData.cathodeNotching > 0 ? Math.max(0, dayData.cathodeNotching - dayData.cathodeOutput) : null;
       const anodeNg = dayData.anodeNotching > 0 ? Math.max(0, dayData.anodeNotching - dayData.anodeOutput) : null;
 
       const cathodeYield =
-        dayData.cathodeNotching > 0
-          ? Math.round((dayData.cathodeOutput / dayData.cathodeNotching) * 100 * 100) / 100
-          : null;
-      const anodeYield =
-        dayData.anodeNotching > 0
-          ? Math.round((dayData.anodeOutput / dayData.anodeNotching) * 100 * 100) / 100
-          : null;
+        dayData.cathodeNotching > 0 ? Math.round((dayData.cathodeOutput / dayData.cathodeNotching) * 100 * 100) / 100 : null;
+      const anodeYield = dayData.anodeNotching > 0 ? Math.round((dayData.anodeOutput / dayData.anodeNotching) * 100 * 100) / 100 : null;
 
       data.push({
         day,
@@ -307,35 +269,16 @@ export class VdProcessService {
       totalAnodeNotching += dayData.anodeNotching;
     }
 
-    const totalCathodeNg =
-      totalCathodeNotching > 0 ? Math.max(0, totalCathodeNotching - totalCathodeOutput) : null;
+    const totalCathodeNg = totalCathodeNotching > 0 ? Math.max(0, totalCathodeNotching - totalCathodeOutput) : null;
     const totalAnodeNg = totalAnodeNotching > 0 ? Math.max(0, totalAnodeNotching - totalAnodeOutput) : null;
 
-    const totalCathodeYield =
-      totalCathodeNotching > 0
-        ? Math.round((totalCathodeOutput / totalCathodeNotching) * 100 * 100) / 100
-        : null;
-    const totalAnodeYield =
-      totalAnodeNotching > 0 ? Math.round((totalAnodeOutput / totalAnodeNotching) * 100 * 100) / 100 : null;
+    const totalCathodeYield = totalCathodeNotching > 0 ? Math.round((totalCathodeOutput / totalCathodeNotching) * 100 * 100) / 100 : null;
+    const totalAnodeYield = totalAnodeNotching > 0 ? Math.round((totalAnodeOutput / totalAnodeNotching) * 100 * 100) / 100 : null;
 
     const cathodeTargetQuantity = productionTarget?.vdCathode || null;
     const anodeTargetQuantity = productionTarget?.vdAnode || null;
-    const cathodeProgress = cathodeTargetQuantity
-      ? Math.round((totalCathodeOutput / cathodeTargetQuantity) * 100 * 100) / 100
-      : null;
-    const anodeProgress = anodeTargetQuantity
-      ? Math.round((totalAnodeOutput / anodeTargetQuantity) * 100 * 100) / 100
-      : null;
-
-    console.log('=== VD 최종 결과 ===');
-    console.log('totalCathodeOutput:', totalCathodeOutput);
-    console.log('totalAnodeOutput:', totalAnodeOutput);
-    console.log('totalCathodeNotching:', totalCathodeNotching);
-    console.log('totalAnodeNotching:', totalAnodeNotching);
-    console.log('totalCathodeNg:', totalCathodeNg);
-    console.log('totalAnodeNg:', totalAnodeNg);
-    console.log('totalCathodeYield:', totalCathodeYield);
-    console.log('totalAnodeYield:', totalAnodeYield);
+    const cathodeProgress = cathodeTargetQuantity ? Math.round((totalCathodeOutput / cathodeTargetQuantity) * 100 * 100) / 100 : null;
+    const anodeProgress = anodeTargetQuantity ? Math.round((totalAnodeOutput / anodeTargetQuantity) * 100 * 100) / 100 : null;
 
     return {
       data,
