@@ -8,3 +8,4 @@ export { FormingProcessService } from './07-forming.service';
 export { StackingProcessService } from './08-stacking.service';
 export { WeldingProcessService } from './09-welding.service';
 export { SealingProcessService } from './10-sealing.service';
+export { FillingProcessService } from './11-filling.service';
