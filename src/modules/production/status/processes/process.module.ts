@@ -8,6 +8,7 @@ import { WorklogNotching } from 'src/common/entities/worklogs/worklog-06-notchin
 import { WorklogVd } from 'src/common/entities/worklogs/worklog-07-vd.entity';
 import { WorklogForming } from 'src/common/entities/worklogs/worklog-08-forming.entity';
 import { WorklogStacking } from 'src/common/entities/worklogs/worklog-09-stacking.entity';
+import { WorklogWelding } from 'src/common/entities/worklogs/worklog-10-welding.entity';
 import { Material } from 'src/common/entities/material.entity';
 import { ProductionPlan } from 'src/common/entities/production-plan.entity';
 import { ProductionTarget } from 'src/common/entities/production-target.entity';
@@ -20,6 +21,7 @@ import {
   VdProcessService,
   FormingProcessService,
   StackingProcessService,
+  WeldingProcessService,
 } from '.';
 
 @Module({
@@ -33,6 +35,7 @@ import {
       WorklogVd,
       WorklogForming,
       WorklogStacking,
+      WorklogWelding,
       Material,
       ProductionPlan,
       ProductionTarget,
@@ -47,6 +50,7 @@ import {
     VdProcessService,
     FormingProcessService,
     StackingProcessService,
+    WeldingProcessService,
   ],
   exports: [
     MixingProcessService,
@@ -57,6 +61,7 @@ import {
     VdProcessService,
     FormingProcessService,
     StackingProcessService,
+    WeldingProcessService,
   ],
 })
 export class ProcessModule {}

@@ -46,11 +46,8 @@ export class WorklogWelding extends WorklogBase {
   @Column({ type: 'smallint', nullable: true })
   preWeldingDefectQuantity: number;
 
-  @Column({ type: 'smallint', nullable: true })
-  preWeldingDiscardQuantity: number;
-
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  preWeldingDefectRate: number;
+  @Column({ type: 'text', nullable: true })
+  preWeldingDefectRemark: string;
 
   // 메인웰딩
   @Column({ type: 'varchar', length: 20, nullable: true })
@@ -65,11 +62,8 @@ export class WorklogWelding extends WorklogBase {
   @Column({ type: 'smallint', nullable: true })
   mainWeldingDefectQuantity: number;
 
-  @Column({ type: 'smallint', nullable: true })
-  mainWeldingDiscardQuantity: number;
-
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  mainWeldingDefectRate: number;
+  @Column({ type: 'text', nullable: true })
+  mainWeldingDefectRemark: string;
 
   // 하이팟2
   @Column({ type: 'varchar', length: 20, nullable: true })
@@ -84,11 +78,8 @@ export class WorklogWelding extends WorklogBase {
   @Column({ type: 'smallint', nullable: true })
   hipot2DefectQuantity: number;
 
-  @Column({ type: 'smallint', nullable: true })
-  hipot2DiscardQuantity: number;
-
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  hipot2DefectRate: number;
+  @Column({ type: 'text', nullable: true })
+  hipot2DefectRemark: string;
 
   // 테이핑
   @Column({ type: 'varchar', length: 20, nullable: true })
@@ -103,11 +94,8 @@ export class WorklogWelding extends WorklogBase {
   @Column({ type: 'smallint', nullable: true })
   tapingDefectQuantity: number;
 
-  @Column({ type: 'smallint', nullable: true })
-  tapingDiscardQuantity: number;
-
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  tapingDefectRate: number;
+  @Column({ type: 'text', nullable: true })
+  tapingDefectRemark: string;
 
   // ===== C. 공정 조건 (Process Conditions) =====
 
