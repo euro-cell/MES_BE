@@ -14,6 +14,7 @@ import {
   WeldingProcessService,
   SealingProcessService,
   FillingProcessService,
+  FormationProcessService,
 } from './processes';
 import { ProductionTargetDto } from 'src/common/dtos/production-target.dto';
 import { ProductionTarget } from 'src/common/entities/production-target.entity';
@@ -36,6 +37,7 @@ export class StatusService {
     private readonly weldingProcessService: WeldingProcessService,
     private readonly sealingProcessService: SealingProcessService,
     private readonly fillingProcessService: FillingProcessService,
+    private readonly formationProcessService: FormationProcessService,
   ) {}
 
   async targetStatus(productionId: number, dto: ProductionTargetDto) {
@@ -123,6 +125,20 @@ export class StatusService {
         mainWelding: welding.mainWelding,
         sealing,
         filling,
+      },
+    };
+  }
+
+  async getFormationStatus(productionId: number, month: string) {
+    const [formation] = await Promise.all([this.formationProcessService.getMonthlyData(productionId, month)]);
+
+    return {
+      category: 'formation',
+      month,
+      processes: {
+        preFormation: formation.preFormation,
+        degas: formation.degas,
+        mainFormation: formation.mainFormation,
       },
     };
   }

@@ -30,10 +30,13 @@ export class StatusController {
 
   @Get('Assembly')
   @ApiQuery({ name: 'month', required: true, type: String, description: 'YYYY-MM 형식 (예: 2025-01)' })
-  async getAssemblyStatus(
-    @Param('productionId', ParseIntPipe) productionId: number,
-    @Query('month') month: string,
-  ) {
+  async getAssemblyStatus(@Param('productionId', ParseIntPipe) productionId: number, @Query('month') month: string) {
     return await this.statusService.getAssemblyStatus(productionId, month);
+  }
+
+  @Get('Formation')
+  @ApiQuery({ name: 'month', required: true, type: String, description: 'YYYY-MM 형식 (예: 2025-01)' })
+  async getFormationStatus(@Param('productionId', ParseIntPipe) productionId: number, @Query('month') month: string) {
+    return await this.statusService.getFormationStatus(productionId, month);
   }
 }
