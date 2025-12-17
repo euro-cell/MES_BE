@@ -112,6 +112,7 @@ export class StackingProcessService {
       output: number;
       ng: number | null;
       ncr: { hiPot: number; weight: number; thickness: number; alignment: number } | null;
+      yield: number | null;
     }> = [];
 
     let totalOutput = 0;
@@ -123,12 +124,14 @@ export class StackingProcessService {
       if (dayData) {
         const ngTotal = dayData.ncr.hiPot + dayData.ncr.weight + dayData.ncr.thickness + dayData.ncr.alignment;
         const ng = dayData.output > 0 ? ngTotal : null;
+        const dayYield = dayData.output > 0 ? Math.round(((dayData.output - ngTotal) / dayData.output) * 100 * 100) / 100 : null;
 
         data.push({
           day,
           output: dayData.output,
           ng,
           ncr: dayData.output > 0 ? dayData.ncr : null,
+          yield: dayYield,
         });
 
         totalOutput += dayData.output;
@@ -137,7 +140,7 @@ export class StackingProcessService {
         totalNcr.thickness += dayData.ncr.thickness;
         totalNcr.alignment += dayData.ncr.alignment;
       } else {
-        data.push({ day, output: 0, ng: null, ncr: null });
+        data.push({ day, output: 0, ng: null, ncr: null, yield: null });
       }
     }
 

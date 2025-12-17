@@ -146,6 +146,7 @@ export class WeldingProcessService {
       output: number;
       ng: number | null;
       ncr: { burning: number; align: number; etc: number } | null;
+      yield: number | null;
     }> = [];
 
     const mainWeldingData: Array<{
@@ -153,6 +154,7 @@ export class WeldingProcessService {
       output: number;
       ng: number | null;
       ncr: { hiPot: number; burning: number; align: number; taping: number; etc: number } | null;
+      yield: number | null;
     }> = [];
 
     let totalPreWeldingOutput = 0;
@@ -166,11 +168,13 @@ export class WeldingProcessService {
       if (dayData) {
         // 프리웰딩
         const preNgTotal = dayData.preWelding.ncr.burning + dayData.preWelding.ncr.align + dayData.preWelding.ncr.etc;
+        const preYield = dayData.preWelding.work > 0 ? Math.round(((dayData.preWelding.work - preNgTotal) / dayData.preWelding.work) * 100 * 100) / 100 : null;
         preWeldingData.push({
           day,
           output: dayData.preWelding.work,
           ng: dayData.preWelding.work > 0 ? preNgTotal : null,
           ncr: dayData.preWelding.work > 0 ? dayData.preWelding.ncr : null,
+          yield: preYield,
         });
 
         // 메인웰딩
@@ -180,6 +184,7 @@ export class WeldingProcessService {
           dayData.mainWelding.ncr.align +
           dayData.mainWelding.taping +
           dayData.mainWelding.ncr.etc;
+        const mainYield = dayData.mainWelding.work > 0 ? Math.round(((dayData.mainWelding.work - mainNgTotal) / dayData.mainWelding.work) * 100 * 100) / 100 : null;
         mainWeldingData.push({
           day,
           output: dayData.mainWelding.work,
@@ -193,6 +198,7 @@ export class WeldingProcessService {
                 etc: dayData.mainWelding.ncr.etc,
               }
             : null,
+          yield: mainYield,
         });
 
         totalPreWeldingOutput += dayData.preWelding.work;
@@ -208,8 +214,8 @@ export class WeldingProcessService {
         totalMainNcr.taping += dayData.mainWelding.taping;
         totalMainNcr.etc += dayData.mainWelding.ncr.etc;
       } else {
-        preWeldingData.push({ day, output: 0, ng: null, ncr: null });
-        mainWeldingData.push({ day, output: 0, ng: null, ncr: null });
+        preWeldingData.push({ day, output: 0, ng: null, ncr: null, yield: null });
+        mainWeldingData.push({ day, output: 0, ng: null, ncr: null, yield: null });
       }
     }
 

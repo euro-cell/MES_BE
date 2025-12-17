@@ -112,6 +112,7 @@ export class SealingProcessService {
       output: number;
       ng: number | null;
       ncr: { hiPot: number; appearance: number; thickness: number; etc: number } | null;
+      yield: number | null;
     }> = [];
 
     let totalOutput = 0;
@@ -123,12 +124,14 @@ export class SealingProcessService {
       if (dayData) {
         const ngTotal = dayData.ncr.hiPot + dayData.ncr.appearance + dayData.ncr.thickness + dayData.ncr.etc;
         const ng = dayData.output > 0 ? ngTotal : null;
+        const dayYield = dayData.output > 0 ? Math.round(((dayData.output - ngTotal) / dayData.output) * 100 * 100) / 100 : null;
 
         data.push({
           day,
           output: dayData.output,
           ng,
           ncr: dayData.output > 0 ? dayData.ncr : null,
+          yield: dayYield,
         });
 
         totalOutput += dayData.output;
@@ -137,7 +140,7 @@ export class SealingProcessService {
         totalNcr.thickness += dayData.ncr.thickness;
         totalNcr.etc += dayData.ncr.etc;
       } else {
-        data.push({ day, output: 0, ng: null, ncr: null });
+        data.push({ day, output: 0, ng: null, ncr: null, yield: null });
       }
     }
 
