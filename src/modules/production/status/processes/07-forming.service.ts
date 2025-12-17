@@ -173,7 +173,7 @@ export class FormingProcessService {
       let total = 0;
       for (let day = 1; day <= daysInMonth; day++) {
         const dayData = dailyMap.get(day);
-        total += dayData?.[subProcess].good || 0;
+        total += dayData?.[subProcess].work || 0;
       }
       subProcessTotals[subProcess] = total;
     }
@@ -202,12 +202,12 @@ export class FormingProcessService {
         const dayData = dailyMap.get(day);
         const subData = dayData?.[subProcess] || { work: 0, good: 0, defect: 0, discard: 0 };
 
-        // 생산량(양품)이 있으면 ng는 0이라도 표시, 없으면 null
-        const ng = subData.good > 0 ? subData.defect : null;
+        // 작업수량이 있으면 ng는 0이라도 표시, 없으면 null
+        const ng = subData.work > 0 ? subData.defect : null;
 
-        data.push({ day, output: subData.good, ng });
+        data.push({ day, output: subData.work, ng });
 
-        totalOutput += subData.good;
+        totalOutput += subData.work;
         totalDefect += subData.defect;
       }
 
