@@ -29,16 +29,17 @@ export class StackingProcessService {
     if (!productionPlan) throw new NotFoundException('생산 계획이 존재하지 않습니다.');
 
     const { startDate, endDate } = this.getMonthRange(month);
+    const projectStartDate = new Date(productionPlan.startDate);
 
     const stackingLogs = await this.stackingRepository.find({
       where: {
         production: { id: productionId },
-        manufactureDate: Between(startDate, endDate),
+        manufactureDate: Between(projectStartDate, endDate),
       },
       order: { manufactureDate: 'ASC' },
     });
 
-    return this.processStackingData(stackingLogs, month, productionTarget);
+    return this.processStackingData(stackingLogs, month, productionTarget, startDate, endDate);
   }
 
   private parseNcrFromRemark(remark: string | null): {
@@ -70,7 +71,13 @@ export class StackingProcessService {
     return result;
   }
 
-  private processStackingData(logs: WorklogStacking[], month: string, productionTarget: ProductionTarget | null) {
+  private processStackingData(
+    logs: WorklogStacking[],
+    month: string,
+    productionTarget: ProductionTarget | null,
+    monthStartDate: Date,
+    monthEndDate: Date,
+  ) {
     const dailyMap = new Map<
       number,
       {
@@ -79,31 +86,42 @@ export class StackingProcessService {
       }
     >();
 
+    let cumulativeOutput = 0;
+
     for (const log of logs) {
-      const day = new Date(log.manufactureDate).getDate();
-      const current = dailyMap.get(day) || {
-        output: 0,
-        ncr: { hiPot: 0, weight: 0, thickness: 0, alignment: 0 },
-      };
+      const logDate = new Date(log.manufactureDate);
+      const isCurrentMonth = logDate >= monthStartDate && logDate <= monthEndDate;
+      const day = logDate.getDate();
 
-      current.output += Number(log.stackActualInput) || 0;
+      const output = Number(log.stackActualInput) || 0;
+      cumulativeOutput += output;
 
-      const ncr = this.parseNcrFromRemark(log.remark);
-      current.ncr.hiPot += ncr.hiPot;
-      current.ncr.weight += ncr.weight;
-      current.ncr.thickness += ncr.thickness;
-      current.ncr.alignment += ncr.alignment;
+      if (isCurrentMonth) {
+        const current = dailyMap.get(day) || {
+          output: 0,
+          ncr: { hiPot: 0, weight: 0, thickness: 0, alignment: 0 },
+        };
 
-      dailyMap.set(day, current);
+        current.output += output;
+
+        const ncr = this.parseNcrFromRemark(log.remark);
+        current.ncr.hiPot += ncr.hiPot;
+        current.ncr.weight += ncr.weight;
+        current.ncr.thickness += ncr.thickness;
+        current.ncr.alignment += ncr.alignment;
+
+        dailyMap.set(day, current);
+      }
     }
 
-    return this.buildResult(dailyMap, month, productionTarget);
+    return this.buildResult(dailyMap, month, productionTarget, cumulativeOutput);
   }
 
   private buildResult(
     dailyMap: Map<number, { output: number; ncr: { hiPot: number; weight: number; thickness: number; alignment: number } }>,
     month: string,
     productionTarget: ProductionTarget | null,
+    cumulativeOutput: number,
   ) {
     const daysInMonth = new Date(parseInt(month.split('-')[0]), parseInt(month.split('-')[1]), 0).getDate();
 
@@ -148,7 +166,7 @@ export class StackingProcessService {
     const totalNg = totalOutput > 0 ? totalNgSum : null;
 
     const targetQuantity = productionTarget?.stack || null;
-    const progress = targetQuantity && totalOutput > 0 ? Math.round((totalOutput / targetQuantity) * 100 * 100) / 100 : null;
+    const progress = targetQuantity && cumulativeOutput > 0 ? Math.round((cumulativeOutput / targetQuantity) * 100 * 100) / 100 : null;
 
     const totalYield = totalOutput > 0 && totalNgSum >= 0 ? Math.round(((totalOutput - totalNgSum) / totalOutput) * 100 * 100) / 100 : null;
 

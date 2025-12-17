@@ -29,19 +29,26 @@ export class GradingProcessService {
     if (!productionPlan) throw new NotFoundException('생산 계획이 존재하지 않습니다.');
 
     const { startDate, endDate } = this.getMonthRange(month);
+    const projectStartDate = new Date(productionPlan.startDate);
 
     const gradingLogs = await this.gradingRepository.find({
       where: {
         production: { id: productionId },
-        manufactureDate: Between(startDate, endDate),
+        manufactureDate: Between(projectStartDate, endDate),
       },
       order: { manufactureDate: 'ASC' },
     });
 
-    return this.processGradingData(gradingLogs, month, productionTarget);
+    return this.processGradingData(gradingLogs, month, productionTarget, startDate, endDate);
   }
 
-  private processGradingData(logs: WorklogGrading[], month: string, productionTarget: ProductionTarget | null) {
+  private processGradingData(
+    logs: WorklogGrading[],
+    month: string,
+    productionTarget: ProductionTarget | null,
+    monthStartDate: Date,
+    monthEndDate: Date,
+  ) {
     const dailyMap = new Map<
       number,
       {
@@ -50,25 +57,41 @@ export class GradingProcessService {
       }
     >();
 
+    const cumulativeTotals = {
+      aging: 0,
+      grading: 0,
+    };
+
     for (const log of logs) {
-      const day = new Date(log.manufactureDate).getDate();
-      const current = dailyMap.get(day) || {
-        aging: { input: 0, good: 0 },
-        grading: { input: 0, ocv3Good: 0 },
-      };
+      const logDate = new Date(log.manufactureDate);
+      const isCurrentMonth = logDate >= monthStartDate && logDate <= monthEndDate;
+      const day = logDate.getDate();
 
-      // Aging (OCV2)
-      current.aging.input += Number(log.ocv2InputQuantity) || 0;
-      current.aging.good += Number(log.ocv2GoodQuantity) || 0;
+      const agingInput = Number(log.ocv2InputQuantity) || 0;
+      const gradingInput = Number(log.gradingInputQuantity) || 0;
 
-      // Grading (OCV3)
-      current.grading.input += Number(log.gradingInputQuantity) || 0;
-      current.grading.ocv3Good += Number(log.ocv3GoodQuantity) || 0;
+      cumulativeTotals.aging += agingInput;
+      cumulativeTotals.grading += gradingInput;
 
-      dailyMap.set(day, current);
+      if (isCurrentMonth) {
+        const current = dailyMap.get(day) || {
+          aging: { input: 0, good: 0 },
+          grading: { input: 0, ocv3Good: 0 },
+        };
+
+        // Aging (OCV2)
+        current.aging.input += agingInput;
+        current.aging.good += Number(log.ocv2GoodQuantity) || 0;
+
+        // Grading (OCV3)
+        current.grading.input += gradingInput;
+        current.grading.ocv3Good += Number(log.ocv3GoodQuantity) || 0;
+
+        dailyMap.set(day, current);
+      }
     }
 
-    return this.buildResult(dailyMap, month, productionTarget);
+    return this.buildResult(dailyMap, month, productionTarget, cumulativeTotals);
   }
 
   private buildResult(
@@ -81,6 +104,7 @@ export class GradingProcessService {
     >,
     month: string,
     productionTarget: ProductionTarget | null,
+    cumulativeTotals: { aging: number; grading: number },
   ) {
     const daysInMonth = new Date(parseInt(month.split('-')[0]), parseInt(month.split('-')[1]), 0).getDate();
 
@@ -147,8 +171,8 @@ export class GradingProcessService {
     const agingTargetQuantity = productionTarget?.aging || null;
     const agingTotalNg = totalAging.output - totalAging.good;
     const agingProgress =
-      agingTargetQuantity && totalAging.output > 0
-        ? Math.round((totalAging.output / agingTargetQuantity) * 100 * 100) / 100
+      agingTargetQuantity && cumulativeTotals.aging > 0
+        ? Math.round((cumulativeTotals.aging / agingTargetQuantity) * 100 * 100) / 100
         : null;
     const agingTotalYield =
       totalAging.output > 0
@@ -159,8 +183,8 @@ export class GradingProcessService {
     const gradingTargetQuantity = productionTarget?.grading || null;
     const gradingTotalNg = totalGrading.output - totalGrading.ocv3Good;
     const gradingProgress =
-      gradingTargetQuantity && totalGrading.output > 0
-        ? Math.round((totalGrading.output / gradingTargetQuantity) * 100 * 100) / 100
+      gradingTargetQuantity && cumulativeTotals.grading > 0
+        ? Math.round((cumulativeTotals.grading / gradingTargetQuantity) * 100 * 100) / 100
         : null;
     const gradingTotalYield =
       totalGrading.output > 0

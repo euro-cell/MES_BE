@@ -29,38 +29,53 @@ export class FillingProcessService {
     if (!productionPlan) throw new NotFoundException('생산 계획이 존재하지 않습니다.');
 
     const { startDate, endDate } = this.getMonthRange(month);
+    const projectStartDate = new Date(productionPlan.startDate);
 
     const fillingLogs = await this.fillingRepository.find({
       where: {
         production: { id: productionId },
-        manufactureDate: Between(startDate, endDate),
+        manufactureDate: Between(projectStartDate, endDate),
       },
       order: { manufactureDate: 'ASC' },
     });
 
-    return this.processFillingData(fillingLogs, month, productionTarget);
+    return this.processFillingData(fillingLogs, month, productionTarget, startDate, endDate);
   }
 
-  private processFillingData(logs: WorklogFilling[], month: string, productionTarget: ProductionTarget | null) {
+  private processFillingData(
+    logs: WorklogFilling[],
+    month: string,
+    productionTarget: ProductionTarget | null,
+    monthStartDate: Date,
+    monthEndDate: Date,
+  ) {
     const dailyMap = new Map<number, { output: number; ng: number }>();
+    let cumulativeOutput = 0;
 
     for (const log of logs) {
-      const day = new Date(log.manufactureDate).getDate();
-      const current = dailyMap.get(day) || { output: 0, ng: 0 };
+      const logDate = new Date(log.manufactureDate);
+      const isCurrentMonth = logDate >= monthStartDate && logDate <= monthEndDate;
+      const day = logDate.getDate();
 
-      current.output += Number(log.fillingWorkQuantity) || 0;
-      current.ng += (Number(log.fillingDefectQuantity) || 0) + (Number(log.waitingDefectQuantity) || 0);
+      const output = Number(log.fillingWorkQuantity) || 0;
+      cumulativeOutput += output;
 
-      dailyMap.set(day, current);
+      if (isCurrentMonth) {
+        const current = dailyMap.get(day) || { output: 0, ng: 0 };
+        current.output += output;
+        current.ng += (Number(log.fillingDefectQuantity) || 0) + (Number(log.waitingDefectQuantity) || 0);
+        dailyMap.set(day, current);
+      }
     }
 
-    return this.buildResult(dailyMap, month, productionTarget);
+    return this.buildResult(dailyMap, month, productionTarget, cumulativeOutput);
   }
 
   private buildResult(
     dailyMap: Map<number, { output: number; ng: number }>,
     month: string,
     productionTarget: ProductionTarget | null,
+    cumulativeOutput: number,
   ) {
     const daysInMonth = new Date(parseInt(month.split('-')[0]), parseInt(month.split('-')[1]), 0).getDate();
 
@@ -94,7 +109,7 @@ export class FillingProcessService {
     }
 
     const targetQuantity = productionTarget?.filling || null;
-    const progress = targetQuantity && totalOutput > 0 ? Math.round((totalOutput / targetQuantity) * 100 * 100) / 100 : null;
+    const progress = targetQuantity && cumulativeOutput > 0 ? Math.round((cumulativeOutput / targetQuantity) * 100 * 100) / 100 : null;
 
     const totalYield = totalOutput > 0 ? Math.round(((totalOutput - totalNg) / totalOutput) * 100 * 100) / 100 : null;
 

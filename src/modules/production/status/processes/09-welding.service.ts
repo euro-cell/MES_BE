@@ -29,16 +29,17 @@ export class WeldingProcessService {
     if (!productionPlan) throw new NotFoundException('생산 계획이 존재하지 않습니다.');
 
     const { startDate, endDate } = this.getMonthRange(month);
+    const projectStartDate = new Date(productionPlan.startDate);
 
     const weldingLogs = await this.weldingRepository.find({
       where: {
         production: { id: productionId },
-        manufactureDate: Between(startDate, endDate),
+        manufactureDate: Between(projectStartDate, endDate),
       },
       order: { manufactureDate: 'ASC' },
     });
 
-    return this.processWeldingData(weldingLogs, month, productionTarget);
+    return this.processWeldingData(weldingLogs, month, productionTarget, startDate, endDate);
   }
 
   private parseNcrFromDefectRemark(defectRemark: string | null): {
@@ -66,7 +67,13 @@ export class WeldingProcessService {
     return result;
   }
 
-  private processWeldingData(logs: WorklogWelding[], month: string, productionTarget: ProductionTarget | null) {
+  private processWeldingData(
+    logs: WorklogWelding[],
+    month: string,
+    productionTarget: ProductionTarget | null,
+    monthStartDate: Date,
+    monthEndDate: Date,
+  ) {
     const dailyMap = new Map<
       number,
       {
@@ -83,41 +90,55 @@ export class WeldingProcessService {
       }
     >();
 
+    let cumulativePreWeldingOutput = 0;
+    let cumulativeMainWeldingOutput = 0;
+
     for (const log of logs) {
-      const day = new Date(log.manufactureDate).getDate();
-      const current = dailyMap.get(day) || {
-        preWelding: {
-          work: 0,
-          ncr: { burning: 0, align: 0, etc: 0 },
-        },
-        mainWelding: {
-          work: 0,
-          hiPot: 0,
-          taping: 0,
-          ncr: { burning: 0, align: 0, etc: 0 },
-        },
-      };
+      const logDate = new Date(log.manufactureDate);
+      const isCurrentMonth = logDate >= monthStartDate && logDate <= monthEndDate;
+      const day = logDate.getDate();
 
-      // 프리웰딩
-      current.preWelding.work += Number(log.preWeldingWorkQuantity) || 0;
-      const preNcr = this.parseNcrFromDefectRemark(log.preWeldingDefectRemark);
-      current.preWelding.ncr.burning += preNcr.burning;
-      current.preWelding.ncr.align += preNcr.align;
-      current.preWelding.ncr.etc += preNcr.etc;
+      const preWeldingWork = Number(log.preWeldingWorkQuantity) || 0;
+      const mainWeldingWork = Number(log.mainWeldingWorkQuantity) || 0;
 
-      // 메인웰딩
-      current.mainWelding.work += Number(log.mainWeldingWorkQuantity) || 0;
-      current.mainWelding.hiPot += Number(log.hipot2DefectQuantity) || 0;
-      current.mainWelding.taping += Number(log.tapingDefectQuantity) || 0;
-      const mainNcr = this.parseNcrFromDefectRemark(log.mainWeldingDefectRemark);
-      current.mainWelding.ncr.burning += mainNcr.burning;
-      current.mainWelding.ncr.align += mainNcr.align;
-      current.mainWelding.ncr.etc += mainNcr.etc;
+      cumulativePreWeldingOutput += preWeldingWork;
+      cumulativeMainWeldingOutput += mainWeldingWork;
 
-      dailyMap.set(day, current);
+      if (isCurrentMonth) {
+        const current = dailyMap.get(day) || {
+          preWelding: {
+            work: 0,
+            ncr: { burning: 0, align: 0, etc: 0 },
+          },
+          mainWelding: {
+            work: 0,
+            hiPot: 0,
+            taping: 0,
+            ncr: { burning: 0, align: 0, etc: 0 },
+          },
+        };
+
+        // 프리웰딩
+        current.preWelding.work += preWeldingWork;
+        const preNcr = this.parseNcrFromDefectRemark(log.preWeldingDefectRemark);
+        current.preWelding.ncr.burning += preNcr.burning;
+        current.preWelding.ncr.align += preNcr.align;
+        current.preWelding.ncr.etc += preNcr.etc;
+
+        // 메인웰딩
+        current.mainWelding.work += mainWeldingWork;
+        current.mainWelding.hiPot += Number(log.hipot2DefectQuantity) || 0;
+        current.mainWelding.taping += Number(log.tapingDefectQuantity) || 0;
+        const mainNcr = this.parseNcrFromDefectRemark(log.mainWeldingDefectRemark);
+        current.mainWelding.ncr.burning += mainNcr.burning;
+        current.mainWelding.ncr.align += mainNcr.align;
+        current.mainWelding.ncr.etc += mainNcr.etc;
+
+        dailyMap.set(day, current);
+      }
     }
 
-    return this.buildResult(dailyMap, month, productionTarget);
+    return this.buildResult(dailyMap, month, productionTarget, cumulativePreWeldingOutput, cumulativeMainWeldingOutput);
   }
 
   private buildResult(
@@ -138,6 +159,8 @@ export class WeldingProcessService {
     >,
     month: string,
     productionTarget: ProductionTarget | null,
+    cumulativePreWeldingOutput: number,
+    cumulativeMainWeldingOutput: number,
   ) {
     const daysInMonth = new Date(parseInt(month.split('-')[0]), parseInt(month.split('-')[1]), 0).getDate();
 
@@ -227,12 +250,12 @@ export class WeldingProcessService {
     const mainWeldingTargetQuantity = productionTarget?.mainWelding || null;
 
     const preWeldingProgress =
-      preWeldingTargetQuantity && totalPreWeldingOutput > 0
-        ? Math.round((totalPreWeldingOutput / preWeldingTargetQuantity) * 100 * 100) / 100
+      preWeldingTargetQuantity && cumulativePreWeldingOutput > 0
+        ? Math.round((cumulativePreWeldingOutput / preWeldingTargetQuantity) * 100 * 100) / 100
         : null;
     const mainWeldingProgress =
-      mainWeldingTargetQuantity && totalMainWeldingOutput > 0
-        ? Math.round((totalMainWeldingOutput / mainWeldingTargetQuantity) * 100 * 100) / 100
+      mainWeldingTargetQuantity && cumulativeMainWeldingOutput > 0
+        ? Math.round((cumulativeMainWeldingOutput / mainWeldingTargetQuantity) * 100 * 100) / 100
         : null;
 
     const preWeldingYield =

@@ -29,22 +29,25 @@ export class VisualInspectionProcessService {
     if (!productionPlan) throw new NotFoundException('생산 계획이 존재하지 않습니다.');
 
     const { startDate, endDate } = this.getMonthRange(month);
+    const projectStartDate = new Date(productionPlan.startDate);
 
     const visualInspectionLogs = await this.visualInspectionRepository.find({
       where: {
         production: { id: productionId },
-        manufactureDate: Between(startDate, endDate),
+        manufactureDate: Between(projectStartDate, endDate),
       },
       order: { manufactureDate: 'ASC' },
     });
 
-    return this.processVisualInspectionData(visualInspectionLogs, month, productionTarget);
+    return this.processVisualInspectionData(visualInspectionLogs, month, productionTarget, startDate, endDate);
   }
 
   private processVisualInspectionData(
     logs: WorklogVisualInspection[],
     month: string,
     productionTarget: ProductionTarget | null,
+    monthStartDate: Date,
+    monthEndDate: Date,
   ) {
     const dailyMap = new Map<
       number,
@@ -61,32 +64,42 @@ export class VisualInspectionProcessService {
       }
     >();
 
+    let cumulativeOutput = 0;
+
     for (const log of logs) {
-      const day = new Date(log.manufactureDate).getDate();
-      const current = dailyMap.get(day) || {
-        output: 0,
-        ncr: {
-          gas: 0,
-          foreignMatter: 0,
-          scratch: 0,
-          dent: 0,
-          leakCorrosion: 0,
-          cellSize: 0,
-        },
-      };
+      const logDate = new Date(log.manufactureDate);
+      const isCurrentMonth = logDate >= monthStartDate && logDate <= monthEndDate;
+      const day = logDate.getDate();
 
-      current.output += Number(log.cellInputQuantity) || 0;
-      current.ncr.gas += Number(log.gasDiscardQuantity) || 0;
-      current.ncr.foreignMatter += Number(log.foreignMatterDiscardQuantity) || 0;
-      current.ncr.scratch += Number(log.scratchDiscardQuantity) || 0;
-      current.ncr.dent += Number(log.dentDiscardQuantity) || 0;
-      current.ncr.leakCorrosion += Number(log.leakCorrosionDiscardQuantity) || 0;
-      current.ncr.cellSize += Number(log.cellSizeDiscardQuantity) || 0;
+      const output = Number(log.cellInputQuantity) || 0;
+      cumulativeOutput += output;
 
-      dailyMap.set(day, current);
+      if (isCurrentMonth) {
+        const current = dailyMap.get(day) || {
+          output: 0,
+          ncr: {
+            gas: 0,
+            foreignMatter: 0,
+            scratch: 0,
+            dent: 0,
+            leakCorrosion: 0,
+            cellSize: 0,
+          },
+        };
+
+        current.output += output;
+        current.ncr.gas += Number(log.gasDiscardQuantity) || 0;
+        current.ncr.foreignMatter += Number(log.foreignMatterDiscardQuantity) || 0;
+        current.ncr.scratch += Number(log.scratchDiscardQuantity) || 0;
+        current.ncr.dent += Number(log.dentDiscardQuantity) || 0;
+        current.ncr.leakCorrosion += Number(log.leakCorrosionDiscardQuantity) || 0;
+        current.ncr.cellSize += Number(log.cellSizeDiscardQuantity) || 0;
+
+        dailyMap.set(day, current);
+      }
     }
 
-    return this.buildResult(dailyMap, month, productionTarget);
+    return this.buildResult(dailyMap, month, productionTarget, cumulativeOutput);
   }
 
   private buildResult(
@@ -106,6 +119,7 @@ export class VisualInspectionProcessService {
     >,
     month: string,
     productionTarget: ProductionTarget | null,
+    cumulativeOutput: number,
   ) {
     const daysInMonth = new Date(parseInt(month.split('-')[0]), parseInt(month.split('-')[1]), 0).getDate();
 
@@ -180,7 +194,7 @@ export class VisualInspectionProcessService {
 
     const targetQuantity = productionTarget?.visualInspection || null;
     const progress =
-      targetQuantity && totalOutput > 0 ? Math.round((totalOutput / targetQuantity) * 100 * 100) / 100 : null;
+      targetQuantity && cumulativeOutput > 0 ? Math.round((cumulativeOutput / targetQuantity) * 100 * 100) / 100 : null;
 
     const totalYield =
       totalOutput > 0 ? Math.round(((totalOutput - totalNgSum) / totalOutput) * 100 * 100) / 100 : null;

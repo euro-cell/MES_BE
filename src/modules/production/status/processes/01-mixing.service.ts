@@ -31,7 +31,7 @@ export class MixingProcessService {
 
     if (!productionPlan) throw new NotFoundException('생산 계획이 존재하지 않습니다.');
 
-    const { endDate } = this.getMonthRange(month);
+    const { startDate, endDate } = this.getMonthRange(month);
     const projectStartDate = new Date(productionPlan.startDate);
 
     const targetCategory = type === 'cathode' ? '양극재' : '음극재';
@@ -50,10 +50,12 @@ export class MixingProcessService {
     });
 
     const dailyMap = new Map<number, number>();
+    let cumulativeOutput = 0;
 
     for (const log of slurryLogs) {
-      const day = new Date(log.manufactureDate).getDate();
-      const current = dailyMap.get(day) || 0;
+      const logDate = new Date(log.manufactureDate);
+      const isCurrentMonth = logDate >= startDate && logDate <= endDate;
+      const day = logDate.getDate();
 
       const materialFields = [
         { lot: log.material1Lot, input: log.material1ActualInput },
@@ -66,13 +68,19 @@ export class MixingProcessService {
         { lot: log.material8Lot, input: log.material8ActualInput },
       ];
 
-      let dayTotal = current;
+      let logTotal = 0;
       for (const field of materialFields) {
         if (field.lot && materialLotNos.has(field.lot)) {
-          dayTotal += Number(field.input) || 0;
+          logTotal += Number(field.input) || 0;
         }
       }
-      dailyMap.set(day, dayTotal);
+
+      cumulativeOutput += logTotal;
+
+      if (isCurrentMonth) {
+        const current = dailyMap.get(day) || 0;
+        dailyMap.set(day, current + logTotal);
+      }
     }
 
     const daysInMonth = new Date(parseInt(month.split('-')[0]), parseInt(month.split('-')[1]), 0).getDate();
@@ -89,7 +97,7 @@ export class MixingProcessService {
     const targetField = type === 'cathode' ? 'mixingCathode' : 'mixingAnode';
     const targetQuantity = productionTarget?.[targetField] || null;
 
-    const progress = targetQuantity ? Math.round((totalOutput / targetQuantity) * 100 * 100) / 100 : null;
+    const progress = targetQuantity ? Math.round((cumulativeOutput / targetQuantity) * 100 * 100) / 100 : null;
 
     return {
       data,

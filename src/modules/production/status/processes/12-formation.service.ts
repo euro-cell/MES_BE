@@ -29,19 +29,26 @@ export class FormationProcessService {
     if (!productionPlan) throw new NotFoundException('생산 계획이 존재하지 않습니다.');
 
     const { startDate, endDate } = this.getMonthRange(month);
+    const projectStartDate = new Date(productionPlan.startDate);
 
     const formationLogs = await this.formationRepository.find({
       where: {
         production: { id: productionId },
-        manufactureDate: Between(startDate, endDate),
+        manufactureDate: Between(projectStartDate, endDate),
       },
       order: { manufactureDate: 'ASC' },
     });
 
-    return this.processFormationData(formationLogs, month, productionTarget);
+    return this.processFormationData(formationLogs, month, productionTarget, startDate, endDate);
   }
 
-  private processFormationData(logs: WorklogFormation[], month: string, productionTarget: ProductionTarget | null) {
+  private processFormationData(
+    logs: WorklogFormation[],
+    month: string,
+    productionTarget: ProductionTarget | null,
+    monthStartDate: Date,
+    monthEndDate: Date,
+  ) {
     const dailyMap = new Map<
       number,
       {
@@ -51,30 +58,49 @@ export class FormationProcessService {
       }
     >();
 
+    const cumulativeTotals = {
+      preFormation: 0,
+      degas: 0,
+      mainFormation: 0,
+    };
+
     for (const log of logs) {
-      const day = new Date(log.manufactureDate).getDate();
-      const current = dailyMap.get(day) || {
-        preFormation: { input: 0, good: 0 },
-        degas: { input: 0, good: 0 },
-        mainFormation: { input: 0, ocv1Good: 0 },
-      };
+      const logDate = new Date(log.manufactureDate);
+      const isCurrentMonth = logDate >= monthStartDate && logDate <= monthEndDate;
+      const day = logDate.getDate();
 
-      // Pre Formation
-      current.preFormation.input += Number(log.preFormationInputQuantity) || 0;
-      current.preFormation.good += Number(log.preFormationGoodQuantity) || 0;
+      const preFormationInput = Number(log.preFormationInputQuantity) || 0;
+      const degasInput = Number(log.degas2InputQuantity) || 0;
+      const mainFormationInput = Number(log.mainFormationInputQuantity) || 0;
 
-      // Degas (디가스2만 사용)
-      current.degas.input += Number(log.degas2InputQuantity) || 0;
-      current.degas.good += Number(log.degas2GoodQuantity) || 0;
+      cumulativeTotals.preFormation += preFormationInput;
+      cumulativeTotals.degas += degasInput;
+      cumulativeTotals.mainFormation += mainFormationInput;
 
-      // Main Formation + OCV/IR_1
-      current.mainFormation.input += Number(log.mainFormationInputQuantity) || 0;
-      current.mainFormation.ocv1Good += Number(log.ocv1GoodQuantity) || 0;
+      if (isCurrentMonth) {
+        const current = dailyMap.get(day) || {
+          preFormation: { input: 0, good: 0 },
+          degas: { input: 0, good: 0 },
+          mainFormation: { input: 0, ocv1Good: 0 },
+        };
 
-      dailyMap.set(day, current);
+        // Pre Formation
+        current.preFormation.input += preFormationInput;
+        current.preFormation.good += Number(log.preFormationGoodQuantity) || 0;
+
+        // Degas (디가스2만 사용)
+        current.degas.input += degasInput;
+        current.degas.good += Number(log.degas2GoodQuantity) || 0;
+
+        // Main Formation + OCV/IR_1
+        current.mainFormation.input += mainFormationInput;
+        current.mainFormation.ocv1Good += Number(log.ocv1GoodQuantity) || 0;
+
+        dailyMap.set(day, current);
+      }
     }
 
-    return this.buildResult(dailyMap, month, productionTarget);
+    return this.buildResult(dailyMap, month, productionTarget, cumulativeTotals);
   }
 
   private buildResult(
@@ -88,6 +114,7 @@ export class FormationProcessService {
     >,
     month: string,
     productionTarget: ProductionTarget | null,
+    cumulativeTotals: { preFormation: number; degas: number; mainFormation: number },
   ) {
     const daysInMonth = new Date(parseInt(month.split('-')[0]), parseInt(month.split('-')[1]), 0).getDate();
 
@@ -177,8 +204,8 @@ export class FormationProcessService {
     const preFormationTargetQuantity = productionTarget?.preFormation || null;
     const preFormationTotalNg = totalPreFormation.output - totalPreFormation.good;
     const preFormationProgress =
-      preFormationTargetQuantity && totalPreFormation.output > 0
-        ? Math.round((totalPreFormation.output / preFormationTargetQuantity) * 100 * 100) / 100
+      preFormationTargetQuantity && cumulativeTotals.preFormation > 0
+        ? Math.round((cumulativeTotals.preFormation / preFormationTargetQuantity) * 100 * 100) / 100
         : null;
     const preFormationTotalYield =
       totalPreFormation.output > 0
@@ -189,8 +216,8 @@ export class FormationProcessService {
     const degasTargetQuantity = productionTarget?.degas || null;
     const degasTotalNg = totalDegas.output - totalDegas.good;
     const degasProgress =
-      degasTargetQuantity && totalDegas.output > 0
-        ? Math.round((totalDegas.output / degasTargetQuantity) * 100 * 100) / 100
+      degasTargetQuantity && cumulativeTotals.degas > 0
+        ? Math.round((cumulativeTotals.degas / degasTargetQuantity) * 100 * 100) / 100
         : null;
     const degasTotalYield =
       totalDegas.output > 0 ? Math.round((totalDegas.good / totalDegas.output) * 100 * 100) / 100 : null;
@@ -199,8 +226,8 @@ export class FormationProcessService {
     const mainFormationTargetQuantity = productionTarget?.mainFormation || null;
     const mainFormationTotalNg = totalMainFormation.output - totalMainFormation.ocv1Good;
     const mainFormationProgress =
-      mainFormationTargetQuantity && totalMainFormation.output > 0
-        ? Math.round((totalMainFormation.output / mainFormationTargetQuantity) * 100 * 100) / 100
+      mainFormationTargetQuantity && cumulativeTotals.mainFormation > 0
+        ? Math.round((cumulativeTotals.mainFormation / mainFormationTargetQuantity) * 100 * 100) / 100
         : null;
     const mainFormationTotalYield =
       totalMainFormation.output > 0

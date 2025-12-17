@@ -31,7 +31,7 @@ export class NotchingProcessService {
 
     if (!productionPlan) throw new NotFoundException('생산 계획이 존재하지 않습니다.');
 
-    const { endDate } = this.getMonthRange(month);
+    const { startDate, endDate } = this.getMonthRange(month);
     const projectStartDate = new Date(productionPlan.startDate);
     const targetChar = type === 'cathode' ? 'C' : 'A';
 
@@ -60,7 +60,7 @@ export class NotchingProcessService {
 
     const pressLotQuantityMap = this.buildPressLotQuantityMap(pressLogs, targetChar);
 
-    return this.processNotchingData(notchingLogs, targetChar, month, productionTarget, type, pressLotQuantityMap);
+    return this.processNotchingData(notchingLogs, targetChar, month, productionTarget, type, pressLotQuantityMap, startDate, endDate);
   }
 
   private buildPressLotQuantityMap(logs: WorklogPress[], targetChar: string): Map<string, number> {
@@ -92,15 +92,19 @@ export class NotchingProcessService {
     productionTarget: ProductionTarget | null,
     type: 'cathode' | 'anode',
     pressLotQuantityMap: Map<string, number>,
+    monthStartDate: Date,
+    monthEndDate: Date,
   ) {
     const dailyMap = new Map<number, { good: number; defect: number; notchingLengthM: number; pressInputM: number }>();
     const notchingLengthMap = new Map<string, number>();
-    const pressLotLastDay = new Map<string, number>();
+    const pressLotLastDay = new Map<string, { day: number; isCurrentMonth: boolean }>();
     const processedPressLots = new Set<string>();
+    let cumulativeOutput = 0;
 
     for (const log of logs) {
-      const day = new Date(log.manufactureDate).getDate();
-      const current = dailyMap.get(day) || { good: 0, defect: 0, notchingLengthM: 0, pressInputM: 0 };
+      const logDate = new Date(log.manufactureDate);
+      const isCurrentMonth = logDate >= monthStartDate && logDate <= monthEndDate;
+      const day = logDate.getDate();
 
       const notchingFields = [
         { pressLot: log.pressLot1, good: log.goodQuantity1, defect: log.defectQuantity1, wide: log.wide1 },
@@ -117,40 +121,49 @@ export class NotchingProcessService {
           const wide = Number(field.wide) || 0;
           const notchingLengthM = (good * wide) / 1000;
 
-          current.good += good;
-          current.defect += defect;
-          current.notchingLengthM += notchingLengthM;
+          cumulativeOutput += good;
+
+          if (isCurrentMonth) {
+            const current = dailyMap.get(day) || { good: 0, defect: 0, notchingLengthM: 0, pressInputM: 0 };
+            current.good += good;
+            current.defect += defect;
+            current.notchingLengthM += notchingLengthM;
+            dailyMap.set(day, current);
+          }
 
           const currentLength = notchingLengthMap.get(field.pressLot) || 0;
           notchingLengthMap.set(field.pressLot, currentLength + notchingLengthM);
 
-          pressLotLastDay.set(field.pressLot, day);
+          pressLotLastDay.set(field.pressLot, { day, isCurrentMonth });
 
           const pressQty = pressLotQuantityMap.get(field.pressLot) || 0;
           const newNotchingLength = currentLength + notchingLengthM;
 
           if (!processedPressLots.has(field.pressLot) && newNotchingLength >= pressQty && pressQty > 0) {
-            current.pressInputM += pressQty;
+            if (isCurrentMonth) {
+              const current = dailyMap.get(day) || { good: 0, defect: 0, notchingLengthM: 0, pressInputM: 0 };
+              current.pressInputM += pressQty;
+              dailyMap.set(day, current);
+            }
             processedPressLots.add(field.pressLot);
           }
         }
       }
-      dailyMap.set(day, current);
     }
 
     for (const [pressLot, pressQty] of pressLotQuantityMap) {
       if (!processedPressLots.has(pressLot)) {
-        const lastDay = pressLotLastDay.get(pressLot);
+        const lastDayInfo = pressLotLastDay.get(pressLot);
 
-        if (lastDay) {
-          const dayData = dailyMap.get(lastDay) || { good: 0, defect: 0, notchingLengthM: 0, pressInputM: 0 };
+        if (lastDayInfo && lastDayInfo.isCurrentMonth) {
+          const dayData = dailyMap.get(lastDayInfo.day) || { good: 0, defect: 0, notchingLengthM: 0, pressInputM: 0 };
           dayData.pressInputM += pressQty;
-          dailyMap.set(lastDay, dayData);
+          dailyMap.set(lastDayInfo.day, dayData);
         }
       }
     }
 
-    return this.buildResult(dailyMap, month, productionTarget, type);
+    return this.buildResult(dailyMap, month, productionTarget, type, cumulativeOutput);
   }
 
   private buildResult(
@@ -158,6 +171,7 @@ export class NotchingProcessService {
     month: string,
     productionTarget: ProductionTarget | null,
     type: 'cathode' | 'anode',
+    cumulativeOutput: number,
   ) {
     const daysInMonth = new Date(parseInt(month.split('-')[0]), parseInt(month.split('-')[1]), 0).getDate();
     const data: Array<{ day: number; output: number; ng: number | null; yield: number | null }> = [];
@@ -179,7 +193,7 @@ export class NotchingProcessService {
 
     const targetField = type === 'cathode' ? 'notchingCathode' : 'notchingAnode';
     const targetQuantity = productionTarget?.[targetField] || null;
-    const progress = targetQuantity ? Math.round((totalOutput / targetQuantity) * 100 * 100) / 100 : null;
+    const progress = targetQuantity ? Math.round((cumulativeOutput / targetQuantity) * 100 * 100) / 100 : null;
     const totalYield = totalPressInputM > 0 ? Math.round((totalNotchingLengthM / totalPressInputM) * 100 * 100) / 100 : null;
 
     return {

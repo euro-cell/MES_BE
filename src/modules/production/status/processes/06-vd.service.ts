@@ -103,6 +103,8 @@ export class VdProcessService {
     const processedLots = new Set<string>();
     const lotLastDay = new Map<string, { day: number; isCurrentMonth: boolean }>();
     const vdLotQuantityMap = new Map<string, number>();
+    let cumulativeCathodeOutput = 0;
+    let cumulativeAnodeOutput = 0;
 
     for (const log of logs) {
       const logDate = new Date(log.manufactureDate);
@@ -131,6 +133,7 @@ export class VdProcessService {
       for (const field of cathodeFields) {
         if (this.isValidLot(field.lot)) {
           const qty = Number(field.qty) || 0;
+          cumulativeCathodeOutput += qty;
 
           const currentVdQty = vdLotQuantityMap.get(field.lot) || 0;
           vdLotQuantityMap.set(field.lot, currentVdQty + qty);
@@ -161,6 +164,7 @@ export class VdProcessService {
       for (const field of anodeFields) {
         if (this.isValidLot(field.lot)) {
           const qty = Number(field.qty) || 0;
+          cumulativeAnodeOutput += qty;
 
           const currentVdQty = vdLotQuantityMap.get(field.lot) || 0;
           vdLotQuantityMap.set(field.lot, currentVdQty + qty);
@@ -207,7 +211,7 @@ export class VdProcessService {
       }
     }
 
-    return this.buildResult(dailyMap, month, productionTarget);
+    return this.buildResult(dailyMap, month, productionTarget, cumulativeCathodeOutput, cumulativeAnodeOutput);
   }
 
   private buildResult(
@@ -222,6 +226,8 @@ export class VdProcessService {
     >,
     month: string,
     productionTarget: ProductionTarget | null,
+    cumulativeCathodeOutput: number,
+    cumulativeAnodeOutput: number,
   ) {
     const daysInMonth = new Date(parseInt(month.split('-')[0]), parseInt(month.split('-')[1]), 0).getDate();
     const data: Array<{
@@ -277,8 +283,8 @@ export class VdProcessService {
 
     const cathodeTargetQuantity = productionTarget?.vdCathode || null;
     const anodeTargetQuantity = productionTarget?.vdAnode || null;
-    const cathodeProgress = cathodeTargetQuantity ? Math.round((totalCathodeOutput / cathodeTargetQuantity) * 100 * 100) / 100 : null;
-    const anodeProgress = anodeTargetQuantity ? Math.round((totalAnodeOutput / anodeTargetQuantity) * 100 * 100) / 100 : null;
+    const cathodeProgress = cathodeTargetQuantity ? Math.round((cumulativeCathodeOutput / cathodeTargetQuantity) * 100 * 100) / 100 : null;
+    const anodeProgress = anodeTargetQuantity ? Math.round((cumulativeAnodeOutput / anodeTargetQuantity) * 100 * 100) / 100 : null;
 
     return {
       data,

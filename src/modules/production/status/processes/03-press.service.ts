@@ -31,7 +31,7 @@ export class PressProcessService {
 
     if (!productionPlan) throw new NotFoundException('생산 계획이 존재하지 않습니다.');
 
-    const { endDate } = this.getMonthRange(month);
+    const { startDate, endDate } = this.getMonthRange(month);
     const projectStartDate = new Date(productionPlan.startDate);
     const targetChar = type === 'cathode' ? 'C' : 'A';
 
@@ -54,7 +54,7 @@ export class PressProcessService {
 
     const doubleLotQuantityMap = this.buildDoubleLotQuantityMap(coatingLogs, targetChar);
 
-    return this.processPressData(pressLogs, targetChar, month, productionTarget, type, doubleLotQuantityMap);
+    return this.processPressData(pressLogs, targetChar, month, productionTarget, type, doubleLotQuantityMap, startDate, endDate);
   }
 
   private buildDoubleLotQuantityMap(logs: WorklogCoating[], targetChar: string): Map<string, number> {
@@ -95,15 +95,19 @@ export class PressProcessService {
     productionTarget: ProductionTarget | null,
     type: 'cathode' | 'anode',
     doubleLotQuantityMap: Map<string, number>,
+    monthStartDate: Date,
+    monthEndDate: Date,
   ) {
     const dailyMap = new Map<number, { output: number; inputQty: number }>();
     const pressLotQuantityMap = new Map<string, number>();
-    const doubleLotLastDay = new Map<string, number>();
+    const doubleLotLastDay = new Map<string, { day: number; isCurrentMonth: boolean }>();
     const processedDoubleLots = new Set<string>();
+    let cumulativeOutput = 0;
 
     for (const log of logs) {
-      const day = new Date(log.manufactureDate).getDate();
-      const current = dailyMap.get(day) || { output: 0, inputQty: 0 };
+      const logDate = new Date(log.manufactureDate);
+      const isCurrentMonth = logDate >= monthStartDate && logDate <= monthEndDate;
+      const day = logDate.getDate();
 
       const pressFields = [
         { pressLot: log.pressLot1, pressQty: log.pressQuantity1 },
@@ -116,7 +120,13 @@ export class PressProcessService {
       for (const field of pressFields) {
         if (field.pressLot && field.pressLot.length >= 5 && field.pressLot[4] === targetChar) {
           const pressQty = Number(field.pressQty) || 0;
-          current.output += pressQty;
+          cumulativeOutput += pressQty;
+
+          if (isCurrentMonth) {
+            const current = dailyMap.get(day) || { output: 0, inputQty: 0 };
+            current.output += pressQty;
+            dailyMap.set(day, current);
+          }
 
           const doubleLot = this.extractDoubleLotFromPress(field.pressLot);
 
@@ -125,33 +135,36 @@ export class PressProcessService {
             const newPressQty = currentPressQty + pressQty;
             pressLotQuantityMap.set(doubleLot, newPressQty);
 
-            doubleLotLastDay.set(doubleLot, day);
+            doubleLotLastDay.set(doubleLot, { day, isCurrentMonth });
 
             const doubleQty = doubleLotQuantityMap.get(doubleLot) || 0;
 
             if (!processedDoubleLots.has(doubleLot) && newPressQty >= doubleQty && doubleQty > 0) {
-              current.inputQty += doubleQty;
+              if (isCurrentMonth) {
+                const current = dailyMap.get(day) || { output: 0, inputQty: 0 };
+                current.inputQty += doubleQty;
+                dailyMap.set(day, current);
+              }
               processedDoubleLots.add(doubleLot);
             }
           }
         }
       }
-      dailyMap.set(day, current);
     }
 
     for (const [doubleLot, doubleQty] of doubleLotQuantityMap) {
       if (!processedDoubleLots.has(doubleLot)) {
-        const lastDay = doubleLotLastDay.get(doubleLot);
+        const lastDayInfo = doubleLotLastDay.get(doubleLot);
 
-        if (lastDay) {
-          const dayData = dailyMap.get(lastDay) || { output: 0, inputQty: 0 };
+        if (lastDayInfo && lastDayInfo.isCurrentMonth) {
+          const dayData = dailyMap.get(lastDayInfo.day) || { output: 0, inputQty: 0 };
           dayData.inputQty += doubleQty;
-          dailyMap.set(lastDay, dayData);
+          dailyMap.set(lastDayInfo.day, dayData);
         }
       }
     }
 
-    return this.buildResult(dailyMap, month, productionTarget, type);
+    return this.buildResult(dailyMap, month, productionTarget, type, cumulativeOutput);
   }
 
   private buildResult(
@@ -159,6 +172,7 @@ export class PressProcessService {
     month: string,
     productionTarget: ProductionTarget | null,
     type: 'cathode' | 'anode',
+    cumulativeOutput: number,
   ) {
     const daysInMonth = new Date(parseInt(month.split('-')[0]), parseInt(month.split('-')[1]), 0).getDate();
     const data: Array<{ day: number; output: number; ng: number | null; yield: number | null }> = [];
@@ -176,7 +190,7 @@ export class PressProcessService {
 
     const targetField = type === 'cathode' ? 'pressCathode' : 'pressAnode';
     const targetQuantity = productionTarget?.[targetField] || null;
-    const progress = targetQuantity ? Math.round((totalOutput / targetQuantity) * 100 * 100) / 100 : null;
+    const progress = targetQuantity ? Math.round((cumulativeOutput / targetQuantity) * 100 * 100) / 100 : null;
     const totalNg = totalInputQty > totalOutput ? totalInputQty - totalOutput : null;
     const totalYield = totalInputQty > 0 ? Math.round((totalOutput / totalInputQty) * 100 * 100) / 100 : null;
 

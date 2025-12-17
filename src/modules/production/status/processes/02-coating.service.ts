@@ -28,7 +28,7 @@ export class CoatingProcessService {
 
     if (!productionPlan) throw new NotFoundException('생산 계획이 존재하지 않습니다.');
 
-    const { endDate } = this.getMonthRange(month);
+    const { startDate, endDate } = this.getMonthRange(month);
     const projectStartDate = new Date(productionPlan.startDate);
     const targetChar = type === 'cathode' ? 'C' : 'A';
     const coatingLogs = await this.coatingRepository.find({
@@ -40,8 +40,8 @@ export class CoatingProcessService {
     });
 
     const singleLotQuantityMap = this.buildSingleLotQuantityMap(coatingLogs, targetChar);
-    const singleData = this.processSingleCoatingData(coatingLogs, targetChar, month, productionTarget, type);
-    const doubleData = this.processDoubleCoatingData(coatingLogs, targetChar, month, productionTarget, type, singleLotQuantityMap);
+    const singleData = this.processSingleCoatingData(coatingLogs, targetChar, month, productionTarget, type, startDate, endDate);
+    const doubleData = this.processDoubleCoatingData(coatingLogs, targetChar, month, productionTarget, type, singleLotQuantityMap, startDate, endDate);
 
     return { single: singleData, double: doubleData };
   }
@@ -79,12 +79,16 @@ export class CoatingProcessService {
     month: string,
     productionTarget: ProductionTarget | null,
     type: 'cathode' | 'anode',
+    monthStartDate: Date,
+    monthEndDate: Date,
   ) {
     const dailyMap = new Map<number, { output: number; ng: number }>();
+    let cumulativeOutput = 0;
 
     for (const log of logs) {
-      const day = new Date(log.manufactureDate).getDate();
-      const current = dailyMap.get(day) || { output: 0, ng: 0 };
+      const logDate = new Date(log.manufactureDate);
+      const isCurrentMonth = logDate >= monthStartDate && logDate <= monthEndDate;
+      const day = logDate.getDate();
 
       const coatingFields = [
         { lot: log.coatingLot1, quantity: log.productionQuantity1, side: log.coatingSide1 },
@@ -95,12 +99,17 @@ export class CoatingProcessService {
 
       for (const field of coatingFields) {
         if (field.lot && field.lot.length >= 5 && field.lot[4] === targetChar && field.side === '단면') {
-          current.output += Number(field.quantity) || 0;
+          const qty = Number(field.quantity) || 0;
+          cumulativeOutput += qty;
+          if (isCurrentMonth) {
+            const current = dailyMap.get(day) || { output: 0, ng: 0 };
+            current.output += qty;
+            dailyMap.set(day, current);
+          }
         }
       }
-      dailyMap.set(day, current);
     }
-    return this.buildResult(dailyMap, month, productionTarget, type, '단면');
+    return this.buildResult(dailyMap, month, productionTarget, type, '단면', cumulativeOutput);
   }
 
   private processDoubleCoatingData(
@@ -110,15 +119,19 @@ export class CoatingProcessService {
     productionTarget: ProductionTarget | null,
     type: 'cathode' | 'anode',
     singleLotQuantityMap: Map<string, number>,
+    monthStartDate: Date,
+    monthEndDate: Date,
   ) {
     const dailyMap = new Map<number, { output: number; ng: number }>();
     const doubleLotQuantityMap = new Map<string, number>();
-    const singleLotLastDay = new Map<string, number>();
+    const singleLotLastDay = new Map<string, { day: number; isCurrentMonth: boolean }>();
     const processedSingleLots = new Set<string>();
+    let cumulativeOutput = 0;
 
     for (const log of logs) {
-      const day = new Date(log.manufactureDate).getDate();
-      const current = dailyMap.get(day) || { output: 0, ng: 0 };
+      const logDate = new Date(log.manufactureDate);
+      const isCurrentMonth = logDate >= monthStartDate && logDate <= monthEndDate;
+      const day = logDate.getDate();
 
       const coatingFields = [
         { lot: log.coatingLot1, quantity: log.productionQuantity1, side: log.coatingSide1 },
@@ -130,7 +143,13 @@ export class CoatingProcessService {
       for (const field of coatingFields) {
         if (field.lot && field.lot.length >= 5 && field.lot[4] === targetChar && field.side === '양면') {
           const qty = Number(field.quantity) || 0;
-          current.output += qty;
+          cumulativeOutput += qty;
+
+          if (isCurrentMonth) {
+            const current = dailyMap.get(day) || { output: 0, ng: 0 };
+            current.output += qty;
+            dailyMap.set(day, current);
+          }
 
           const singleLot = this.extractSingleLotFromDouble(field.lot);
 
@@ -139,37 +158,40 @@ export class CoatingProcessService {
             const newDoubleQty = currentDoubleQty + qty;
             doubleLotQuantityMap.set(singleLot, newDoubleQty);
 
-            singleLotLastDay.set(singleLot, day);
+            singleLotLastDay.set(singleLot, { day, isCurrentMonth });
 
             const singleQty = singleLotQuantityMap.get(singleLot) || 0;
 
             if (!processedSingleLots.has(singleLot) && newDoubleQty >= singleQty && singleQty > 0) {
-              const ng = singleQty - newDoubleQty;
-              if (ng > 0) {
-                current.ng += ng;
+              if (isCurrentMonth) {
+                const current = dailyMap.get(day) || { output: 0, ng: 0 };
+                const ng = singleQty - newDoubleQty;
+                if (ng > 0) {
+                  current.ng += ng;
+                  dailyMap.set(day, current);
+                }
               }
               processedSingleLots.add(singleLot);
             }
           }
         }
       }
-      dailyMap.set(day, current);
     }
 
     for (const [singleLot, singleQty] of singleLotQuantityMap) {
       if (!processedSingleLots.has(singleLot)) {
         const doubleQty = doubleLotQuantityMap.get(singleLot) || 0;
         const ng = singleQty - doubleQty;
-        const lastDay = singleLotLastDay.get(singleLot);
+        const lastDayInfo = singleLotLastDay.get(singleLot);
 
-        if (ng > 0 && lastDay) {
-          const dayData = dailyMap.get(lastDay) || { output: 0, ng: 0 };
+        if (ng > 0 && lastDayInfo && lastDayInfo.isCurrentMonth) {
+          const dayData = dailyMap.get(lastDayInfo.day) || { output: 0, ng: 0 };
           dayData.ng += ng;
-          dailyMap.set(lastDay, dayData);
+          dailyMap.set(lastDayInfo.day, dayData);
         }
       }
     }
-    return this.buildResultWithNg(dailyMap, month, productionTarget, type, '양면', 0);
+    return this.buildResultWithNg(dailyMap, month, productionTarget, type, '양면', 0, cumulativeOutput);
   }
 
   private buildResult(
@@ -178,6 +200,7 @@ export class CoatingProcessService {
     productionTarget: ProductionTarget | null,
     type: 'cathode' | 'anode',
     coatingType: '단면' | '양면',
+    cumulativeOutput: number,
   ) {
     const daysInMonth = new Date(parseInt(month.split('-')[0]), parseInt(month.split('-')[1]), 0).getDate();
     const data: Array<{ day: number; output: number; ng: number | null; yield: number | null }> = [];
@@ -199,7 +222,7 @@ export class CoatingProcessService {
           : 'coatingDoubleAnode';
 
     const targetQuantity = productionTarget?.[targetField] || null;
-    const progress = targetQuantity ? Math.round((totalOutput / targetQuantity) * 100 * 100) / 100 : null;
+    const progress = targetQuantity ? Math.round((cumulativeOutput / targetQuantity) * 100 * 100) / 100 : null;
 
     return {
       data,
@@ -214,6 +237,7 @@ export class CoatingProcessService {
     type: 'cathode' | 'anode',
     coatingType: '단면' | '양면',
     remainingNg: number,
+    cumulativeOutput: number,
   ) {
     const daysInMonth = new Date(parseInt(month.split('-')[0]), parseInt(month.split('-')[1]), 0).getDate();
     const data: Array<{ day: number; output: number; ng: number | null; yield: number | null }> = [];
@@ -240,7 +264,7 @@ export class CoatingProcessService {
           : 'coatingDoubleAnode';
 
     const targetQuantity = productionTarget?.[targetField] || null;
-    const progress = targetQuantity ? Math.round((totalOutput / targetQuantity) * 100 * 100) / 100 : null;
+    const progress = targetQuantity ? Math.round((cumulativeOutput / targetQuantity) * 100 * 100) / 100 : null;
 
     const totalYield = totalOutput + totalNg > 0 ? Math.round((totalOutput / (totalOutput + totalNg)) * 100 * 100) / 100 : null;
 
