@@ -58,20 +58,7 @@ export class NotchingProcessService {
       }),
     ]);
 
-    console.log('=== NOTCHING DEBUG ===');
-    console.log('productionId:', productionId);
-    console.log('month:', month);
-    console.log('type:', type);
-    console.log('targetChar:', targetChar);
-    console.log('notchingLogs count:', notchingLogs.length);
-    console.log('pressLogs count:', pressLogs.length);
-
     const pressLotQuantityMap = this.buildPressLotQuantityMap(pressLogs, targetChar);
-
-    console.log('=== 프레스 LOT별 생산량 (m) ===');
-    for (const [lot, qty] of pressLotQuantityMap) {
-      console.log(`  ${lot}: ${qty}`);
-    }
 
     return this.processNotchingData(notchingLogs, targetChar, month, productionTarget, type, pressLotQuantityMap);
   }
@@ -111,8 +98,6 @@ export class NotchingProcessService {
     const pressLotLastDay = new Map<string, number>();
     const processedPressLots = new Set<string>();
 
-    console.log('=== 노칭 LOT 처리 ===');
-
     for (const log of logs) {
       const day = new Date(log.manufactureDate).getDate();
       const current = dailyMap.get(day) || { good: 0, defect: 0, notchingLengthM: 0, pressInputM: 0 };
@@ -136,8 +121,6 @@ export class NotchingProcessService {
           current.defect += defect;
           current.notchingLengthM += notchingLengthM;
 
-          console.log(`  pressLot: ${field.pressLot}, good: ${good}, defect: ${defect}, wide(mm): ${wide}, notchingLength(m): ${notchingLengthM}`);
-
           const currentLength = notchingLengthMap.get(field.pressLot) || 0;
           notchingLengthMap.set(field.pressLot, currentLength + notchingLengthM);
 
@@ -146,11 +129,8 @@ export class NotchingProcessService {
           const pressQty = pressLotQuantityMap.get(field.pressLot) || 0;
           const newNotchingLength = currentLength + notchingLengthM;
 
-          console.log(`    pressLot: ${field.pressLot}, pressQty(m): ${pressQty}, notchingLength누적(m): ${newNotchingLength}`);
-
           if (!processedPressLots.has(field.pressLot) && newNotchingLength >= pressQty && pressQty > 0) {
             current.pressInputM += pressQty;
-            console.log(`    pressInputM 추가: ${pressQty}`);
             processedPressLots.add(field.pressLot);
           }
         }
@@ -158,31 +138,15 @@ export class NotchingProcessService {
       dailyMap.set(day, current);
     }
 
-    console.log('=== 노칭 LOT별 총 길이 (m) ===');
-    for (const [lot, length] of notchingLengthMap) {
-      console.log(`  ${lot}: ${length}`);
-    }
-
-    console.log('=== 미처리 프레스 LOT pressInputM 처리 ===');
     for (const [pressLot, pressQty] of pressLotQuantityMap) {
       if (!processedPressLots.has(pressLot)) {
         const lastDay = pressLotLastDay.get(pressLot);
-
-        console.log(`  pressLot: ${pressLot}, pressQty: ${pressQty}, lastDay: ${lastDay}`);
 
         if (lastDay) {
           const dayData = dailyMap.get(lastDay) || { good: 0, defect: 0, notchingLengthM: 0, pressInputM: 0 };
           dayData.pressInputM += pressQty;
           dailyMap.set(lastDay, dayData);
-          console.log(`    -> day ${lastDay}에 pressInputM ${pressQty} 추가`);
         }
-      }
-    }
-
-    console.log('=== dailyMap 최종 결과 ===');
-    for (const [day, data] of dailyMap) {
-      if (data.good > 0 || data.defect > 0) {
-        console.log(`  day ${day}: good=${data.good}, defect=${data.defect}, notchingLengthM=${data.notchingLengthM}, pressInputM=${data.pressInputM}`);
       }
     }
 
@@ -217,13 +181,6 @@ export class NotchingProcessService {
     const targetQuantity = productionTarget?.[targetField] || null;
     const progress = targetQuantity ? Math.round((totalOutput / targetQuantity) * 100 * 100) / 100 : null;
     const totalYield = totalPressInputM > 0 ? Math.round((totalNotchingLengthM / totalPressInputM) * 100 * 100) / 100 : null;
-
-    console.log('=== 최종 결과 ===');
-    console.log('totalOutput (양품 개수):', totalOutput);
-    console.log('totalDefect (불량 개수):', totalDefect);
-    console.log('totalNotchingLengthM (노칭 총 길이 m):', totalNotchingLengthM);
-    console.log('totalPressInputM (프레스 투입량 m):', totalPressInputM);
-    console.log('totalYield (수율 %):', totalYield);
 
     return {
       data,

@@ -35,12 +35,6 @@ export class PressProcessService {
     const projectStartDate = new Date(productionPlan.startDate);
     const targetChar = type === 'cathode' ? 'C' : 'A';
 
-    console.log('=== PRESS DEBUG ===');
-    console.log('productionId:', productionId);
-    console.log('month:', month);
-    console.log('type:', type);
-    console.log('targetChar:', targetChar);
-
     const [pressLogs, coatingLogs] = await Promise.all([
       this.pressRepository.find({
         where: {
@@ -58,15 +52,7 @@ export class PressProcessService {
       }),
     ]);
 
-    console.log('pressLogs count:', pressLogs.length);
-    console.log('coatingLogs count:', coatingLogs.length);
-
     const doubleLotQuantityMap = this.buildDoubleLotQuantityMap(coatingLogs, targetChar);
-
-    console.log('=== 코팅 양면 LOT별 생산량 ===');
-    for (const [lot, qty] of doubleLotQuantityMap) {
-      console.log(`  ${lot}: ${qty}`);
-    }
 
     return this.processPressData(pressLogs, targetChar, month, productionTarget, type, doubleLotQuantityMap);
   }
@@ -115,8 +101,6 @@ export class PressProcessService {
     const doubleLotLastDay = new Map<string, number>();
     const processedDoubleLots = new Set<string>();
 
-    console.log('=== 프레스 LOT 처리 ===');
-
     for (const log of logs) {
       const day = new Date(log.manufactureDate).getDate();
       const current = dailyMap.get(day) || { output: 0, inputQty: 0 };
@@ -136,8 +120,6 @@ export class PressProcessService {
 
           const doubleLot = this.extractDoubleLotFromPress(field.pressLot);
 
-          console.log(`  pressLot: ${field.pressLot} -> doubleLot: ${doubleLot}, pressQty: ${pressQty}`);
-
           if (doubleLot) {
             const currentPressQty = pressLotQuantityMap.get(doubleLot) || 0;
             const newPressQty = currentPressQty + pressQty;
@@ -147,11 +129,8 @@ export class PressProcessService {
 
             const doubleQty = doubleLotQuantityMap.get(doubleLot) || 0;
 
-            console.log(`    doubleLot: ${doubleLot}, doubleQty(코팅양면): ${doubleQty}, newPressQty(프레스누적): ${newPressQty}`);
-
             if (!processedDoubleLots.has(doubleLot) && newPressQty >= doubleQty && doubleQty > 0) {
               current.inputQty += doubleQty;
-              console.log(`    inputQty 추가: ${doubleQty}`);
               processedDoubleLots.add(doubleLot);
             }
           }
@@ -160,31 +139,15 @@ export class PressProcessService {
       dailyMap.set(day, current);
     }
 
-    console.log('=== 프레스 LOT별 누적 생산량 ===');
-    for (const [lot, qty] of pressLotQuantityMap) {
-      console.log(`  ${lot}: ${qty}`);
-    }
-
-    console.log('=== 미처리 양면 LOT inputQty 처리 ===');
     for (const [doubleLot, doubleQty] of doubleLotQuantityMap) {
       if (!processedDoubleLots.has(doubleLot)) {
         const lastDay = doubleLotLastDay.get(doubleLot);
-
-        console.log(`  doubleLot: ${doubleLot}, doubleQty: ${doubleQty}, lastDay: ${lastDay}`);
 
         if (lastDay) {
           const dayData = dailyMap.get(lastDay) || { output: 0, inputQty: 0 };
           dayData.inputQty += doubleQty;
           dailyMap.set(lastDay, dayData);
-          console.log(`    -> day ${lastDay}에 inputQty ${doubleQty} 추가`);
         }
-      }
-    }
-
-    console.log('=== dailyMap 최종 결과 ===');
-    for (const [day, data] of dailyMap) {
-      if (data.output > 0 || data.inputQty > 0) {
-        console.log(`  day ${day}: output=${data.output}, inputQty=${data.inputQty}`);
       }
     }
 
@@ -216,12 +179,6 @@ export class PressProcessService {
     const progress = targetQuantity ? Math.round((totalOutput / targetQuantity) * 100 * 100) / 100 : null;
     const totalNg = totalInputQty > totalOutput ? totalInputQty - totalOutput : null;
     const totalYield = totalInputQty > 0 ? Math.round((totalOutput / totalInputQty) * 100 * 100) / 100 : null;
-
-    console.log('=== 최종 결과 ===');
-    console.log('totalOutput:', totalOutput);
-    console.log('totalInputQty:', totalInputQty);
-    console.log('totalNg:', totalNg);
-    console.log('totalYield:', totalYield);
 
     return {
       data,
