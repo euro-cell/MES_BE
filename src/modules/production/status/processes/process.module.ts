@@ -13,6 +13,7 @@ import { WorklogSealing } from 'src/common/entities/worklogs/worklog-11-sealing.
 import { WorklogFilling } from 'src/common/entities/worklogs/worklog-12-filling.entity';
 import { WorklogFormation } from 'src/common/entities/worklogs/worklog-13-formation.entity';
 import { WorklogGrading } from 'src/common/entities/worklogs/worklog-14-grading.entity';
+import { WorklogVisualInspection } from 'src/common/entities/worklogs/worklog-15-visual-inspection.entity';
 import { Material } from 'src/common/entities/material.entity';
 import { ProductionPlan } from 'src/common/entities/production-plan.entity';
 import { ProductionTarget } from 'src/common/entities/production-target.entity';
@@ -30,6 +31,7 @@ import {
   FillingProcessService,
   FormationProcessService,
   GradingProcessService,
+  VisualInspectionProcessService,
 } from '.';
 
 @Module({
@@ -48,6 +50,7 @@ import {
       WorklogFilling,
       WorklogFormation,
       WorklogGrading,
+      WorklogVisualInspection,
       Material,
       ProductionPlan,
       ProductionTarget,
@@ -67,6 +70,7 @@ import {
     FillingProcessService,
     FormationProcessService,
     GradingProcessService,
+    VisualInspectionProcessService,
   ],
   exports: [
     MixingProcessService,
@@ -82,6 +86,7 @@ import {
     FillingProcessService,
     FormationProcessService,
     GradingProcessService,
+    VisualInspectionProcessService,
   ],
 })
 export class ProcessModule {}

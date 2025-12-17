@@ -11,3 +11,4 @@ export { SealingProcessService } from './10-sealing.service';
 export { FillingProcessService } from './11-filling.service';
 export { FormationProcessService } from './12-formation.service';
 export { GradingProcessService } from './13-grading.service';
+export { VisualInspectionProcessService } from './14-visual-inspection.service';
