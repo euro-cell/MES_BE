@@ -10,3 +10,4 @@ export { WeldingProcessService } from './09-welding.service';
 export { SealingProcessService } from './10-sealing.service';
 export { FillingProcessService } from './11-filling.service';
 export { FormationProcessService } from './12-formation.service';
+export { GradingProcessService } from './13-grading.service';

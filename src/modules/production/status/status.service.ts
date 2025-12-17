@@ -15,6 +15,7 @@ import {
   SealingProcessService,
   FillingProcessService,
   FormationProcessService,
+  GradingProcessService,
 } from './processes';
 import { ProductionTargetDto } from 'src/common/dtos/production-target.dto';
 import { ProductionTarget } from 'src/common/entities/production-target.entity';
@@ -38,6 +39,7 @@ export class StatusService {
     private readonly sealingProcessService: SealingProcessService,
     private readonly fillingProcessService: FillingProcessService,
     private readonly formationProcessService: FormationProcessService,
+    private readonly gradingProcessService: GradingProcessService,
   ) {}
 
   async targetStatus(productionId: number, dto: ProductionTargetDto) {
@@ -130,7 +132,10 @@ export class StatusService {
   }
 
   async getFormationStatus(productionId: number, month: string) {
-    const [formation] = await Promise.all([this.formationProcessService.getMonthlyData(productionId, month)]);
+    const [formation, grading] = await Promise.all([
+      this.formationProcessService.getMonthlyData(productionId, month),
+      this.gradingProcessService.getMonthlyData(productionId, month),
+    ]);
 
     return {
       category: 'formation',
@@ -139,6 +144,8 @@ export class StatusService {
         preFormation: formation.preFormation,
         degas: formation.degas,
         mainFormation: formation.mainFormation,
+        aging: grading.aging,
+        grading: grading.grading,
       },
     };
   }
