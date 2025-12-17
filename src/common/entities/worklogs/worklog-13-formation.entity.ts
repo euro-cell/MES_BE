@@ -240,7 +240,19 @@ export class WorklogFormation extends WorklogBase {
 
   // OCV1
   @Column({ type: 'smallint', nullable: true })
-  ocv1Quantity: number;
+  ocv1InputQuantity: number;
+
+  @Column({ type: 'smallint', nullable: true })
+  ocv1GoodQuantity: number;
+
+  @Column({ type: 'smallint', nullable: true })
+  ocv1DefectQuantity: number;
+
+  @Column({ type: 'smallint', nullable: true })
+  ocv1DiscardQuantity: number;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  ocv1DefectRate: number;
 
   // Lot
   @Column({ type: 'varchar', length: 50, nullable: true })
