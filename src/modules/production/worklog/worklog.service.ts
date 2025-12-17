@@ -15,6 +15,7 @@ export enum ProcessTemplateFile {
   filling = '12.Filling.xlsx',
   formation = '13.Formation.xlsx',
   grading = '14.Grading.xlsx',
+  inspection = '15.VisualInspection.xlsx',
 }
 
 @Injectable()
