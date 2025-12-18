@@ -1,5 +1,5 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNumber, IsOptional } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class ProductionTargetDto {
   // 전극 공정
@@ -134,4 +134,14 @@ export class ProductionTargetDto {
   @IsOptional()
   @IsNumber()
   visualInspection: number;
+}
+
+export class UpdateTargetByKeyDto {
+  @ApiProperty({ description: '공정 키', example: 'aging' })
+  @IsString()
+  processKey: string;
+
+  @ApiProperty({ description: '목표 수량', example: 999 })
+  @IsNumber()
+  targetQuantity: number;
 }
