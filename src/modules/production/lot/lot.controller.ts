@@ -18,6 +18,11 @@ export class LotController {
     return this.lotService.sync(productionId, process);
   }
 
+  @Get('sync')
+  async getSync(@Param('productionId') productionId: number, @Query('process') process: string) {
+    return await this.lotService.getLastSync(productionId, process);
+  }
+
   @Get('mixing')
   async getMixingLots(@Param('productionId') productionId: number) {
     return this.mixingService.getMixingLots(productionId);

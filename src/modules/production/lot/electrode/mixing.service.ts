@@ -61,7 +61,7 @@ export class MixingService {
     }
   }
 
-  private async getLastSync(productionId: number) {
+  async getLastSync(productionId: number) {
     return this.lotSyncRepo.findOne({
       where: { production: { id: productionId }, process: 'mixing' },
       order: { syncedAt: 'DESC' },
