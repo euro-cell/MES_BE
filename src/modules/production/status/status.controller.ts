@@ -19,7 +19,7 @@ export class StatusController {
 
   @Get('Electrode')
   @ApiQuery({ name: 'month', required: true, type: String, description: 'YYYY-MM 형식 (예: 2025-01)' })
-  @ApiQuery({ name: 'type', required: true, enum: ['cathode', 'anode'], description: '양극재(cathode) 또는 음극재(anode)' })
+  @ApiQuery({ name: 'type', required: true, enum: ['cathode', 'anode'], description: 'cathode 또는 anode' })
   async getElectrodeStatus(
     @Param('productionId', ParseIntPipe) productionId: number,
     @Query('month') month: string,
