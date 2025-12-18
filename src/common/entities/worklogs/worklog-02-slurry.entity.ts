@@ -193,24 +193,24 @@ export class WorklogSlurry extends WorklogBase {
   solidContent3Percentage: number;
 
   // 생산 정보 - Grind Gage - 미세입자 (1차, 2차)
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'smallint', nullable: true })
   grindGageFineParticle1: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'smallint', nullable: true })
   grindGageFineParticle2: number;
 
   // 생산 정보 - Grind Gage - Line (1차, 2차)
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'smallint', nullable: true })
   grindGageLine1: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'smallint', nullable: true })
   grindGageLine2: number;
 
   // 생산 정보 - Grind Gage - 논코팅 (1차, 2차)
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'smallint', nullable: true })
   grindGageNonCoating1: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'smallint', nullable: true })
   grindGageNonCoating2: number;
 
   // 공정 조건 - PD Mixer 1
