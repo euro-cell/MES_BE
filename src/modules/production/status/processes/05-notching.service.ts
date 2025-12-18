@@ -198,7 +198,7 @@ export class NotchingProcessService {
 
     return {
       data,
-      total: { totalOutput, targetQuantity, progress, totalNg: totalDefect > 0 ? totalDefect : null, totalYield },
+      total: { totalOutput, cumulativeOutput, targetQuantity, progress, totalNg: totalDefect > 0 ? totalDefect : null, totalYield },
     };
   }
 

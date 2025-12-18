@@ -291,6 +291,7 @@ export class VdProcessService {
       total: {
         cathode: {
           totalOutput: totalCathodeOutput,
+          cumulativeOutput: cumulativeCathodeOutput,
           targetQuantity: cathodeTargetQuantity,
           progress: cathodeProgress,
           totalNg: totalCathodeNg,
@@ -298,6 +299,7 @@ export class VdProcessService {
         },
         anode: {
           totalOutput: totalAnodeOutput,
+          cumulativeOutput: cumulativeAnodeOutput,
           targetQuantity: anodeTargetQuantity,
           progress: anodeProgress,
           totalNg: totalAnodeNg,

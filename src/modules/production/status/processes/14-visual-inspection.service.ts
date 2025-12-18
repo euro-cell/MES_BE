@@ -203,6 +203,7 @@ export class VisualInspectionProcessService {
       data,
       total: {
         totalOutput,
+        cumulativeOutput,
         targetQuantity,
         progress,
         totalNg,

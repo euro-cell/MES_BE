@@ -174,6 +174,7 @@ export class SealingProcessService {
       data,
       total: {
         totalOutput,
+        cumulativeOutput,
         targetQuantity,
         progress,
         totalNg,

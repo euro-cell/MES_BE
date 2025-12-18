@@ -117,6 +117,7 @@ export class FillingProcessService {
       data,
       total: {
         totalOutput,
+        cumulativeOutput,
         targetQuantity,
         progress,
         totalNg: totalOutput > 0 ? totalNg : null,

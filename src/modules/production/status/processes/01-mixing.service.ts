@@ -103,6 +103,7 @@ export class MixingProcessService {
       data,
       total: {
         totalOutput,
+        cumulativeOutput,
         targetQuantity,
         progress,
       },

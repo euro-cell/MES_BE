@@ -272,6 +272,7 @@ export class WeldingProcessService {
         data: preWeldingData,
         total: {
           totalOutput: totalPreWeldingOutput,
+          cumulativeOutput: cumulativePreWeldingOutput,
           targetQuantity: preWeldingTargetQuantity,
           progress: preWeldingProgress,
           totalNg: totalPreWeldingOutput > 0 ? totalPreNgSum : null,
@@ -283,6 +284,7 @@ export class WeldingProcessService {
         data: mainWeldingData,
         total: {
           totalOutput: totalMainWeldingOutput,
+          cumulativeOutput: cumulativeMainWeldingOutput,
           targetQuantity: mainWeldingTargetQuantity,
           progress: mainWeldingProgress,
           totalNg: totalMainWeldingOutput > 0 ? totalMainNgSum : null,

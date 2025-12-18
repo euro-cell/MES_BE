@@ -174,6 +174,7 @@ export class StackingProcessService {
       data,
       total: {
         totalOutput,
+        cumulativeOutput,
         targetQuantity,
         progress,
         totalNg,

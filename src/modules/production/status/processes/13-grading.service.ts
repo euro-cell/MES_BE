@@ -196,6 +196,7 @@ export class GradingProcessService {
         data: agingData,
         total: {
           totalOutput: totalAging.output,
+          cumulativeOutput: cumulativeTotals.aging,
           targetQuantity: agingTargetQuantity,
           progress: agingProgress,
           totalNg: totalAging.output > 0 ? agingTotalNg : null,
@@ -206,6 +207,7 @@ export class GradingProcessService {
         data: gradingData,
         total: {
           totalOutput: totalGrading.output,
+          cumulativeOutput: cumulativeTotals.grading,
           targetQuantity: gradingTargetQuantity,
           progress: gradingProgress,
           totalNg: totalGrading.output > 0 ? gradingTotalNg : null,

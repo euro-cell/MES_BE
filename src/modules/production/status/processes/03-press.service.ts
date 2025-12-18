@@ -196,7 +196,7 @@ export class PressProcessService {
 
     return {
       data,
-      total: { totalOutput, targetQuantity, progress, totalNg, totalYield },
+      total: { totalOutput, cumulativeOutput, targetQuantity, progress, totalNg, totalYield },
     };
   }
 

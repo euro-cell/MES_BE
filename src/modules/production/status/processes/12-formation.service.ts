@@ -239,6 +239,7 @@ export class FormationProcessService {
         data: preFormationData,
         total: {
           totalOutput: totalPreFormation.output,
+          cumulativeOutput: cumulativeTotals.preFormation,
           targetQuantity: preFormationTargetQuantity,
           progress: preFormationProgress,
           totalNg: totalPreFormation.output > 0 ? preFormationTotalNg : null,
@@ -249,6 +250,7 @@ export class FormationProcessService {
         data: degasData,
         total: {
           totalOutput: totalDegas.output,
+          cumulativeOutput: cumulativeTotals.degas,
           targetQuantity: degasTargetQuantity,
           progress: degasProgress,
           totalNg: totalDegas.output > 0 ? degasTotalNg : null,
@@ -259,6 +261,7 @@ export class FormationProcessService {
         data: mainFormationData,
         total: {
           totalOutput: totalMainFormation.output,
+          cumulativeOutput: cumulativeTotals.mainFormation,
           targetQuantity: mainFormationTargetQuantity,
           progress: mainFormationProgress,
           totalNg: totalMainFormation.output > 0 ? mainFormationTotalNg : null,

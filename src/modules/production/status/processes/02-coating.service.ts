@@ -226,7 +226,7 @@ export class CoatingProcessService {
 
     return {
       data,
-      total: { totalOutput, targetQuantity, progress, totalNg: null, totalYield: null },
+      total: { totalOutput, cumulativeOutput, targetQuantity, progress, totalNg: null, totalYield: null },
     };
   }
 
@@ -270,7 +270,7 @@ export class CoatingProcessService {
 
     return {
       data,
-      total: { totalOutput, targetQuantity, progress, totalNg, totalYield },
+      total: { totalOutput, cumulativeOutput, targetQuantity, progress, totalNg, totalYield },
     };
   }
 

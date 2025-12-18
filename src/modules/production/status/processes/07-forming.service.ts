@@ -193,6 +193,7 @@ export class FormingProcessService {
         }>;
         total: {
           totalOutput: number;
+          cumulativeOutput: number;
           totalNg: number | null;
         };
       }
@@ -242,6 +243,7 @@ export class FormingProcessService {
         data,
         total: {
           totalOutput,
+          cumulativeOutput: cumulativeTotals[subProcess],
           // 총 생산량이 있으면 totalNg는 0이라도 표시
           totalNg: totalOutput > 0 ? totalDefect : null,
         },
@@ -279,6 +281,7 @@ export class FormingProcessService {
         total: totalYield,
       },
       targetQuantity,
+      cumulativeOutput: cumulativeLastProcessOutput,
       progress,
     };
   }
