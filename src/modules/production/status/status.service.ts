@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ProductionPlan } from 'src/common/entities/production-plan.entity';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import {
   MixingProcessService,
   CoatingProcessService,
@@ -152,5 +152,20 @@ export class StatusService {
         visualInspection,
       },
     };
+  }
+
+  async updateTargetStatus(productionId: number, dto: ProductionTargetDto) {
+    const existingTarget = await this.productionTargetRepository.findOne({
+      where: { production: { id: productionId } },
+    });
+
+    if (!existingTarget) throw new NotFoundException('목표 수량이 설정되어 있지 않습니다.');
+
+    Object.keys(dto).forEach((key) => {
+      if (dto[key] !== undefined && dto[key] !== null) {
+        existingTarget[key] = dto[key];
+      }
+    });
+    return await this.productionTargetRepository.save(existingTarget);
   }
 }
