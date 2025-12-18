@@ -67,4 +67,43 @@ export class MixingService {
       order: { syncedAt: 'DESC' },
     });
   }
+
+  async getMixingLots(productionId: number) {
+    const lots = await this.lotMixingRepo.find({
+      where: { production: { id: productionId } },
+      relations: ['worklogBinder', 'worklogSlurry'],
+      order: { processDate: 'DESC' },
+    });
+
+    return lots.map((lot) => ({
+      id: lot.id,
+      lot: lot.lot,
+      processDate: lot.processDate,
+      binder: lot.worklogBinder
+        ? {
+            viscosity: Number(lot.worklogBinder.viscosity),
+            solidContent1: Number(lot.worklogBinder.solidContent1),
+            solidContent2: Number(lot.worklogBinder.solidContent2),
+            solidContent3: Number(lot.worklogBinder.solidContent3),
+          }
+        : null,
+      slurry: lot.worklogSlurry
+        ? {
+            tempHumi: lot.worklogSlurry.tempHumi,
+            activeMaterialInput: Number(lot.worklogSlurry.material1ActualInput),
+            viscosityAfterMixing: Number(lot.worklogSlurry.viscosityAfterMixing),
+            viscosityAfterDefoaming: Number(lot.worklogSlurry.viscosityAfterDefoaming),
+            viscosityAfterStabilization: Number(lot.worklogSlurry.viscosityAfterStabilization),
+            solidContent1: Number(lot.worklogSlurry.solidContent1Percentage),
+            solidContent2: Number(lot.worklogSlurry.solidContent2Percentage),
+            solidContent3: Number(lot.worklogSlurry.solidContent3Percentage),
+            grindGage: [
+              lot.worklogSlurry.grindGageFineParticle2,
+              lot.worklogSlurry.grindGageLine2,
+              lot.worklogSlurry.grindGageNonCoating2,
+            ].join('-'),
+          }
+        : null,
+    }));
+  }
 }
