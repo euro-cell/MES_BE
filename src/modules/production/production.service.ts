@@ -13,7 +13,12 @@ export class ProductionService {
 
   async findAll() {
     const productions = await this.ProductionRepository.find({ order: { id: 'DESC' }, relations: ['plan'] });
-    return productions.map(({ plan, ...rest }) => ({ ...rest, isPlan: !!plan }));
+    return productions.map(({ plan, ...rest }) => ({
+      ...rest,
+      isPlan: !!plan,
+      startDate: plan?.startDate || null,
+      endDate: plan?.endDate || null,
+    }));
   }
 
   private generateProjectName({
