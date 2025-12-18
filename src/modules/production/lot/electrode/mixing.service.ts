@@ -98,9 +98,9 @@ export class MixingService {
             solidContent2: Number(lot.worklogSlurry.solidContent2Percentage),
             solidContent3: Number(lot.worklogSlurry.solidContent3Percentage),
             grindGage: [
-              lot.worklogSlurry.grindGageFineParticle2,
-              lot.worklogSlurry.grindGageLine2,
-              lot.worklogSlurry.grindGageNonCoating2,
+              lot.worklogSlurry.grindGageFineParticle1,
+              lot.worklogSlurry.grindGageLine1,
+              lot.worklogSlurry.grindGageNonCoating1,
             ].join('-'),
           }
         : null,
