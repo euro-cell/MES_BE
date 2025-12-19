@@ -93,15 +93,15 @@ export class CreateCoatingWorklogDto extends BaseWorklogDto {
   @IsNumber()
   monoPumpRear1?: number;
 
-  @ApiPropertyOptional({ description: '코팅 속도 전단 1차', example: 10.5 })
+  @ApiPropertyOptional({ description: '코팅 폭 1차', example: 10.5 })
   @IsOptional()
   @IsNumber()
-  coatingSpeedFront1?: number;
+  coatingWidth1?: number;
 
-  @ApiPropertyOptional({ description: '코팅 속도 후단 1차', example: 10.5 })
+  @ApiPropertyOptional({ description: 'Miss Match 1차', example: 0 })
   @IsOptional()
   @IsNumber()
-  coatingSpeedRear1?: number;
+  misalignment1?: number;
 
   @ApiPropertyOptional({ description: '면적밀도 전단 M 1차', example: 25.5 })
   @IsOptional()
@@ -189,15 +189,15 @@ export class CreateCoatingWorklogDto extends BaseWorklogDto {
   @IsNumber()
   monoPumpRear2?: number;
 
-  @ApiPropertyOptional({ description: '코팅 속도 전단 2차' })
+  @ApiPropertyOptional({ description: '코팅 폭 2차' })
   @IsOptional()
   @IsNumber()
-  coatingSpeedFront2?: number;
+  coatingWidth2?: number;
 
-  @ApiPropertyOptional({ description: '코팅 속도 후단 2차' })
+  @ApiPropertyOptional({ description: 'Miss Match 2차' })
   @IsOptional()
   @IsNumber()
-  coatingSpeedRear2?: number;
+  misalignment2?: number;
 
   @ApiPropertyOptional()
   @IsOptional()
@@ -285,15 +285,15 @@ export class CreateCoatingWorklogDto extends BaseWorklogDto {
   @IsNumber()
   monoPumpRear3?: number;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ description: '코팅 폭 3차' })
   @IsOptional()
   @IsNumber()
-  coatingSpeedFront3?: number;
+  coatingWidth3?: number;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ description: 'Miss Match 3차' })
   @IsOptional()
   @IsNumber()
-  coatingSpeedRear3?: number;
+  misalignment3?: number;
 
   @ApiPropertyOptional()
   @IsOptional()
@@ -381,15 +381,15 @@ export class CreateCoatingWorklogDto extends BaseWorklogDto {
   @IsNumber()
   monoPumpRear4?: number;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ description: '코팅 폭 4차' })
   @IsOptional()
   @IsNumber()
-  coatingSpeedFront4?: number;
+  coatingWidth4?: number;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ description: 'Miss Match 4차' })
   @IsOptional()
   @IsNumber()
-  coatingSpeedRear4?: number;
+  misalignment4?: number;
 
   @ApiPropertyOptional()
   @IsOptional()

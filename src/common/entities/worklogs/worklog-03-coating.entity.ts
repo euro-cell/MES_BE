@@ -58,10 +58,10 @@ export class WorklogCoating extends WorklogBase {
   monoPumpRear1: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  coatingSpeedFront1: number;
+  coatingWidth1: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  coatingSpeedRear1: number;
+  misalignment1: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   weightPerAreaFront1M: number;
@@ -116,10 +116,10 @@ export class WorklogCoating extends WorklogBase {
   monoPumpRear2: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  coatingSpeedFront2: number;
+  coatingWidth2: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  coatingSpeedRear2: number;
+  misalignment2: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   weightPerAreaFront2M: number;
@@ -174,10 +174,10 @@ export class WorklogCoating extends WorklogBase {
   monoPumpRear3: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  coatingSpeedFront3: number;
+  coatingWidth3: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  coatingSpeedRear3: number;
+  misalignment3: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   weightPerAreaFront3M: number;
@@ -232,10 +232,10 @@ export class WorklogCoating extends WorklogBase {
   monoPumpRear4: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  coatingSpeedFront4: number;
+  coatingWidth4: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  coatingSpeedRear4: number;
+  misalignment4: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   weightPerAreaFront4M: number;

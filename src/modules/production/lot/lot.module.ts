@@ -10,18 +10,10 @@ import { LotSync } from '../../../common/entities/lots/lot-sync.entity';
 import { WorklogBinder } from '../../../common/entities/worklogs/worklog-01-binder.entity';
 import { WorklogSlurry } from '../../../common/entities/worklogs/worklog-02-slurry.entity';
 import { WorklogCoating } from '../../../common/entities/worklogs/worklog-03-coating.entity';
+import { Material } from '../../../common/entities/material.entity';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([
-      LotMixing,
-      LotCoating,
-      LotSync,
-      WorklogBinder,
-      WorklogSlurry,
-      WorklogCoating,
-    ]),
-  ],
+  imports: [TypeOrmModule.forFeature([LotMixing, LotCoating, LotSync, Material, WorklogBinder, WorklogSlurry, WorklogCoating])],
   controllers: [LotController],
   providers: [LotService, MixingService, CoatingService],
 })

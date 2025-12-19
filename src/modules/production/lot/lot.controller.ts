@@ -2,6 +2,7 @@ import { Controller, Post, Param, Query, Get } from '@nestjs/common';
 import { LotService } from './lot.service';
 import { ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { MixingService } from './electrode/mixing.service';
+import { CoatingService } from './electrode/coating.service';
 
 @ApiTags('Lot 관리/검색')
 @Controller(':productionId/lot')
@@ -9,6 +10,7 @@ export class LotController {
   constructor(
     private readonly lotService: LotService,
     private readonly mixingService: MixingService,
+    private readonly coatingService: CoatingService,
   ) {}
 
   @Post('sync')
@@ -26,5 +28,10 @@ export class LotController {
   @Get('mixing')
   async getMixingLots(@Param('productionId') productionId: number) {
     return this.mixingService.getMixingLots(productionId);
+  }
+
+  @Get('coating')
+  async getCoatingLots(@Param('productionId') productionId: number) {
+    return this.coatingService.getCoatingLots(productionId);
   }
 }
