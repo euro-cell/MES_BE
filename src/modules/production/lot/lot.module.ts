@@ -4,17 +4,32 @@ import { LotService } from './lot.service';
 import { LotController } from './lot.controller';
 import { MixingService } from './electrode/mixing.service';
 import { CoatingService } from './electrode/coating.service';
+import { PressService } from './electrode/press.service';
 import { LotMixing } from '../../../common/entities/lots/lot-01-mixing.entity';
 import { LotCoating } from '../../../common/entities/lots/lot-02-coating.entity';
+import { LotPress } from '../../../common/entities/lots/lot-03-press.entity';
 import { LotSync } from '../../../common/entities/lots/lot-sync.entity';
 import { WorklogBinder } from '../../../common/entities/worklogs/worklog-01-binder.entity';
 import { WorklogSlurry } from '../../../common/entities/worklogs/worklog-02-slurry.entity';
 import { WorklogCoating } from '../../../common/entities/worklogs/worklog-03-coating.entity';
+import { WorklogPress } from '../../../common/entities/worklogs/worklog-04-press.entity';
 import { Material } from '../../../common/entities/material.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([LotMixing, LotCoating, LotSync, Material, WorklogBinder, WorklogSlurry, WorklogCoating])],
+  imports: [
+    TypeOrmModule.forFeature([
+      LotMixing,
+      LotCoating,
+      LotPress,
+      LotSync,
+      Material,
+      WorklogBinder,
+      WorklogSlurry,
+      WorklogCoating,
+      WorklogPress,
+    ]),
+  ],
   controllers: [LotController],
-  providers: [LotService, MixingService, CoatingService],
+  providers: [LotService, MixingService, CoatingService, PressService],
 })
 export class LotModule {}
