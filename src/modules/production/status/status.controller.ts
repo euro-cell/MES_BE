@@ -44,4 +44,9 @@ export class StatusController {
   async updateTargetStatus(@Param('productionId', ParseIntPipe) productionId: number, @Body() dto: UpdateTargetByKeyDto) {
     return await this.statusService.updateTargetStatus(productionId, dto);
   }
+
+  @Get('progress')
+  async getProgress(@Param('productionId', ParseIntPipe) productionId: number) {
+    return await this.statusService.getProgress(productionId);
+  }
 }

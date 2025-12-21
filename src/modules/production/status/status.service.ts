@@ -20,6 +20,7 @@ import {
 } from './processes';
 import { ProductionTargetDto, UpdateTargetByKeyDto } from 'src/common/dtos/production-target.dto';
 import { ProductionTarget } from 'src/common/entities/production-target.entity';
+import { ProductionProgressDto } from 'src/common/dtos/production-progress.dto';
 
 @Injectable()
 export class StatusService {
@@ -169,5 +170,164 @@ export class StatusService {
 
     existingTarget[processKey] = targetQuantity;
     return await this.productionTargetRepository.save(existingTarget);
+  }
+
+  async getProgress(productionId: number): Promise<ProductionProgressDto> {
+    const currentDate = new Date();
+    const month = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`;
+
+    const [electrodeData, assemblyData, formationData] = await Promise.all([
+      this.calculateElectrodeProgress(productionId, month),
+      this.calculateAssemblyProgress(productionId, month),
+      this.calculateFormationProgress(productionId, month),
+    ]);
+
+    const overall = Math.round(((electrodeData + assemblyData + formationData) / 3) * 100) / 100;
+
+    return { electrode: electrodeData, assembly: assemblyData, formation: formationData, overall };
+  }
+
+  private async calculateElectrodeProgress(productionId: number, month: string): Promise<number> {
+    try {
+      const [cathodeData, anodeData] = await Promise.all([
+        this.getElectrodeStatus(productionId, month, 'cathode'),
+        this.getElectrodeStatus(productionId, month, 'anode'),
+      ]);
+
+      const progressValues: number[] = [];
+
+      // Cathode 공정별 진행률 수집
+      if (cathodeData.processes.mixing?.total?.progress !== null) {
+        progressValues.push(cathodeData.processes.mixing.total.progress);
+      }
+      if (cathodeData.processes.coatingSingle?.total?.progress !== null) {
+        progressValues.push(cathodeData.processes.coatingSingle.total.progress);
+      }
+      if (cathodeData.processes.coatingDouble?.total?.progress !== null) {
+        progressValues.push(cathodeData.processes.coatingDouble.total.progress);
+      }
+      if (cathodeData.processes.press?.total?.progress !== null) {
+        progressValues.push(cathodeData.processes.press.total.progress);
+      }
+      if (cathodeData.processes.slitting?.total?.progress !== null) {
+        progressValues.push(cathodeData.processes.slitting.total.progress);
+      }
+      if (cathodeData.processes.notching?.total?.progress !== null) {
+        progressValues.push(cathodeData.processes.notching.total.progress);
+      }
+
+      // Anode 공정별 진행률 수집
+      if (anodeData.processes.mixing?.total?.progress !== null) {
+        progressValues.push(anodeData.processes.mixing.total.progress);
+      }
+      if (anodeData.processes.coatingSingle?.total?.progress !== null) {
+        progressValues.push(anodeData.processes.coatingSingle.total.progress);
+      }
+      if (anodeData.processes.coatingDouble?.total?.progress !== null) {
+        progressValues.push(anodeData.processes.coatingDouble.total.progress);
+      }
+      if (anodeData.processes.press?.total?.progress !== null) {
+        progressValues.push(anodeData.processes.press.total.progress);
+      }
+      if (anodeData.processes.slitting?.total?.progress !== null) {
+        progressValues.push(anodeData.processes.slitting.total.progress);
+      }
+      if (anodeData.processes.notching?.total?.progress !== null) {
+        progressValues.push(anodeData.processes.notching.total.progress);
+      }
+
+      // 평균 진행률 계산
+      if (progressValues.length === 0) return 0;
+      const average = progressValues.reduce((sum, val) => sum + val, 0) / progressValues.length;
+      return Math.round(average * 100) / 100;
+    } catch (error) {
+      return 0;
+    }
+  }
+
+  private async calculateAssemblyProgress(productionId: number, month: string): Promise<number> {
+    try {
+      const assemblyData = await this.getAssemblyStatus(productionId, month);
+      const progressValues: number[] = [];
+
+      // VD - cathode와 anode 진행률
+      if (assemblyData.processes.vd?.total?.cathode?.progress !== null) {
+        progressValues.push(assemblyData.processes.vd.total.cathode.progress);
+      }
+      if (assemblyData.processes.vd?.total?.anode?.progress !== null) {
+        progressValues.push(assemblyData.processes.vd.total.anode.progress);
+      }
+
+      // Forming - 루트 레벨의 progress
+      if (assemblyData.processes.forming?.progress !== null) {
+        progressValues.push(assemblyData.processes.forming.progress);
+      }
+
+      // Stacking
+      if (assemblyData.processes.stacking?.total?.progress !== null) {
+        progressValues.push(assemblyData.processes.stacking.total.progress);
+      }
+
+      // Welding - preWelding과 mainWelding
+      if (assemblyData.processes.preWelding?.total?.progress !== null) {
+        progressValues.push(assemblyData.processes.preWelding.total.progress);
+      }
+      if (assemblyData.processes.mainWelding?.total?.progress !== null) {
+        progressValues.push(assemblyData.processes.mainWelding.total.progress);
+      }
+
+      // Sealing
+      if (assemblyData.processes.sealing?.total?.progress !== null) {
+        progressValues.push(assemblyData.processes.sealing.total.progress);
+      }
+
+      // Filling
+      if (assemblyData.processes.filling?.total?.progress !== null) {
+        progressValues.push(assemblyData.processes.filling.total.progress);
+      }
+
+      if (progressValues.length === 0) return 0;
+      const average = progressValues.reduce((sum, val) => sum + val, 0) / progressValues.length;
+      return Math.round(average * 100) / 100;
+    } catch (error) {
+      return 0;
+    }
+  }
+
+  private async calculateFormationProgress(productionId: number, month: string): Promise<number> {
+    try {
+      const formationData = await this.getFormationStatus(productionId, month);
+      const progressValues: number[] = [];
+
+      // Formation - preFormation, degas, mainFormation
+      if (formationData.processes.preFormation?.total?.progress !== null) {
+        progressValues.push(formationData.processes.preFormation.total.progress);
+      }
+      if (formationData.processes.degas?.total?.progress !== null) {
+        progressValues.push(formationData.processes.degas.total.progress);
+      }
+      if (formationData.processes.mainFormation?.total?.progress !== null) {
+        progressValues.push(formationData.processes.mainFormation.total.progress);
+      }
+
+      // Grading - aging과 grading
+      if (formationData.processes.aging?.total?.progress !== null) {
+        progressValues.push(formationData.processes.aging.total.progress);
+      }
+      if (formationData.processes.grading?.total?.progress !== null) {
+        progressValues.push(formationData.processes.grading.total.progress);
+      }
+
+      // Visual Inspection
+      if (formationData.processes.visualInspection?.total?.progress !== null) {
+        progressValues.push(formationData.processes.visualInspection.total.progress);
+      }
+
+      if (progressValues.length === 0) return 0;
+      const average = progressValues.reduce((sum, val) => sum + val, 0) / progressValues.length;
+      return Math.round(average * 100) / 100;
+    } catch (error) {
+      return 0;
+    }
   }
 }
