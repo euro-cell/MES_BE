@@ -89,12 +89,10 @@ export class PressService {
       const press = lot.worklogPress;
       const coatingWorklog = lot.lotCoating?.worklogCoating;
 
-      // lot 번호에 해당하는 인덱스 찾기 (pressLot1~5 중 어느 것인지)
       const lotIndex = press
         ? [press.pressLot1, press.pressLot2, press.pressLot3, press.pressLot4, press.pressLot5].findIndex((l) => l === lot.lot) + 1
         : 0;
 
-      // tempHumi 파싱 (예: "25°C / 50%" -> temp: 25, humidity: 50)
       let temp: number | null = null;
       let humidity: number | null = null;
       if (press?.tempHumi) {
@@ -104,11 +102,9 @@ export class PressService {
         humidity = humidityMatch ? Number(humidityMatch[1]) : null;
       }
 
-      // 해당 lot의 데이터 가져오기
       const pressRecord = press as unknown as Record<string, unknown>;
       const pressQuantity = press && lotIndex > 0 ? pressRecord[`pressQuantity${lotIndex}`] : null;
 
-      // thickness 데이터
       const thicknessFrontM = press && lotIndex > 0 ? pressRecord[`thicknessFront${lotIndex}M`] : null;
       const thicknessFrontC = press && lotIndex > 0 ? pressRecord[`thicknessFront${lotIndex}C`] : null;
       const thicknessFrontD = press && lotIndex > 0 ? pressRecord[`thicknessFront${lotIndex}D`] : null;
@@ -116,7 +112,6 @@ export class PressService {
       const thicknessRearC = press && lotIndex > 0 ? pressRecord[`thicknessRear${lotIndex}C`] : null;
       const thicknessRearD = press && lotIndex > 0 ? pressRecord[`thicknessRear${lotIndex}D`] : null;
 
-      // coatWeight 데이터
       const weightPerAreaFrontM = press && lotIndex > 0 ? pressRecord[`weightPerAreaFront${lotIndex}M`] : null;
       const weightPerAreaFrontC = press && lotIndex > 0 ? pressRecord[`weightPerAreaFront${lotIndex}C`] : null;
       const weightPerAreaFrontD = press && lotIndex > 0 ? pressRecord[`weightPerAreaFront${lotIndex}D`] : null;
@@ -136,7 +131,7 @@ export class PressService {
         },
         realInspection: press
           ? {
-              conditions: null, // 작업일지에 해당 필드 없음
+              conditions: press.rollTemperatureMain || press.rollTemperatureInfeed ? 'Heating' : 'Cooling',
               pressingTemp: Number(press.rollTemperatureMain),
               thickness: {
                 op: {
