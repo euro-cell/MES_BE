@@ -6,6 +6,7 @@ import { CoatingService } from './electrode/coating.service';
 import { PressService } from './electrode/press.service';
 import { NotchingService } from './electrode/notching.service';
 import { StackingService } from './assembly/stacking.service';
+import { WeldingService } from './assembly/welding.service';
 
 @ApiTags('Lot 관리/검색')
 @Controller(':productionId/lot')
@@ -17,6 +18,7 @@ export class LotController {
     private readonly pressService: PressService,
     private readonly notchingService: NotchingService,
     private readonly stackingService: StackingService,
+    private readonly weldingService: WeldingService,
   ) {}
 
   @Post('sync')
@@ -54,5 +56,10 @@ export class LotController {
   @Get('stacking')
   async getStackingLots(@Param('productionId') productionId: number) {
     return this.stackingService.getStackingLots(productionId);
+  }
+
+  @Get('welding')
+  async getWeldingLots(@Param('productionId') productionId: number) {
+    return this.weldingService.getWeldingLots(productionId);
   }
 }
