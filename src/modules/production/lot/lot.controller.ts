@@ -5,6 +5,7 @@ import { MixingService } from './electrode/mixing.service';
 import { CoatingService } from './electrode/coating.service';
 import { PressService } from './electrode/press.service';
 import { NotchingService } from './electrode/notching.service';
+import { StackingService } from './assembly/stacking.service';
 
 @ApiTags('Lot 관리/검색')
 @Controller(':productionId/lot')
@@ -15,11 +16,12 @@ export class LotController {
     private readonly coatingService: CoatingService,
     private readonly pressService: PressService,
     private readonly notchingService: NotchingService,
+    private readonly stackingService: StackingService,
   ) {}
 
   @Post('sync')
   @ApiOperation({ summary: '데이터 갱신' })
-  @ApiQuery({ name: 'process', required: true, description: '공정명 (mixing, coating, calendering, notching 등)' })
+  @ApiQuery({ name: 'process', required: true, description: '공정명 (mixing, coating, calendering, notching, stacking 등)' })
   async sync(@Param('productionId') productionId: number, @Query('process') process: string) {
     return this.lotService.sync(productionId, process);
   }
@@ -47,5 +49,10 @@ export class LotController {
   @Get('notching')
   async getNotchingLots(@Param('productionId') productionId: number) {
     return this.notchingService.getNotchingLots(productionId);
+  }
+
+  @Get('stacking')
+  async getStackingLots(@Param('productionId') productionId: number) {
+    return this.stackingService.getStackingLots(productionId);
   }
 }
