@@ -126,4 +126,12 @@ export class WorklogSealing extends WorklogBase {
 
   @Column({ type: 'smallint', nullable: true })
   hipotTime: number;
+
+  // ===== D. 비고 (Remarks) =====
+
+  @Column({ type: 'text', nullable: true })
+  remarkTop: string;
+
+  @Column({ type: 'text', nullable: true })
+  remarkSide: string;
 }

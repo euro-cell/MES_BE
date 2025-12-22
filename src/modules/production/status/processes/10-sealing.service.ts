@@ -42,31 +42,61 @@ export class SealingProcessService {
     return this.processSealingData(sealingLogs, month, productionTarget, startDate, endDate);
   }
 
-  private parseNcrFromRemark(remark: string | null): {
+  private parseNcrFromRemarks(remarkTop: string | null, remarkSide: string | null): {
     hiPot: number;
     appearance: number;
     thickness: number;
     etc: number;
   } {
     const result = { hiPot: 0, appearance: 0, thickness: 0, etc: 0 };
-    if (!remark) return result;
 
     const countCellNumbers = (value: string): number => {
       if (!value || !value.trim()) return 0;
       return value.split(',').filter((v) => v.trim()).length;
     };
 
-    const hiPotMatch = remark.match(/Hi-pot\s*:\s*([^\n]*)/i);
-    if (hiPotMatch) result.hiPot = countCellNumbers(hiPotMatch[1]);
+    // Top remark parsing
+    if (remarkTop) {
+      // Top - Seal 돌출, 파우치 두께, 탑실 두께 → thickness
+      const sealProtrusionMatch = remarkTop.match(/Seal\s*돌출\s*:\s*([^\n]*)/);
+      if (sealProtrusionMatch) result.thickness += countCellNumbers(sealProtrusionMatch[1]);
 
-    const appearanceMatch = remark.match(/외관\s*:\s*([^\n]*)/);
-    if (appearanceMatch) result.appearance = countCellNumbers(appearanceMatch[1]);
+      const pouchThicknessMatch = remarkTop.match(/파우치\s*두께\s*:\s*([^\n]*)/);
+      if (pouchThicknessMatch) result.thickness += countCellNumbers(pouchThicknessMatch[1]);
 
-    const thicknessMatch = remark.match(/두께\s*:\s*([^\n]*)/);
-    if (thicknessMatch) result.thickness = countCellNumbers(thicknessMatch[1]);
+      const topSealThicknessMatch = remarkTop.match(/탑실\s*두께\s*:\s*([^\n]*)/);
+      if (topSealThicknessMatch) result.thickness += countCellNumbers(topSealThicknessMatch[1]);
 
-    const etcMatch = remark.match(/기타\s*:\s*([^\n]*)/);
-    if (etcMatch) result.etc = countCellNumbers(etcMatch[1]);
+      // Top - 외관 → appearance
+      const topAppearanceMatch = remarkTop.match(/외관\s*:\s*([^\n]*)/);
+      if (topAppearanceMatch) result.appearance += countCellNumbers(topAppearanceMatch[1]);
+
+      // Top - 기타 → etc
+      const topEtcMatch = remarkTop.match(/기타\s*:\s*([^\n]*)/);
+      if (topEtcMatch) result.etc += countCellNumbers(topEtcMatch[1]);
+    }
+
+    // Side remark parsing
+    if (remarkSide) {
+      // Side - 파우치 두께, 실 폭 → thickness
+      const sidePouchThicknessMatch = remarkSide.match(/파우치\s*두께\s*:\s*([^\n]*)/);
+      if (sidePouchThicknessMatch) result.thickness += countCellNumbers(sidePouchThicknessMatch[1]);
+
+      const sealWidthMatch = remarkSide.match(/실\s*폭\s*:\s*([^\n]*)/);
+      if (sealWidthMatch) result.thickness += countCellNumbers(sealWidthMatch[1]);
+
+      // Side - 외관 → appearance
+      const sideAppearanceMatch = remarkSide.match(/외관\s*:\s*([^\n]*)/);
+      if (sideAppearanceMatch) result.appearance += countCellNumbers(sideAppearanceMatch[1]);
+
+      // Side - H-pot → hiPot
+      const hiPotMatch = remarkSide.match(/H-pot\s*:\s*([^\n]*)/i);
+      if (hiPotMatch) result.hiPot += countCellNumbers(hiPotMatch[1]);
+
+      // Side - 기타 → etc
+      const sideEtcMatch = remarkSide.match(/기타\s*:\s*([^\n]*)/);
+      if (sideEtcMatch) result.etc += countCellNumbers(sideEtcMatch[1]);
+    }
 
     return result;
   }
@@ -104,7 +134,7 @@ export class SealingProcessService {
 
         current.output += output;
 
-        const ncr = this.parseNcrFromRemark(log.remark);
+        const ncr = this.parseNcrFromRemarks(log.remarkTop, log.remarkSide);
         current.ncr.hiPot += ncr.hiPot;
         current.ncr.appearance += ncr.appearance;
         current.ncr.thickness += ncr.thickness;

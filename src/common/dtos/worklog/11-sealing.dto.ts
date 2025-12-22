@@ -246,6 +246,18 @@ export class CreateSealingWorklogDto extends BaseWorklogDto {
   @IsOptional()
   @IsNumber()
   hipot3Time?: number;
+
+  // ===== D. 비고 =====
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  remarkTop?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  remarkSide?: string;
 }
 
 export class UpdateSealingWorklogDto extends PartialType(CreateSealingWorklogDto) {}
