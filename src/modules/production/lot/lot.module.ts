@@ -8,12 +8,14 @@ import { PressService } from './electrode/press.service';
 import { NotchingService } from './electrode/notching.service';
 import { StackingService } from './assembly/stacking.service';
 import { WeldingService } from './assembly/welding.service';
+import { SealingLotService } from './assembly/sealing.service';
 import { LotMixing } from '../../../common/entities/lots/lot-01-mixing.entity';
 import { LotCoating } from '../../../common/entities/lots/lot-02-coating.entity';
 import { LotPress } from '../../../common/entities/lots/lot-03-press.entity';
 import { LotNotching } from '../../../common/entities/lots/lot-04-notching.entity';
 import { LotStacking } from '../../../common/entities/lots/lot-05-stacking.entity';
 import { LotWelding } from '../../../common/entities/lots/lot-06-welding.entity';
+import { LotSealing } from '../../../common/entities/lots/lot-07-sealing.entity';
 import { LotSync } from '../../../common/entities/lots/lot-sync.entity';
 import { WorklogBinder } from '../../../common/entities/worklogs/worklog-01-binder.entity';
 import { WorklogSlurry } from '../../../common/entities/worklogs/worklog-02-slurry.entity';
@@ -22,6 +24,8 @@ import { WorklogPress } from '../../../common/entities/worklogs/worklog-04-press
 import { WorklogNotching } from '../../../common/entities/worklogs/worklog-06-notching.entity';
 import { WorklogStacking } from '../../../common/entities/worklogs/worklog-09-stacking.entity';
 import { WorklogWelding } from '../../../common/entities/worklogs/worklog-10-welding.entity';
+import { WorklogSealing } from '../../../common/entities/worklogs/worklog-11-sealing.entity';
+import { WorklogFilling } from '../../../common/entities/worklogs/worklog-12-filling.entity';
 import { Material } from '../../../common/entities/material.entity';
 
 @Module({
@@ -33,6 +37,7 @@ import { Material } from '../../../common/entities/material.entity';
       LotNotching,
       LotStacking,
       LotWelding,
+      LotSealing,
       LotSync,
       Material,
       WorklogBinder,
@@ -42,9 +47,11 @@ import { Material } from '../../../common/entities/material.entity';
       WorklogNotching,
       WorklogStacking,
       WorklogWelding,
+      WorklogSealing,
+      WorklogFilling,
     ]),
   ],
   controllers: [LotController],
-  providers: [LotService, MixingService, CoatingService, PressService, NotchingService, StackingService, WeldingService],
+  providers: [LotService, MixingService, CoatingService, PressService, NotchingService, StackingService, WeldingService, SealingLotService],
 })
 export class LotModule {}

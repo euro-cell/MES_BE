@@ -14,11 +14,11 @@ export class WorklogSealing extends WorklogBase {
   @Column({ type: 'smallint', nullable: true })
   pouchDepth: number;
 
-  @Column({ type: 'smallint', nullable: true })
-  pouchInputQuantity: number;
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  pouchInputQuantity: string;
 
-  @Column({ type: 'smallint', nullable: true })
-  pouchUsage: number;
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  pouchUsage: string;
 
   // ===== B. 생산 정보 (Production Info) =====
 

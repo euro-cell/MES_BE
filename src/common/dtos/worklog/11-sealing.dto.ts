@@ -23,13 +23,13 @@ export class CreateSealingWorklogDto extends BaseWorklogDto {
 
   @ApiPropertyOptional()
   @IsOptional()
-  @IsNumber()
-  pouchInputQuantity?: number;
+  @IsString()
+  pouchInputQuantity?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
-  @IsNumber()
-  pouchUsage?: number;
+  @IsString()
+  pouchUsage?: string;
 
   // ===== B. 생산 정보 =====
 

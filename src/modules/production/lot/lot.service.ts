@@ -5,6 +5,7 @@ import { PressService } from './electrode/press.service';
 import { NotchingService } from './electrode/notching.service';
 import { StackingService } from './assembly/stacking.service';
 import { WeldingService } from './assembly/welding.service';
+import { SealingLotService } from './assembly/sealing.service';
 
 @Injectable()
 export class LotService {
@@ -15,6 +16,7 @@ export class LotService {
     private readonly notchingService: NotchingService,
     private readonly stackingService: StackingService,
     private readonly weldingService: WeldingService,
+    private readonly sealingService: SealingLotService,
   ) {}
 
   async sync(productionId: number, process: string) {
@@ -31,6 +33,8 @@ export class LotService {
         return this.stackingService.sync(productionId);
       case 'welding':
         return this.weldingService.sync(productionId);
+      case 'sealing':
+        return this.sealingService.sync(productionId);
       default:
         throw new BadRequestException(`지원하지 않는 공정입니다: ${process}`);
     }
@@ -50,6 +54,8 @@ export class LotService {
         return this.stackingService.getLastSync(productionId);
       case 'welding':
         return this.weldingService.getLastSync(productionId);
+      case 'sealing':
+        return this.sealingService.getLastSync(productionId);
       default:
         throw new BadRequestException(`지원하지 않는 공정입니다: ${process}`);
     }
