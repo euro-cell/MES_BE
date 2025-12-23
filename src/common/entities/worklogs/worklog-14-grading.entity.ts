@@ -50,12 +50,18 @@ export class WorklogGrading extends WorklogBase {
   @Column({ type: 'varchar', length: 20, nullable: true })
   grading1UnitNumber: string;
 
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  grading1CellNumberRange: string;
+
   @Column({ type: 'smallint', nullable: true })
   grading1Quantity: number;
 
   // Grading 호기 2
   @Column({ type: 'varchar', length: 20, nullable: true })
   grading2UnitNumber: string;
+
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  grading2CellNumberRange: string;
 
   @Column({ type: 'smallint', nullable: true })
   grading2Quantity: number;
@@ -64,6 +70,9 @@ export class WorklogGrading extends WorklogBase {
   @Column({ type: 'varchar', length: 20, nullable: true })
   grading3UnitNumber: string;
 
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  grading3CellNumberRange: string;
+
   @Column({ type: 'smallint', nullable: true })
   grading3Quantity: number;
 
@@ -71,12 +80,18 @@ export class WorklogGrading extends WorklogBase {
   @Column({ type: 'varchar', length: 20, nullable: true })
   grading4UnitNumber: string;
 
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  grading4CellNumberRange: string;
+
   @Column({ type: 'smallint', nullable: true })
   grading4Quantity: number;
 
   // Grading 호기 5
   @Column({ type: 'varchar', length: 20, nullable: true })
   grading5UnitNumber: string;
+
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  grading5CellNumberRange: string;
 
   @Column({ type: 'smallint', nullable: true })
   grading5Quantity: number;

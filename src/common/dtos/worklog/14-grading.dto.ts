@@ -79,6 +79,11 @@ export class CreateGradingWorklogDto extends BaseWorklogDto {
 
   @ApiPropertyOptional()
   @IsOptional()
+  @IsString()
+  grading1CellNumberRange?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
   @IsNumber()
   grading1Quantity?: number;
 
@@ -86,6 +91,11 @@ export class CreateGradingWorklogDto extends BaseWorklogDto {
   @IsOptional()
   @IsString()
   grading2UnitNumber?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  grading2CellNumberRange?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
@@ -99,6 +109,11 @@ export class CreateGradingWorklogDto extends BaseWorklogDto {
 
   @ApiPropertyOptional()
   @IsOptional()
+  @IsString()
+  grading3CellNumberRange?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
   @IsNumber()
   grading3Quantity?: number;
 
@@ -109,6 +124,11 @@ export class CreateGradingWorklogDto extends BaseWorklogDto {
 
   @ApiPropertyOptional()
   @IsOptional()
+  @IsString()
+  grading4CellNumberRange?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
   @IsNumber()
   grading4Quantity?: number;
 
@@ -116,6 +136,11 @@ export class CreateGradingWorklogDto extends BaseWorklogDto {
   @IsOptional()
   @IsString()
   grading5UnitNumber?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  grading5CellNumberRange?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
