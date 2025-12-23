@@ -8,6 +8,7 @@ import { NotchingService } from './electrode/notching.service';
 import { StackingService } from './assembly/stacking.service';
 import { WeldingService } from './assembly/welding.service';
 import { SealingLotService } from './assembly/sealing.service';
+import { FormationLotService } from './formation/formation.service';
 
 @ApiTags('Lot 관리/검색')
 @Controller(':productionId/lot')
@@ -21,6 +22,7 @@ export class LotController {
     private readonly stackingService: StackingService,
     private readonly weldingService: WeldingService,
     private readonly sealingService: SealingLotService,
+    private readonly formationService: FormationLotService,
   ) {}
 
   @Post('sync')
@@ -68,5 +70,10 @@ export class LotController {
   @Get('sealing')
   async getSealingLots(@Param('productionId') productionId: number) {
     return this.sealingService.getSealingLots(productionId);
+  }
+
+  @Get('formation')
+  async getFormation(@Param('productionId') productionId: number) {
+    return this.formationService.getFormationLots(productionId);
   }
 }
