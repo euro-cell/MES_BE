@@ -10,7 +10,7 @@ import { WeldingService } from './assembly/welding.service';
 import { SealingLotService } from './assembly/sealing.service';
 import { FormationLotService } from './formation/formation.service';
 
-@ApiTags('Lot 관리/검색')
+@ApiTags('Lot 관리')
 @Controller(':productionId/lot')
 export class LotController {
   constructor(

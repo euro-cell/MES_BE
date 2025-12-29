@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { LotService } from './lot.service';
 import { LotController } from './lot.controller';
+import { LotSearchController } from './lot-search.controller';
 import { MixingService } from './electrode/mixing.service';
 import { CoatingService } from './electrode/coating.service';
 import { PressService } from './electrode/press.service';
@@ -31,6 +32,7 @@ import { WorklogFilling } from '../../../common/entities/worklogs/worklog-12-fil
 import { WorklogFormation } from '../../../common/entities/worklogs/worklog-13-formation.entity';
 import { WorklogGrading } from '../../../common/entities/worklogs/worklog-14-grading.entity';
 import { Material } from '../../../common/entities/material.entity';
+import { ProductionMaterial } from '../../../common/entities/production-material.entity';
 
 @Module({
   imports: [
@@ -45,6 +47,7 @@ import { Material } from '../../../common/entities/material.entity';
       LotFormation,
       LotSync,
       Material,
+      ProductionMaterial,
       WorklogBinder,
       WorklogSlurry,
       WorklogCoating,
@@ -58,7 +61,7 @@ import { Material } from '../../../common/entities/material.entity';
       WorklogGrading,
     ]),
   ],
-  controllers: [LotController],
+  controllers: [LotController, LotSearchController],
   providers: [LotService, MixingService, CoatingService, PressService, NotchingService, StackingService, WeldingService, SealingLotService, FormationLotService],
 })
 export class LotModule {}

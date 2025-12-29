@@ -66,4 +66,20 @@ export class LotService {
         throw new BadRequestException(`지원하지 않는 공정입니다: ${process}`);
     }
   }
+
+  //TODO 공정 Lot 검색 (구현 예정)
+  async searchProcessLots(lot: string) {
+    return {
+      projectId: null,
+      projectName: null,
+      processLots: [],
+    };
+  }
+
+  //TODO 원자재 Lot 검색 (구현 예정)
+  async searchRawMaterialLots(lot: string) {
+    return {
+      rawMaterialLots: [],
+    };
+  }
 }
