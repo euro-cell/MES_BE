@@ -31,7 +31,7 @@ export class FormationLotService {
     const month = dateObj.getMonth();
     const monthCode = String.fromCharCode('A'.charCodeAt(0) + month);
     const day = String(dateObj.getDate()).padStart(2, '0');
-    const cellNo = String(cellNumber).padStart(5, '0');
+    const cellNo = String(cellNumber).padStart(4, '0');
     return `${factory}${line}${yearCode}${monthCode}${day}${cellNo}`;
   }
 
@@ -125,7 +125,7 @@ export class FormationLotService {
     gradingWorklogs: WorklogGrading[],
   ) {
     let updated = false;
-    const cellNumber = Number(formationLot.lot.slice(-5));
+    const cellNumber = Number(formationLot.lot.slice(-4));
 
     if (!formationLot.worklogFormation) {
       for (const worklog of formationWorklogs) {
@@ -357,7 +357,7 @@ export class FormationLotService {
     const worklogIndexMap = new Map<number, number>();
 
     return lots.map((lotEntry) => {
-      const cellNumber = Number(lotEntry.lot.slice(-5));
+      const cellNumber = Number(lotEntry.lot.slice(-4));
 
       let thicknessIndex = 0;
       if (lotEntry.worklogFormation) {
