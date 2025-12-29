@@ -15,10 +15,8 @@ export class LotSearchController {
       throw new BadRequestException('lot 파라미터가 필요합니다.');
     }
 
-    const [processResult, materialResult] = await Promise.all([
-      this.lotService.searchProcessLots(lot),
-      this.lotService.searchRawMaterialLots(lot),
-    ]);
+    const processResult = await this.lotService.searchProcessLots(lot);
+    const materialResult = await this.lotService.searchRawMaterialLots(processResult);
 
     return {
       projectId: processResult.projectId,

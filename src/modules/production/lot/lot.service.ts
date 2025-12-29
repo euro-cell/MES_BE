@@ -86,7 +86,6 @@ export class LotService {
     }
   }
 
-  //TODO 공정 Lot 검색 (구현 예정)
   async searchProcessLots(lot: string) {
     // 1. Formation Lot 조회
     const formationLot = await this.lotFormationRepo.findOne({
@@ -260,7 +259,9 @@ export class LotService {
   }
 
   //TODO 원자재 Lot 검색 (구현 예정)
-  async searchRawMaterialLots(lot: string) {
+  async searchRawMaterialLots(processResult: Awaited<ReturnType<typeof this.searchProcessLots>>) {
+    const { processLots } = processResult;
+    console.log('🚀 ~ processLots:', processLots);
     return {
       rawMaterialLots: [],
     };
