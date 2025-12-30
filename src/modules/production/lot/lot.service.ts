@@ -8,6 +8,11 @@ import { LotNotching } from '../../../common/entities/lots/lot-04-notching.entit
 import { LotPress } from '../../../common/entities/lots/lot-03-press.entity';
 import { LotCoating } from '../../../common/entities/lots/lot-02-coating.entity';
 import { LotMixing } from '../../../common/entities/lots/lot-01-mixing.entity';
+import { LotSealing } from '../../../common/entities/lots/lot-07-sealing.entity';
+import { WorklogBinder } from '../../../common/entities/worklogs/worklog-01-binder.entity';
+import { WorklogSlurry } from '../../../common/entities/worklogs/worklog-02-slurry.entity';
+import { WorklogCoating } from '../../../common/entities/worklogs/worklog-03-coating.entity';
+import { Material } from '../../../common/entities/material.entity';
 import { MixingService } from './electrode/mixing.service';
 import { CoatingService } from './electrode/coating.service';
 import { PressService } from './electrode/press.service';
@@ -30,6 +35,16 @@ export class LotService {
     private readonly lotNotchingRepo: Repository<LotNotching>,
     @InjectRepository(LotMixing)
     private readonly lotMixingRepo: Repository<LotMixing>,
+    @InjectRepository(LotSealing)
+    private readonly lotSealingRepo: Repository<LotSealing>,
+    @InjectRepository(WorklogBinder)
+    private readonly worklogBinderRepo: Repository<WorklogBinder>,
+    @InjectRepository(WorklogSlurry)
+    private readonly worklogSlurryRepo: Repository<WorklogSlurry>,
+    @InjectRepository(WorklogCoating)
+    private readonly worklogCoatingRepo: Repository<WorklogCoating>,
+    @InjectRepository(Material)
+    private readonly materialRepo: Repository<Material>,
     private readonly mixingService: MixingService,
     private readonly coatingService: CoatingService,
     private readonly pressService: PressService,
@@ -258,12 +273,221 @@ export class LotService {
     };
   }
 
-  //TODO 원자재 Lot 검색 (구현 예정)
+  // 원자재 Lot 검색
   async searchRawMaterialLots(processResult: Awaited<ReturnType<typeof this.searchProcessLots>>) {
     const { processLots } = processResult;
-    console.log('🚀 ~ processLots:', processLots);
-    return {
-      rawMaterialLots: [],
+    const rawMaterialLots: {
+      category: string;
+      material: string | null;
+      product: string | null;
+      spec: string | null;
+      manufacturer: string | null;
+      lot: string;
+    }[] = [];
+
+    // Helper: Material 테이블에서 lotNo로 material/product/spec/manufacturer 조회
+    const getMaterialInfo = async (lotNo: string) => {
+      if (!lotNo) return { material: null, product: null, spec: null, manufacturer: null };
+      const mat = await this.materialRepo.findOne({ where: { lotNo } });
+      return {
+        material: mat?.category || null,
+        product: mat?.type || null,
+        spec: mat?.name || null,
+        manufacturer: mat?.company || null,
+      };
     };
+
+    // 1. Mixing 원자재 조회 (Cathode/Anode)
+    const mixingLot = processLots.find((p) => p.category === 'Mixing') as { cathodeLot: string; anodeLot: string } | undefined;
+    if (mixingLot) {
+      for (const [category, lot] of [
+        ['Cathode', mixingLot.cathodeLot],
+        ['Anode', mixingLot.anodeLot],
+      ] as const) {
+        if (!lot) continue;
+
+        // WorklogBinder에서 조회 (바인더 원자재)
+        const binder = await this.worklogBinderRepo.findOne({ where: { lot } });
+        if (binder) {
+          for (const i of [1, 2] as const) {
+            const materialLot = binder[`material${i}Lot` as keyof WorklogBinder] as string;
+            if (materialLot) {
+              const info = await getMaterialInfo(materialLot);
+              rawMaterialLots.push({
+                category,
+                material: info.material,
+                product: info.product,
+                spec: info.spec,
+                manufacturer: info.manufacturer,
+                lot: materialLot,
+              });
+            }
+          }
+        }
+
+        // WorklogSlurry에서 조회 (슬러리 원자재 - NCM622, LCO, Conductor 등)
+        const slurry = await this.worklogSlurryRepo.findOne({ where: { lot } });
+        if (slurry) {
+          for (const i of [1, 2, 3, 4, 5, 6, 7, 8] as const) {
+            const materialLot = slurry[`material${i}Lot` as keyof WorklogSlurry] as string;
+            if (materialLot) {
+              const info = await getMaterialInfo(materialLot);
+              rawMaterialLots.push({
+                category,
+                material: info.material,
+                product: info.product,
+                spec: info.spec,
+                manufacturer: info.manufacturer,
+                lot: materialLot,
+              });
+            }
+          }
+        }
+      }
+    }
+
+    // 2. Coating 원자재 조회 (Cathode/Anode)
+    const coatingLot = processLots.find((p) => p.category === 'Coating') as { cathodeLot: string; anodeLot: string } | undefined;
+    if (coatingLot) {
+      for (const [category, lot] of [
+        ['Cathode', coatingLot.cathodeLot],
+        ['Anode', coatingLot.anodeLot],
+      ] as const) {
+        if (!lot) continue;
+
+        // WorklogCoating에서 coatingLot1~4 중 일치하는 것 찾기
+        const coating = await this.worklogCoatingRepo
+          .createQueryBuilder('wc')
+          .where('wc.coatingLot1 = :lot OR wc.coatingLot2 = :lot OR wc.coatingLot3 = :lot OR wc.coatingLot4 = :lot', { lot })
+          .getOne();
+
+        if (coating) {
+          // materialLot (Collector) - Slurry 제외
+          if (coating.materialLot && coating.materialType?.toLowerCase() !== 'slurry') {
+            const info = await getMaterialInfo(coating.materialLot);
+            rawMaterialLots.push({
+              category,
+              material: info.material,
+              product: info.product,
+              spec: info.spec,
+              manufacturer: info.manufacturer,
+              lot: coating.materialLot,
+            });
+          }
+          // materialLot2 - Slurry 제외
+          if (coating.materialLot2 && coating.materialType2?.toLowerCase() !== 'slurry') {
+            const info = await getMaterialInfo(coating.materialLot2);
+            rawMaterialLots.push({
+              category,
+              material: info.material,
+              product: info.product,
+              spec: info.spec,
+              manufacturer: info.manufacturer,
+              lot: coating.materialLot2,
+            });
+          }
+        }
+      }
+    }
+
+    // 3. Assembly 원자재 조회
+    const assemblyLot = processLots.find((p) => p.category === 'Assembly') as { lot: string } | undefined;
+    if (assemblyLot?.lot) {
+      const lot = assemblyLot.lot;
+
+      // Stacking - separator
+      const stacking = await this.lotStackingRepo.findOne({
+        where: { lot },
+        relations: ['worklogStacking'],
+      });
+      if (stacking?.worklogStacking) {
+        const worklog = stacking.worklogStacking;
+        const jrRange = stacking.jrRange;
+
+        // jrRange에 맞는 separatorLot 선택
+        let separatorLot: string | null = null;
+        if (worklog.jr1Range === jrRange) separatorLot = worklog.jr1SeparatorLot;
+        else if (worklog.jr2Range === jrRange) separatorLot = worklog.jr2SeparatorLot;
+        else if (worklog.jr3Range === jrRange) separatorLot = worklog.jr3SeparatorLot;
+        else if (worklog.jr4Range === jrRange) separatorLot = worklog.jr4SeparatorLot;
+
+        if (separatorLot) {
+          const info = await getMaterialInfo(separatorLot);
+          rawMaterialLots.push({
+            category: "Ass'y",
+            material: info.material,
+            product: info.product,
+            spec: info.spec,
+            manufacturer: info.manufacturer,
+            lot: separatorLot,
+          });
+        }
+      }
+
+      // Welding - leadTab, piTape
+      const welding = await this.lotWeldingRepo.findOne({
+        where: { lot },
+        relations: ['worklogWelding'],
+      });
+      if (welding?.worklogWelding) {
+        const worklog = welding.worklogWelding;
+
+        if (worklog.leadTabLot) {
+          const info = await getMaterialInfo(worklog.leadTabLot);
+          rawMaterialLots.push({
+            category: "Ass'y",
+            material: info.material,
+            product: info.product,
+            spec: info.spec,
+            manufacturer: info.manufacturer,
+            lot: worklog.leadTabLot,
+          });
+        }
+
+        if (worklog.piTapeLot) {
+          const info = await getMaterialInfo(worklog.piTapeLot);
+          rawMaterialLots.push({
+            category: "Ass'y",
+            material: info.material,
+            product: info.product,
+            spec: info.spec,
+            manufacturer: info.manufacturer,
+            lot: worklog.piTapeLot,
+          });
+        }
+      }
+
+      // Sealing - pouch
+      const sealing = await this.lotSealingRepo.findOne({
+        where: { lot },
+        relations: ['worklogSealing', 'worklogFilling'],
+      });
+      if (sealing?.worklogSealing?.pouchLot) {
+        const info = await getMaterialInfo(sealing.worklogSealing.pouchLot);
+        rawMaterialLots.push({
+          category: "Ass'y",
+          material: info.material,
+          product: info.product,
+          spec: info.spec,
+          manufacturer: info.manufacturer,
+          lot: sealing.worklogSealing.pouchLot,
+        });
+      }
+
+      // Filling - electrolyte
+      if (sealing?.worklogFilling?.electrolyteLot) {
+        const info = await getMaterialInfo(sealing.worklogFilling.electrolyteLot);
+        rawMaterialLots.push({
+          category: "Ass'y",
+          material: info.material,
+          product: info.product,
+          spec: info.spec,
+          manufacturer: info.manufacturer,
+          lot: sealing.worklogFilling.electrolyteLot,
+        });
+      }
+    }
+
+    return { rawMaterialLots };
   }
 }
