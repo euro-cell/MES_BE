@@ -1,16 +1,11 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Patch, Query } from '@nestjs/common';
 import { StatusService } from './status.service';
 import { ApiQuery } from '@nestjs/swagger';
-import { ProductionTargetDto, UpdateTargetByKeyDto } from 'src/common/dtos/production-target.dto';
+import { UpdateTargetByKeyDto } from 'src/common/dtos/production-target.dto';
 
 @Controller(':productionId/status')
 export class StatusController {
   constructor(private readonly statusService: StatusService) {}
-
-  @Post('target')
-  async targetStatus(@Param('productionId', ParseIntPipe) productionId: number, @Body() dto: ProductionTargetDto) {
-    return await this.statusService.targetStatus(productionId, dto);
-  }
 
   @Get()
   async getStatusData(@Param('productionId', ParseIntPipe) productionId: number) {

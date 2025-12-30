@@ -18,7 +18,7 @@ import {
   GradingProcessService,
   VisualInspectionProcessService,
 } from './processes';
-import { ProductionTargetDto, UpdateTargetByKeyDto } from 'src/common/dtos/production-target.dto';
+import { UpdateTargetByKeyDto } from 'src/common/dtos/production-target.dto';
 import { ProductionTarget } from 'src/common/entities/production-target.entity';
 import { ProductionProgressDto } from 'src/common/dtos/production-progress.dto';
 
@@ -44,29 +44,6 @@ export class StatusService {
     private readonly gradingProcessService: GradingProcessService,
     private readonly visualInspectionProcessService: VisualInspectionProcessService,
   ) {}
-
-  async targetStatus(productionId: number, dto: ProductionTargetDto) {
-    const existingTarget = await this.productionTargetRepository.findOne({
-      where: { production: { id: productionId } },
-    });
-    let target: ProductionTarget;
-
-    if (existingTarget) {
-      Object.keys(dto).forEach((key) => {
-        if (dto[key] !== undefined && dto[key] !== null) {
-          existingTarget[key] = dto[key];
-        }
-      });
-      target = await this.productionTargetRepository.save(existingTarget);
-    } else {
-      const newTarget = this.productionTargetRepository.create({
-        production: { id: productionId },
-        ...dto,
-      });
-      target = await this.productionTargetRepository.save(newTarget);
-    }
-    return target;
-  }
 
   async getStatusData(productionId: number) {
     const productionPlan = await this.productionPlanRepository.findOne({
