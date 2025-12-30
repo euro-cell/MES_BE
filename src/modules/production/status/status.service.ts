@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ProductionPlan } from 'src/common/entities/production-plan.entity';
 import { Repository } from 'typeorm';
@@ -156,20 +156,22 @@ export class StatusService {
   }
 
   async updateTargetStatus(productionId: number, dto: UpdateTargetByKeyDto) {
-    const existingTarget = await this.productionTargetRepository.findOne({
+    const { processKey, targetQuantity } = dto;
+
+    let target = await this.productionTargetRepository.findOne({
       where: { production: { id: productionId } },
     });
 
-    if (!existingTarget) throw new NotFoundException('목표 수량이 설정되어 있지 않습니다.');
+    if (!target) {
+      target = this.productionTargetRepository.create({ production: { id: productionId } });
+    }
 
-    const { processKey, targetQuantity } = dto;
-
-    if (!(processKey in existingTarget)) {
+    if (!(processKey in target)) {
       throw new ConflictException(`유효하지 않은 공정 키입니다: ${processKey}`);
     }
 
-    existingTarget[processKey] = targetQuantity;
-    return await this.productionTargetRepository.save(existingTarget);
+    target[processKey] = targetQuantity;
+    return await this.productionTargetRepository.save(target);
   }
 
   async getProgress(productionId: number): Promise<ProductionProgressDto> {
