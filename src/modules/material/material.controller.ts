@@ -1,7 +1,7 @@
-import { Controller, Get, Post, Body, Query } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, Query, Param, ParseIntPipe } from '@nestjs/common';
 import { MaterialService } from './material.service';
 import { ApiQuery } from '@nestjs/swagger';
-import { CreateMaterialDto } from 'src/common/dtos/material.dto';
+import { CreateMaterialDto, UpdateMaterialDto } from 'src/common/dtos/material.dto';
 
 @Controller('material')
 export class MaterialController {
@@ -40,5 +40,13 @@ export class MaterialController {
   @Post('electrode')
   async createElectrodeMaterial(@Body() dto: CreateMaterialDto) {
     return this.materialService.createElectrodeMaterial(dto);
+  }
+
+  @Patch('electrode/:id')
+  async updateElectrodeMaterial(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateMaterialDto: UpdateMaterialDto,
+  ) {
+    return this.materialService.updateElectrodeMaterial(id, updateMaterialDto);
   }
 }

@@ -4,7 +4,7 @@ import { Material } from 'src/common/entities/material.entity';
 import { Production } from 'src/common/entities/production.entity';
 import { MaterialProcess } from 'src/common/enums/material.enum';
 import { Repository } from 'typeorm';
-import { CreateMaterialDto } from 'src/common/dtos/material.dto';
+import { CreateMaterialDto, UpdateMaterialDto } from 'src/common/dtos/material.dto';
 
 @Injectable()
 export class MaterialService {
@@ -88,5 +88,13 @@ export class MaterialService {
       process: MaterialProcess.ELECTRODE,
     });
     return this.materialRepository.save(material);
+  }
+
+  async updateElectrodeMaterial(id: number, updateMaterialDto: UpdateMaterialDto) {
+    await this.materialRepository.update(id, {
+      ...updateMaterialDto,
+      process: MaterialProcess.ELECTRODE,
+    });
+    return this.materialRepository.findOne({ where: { id } });
   }
 }

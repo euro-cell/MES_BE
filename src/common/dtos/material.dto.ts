@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional, OmitType, PartialType } from '@nestjs/swagger';
 import { IsNotEmpty, IsString, IsEnum, IsOptional, IsNumber, IsDecimal } from 'class-validator';
+import { Type } from 'class-transformer';
 import { MaterialOrigin, MaterialProcess, MaterialPurpose } from '../enums/material.enum';
 
 export class MaterialDto {
@@ -104,6 +105,7 @@ export class CreateMaterialDto extends OmitType(MaterialDto, ['id'] as const) {
 
   @ApiPropertyOptional({ description: '가격', example: 0 })
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   price?: number;
 
@@ -114,6 +116,7 @@ export class CreateMaterialDto extends OmitType(MaterialDto, ['id'] as const) {
 
   @ApiPropertyOptional({ description: '재고', example: 10 })
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   stock?: number;
 }
