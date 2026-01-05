@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Body, Query, Param, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Query, Param, ParseIntPipe } from '@nestjs/common';
 import { MaterialService } from './material.service';
 import { ApiQuery } from '@nestjs/swagger';
 import { CreateMaterialDto, UpdateMaterialDto } from 'src/common/dtos/material.dto';
@@ -43,10 +43,14 @@ export class MaterialController {
   }
 
   @Patch('electrode/:id')
-  async updateElectrodeMaterial(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() updateMaterialDto: UpdateMaterialDto,
-  ) {
+  async updateElectrodeMaterial(@Param('id', ParseIntPipe) id: number, @Body() updateMaterialDto: UpdateMaterialDto) {
     return this.materialService.updateElectrodeMaterial(id, updateMaterialDto);
+  }
+
+  @Delete('electrode/:id')
+  @ApiQuery({ name: 'hardDelete', required: false, description: 'hardDelete 여부 (true/false)', example: false })
+  async deleteElectrodeMaterial(@Param('id', ParseIntPipe) id: number, @Query('hardDelete') hardDelete?: string) {
+    const isHardDelete = hardDelete === 'true';
+    return this.materialService.deleteElectrodeMaterial(id, isHardDelete);
   }
 }

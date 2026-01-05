@@ -97,4 +97,14 @@ export class MaterialService {
     });
     return this.materialRepository.findOne({ where: { id } });
   }
+
+  async deleteElectrodeMaterial(id: number, isHardDelete: boolean = false) {
+    if (isHardDelete) {
+      // 하드 딜리트: 데이터 완전 삭제
+      return this.materialRepository.delete(id);
+    } else {
+      // 소프트 딜리트: deletedAt 설정
+      return this.materialRepository.softDelete(id);
+    }
+  }
 }
