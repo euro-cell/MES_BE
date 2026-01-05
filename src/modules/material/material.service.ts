@@ -4,6 +4,7 @@ import { Material } from 'src/common/entities/material.entity';
 import { Production } from 'src/common/entities/production.entity';
 import { MaterialProcess } from 'src/common/enums/material.enum';
 import { Repository } from 'typeorm';
+import { CreateMaterialDto } from 'src/common/dtos/material.dto';
 
 @Injectable()
 export class MaterialService {
@@ -15,8 +16,7 @@ export class MaterialService {
   ) {}
 
   async findAllMaterials(category?: string) {
-    const query = this.materialRepository.createQueryBuilder('material')
-      .where('material.deletedAt IS NULL');
+    const query = this.materialRepository.createQueryBuilder('material').where('material.deletedAt IS NULL');
 
     if (category) {
       query.andWhere('material.category = :category', { category });
@@ -29,7 +29,8 @@ export class MaterialService {
   }
 
   async findByElectrode(isZeroStock: boolean = false) {
-    const query = this.materialRepository.createQueryBuilder('material')
+    const query = this.materialRepository
+      .createQueryBuilder('material')
       .where('material.process = :process', { process: MaterialProcess.ELECTRODE })
       .andWhere('material.deletedAt IS NULL');
 
@@ -42,7 +43,8 @@ export class MaterialService {
   }
 
   async findByAssembly(isZeroStock: boolean = false) {
-    const query = this.materialRepository.createQueryBuilder('material')
+    const query = this.materialRepository
+      .createQueryBuilder('material')
       .where('material.process = :process', { process: MaterialProcess.ASSEMBLY })
       .andWhere('material.deletedAt IS NULL');
 
@@ -78,5 +80,13 @@ export class MaterialService {
       .orderBy('material.category', 'ASC')
       .getRawMany();
     return categories.map((c) => c.category);
+  }
+
+  async createElectrodeMaterial(dto: CreateMaterialDto) {
+    const material = this.materialRepository.create({
+      ...dto,
+      process: MaterialProcess.ELECTRODE,
+    });
+    return this.materialRepository.save(material);
   }
 }
