@@ -1,4 +1,4 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { MaterialOrigin, MaterialProcess, MaterialPurpose } from '../enums/material.enum';
 import { Exclude } from 'class-transformer';
 
@@ -21,6 +21,9 @@ export class Material {
 
   @Column({ length: 100 })
   name: string;
+
+  @Column({ type: 'text', nullable: true })
+  spec: string;
 
   @Column({ length: 50, nullable: true })
   lotNo: string;
@@ -50,4 +53,8 @@ export class Material {
   @Exclude()
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @Exclude()
+  @DeleteDateColumn()
+  deletedAt?: Date;
 }
