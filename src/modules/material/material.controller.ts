@@ -53,4 +53,21 @@ export class MaterialController {
     const isHardDelete = hardDelete === 'true';
     return this.materialService.deleteElectrodeMaterial(id, isHardDelete);
   }
+
+  @Post('assembly')
+  async createAssemblyMaterial(@Body() dto: CreateMaterialDto) {
+    return this.materialService.createAssemblyMaterial(dto);
+  }
+
+  @Patch('assembly/:id')
+  async updateAssemblyMaterial(@Param('id', ParseIntPipe) id: number, @Body() updateMaterialDto: UpdateMaterialDto) {
+    return this.materialService.updateAssemblyMaterial(id, updateMaterialDto);
+  }
+
+  @Delete('assembly/:id')
+  @ApiQuery({ name: 'hardDelete', required: false, description: 'hardDelete 여부 (true/false)', example: false })
+  async deleteAssemblyMaterial(@Param('id', ParseIntPipe) id: number, @Query('hardDelete') hardDelete?: string) {
+    const isHardDelete = hardDelete === 'true';
+    return this.materialService.deleteAssemblyMaterial(id, isHardDelete);
+  }
 }
