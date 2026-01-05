@@ -13,13 +13,17 @@ export class MaterialController {
   }
 
   @Get('electrode')
-  findElectrode() {
-    return this.materialService.findByElectrode();
+  @ApiQuery({ name: 'isZeroStock', required: false, description: '재고 없는 자재 포함 여부 (true/false)', example: false })
+  async findElectrode(@Query('isZeroStock') isZeroStock?: string) {
+    const includeZero = isZeroStock === 'true';
+    return this.materialService.findByElectrode(includeZero);
   }
 
   @Get('assembly')
-  findByAssembly() {
-    return this.materialService.findByAssembly();
+  @ApiQuery({ name: 'isZeroStock', required: false, description: '재고 없는 자재 포함 여부 (true/false)', example: false })
+  async findByAssembly(@Query('isZeroStock') isZeroStock?: string) {
+    const includeZero = isZeroStock === 'true';
+    return this.materialService.findByAssembly(includeZero);
   }
 
   @Get('production')

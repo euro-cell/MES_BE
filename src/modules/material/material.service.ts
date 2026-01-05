@@ -15,18 +15,43 @@ export class MaterialService {
   ) {}
 
   async findAllMaterials(category?: string) {
+    const query = this.materialRepository.createQueryBuilder('material')
+      .where('material.deletedAt IS NULL');
+
     if (category) {
-      return this.materialRepository.find({ where: { category }, order: { name: 'ASC' } });
+      query.andWhere('material.category = :category', { category });
+      query.orderBy('material.name', 'ASC');
+    } else {
+      query.orderBy('material.id', 'ASC');
     }
-    return this.materialRepository.find({ order: { id: 'ASC' } });
+
+    return query.getMany();
   }
 
-  async findByElectrode() {
-    return this.materialRepository.find({ where: { process: MaterialProcess.ELECTRODE } });
+  async findByElectrode(isZeroStock: boolean = false) {
+    const query = this.materialRepository.createQueryBuilder('material')
+      .where('material.process = :process', { process: MaterialProcess.ELECTRODE })
+      .andWhere('material.deletedAt IS NULL');
+
+    // 기본값: 재고가 있는 것만 조회
+    if (!isZeroStock) {
+      query.andWhere('material.stock > 0');
+    }
+
+    return query.orderBy('material.id', 'ASC').getMany();
   }
 
-  async findByAssembly() {
-    return this.materialRepository.find({ where: { process: MaterialProcess.ASSEMBLY } });
+  async findByAssembly(isZeroStock: boolean = false) {
+    const query = this.materialRepository.createQueryBuilder('material')
+      .where('material.process = :process', { process: MaterialProcess.ASSEMBLY })
+      .andWhere('material.deletedAt IS NULL');
+
+    // 기본값: 재고가 있는 것만 조회
+    if (!isZeroStock) {
+      query.andWhere('material.stock > 0');
+    }
+
+    return query.orderBy('material.id', 'ASC').getMany();
   }
 
   async findByMaterialProduction() {
