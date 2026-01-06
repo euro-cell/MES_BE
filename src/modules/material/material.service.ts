@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Material } from 'src/common/entities/material.entity';
+import { MaterialHistory } from 'src/common/entities/material-history.entity';
 import { Production } from 'src/common/entities/production.entity';
 import { MaterialProcess } from 'src/common/enums/material.enum';
 import { Repository } from 'typeorm';
@@ -11,6 +12,8 @@ export class MaterialService {
   constructor(
     @InjectRepository(Material)
     private readonly materialRepository: Repository<Material>,
+    @InjectRepository(MaterialHistory)
+    private readonly materialHistoryRepository: Repository<MaterialHistory>,
     @InjectRepository(Production)
     private readonly productionRepository: Repository<Production>,
   ) {}
@@ -132,5 +135,24 @@ export class MaterialService {
       // 소프트 딜리트: deletedAt 설정
       return this.materialRepository.softDelete(id);
     }
+  }
+
+  async getMaterialHistoryByProcess(process: MaterialProcess, page: number = 1, limit: number = 20) {
+    const skip = (page - 1) * limit;
+    const [data, total] = await this.materialHistoryRepository.findAndCount({
+      where: { process },
+      relations: ['material'],
+      order: { createdAt: 'DESC' },
+      skip,
+      take: limit,
+    });
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 }

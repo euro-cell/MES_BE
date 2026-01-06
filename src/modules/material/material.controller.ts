@@ -2,6 +2,7 @@ import { Controller, Get, Post, Patch, Delete, Body, Query, Param, ParseIntPipe 
 import { MaterialService } from './material.service';
 import { ApiQuery } from '@nestjs/swagger';
 import { CreateMaterialDto, UpdateMaterialDto } from 'src/common/dtos/material.dto';
+import { MaterialProcess } from 'src/common/enums/material.enum';
 
 @Controller('material')
 export class MaterialController {
@@ -69,5 +70,15 @@ export class MaterialController {
   async deleteAssemblyMaterial(@Param('id', ParseIntPipe) id: number, @Query('hardDelete') hardDelete?: string) {
     const isHardDelete = hardDelete === 'true';
     return this.materialService.deleteAssemblyMaterial(id, isHardDelete);
+  }
+
+  @Get('history/:process')
+  @ApiQuery({ name: 'page', required: false, description: '페이지 번호 (기본값: 1)', example: 1 })
+  @ApiQuery({ name: 'limit', required: false, description: '페이지당 아이템 수 (기본값: 20)', example: 20 })
+  async getMaterialHistoryByProcess(@Param('process') process: string, @Query('page') page?: string, @Query('limit') limit?: string) {
+    const pageNum = page ? parseInt(page, 10) : 1;
+    const limitNum = limit ? parseInt(limit, 10) : 20;
+    const processEnum = process === 'electrode' ? MaterialProcess.ELECTRODE : MaterialProcess.ASSEMBLY;
+    return this.materialService.getMaterialHistoryByProcess(processEnum, pageNum, limitNum);
   }
 }
