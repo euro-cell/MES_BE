@@ -10,5 +10,6 @@ import { Production } from 'src/common/entities/production.entity';
   imports: [TypeOrmModule.forFeature([Material, MaterialHistory, Production])],
   controllers: [MaterialController],
   providers: [MaterialService],
+  exports: [MaterialService],
 })
 export class MaterialModule {}
