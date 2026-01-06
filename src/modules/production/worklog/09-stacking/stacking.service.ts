@@ -7,12 +7,15 @@ import {
   StackingWorklogListResponseDto,
   UpdateStackingWorklogDto,
 } from 'src/common/dtos/worklog/09-stacking.dto';
+import { MaterialService } from 'src/modules/material/material.service';
+import { MaterialProcess } from 'src/common/enums/material.enum';
 
 @Injectable()
 export class StackingService {
   constructor(
     @InjectRepository(WorklogStacking)
     private readonly worklogStackingRepository: Repository<WorklogStacking>,
+    private readonly materialService: MaterialService,
   ) {}
 
   async createStackingWorklog(productionId: number, dto: CreateStackingWorklogDto): Promise<WorklogStacking> {
@@ -20,7 +23,14 @@ export class StackingService {
       ...dto,
       production: { id: productionId },
     });
-    return await this.worklogStackingRepository.save(worklog);
+    const savedWorklog = await this.worklogStackingRepository.save(worklog);
+
+    // 자재 사용 이력 기록 (separator)
+    if (dto.separatorLot && dto.separatorUsage && dto.separatorUsage > 0) {
+      await this.materialService.recordMaterialUsage(dto.separatorLot, undefined, dto.separatorUsage, MaterialProcess.ELECTRODE);
+    }
+
+    return savedWorklog;
   }
 
   async getWorklogs(productionId: number): Promise<StackingWorklogListResponseDto[]> {
@@ -58,9 +68,25 @@ export class StackingService {
     if (!worklog) {
       throw new NotFoundException('작업일지를 찾을 수 없습니다.');
     }
-    Object.assign(worklog, updateStackingWorklogDto);
 
-    return await this.worklogStackingRepository.save(worklog);
+    // 변경 전 separatorUsage 저장
+    const previousSeparatorUsage = worklog.separatorUsage || 0;
+
+    Object.assign(worklog, updateStackingWorklogDto);
+    const savedWorklog = await this.worklogStackingRepository.save(worklog);
+
+    // 자재 사용 이력 수정 - 사용량이 변경된 경우
+    const newSeparatorUsage = updateStackingWorklogDto.separatorUsage || 0;
+    if (updateStackingWorklogDto.separatorLot && newSeparatorUsage !== previousSeparatorUsage) {
+      await this.materialService.updateMaterialUsageHistory(
+        updateStackingWorklogDto.separatorLot,
+        undefined,
+        newSeparatorUsage,
+        MaterialProcess.ELECTRODE,
+      );
+    }
+
+    return savedWorklog;
   }
 
   async deleteStackingWorklog(worklogId: string): Promise<void> {

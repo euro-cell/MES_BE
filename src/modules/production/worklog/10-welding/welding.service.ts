@@ -3,12 +3,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { WorklogWelding } from 'src/common/entities/worklogs/worklog-10-welding.entity';
 import { CreateWeldingWorklogDto, WeldingWorklogListResponseDto, UpdateWeldingWorklogDto } from 'src/common/dtos/worklog/10-welding.dto';
+import { MaterialService } from 'src/modules/material/material.service';
+import { MaterialProcess } from 'src/common/enums/material.enum';
 
 @Injectable()
 export class WeldingService {
   constructor(
     @InjectRepository(WorklogWelding)
     private readonly worklogWeldingRepository: Repository<WorklogWelding>,
+    private readonly materialService: MaterialService,
   ) {}
 
   async createWeldingWorklog(productionId: number, dto: CreateWeldingWorklogDto): Promise<WorklogWelding> {
@@ -16,7 +19,20 @@ export class WeldingService {
       ...dto,
       production: { id: productionId },
     });
-    return await this.worklogWeldingRepository.save(worklog);
+    const savedWorklog = await this.worklogWeldingRepository.save(worklog);
+
+    // 자재 사용 이력 기록 (leadTab, piTape)
+    // leadTab: leadTabLot, leadTabUsage
+    if (dto.leadTabLot && dto.leadTabUsage && dto.leadTabUsage > 0) {
+      await this.materialService.recordMaterialUsage(dto.leadTabLot, undefined, dto.leadTabUsage, MaterialProcess.ELECTRODE);
+    }
+
+    // piTape: piTapeLot, piTapeUsage
+    if (dto.piTapeLot && dto.piTapeUsage && dto.piTapeUsage > 0) {
+      await this.materialService.recordMaterialUsage(dto.piTapeLot, undefined, dto.piTapeUsage, MaterialProcess.ELECTRODE);
+    }
+
+    return savedWorklog;
   }
 
   async getWorklogs(productionId: number): Promise<WeldingWorklogListResponseDto[]> {
@@ -54,9 +70,38 @@ export class WeldingService {
     if (!worklog) {
       throw new NotFoundException('작업일지를 찾을 수 없습니다.');
     }
-    Object.assign(worklog, updateWeldingWorklogDto);
 
-    return await this.worklogWeldingRepository.save(worklog);
+    // 변경 전 usage 저장
+    const previousLeadTabUsage = worklog.leadTabUsage || 0;
+    const previousPiTapeUsage = worklog.piTapeUsage || 0;
+
+    Object.assign(worklog, updateWeldingWorklogDto);
+    const savedWorklog = await this.worklogWeldingRepository.save(worklog);
+
+    // 자재 사용 이력 수정 - 사용량이 변경된 경우
+    // leadTab
+    const newLeadTabUsage = updateWeldingWorklogDto.leadTabUsage || 0;
+    if (updateWeldingWorklogDto.leadTabLot && newLeadTabUsage !== previousLeadTabUsage) {
+      await this.materialService.updateMaterialUsageHistory(
+        updateWeldingWorklogDto.leadTabLot,
+        undefined,
+        newLeadTabUsage,
+        MaterialProcess.ELECTRODE,
+      );
+    }
+
+    // piTape
+    const newPiTapeUsage = updateWeldingWorklogDto.piTapeUsage || 0;
+    if (updateWeldingWorklogDto.piTapeLot && newPiTapeUsage !== previousPiTapeUsage) {
+      await this.materialService.updateMaterialUsageHistory(
+        updateWeldingWorklogDto.piTapeLot,
+        undefined,
+        newPiTapeUsage,
+        MaterialProcess.ELECTRODE,
+      );
+    }
+
+    return savedWorklog;
   }
 
   async deleteWeldingWorklog(worklogId: string): Promise<void> {

@@ -6,21 +6,31 @@ import { BaseWorklogDto, BaseWorklogListResponseDto } from './00-base-worklog.dt
 export class CreateStackingWorklogDto extends BaseWorklogDto {
   // ===== A. 자재 투입 정보 =====
 
-  // 세퍼레이터 매거진 LOT 1~3
+  // 분리막
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  separatorMagazineLot1?: string;
+  separatorLot?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  separatorMagazineLot2?: string;
+  separatorManufacturer?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  separatorMagazineLot3?: string;
+  separatorSpec?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  separatorInputQuantity?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  separatorUsage?: number;
 
   // 양극 매거진 LOT 1~3
   @ApiPropertyOptional()

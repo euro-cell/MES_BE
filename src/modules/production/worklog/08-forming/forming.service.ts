@@ -3,12 +3,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { WorklogForming } from 'src/common/entities/worklogs/worklog-08-forming.entity';
 import { CreateFormingWorklogDto, FormingWorklogListResponseDto, UpdateFormingWorklogDto } from 'src/common/dtos/worklog/08-forming.dto';
+import { MaterialService } from 'src/modules/material/material.service';
+import { MaterialProcess } from 'src/common/enums/material.enum';
 
 @Injectable()
 export class FormingService {
   constructor(
     @InjectRepository(WorklogForming)
     private readonly worklogFormingRepository: Repository<WorklogForming>,
+    private readonly materialService: MaterialService,
   ) {}
 
   async createFormingWorklog(productionId: number, dto: CreateFormingWorklogDto): Promise<WorklogForming> {
@@ -16,7 +19,14 @@ export class FormingService {
       ...dto,
       production: { id: productionId },
     });
-    return await this.worklogFormingRepository.save(worklog);
+    const savedWorklog = await this.worklogFormingRepository.save(worklog);
+
+    // 자재 사용 이력 기록 (pouch)
+    if (dto.pouchLot && dto.pouchUsage && dto.pouchUsage > 0) {
+      await this.materialService.recordMaterialUsage(dto.pouchLot, undefined, dto.pouchUsage, MaterialProcess.ELECTRODE);
+    }
+
+    return savedWorklog;
   }
 
   async getWorklogs(productionId: number): Promise<FormingWorklogListResponseDto[]> {
@@ -54,9 +64,25 @@ export class FormingService {
     if (!worklog) {
       throw new NotFoundException('작업일지를 찾을 수 없습니다.');
     }
-    Object.assign(worklog, updateFormingWorklogDto);
 
-    return await this.worklogFormingRepository.save(worklog);
+    // 변경 전 pouchUsage 저장
+    const previousPouchUsage = worklog.pouchUsage || 0;
+
+    Object.assign(worklog, updateFormingWorklogDto);
+    const savedWorklog = await this.worklogFormingRepository.save(worklog);
+
+    // 자재 사용 이력 수정 - 사용량이 변경된 경우
+    const newPouchUsage = updateFormingWorklogDto.pouchUsage || 0;
+    if (updateFormingWorklogDto.pouchLot && newPouchUsage !== previousPouchUsage) {
+      await this.materialService.updateMaterialUsageHistory(
+        updateFormingWorklogDto.pouchLot,
+        undefined,
+        newPouchUsage,
+        MaterialProcess.ELECTRODE,
+      );
+    }
+
+    return savedWorklog;
   }
 
   async deleteFormingWorklog(worklogId: string): Promise<void> {
