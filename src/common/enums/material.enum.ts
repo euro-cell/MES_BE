@@ -36,3 +36,9 @@ export enum MaterialCategory {
   TAPE = '테이프',
   POUCH = '파우치',
 }
+
+export enum MaterialHistoryType {
+  IN = '입고',
+  OUT = '출고',
+  USE = '사용',
+}
