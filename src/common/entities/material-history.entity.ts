@@ -26,9 +26,6 @@ export class MaterialHistory {
   @Column({ type: 'int' })
   currentStock: number;
 
-  @Column({ length: 100, nullable: true })
-  reason: string;
-
   @CreateDateColumn()
   createdAt: Date;
 }
