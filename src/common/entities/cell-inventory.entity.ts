@@ -13,11 +13,11 @@ export class CellInventory {
   @Column({ type: 'varchar', length: 100 })
   projectName: string;
 
-  @Column({ type: 'varchar', length: 100 })
-  projectNo: string;
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  projectNo: string | null;
 
-  @Column({ type: 'varchar', length: 50 })
-  model: string;
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  model: string | null;
 
   @Column({ type: 'enum', enum: CellGrade, default: CellGrade.GOOD })
   grade: CellGrade;
@@ -46,11 +46,11 @@ export class CellInventory {
   @Column({ type: 'text', nullable: true })
   details: string | null;
 
-  @Column({ type: 'boolean', default: false })
-  isShipped: boolean;
+  @Column({ type: 'boolean', default: false, nullable: true })
+  isShipped: boolean | null;
 
-  @Column({ type: 'boolean', default: false })
-  isRestocked: boolean;
+  @Column({ type: 'boolean', default: false, nullable: true })
+  isRestocked: boolean | null;
 
   @Exclude()
   @CreateDateColumn()

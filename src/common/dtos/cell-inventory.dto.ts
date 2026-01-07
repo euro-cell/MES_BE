@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional, OmitType, PartialType } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsEnum, IsDateString } from 'class-validator';
+import { IsNotEmpty, IsString, IsEnum, IsDateString, IsOptional } from 'class-validator';
 import { CellGrade } from '../enums/cell-inventory.enum';
 
 export class CellInventoryDto {
@@ -16,19 +16,22 @@ export class CellInventoryDto {
   @IsString()
   projectName: string;
 
-  @ApiProperty({ description: 'Project No', example: 'PRJ-2025-001' })
+  @ApiPropertyOptional({ description: 'Project No', example: 'PRJ-2025-001' })
+  @IsOptional()
   @IsString()
-  projectNo: string;
+  projectNo?: string;
 
-  @ApiProperty({ description: '모델', example: 'NCM811-50Ah' })
+  @ApiPropertyOptional({ description: '모델', example: 'NCM811-50Ah' })
+  @IsOptional()
   @IsString()
-  model: string;
+  model?: string;
 
   @ApiProperty({ description: '등급', example: '양품', enum: CellGrade })
   @IsEnum(CellGrade)
   grade: CellGrade;
 
   @ApiPropertyOptional({ description: 'NCR 등급', example: 'NCR1' })
+  @IsOptional()
   @IsString()
   ncrGrade?: string | null;
 
@@ -41,10 +44,12 @@ export class CellInventoryDto {
   storageLocation: string;
 
   @ApiPropertyOptional({ description: '출고 일자', example: '2025-01-10' })
+  @IsOptional()
   @IsDateString()
   shippingDate?: Date | null;
 
   @ApiPropertyOptional({ description: '출고 현황', example: '폐기' })
+  @IsOptional()
   @IsString()
   shippingStatus?: string | null;
 
@@ -57,14 +62,17 @@ export class CellInventoryDto {
   receiver: string;
 
   @ApiPropertyOptional({ description: '상세' })
+  @IsOptional()
   @IsString()
   details?: string | null;
 
-  @ApiProperty({ description: '출고 여부', example: false })
-  isShipped: boolean;
+  @ApiPropertyOptional({ description: '출고 여부', example: false })
+  @IsOptional()
+  isShipped?: boolean;
 
-  @ApiProperty({ description: '재입고 여부', example: false })
-  isRestocked: boolean;
+  @ApiPropertyOptional({ description: '재입고 여부', example: false })
+  @IsOptional()
+  isRestocked?: boolean;
 }
 
 export class CreateCellInventoryDto extends OmitType(CellInventoryDto, ['id']) {}
