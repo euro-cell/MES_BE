@@ -1,7 +1,7 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Patch, Body } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiConflictResponse } from '@nestjs/swagger';
 import { CellInventoryService } from './cell-inventory.service';
-import { CreateCellInventoryDto } from 'src/common/dtos/cell-inventory.dto';
+import { CreateCellInventoryDto, UpdateCellInventoryDto } from 'src/common/dtos/cell-inventory.dto';
 
 @ApiTags('Cell Inventory')
 @Controller('cell-inventory')
@@ -13,5 +13,12 @@ export class CellInventoryController {
   @ApiConflictResponse({ description: '이미 존재하는 셀입니다.' })
   async create(@Body() dto: CreateCellInventoryDto) {
     return this.cellInventoryService.create(dto);
+  }
+
+  @Patch()
+  @ApiOperation({ summary: '셀 출고' })
+  @ApiConflictResponse({ description: '이미 출고된 셀입니다.' })
+  async upsert(@Body() dto: UpdateCellInventoryDto) {
+    return this.cellInventoryService.upsert(dto);
   }
 }
