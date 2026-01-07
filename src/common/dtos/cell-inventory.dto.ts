@@ -106,3 +106,14 @@ export class ProjectStatisticsDto {
   @ApiProperty({ description: '총 보유 수량', example: 60 })
   totalAvailable: number;
 }
+
+export class StorageUsageItemDto {
+  @ApiProperty({ description: '보관 갯수', example: 16 })
+  count: number;
+
+  @ApiProperty({ description: '최대 용량', example: 96 })
+  capacity: number;
+
+  @ApiProperty({ description: '사용률 (%)', example: 17 })
+  usage: number;
+}

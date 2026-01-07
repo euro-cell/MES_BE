@@ -35,4 +35,10 @@ export class CellInventoryController {
   async getStatistics() {
     return this.cellInventoryService.getStatistics();
   }
+
+  @Get('storage-usage')
+  @ApiOperation({ summary: 'RACK 보관 현황' })
+  async getStorageUsage() {
+    return await this.cellInventoryService.getStorageUsage();
+  }
 }

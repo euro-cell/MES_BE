@@ -8,6 +8,7 @@ import {
   UpdateCellInventoryDto,
   ProjectStatisticsDto,
   GradeStatisticsDto,
+  StorageUsageItemDto,
 } from 'src/common/dtos/cell-inventory.dto';
 
 @Injectable()
@@ -135,6 +136,60 @@ export class CellInventoryService {
         }
       }
       result.push({ projectName, grades, totalAvailable });
+    }
+    return result;
+  }
+
+  async getStorageUsage(): Promise<Record<string, StorageUsageItemDto>> {
+    const storageCapacity: Record<string, number> = {
+      A: 96,
+      B: 96,
+      C: 96,
+      D: 96,
+      E: 96,
+      F: 96,
+      G: 64,
+      H: 64,
+      I: 64,
+      J: 64,
+    };
+
+    const storageLocations: string[] = [];
+    const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
+    const numbers = [1, 2, 3, 4, 5];
+
+    for (const letter of letters) {
+      for (const num of numbers) {
+        storageLocations.push(`${letter}-${num}`);
+      }
+    }
+
+    const result: Record<string, StorageUsageItemDto> = {};
+    for (const location of storageLocations) {
+      const letter = location.split('-')[0];
+      const capacity = storageCapacity[letter] || 96;
+      result[location] = {
+        count: 0,
+        capacity: capacity,
+        usage: 0,
+      };
+    }
+
+    const cells = await this.cellInventoryRepository.find({
+      select: ['storageLocation', 'isShipped'],
+      where: { isShipped: false },
+    });
+
+    for (const cell of cells) {
+      if (cell.storageLocation && result[cell.storageLocation]) {
+        result[cell.storageLocation].count += 1;
+      }
+    }
+
+    for (const location of storageLocations) {
+      const letter = location.split('-')[0];
+      const capacity = storageCapacity[letter] || 96;
+      result[location].usage = Math.round((result[location].count / capacity) * 100);
     }
     return result;
   }
