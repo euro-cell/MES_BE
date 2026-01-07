@@ -13,6 +13,7 @@ import { PermissionGuard } from 'src/common/guards/permission.guard';
 import { PermissionGuardModule } from 'src/common/guards/permission-guard.module';
 import { SpecificationModule } from 'src/modules/specification/specification.module';
 import { MaterialModule } from 'src/modules/material/material.module';
+import { CellInventoryModule } from 'src/modules/cell-inventory/cell-inventory.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { multerConfig } from 'src/common/configs/multer.config';
 
@@ -32,6 +33,7 @@ import { multerConfig } from 'src/common/configs/multer.config';
     MenuAccessModule,
     SpecificationModule,
     MaterialModule,
+    CellInventoryModule,
   ],
   controllers: [AppController],
   providers: [
