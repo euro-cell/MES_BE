@@ -9,7 +9,7 @@ export class CellInventoryDto {
   @ApiProperty({ description: 'Lot No', example: 'LOT-2025-001' })
   @IsNotEmpty()
   @IsString()
-  lotNo: string;
+  lot: string;
 
   @ApiProperty({ description: '프로젝트명', example: '고용량 배터리 개발' })
   @IsNotEmpty()
@@ -37,11 +37,12 @@ export class CellInventoryDto {
 
   @ApiProperty({ description: '보관 일자', example: '2025-01-07' })
   @IsDateString()
-  storageDate: Date;
+  date: Date;
 
-  @ApiProperty({ description: '보관 위치', example: 'A-1' })
+  @ApiPropertyOptional({ description: '보관 위치', example: 'A-1' })
+  @IsOptional()
   @IsString()
-  storageLocation: string;
+  storageLocation?: string;
 
   @ApiPropertyOptional({ description: '출고 일자', example: '2025-01-10' })
   @IsOptional()

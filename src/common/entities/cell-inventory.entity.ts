@@ -8,7 +8,7 @@ export class CellInventory {
   id: number;
 
   @Column({ type: 'varchar', length: 100 })
-  lotNo: string;
+  lot: string;
 
   @Column({ type: 'varchar', length: 100 })
   projectName: string;
@@ -26,10 +26,10 @@ export class CellInventory {
   ncrGrade: string | null;
 
   @Column({ type: 'date' })
-  storageDate: Date;
+  date: Date;
 
-  @Column({ type: 'varchar', length: 100 })
-  storageLocation: string;
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  storageLocation: string | null;
 
   @Column({ type: 'date', nullable: true })
   shippingDate: Date | null;
