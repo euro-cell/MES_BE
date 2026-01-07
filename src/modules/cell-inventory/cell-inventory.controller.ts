@@ -21,4 +21,11 @@ export class CellInventoryController {
   async upsert(@Body() dto: UpdateCellInventoryDto) {
     return this.cellInventoryService.upsert(dto);
   }
+
+  @Patch('restock')
+  @ApiOperation({ summary: '셀 재입고' })
+  @ApiConflictResponse({ description: '출고된 이력이 없는 셀입니다.' })
+  async restock(@Body() dto: CreateCellInventoryDto) {
+    return this.cellInventoryService.restock(dto);
+  }
 }

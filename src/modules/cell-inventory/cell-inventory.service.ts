@@ -1,4 +1,4 @@
-import { Injectable, ConflictException } from '@nestjs/common';
+import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CellInventory } from 'src/common/entities/cell-inventory.entity';
@@ -44,5 +44,33 @@ export class CellInventoryService {
       const cellInventory = this.cellInventoryRepository.create(updateData);
       return await this.cellInventoryRepository.save(cellInventory);
     }
+  }
+
+  async restock(dto: CreateCellInventoryDto) {
+    const existing = await this.cellInventoryRepository.findOne({
+      where: { lot: dto.lot },
+    });
+    if (!existing) throw new NotFoundException('해당하는 셀이 없습니다.');
+    if (!existing.isShipped) throw new ConflictException('출고된 이력이 없는 셀입니다.');
+
+    const updateData: Partial<CellInventory> = {
+      grade: dto.grade,
+      storageLocation: dto.storageLocation,
+      date: new Date(dto.date),
+      projectName: dto.projectName,
+      projectNo: dto.projectNo,
+      model: dto.model,
+      ncrGrade: dto.ncrGrade,
+      deliverer: dto.deliverer,
+      receiver: dto.receiver,
+      details: dto.details,
+      isRestocked: true,
+      shippingDate: null,
+      shippingStatus: null,
+      isShipped: false,
+    };
+
+    await this.cellInventoryRepository.update(existing.id, updateData);
+    return await this.cellInventoryRepository.findOne({ where: { id: existing.id } });
   }
 }
