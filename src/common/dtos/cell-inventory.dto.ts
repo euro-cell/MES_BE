@@ -81,3 +81,28 @@ export class CreateCellInventoryDto extends OmitType(CellInventoryDto, ['id']) {
 export class UpdateCellInventoryDto extends PartialType(CreateCellInventoryDto) {}
 
 export class CellInventoryResponseDto extends PartialType(CellInventoryDto) {}
+
+export class GradeStatisticsDto {
+  @ApiProperty({ description: '등급', example: '양품', enum: CellGrade })
+  grade: CellGrade;
+
+  @ApiProperty({ description: '입고량 (총 등록 수량)', example: 100, nullable: true })
+  inStock: number | null;
+
+  @ApiProperty({ description: '출고량', example: 50, nullable: true })
+  shipped: number | null;
+
+  @ApiProperty({ description: '보유 수량 (입고량 - 출고량)', example: 50, nullable: true })
+  available: number | null;
+}
+
+export class ProjectStatisticsDto {
+  @ApiProperty({ description: '프로젝트명', example: '프로젝트A' })
+  projectName: string;
+
+  @ApiProperty({ type: [GradeStatisticsDto] })
+  grades: GradeStatisticsDto[];
+
+  @ApiProperty({ description: '총 보유 수량', example: 60 })
+  totalAvailable: number;
+}

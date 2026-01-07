@@ -1,7 +1,7 @@
-import { Controller, Post, Patch, Body } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiConflictResponse } from '@nestjs/swagger';
+import { Controller, Post, Patch, Get, Body } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiConflictResponse, ApiResponse } from '@nestjs/swagger';
 import { CellInventoryService } from './cell-inventory.service';
-import { CreateCellInventoryDto, UpdateCellInventoryDto } from 'src/common/dtos/cell-inventory.dto';
+import { CreateCellInventoryDto, UpdateCellInventoryDto, ProjectStatisticsDto } from 'src/common/dtos/cell-inventory.dto';
 
 @ApiTags('Cell Inventory')
 @Controller('cell-inventory')
@@ -10,7 +10,7 @@ export class CellInventoryController {
 
   @Post()
   @ApiOperation({ summary: '셀 입고 등록' })
-  @ApiConflictResponse({ description: '이미 존재하는 셀입니다.' })
+  @ApiConflictResponse({ description: '이미 입고된 셀입니다.' })
   async create(@Body() dto: CreateCellInventoryDto) {
     return this.cellInventoryService.create(dto);
   }
@@ -27,5 +27,12 @@ export class CellInventoryController {
   @ApiConflictResponse({ description: '출고된 이력이 없는 셀입니다.' })
   async restock(@Body() dto: CreateCellInventoryDto) {
     return this.cellInventoryService.restock(dto);
+  }
+
+  @Get('statistics')
+  @ApiOperation({ summary: '셀 입/출고 현황(프로젝트별)' })
+  @ApiResponse({ type: [ProjectStatisticsDto] })
+  async getStatistics() {
+    return this.cellInventoryService.getStatistics();
   }
 }
