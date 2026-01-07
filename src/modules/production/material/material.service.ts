@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateMaterialDto, UpdateMaterialDto } from 'src/common/dtos/production-material.dto';
+import { CreateProductionMaterialDto, UpdateProductionMaterialDto } from 'src/common/dtos/production-material.dto';
 import { Material } from 'src/common/entities/material.entity';
 import { ProductionMaterial } from 'src/common/entities/production-material.entity';
 import { Production } from 'src/common/entities/production.entity';
@@ -19,7 +19,7 @@ export class ProductMaterialService {
     private readonly dataSource: DataSource,
   ) {}
 
-  async createMaterial(productionId: number, dto: CreateMaterialDto) {
+  async createMaterial(productionId: number, dto: CreateProductionMaterialDto) {
     try {
       const production = await this.productionRepository.findOneByOrFail({ id: productionId });
 
@@ -101,7 +101,7 @@ export class ProductMaterialService {
     return { productionId, materials: grouped };
   }
 
-  async updateMaterial(productionId: number, dto: UpdateMaterialDto) {
+  async updateMaterial(productionId: number, dto: UpdateProductionMaterialDto) {
     const production = await this.productionRepository.findOne({ where: { id: productionId } });
     if (!production) throw new NotFoundException('해당 생산 자재 소요량을 찾을 수 없습니다.');
 
