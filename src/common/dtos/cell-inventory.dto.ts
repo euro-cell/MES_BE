@@ -1,0 +1,74 @@
+import { ApiProperty, ApiPropertyOptional, OmitType, PartialType } from '@nestjs/swagger';
+import { IsNotEmpty, IsString, IsEnum, IsDateString } from 'class-validator';
+import { CellGrade } from '../enums/cell-inventory.enum';
+
+export class CellInventoryDto {
+  @ApiProperty({ description: '셀 재고 ID', example: 1 })
+  id: number;
+
+  @ApiProperty({ description: 'Lot No', example: 'LOT-2025-001' })
+  @IsNotEmpty()
+  @IsString()
+  lotNo: string;
+
+  @ApiProperty({ description: '프로젝트명', example: '고용량 배터리 개발' })
+  @IsNotEmpty()
+  @IsString()
+  projectName: string;
+
+  @ApiProperty({ description: 'Project No', example: 'PRJ-2025-001' })
+  @IsString()
+  projectNo: string;
+
+  @ApiProperty({ description: '모델', example: 'NCM811-50Ah' })
+  @IsString()
+  model: string;
+
+  @ApiProperty({ description: '등급', example: '양품', enum: CellGrade })
+  @IsEnum(CellGrade)
+  grade: CellGrade;
+
+  @ApiPropertyOptional({ description: 'NCR 등급', example: 'NCR1' })
+  @IsString()
+  ncrGrade?: string | null;
+
+  @ApiProperty({ description: '보관 일자', example: '2025-01-07' })
+  @IsDateString()
+  storageDate: Date;
+
+  @ApiProperty({ description: '보관 위치', example: 'A-1' })
+  @IsString()
+  storageLocation: string;
+
+  @ApiPropertyOptional({ description: '출고 일자', example: '2025-01-10' })
+  @IsDateString()
+  shippingDate?: Date | null;
+
+  @ApiPropertyOptional({ description: '출고 현황', example: '폐기' })
+  @IsString()
+  shippingStatus?: string | null;
+
+  @ApiProperty({ description: '인계자', example: '김철수' })
+  @IsString()
+  deliverer: string;
+
+  @ApiProperty({ description: '인수자', example: '이영희' })
+  @IsString()
+  receiver: string;
+
+  @ApiPropertyOptional({ description: '상세' })
+  @IsString()
+  details?: string | null;
+
+  @ApiProperty({ description: '출고 여부', example: false })
+  isShipped: boolean;
+
+  @ApiProperty({ description: '재입고 여부', example: false })
+  isRestocked: boolean;
+}
+
+export class CreateCellInventoryDto extends OmitType(CellInventoryDto, ['id']) {}
+
+export class UpdateCellInventoryDto extends PartialType(CreateCellInventoryDto) {}
+
+export class CellInventoryResponseDto extends PartialType(CellInventoryDto) {}
