@@ -30,7 +30,7 @@ export class CellInventoryService {
 
   async upsert(dto: UpdateCellInventoryDto) {
     const existing = await this.cellInventoryRepository.findOne({
-      where: { lot: dto.lot },
+      where: { lot: dto.lot, projectName: dto.projectName },
     });
 
     if (existing && existing.isShipped) throw new ConflictException('이미 출고된 셀입니다.');
@@ -55,7 +55,7 @@ export class CellInventoryService {
 
   async restock(dto: CreateCellInventoryDto) {
     const existing = await this.cellInventoryRepository.findOne({
-      where: { lot: dto.lot },
+      where: { lot: dto.lot, projectName: dto.projectName },
     });
     if (!existing) throw new NotFoundException('해당하는 셀이 없습니다.');
     if (!existing.isShipped) throw new ConflictException('출고된 이력이 없는 셀입니다.');
@@ -192,5 +192,12 @@ export class CellInventoryService {
       result[location].usage = Math.round((result[location].count / capacity) * 100);
     }
     return result;
+  }
+
+  async getProjectCells(projectName: string) {
+    return await this.cellInventoryRepository.find({
+      where: { projectName },
+      order: { lot: 'ASC', grade: 'ASC' },
+    });
   }
 }

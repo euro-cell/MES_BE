@@ -1,7 +1,12 @@
-import { Controller, Post, Patch, Get, Body } from '@nestjs/common';
+import { Controller, Post, Patch, Get, Body, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiConflictResponse, ApiResponse } from '@nestjs/swagger';
 import { CellInventoryService } from './cell-inventory.service';
-import { CreateCellInventoryDto, UpdateCellInventoryDto, ProjectStatisticsDto } from 'src/common/dtos/cell-inventory.dto';
+import {
+  CreateCellInventoryDto,
+  UpdateCellInventoryDto,
+  ProjectStatisticsDto,
+  CellInventoryResponseDto,
+} from 'src/common/dtos/cell-inventory.dto';
 
 @ApiTags('Cell Inventory')
 @Controller('cell-inventory')
@@ -40,5 +45,12 @@ export class CellInventoryController {
   @ApiOperation({ summary: 'RACK 보관 현황' })
   async getStorageUsage() {
     return await this.cellInventoryService.getStorageUsage();
+  }
+
+  @Get('project')
+  @ApiOperation({ summary: '프로젝트별 셀 데이터 조회' })
+  @ApiResponse({ type: [CellInventoryResponseDto] })
+  async getProjectCells(@Query('name') projectName: string) {
+    return await this.cellInventoryService.getProjectCells(projectName);
   }
 }
