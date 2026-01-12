@@ -14,6 +14,7 @@ import { PermissionGuardModule } from 'src/common/guards/permission-guard.module
 import { SpecificationModule } from 'src/modules/specification/specification.module';
 import { MaterialModule } from 'src/modules/material/material.module';
 import { CellInventoryModule } from 'src/modules/cell-inventory/cell-inventory.module';
+import { QualityModule } from 'src/modules/quality/quality.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { multerConfig } from 'src/common/configs/multer.config';
 
@@ -34,6 +35,7 @@ import { multerConfig } from 'src/common/configs/multer.config';
     SpecificationModule,
     MaterialModule,
     CellInventoryModule,
+    QualityModule,
   ],
   controllers: [AppController],
   providers: [

@@ -1,4 +1,7 @@
 import { Controller } from '@nestjs/common';
+import { LqcService } from './lqc.service';
 
-@Controller('lqc')
-export class LqcController {}
+@Controller()
+export class LqcController {
+  constructor(private readonly lqcService: LqcService) {}
+}
