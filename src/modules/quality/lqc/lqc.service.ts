@@ -5,6 +5,7 @@ import { LqcSpec } from 'src/common/entities/lqc-spec.entity';
 import { LqcProcessType, LqcItemType } from 'src/common/enums/lqc.enum';
 import { CreateLqcSpecDto } from 'src/common/dtos/lqc-spec.dto';
 import { WorklogBinder } from 'src/common/entities/worklogs/worklog-01-binder.entity';
+import { WorklogSlurry } from 'src/common/entities/worklogs/worklog-02-slurry.entity';
 
 @Injectable()
 export class LqcService {
@@ -13,6 +14,8 @@ export class LqcService {
     private readonly lqcSpecRepository: Repository<LqcSpec>,
     @InjectRepository(WorklogBinder)
     private readonly worklogBinderRepository: Repository<WorklogBinder>,
+    @InjectRepository(WorklogSlurry)
+    private readonly worklogSlurryRepository: Repository<WorklogSlurry>,
   ) {}
 
   async getSpec(productionId: number, processType?: LqcProcessType, itemType?: LqcItemType): Promise<LqcSpec[]> {
@@ -73,6 +76,30 @@ export class LqcService {
     }
 
     query.orderBy('binder.manufactureDate', 'DESC');
+
+    return query.getMany();
+  }
+
+  async getSlurryWorklogData(productionId: number, electrode?: 'A' | 'C') {
+    const query = this.worklogSlurryRepository
+      .createQueryBuilder('slurry')
+      .select([
+        'slurry.id',
+        'slurry.manufactureDate',
+        'slurry.lot',
+        'slurry.solidContent1Percentage',
+        'slurry.solidContent2Percentage',
+        'slurry.solidContent3Percentage',
+        'slurry.grindGageFineParticle2',
+        'slurry.viscosityAfterStabilization',
+      ])
+      .where('slurry.production_id = :productionId', { productionId });
+
+    if (electrode) {
+      query.andWhere('SUBSTRING(slurry.lot, 5, 1) = :electrode', { electrode });
+    }
+
+    query.orderBy('slurry.manufactureDate', 'DESC');
 
     return query.getMany();
   }

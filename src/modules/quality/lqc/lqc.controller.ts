@@ -33,4 +33,13 @@ export class LqcController {
   ) {
     return this.lqcService.getBinderWorklogData(productionId, electrode);
   }
+
+  @Get(':productionId/slurry')
+  @ApiOperation({ summary: '슬러리 작업일지 데이터 조회 (입도, 점도)' })
+  async getSlurryWorklogData(
+    @Param('productionId') productionId: number,
+    @Query('electrode') electrode?: 'A' | 'C',
+  ) {
+    return this.lqcService.getSlurryWorklogData(productionId, electrode);
+  }
 }
