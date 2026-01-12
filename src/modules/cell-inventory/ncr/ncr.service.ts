@@ -11,6 +11,7 @@ import {
   ProjectCountDto,
   NcrDetailResponseDto,
   NcrDetailDto,
+  UpdateNcrDetailRequestDto,
 } from 'src/common/dtos/ncr-statistics.dto';
 
 @Injectable()
@@ -112,6 +113,43 @@ export class NcrService {
       projectName,
       ncrDetails,
     };
+  }
+
+  async updateDetail(dto: UpdateNcrDetailRequestDto): Promise<{ message: string }> {
+    const { projectName, ncrDetails } = dto;
+
+    for (const ncrDetail of ncrDetails) {
+      const cellNcr = await this.cellNcrRepository.findOne({
+        where: { id: ncrDetail.id },
+      });
+
+      if (!cellNcr) continue;
+
+      for (const item of ncrDetail.items) {
+        if (!item.id || item.id === 0) {
+          // 신규 생성
+          const newDetail = this.cellNcrDetailRepository.create({
+            projectName,
+            title: item.title,
+            details: item.details,
+            type: item.type,
+            count: item.count,
+            cellNcr,
+          });
+          await this.cellNcrDetailRepository.save(newDetail);
+        } else {
+          // 기존 항목 업데이트
+          await this.cellNcrDetailRepository.update(item.id, {
+            title: item.title,
+            details: item.details,
+            type: item.type,
+            count: item.count,
+          });
+        }
+      }
+    }
+
+    return { message: '저장되었습니다.' };
   }
 
   private async getAllProjects(): Promise<ProjectDto[]> {

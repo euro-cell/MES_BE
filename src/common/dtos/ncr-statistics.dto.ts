@@ -91,3 +91,48 @@ export class NcrDetailResponseDto {
   @ApiProperty({ type: [NcrDetailDto], description: 'NCR 상세 목록' })
   ncrDetails: NcrDetailDto[];
 }
+
+export class UpdateNcrDetailItemDto {
+  @ApiProperty({ description: 'NCR Detail ID (0이면 신규)', example: 1, required: false })
+  id?: number;
+
+  @ApiProperty({ description: '테이블 제목' })
+  title: string;
+
+  @ApiProperty({ description: '구분' })
+  details: string;
+
+  @ApiProperty({ description: '타입/범위' })
+  type: string;
+
+  @ApiProperty({ description: '수량' })
+  count: number;
+}
+
+export class UpdateNcrDetailDto {
+  @ApiProperty({ description: 'NCR ID' })
+  id: number;
+
+  @ApiProperty({ description: 'NCR 코드' })
+  code: string;
+
+  @ApiProperty({ description: 'NCR 제목' })
+  title: string;
+
+  @ApiProperty({ description: '분류' })
+  category: string;
+
+  @ApiProperty({ description: '종류' })
+  ncrType: string;
+
+  @ApiProperty({ type: [UpdateNcrDetailItemDto], description: 'NCR 세부 항목' })
+  items: UpdateNcrDetailItemDto[];
+}
+
+export class UpdateNcrDetailRequestDto {
+  @ApiProperty({ description: '프로젝트명' })
+  projectName: string;
+
+  @ApiProperty({ type: [UpdateNcrDetailDto], description: 'NCR 상세 목록' })
+  ncrDetails: UpdateNcrDetailDto[];
+}

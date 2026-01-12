@@ -1,7 +1,7 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Patch, Query, Body } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 import { NcrService } from './ncr.service';
-import { NcrStatisticsResponseDto, NcrDetailResponseDto } from 'src/common/dtos/ncr-statistics.dto';
+import { NcrStatisticsResponseDto, NcrDetailResponseDto, UpdateNcrDetailRequestDto } from 'src/common/dtos/ncr-statistics.dto';
 
 @ApiTags('Cell NCR')
 @Controller()
@@ -21,5 +21,12 @@ export class NcrController {
   @ApiResponse({ type: NcrDetailResponseDto })
   async getDetail(@Query('projectName') projectName: string) {
     return await this.ncrService.getDetail(projectName);
+  }
+
+  @Patch('detail')
+  @ApiOperation({ summary: 'NCR 세부 현황 저장 (프로젝트별)' })
+  @ApiResponse({ description: '저장 성공', schema: { example: { message: '저장되었습니다.' } } })
+  async updateDetail(@Body() dto: UpdateNcrDetailRequestDto) {
+    return await this.ncrService.updateDetail(dto);
   }
 }
