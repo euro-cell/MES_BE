@@ -1,9 +1,12 @@
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { LqcController } from './lqc.controller';
 import { LqcService } from './lqc.service';
+import { LqcSpec } from 'src/common/entities/lqc-spec.entity';
 
 @Module({
+  imports: [TypeOrmModule.forFeature([LqcSpec])],
   controllers: [LqcController],
-  providers: [LqcService]
+  providers: [LqcService],
 })
 export class LqcModule {}
