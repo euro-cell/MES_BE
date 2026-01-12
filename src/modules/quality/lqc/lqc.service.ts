@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { LqcSpec } from 'src/common/entities/lqc-spec.entity';
 import { LqcProcessType, LqcItemType } from 'src/common/enums/lqc.enum';
+import { CreateLqcSpecDto } from 'src/common/dtos/lqc-spec.dto';
 
 @Injectable()
 export class LqcService {
@@ -23,5 +24,29 @@ export class LqcService {
     }
 
     return query.getMany();
+  }
+
+  async upsertSpec(productionId: number, dto: CreateLqcSpecDto): Promise<LqcSpec> {
+    const existing = await this.lqcSpecRepository.findOne({
+      where: {
+        production: { id: productionId },
+        processType: dto.processType,
+        itemType: dto.itemType,
+      },
+    });
+
+    if (existing) {
+      existing.specs = dto.specs;
+      return this.lqcSpecRepository.save(existing);
+    }
+
+    const newSpec = this.lqcSpecRepository.create({
+      production: { id: productionId },
+      processType: dto.processType,
+      itemType: dto.itemType,
+      specs: dto.specs,
+    });
+
+    return this.lqcSpecRepository.save(newSpec);
   }
 }

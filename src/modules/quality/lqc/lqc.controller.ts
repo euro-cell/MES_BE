@@ -1,7 +1,8 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { LqcService } from './lqc.service';
 import { LqcProcessType, LqcItemType } from 'src/common/enums/lqc.enum';
+import { CreateLqcSpecDto } from 'src/common/dtos/lqc-spec.dto';
 
 @ApiTags('Quality - LQC')
 @Controller()
@@ -16,5 +17,11 @@ export class LqcController {
     @Query('itemType') itemType?: LqcItemType,
   ) {
     return this.lqcService.getSpec(productionId, processType, itemType);
+  }
+
+  @Post(':productionId/spec')
+  @ApiOperation({ summary: 'LQC 규격 저장 (신규 생성 또는 업데이트)' })
+  async upsertSpec(@Param('productionId') productionId: number, @Body() dto: CreateLqcSpecDto) {
+    return this.lqcService.upsertSpec(productionId, dto);
   }
 }
