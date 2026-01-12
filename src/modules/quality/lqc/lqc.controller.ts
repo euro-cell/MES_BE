@@ -24,4 +24,13 @@ export class LqcController {
   async upsertSpec(@Param('productionId') productionId: number, @Body() dto: CreateLqcSpecDto) {
     return this.lqcService.upsertSpec(productionId, dto);
   }
+
+  @Get(':productionId/binder')
+  @ApiOperation({ summary: '바인더 작업일지 데이터 조회 (고형분, 점도)' })
+  async getBinderWorklogData(
+    @Param('productionId') productionId: number,
+    @Query('electrode') electrode?: 'A' | 'C',
+  ) {
+    return this.lqcService.getBinderWorklogData(productionId, electrode);
+  }
 }
