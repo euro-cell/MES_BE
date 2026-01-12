@@ -2,14 +2,24 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CellNcr } from 'src/common/entities/cell-ncr.entity';
+import { CellNcrDetail } from 'src/common/entities/cell-ncr-detail.entity';
 import { CellInventory } from 'src/common/entities/cell-inventory.entity';
-import { NcrStatisticsResponseDto, NcrStatisticsDto, ProjectDto, ProjectCountDto } from 'src/common/dtos/ncr-statistics.dto';
+import {
+  NcrStatisticsResponseDto,
+  NcrStatisticsDto,
+  ProjectDto,
+  ProjectCountDto,
+  NcrDetailResponseDto,
+  NcrDetailDto,
+} from 'src/common/dtos/ncr-statistics.dto';
 
 @Injectable()
 export class NcrService {
   constructor(
     @InjectRepository(CellNcr)
     private readonly cellNcrRepository: Repository<CellNcr>,
+    @InjectRepository(CellNcrDetail)
+    private readonly cellNcrDetailRepository: Repository<CellNcrDetail>,
     @InjectRepository(CellInventory)
     private readonly cellInventoryRepository: Repository<CellInventory>,
   ) {}
@@ -50,6 +60,60 @@ export class NcrService {
     };
   }
 
+  async getDetail(projectName: string): Promise<NcrDetailResponseDto> {
+    // Step 1: 해당 프로젝트의 NCR 코드 목록 조회
+    const ncrGrades = await this.cellInventoryRepository
+      .createQueryBuilder('ci')
+      .select('DISTINCT ci.ncrGrade', 'ncrGrade')
+      .where('ci.projectName = :projectName', { projectName })
+      .andWhere('ci.ncrGrade IS NOT NULL')
+      .getRawMany<{ ncrGrade: string }>();
+
+    const projectNcrCodes = ncrGrades.map((n) => n.ncrGrade);
+
+    // Step 2: 해당 NCR 코드들에 대한 CellNcr 정보 조회
+    const categoryOrder = { Formation: 0, Inspection: 1, Other: 2 };
+    const ncrItems = await this.cellNcrRepository.find({
+      where: projectNcrCodes.map((code) => ({ code })),
+    });
+
+    const sortedNcrItems = ncrItems.sort((a, b) => {
+      const catA = categoryOrder[a.category] ?? 3;
+      const catB = categoryOrder[b.category] ?? 3;
+      if (catA !== catB) return catA - catB;
+      return a.id - b.id;
+    });
+
+    // Step 3: 각 NCR 코드에 대해 CellNcrDetail 조회
+    const ncrDetails: NcrDetailDto[] = [];
+    for (const ncrItem of sortedNcrItems) {
+      const details = await this.cellNcrDetailRepository.find({
+        where: { projectName, cellNcr: { id: ncrItem.id } },
+        order: { id: 'ASC' },
+      });
+
+      ncrDetails.push({
+        id: ncrItem.id,
+        code: ncrItem.code,
+        title: ncrItem.title,
+        category: ncrItem.category,
+        ncrType: ncrItem.ncrType,
+        items: details.map((d) => ({
+          id: d.id,
+          title: d.title,
+          details: d.details,
+          type: d.type,
+          count: d.count,
+        })),
+      });
+    }
+
+    return {
+      projectName,
+      ncrDetails,
+    };
+  }
+
   private async getAllProjects(): Promise<ProjectDto[]> {
     const projects = await this.cellInventoryRepository
       .createQueryBuilder('ci')
@@ -61,10 +125,7 @@ export class NcrService {
 
     const uniqueProjects = Array.from(
       new Map(
-        projects.map(p => [
-          `${p.projectNo || 'null'}|${p.projectName}`,
-          { projectNo: p.projectNo || null, projectName: p.projectName },
-        ]),
+        projects.map((p) => [`${p.projectNo || 'null'}|${p.projectName}`, { projectNo: p.projectNo || null, projectName: p.projectName }]),
       ).values(),
     );
 
@@ -79,10 +140,7 @@ export class NcrService {
     });
   }
 
-  private async getCountsForNcr(
-    ncrCode: string,
-    projects: ProjectDto[],
-  ): Promise<ProjectCountDto[]> {
+  private async getCountsForNcr(ncrCode: string, projects: ProjectDto[]): Promise<ProjectCountDto[]> {
     const countMap = new Map<string, number>();
 
     // 각 프로젝트별로 카운트 조회
@@ -104,7 +162,7 @@ export class NcrService {
     }
 
     // 프로젝트 순서에 맞춰 count 배열 구성
-    return projects.map(project => ({
+    return projects.map((project) => ({
       projectNo: project.projectNo,
       projectName: project.projectName,
       count: countMap.get(`${project.projectNo || 'null'}|${project.projectName}`) || 0,
