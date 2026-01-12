@@ -1,23 +1,10 @@
-import {
-  Column,
-  CreateDateColumn,
-  DeleteDateColumn,
-  Entity,
-  ForeignKey,
-  JoinColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { CellNcr } from './cell-ncr.entity';
 
 @Entity('cell_ncr_details')
 export class CellNcrDetail {
   @PrimaryGeneratedColumn()
   id: number;
-
-  @Column()
-  cellNcrId: number;
 
   @Column({ type: 'varchar', length: 100 })
   projectName: string;
@@ -35,7 +22,7 @@ export class CellNcrDetail {
   count: number;
 
   @ManyToOne(() => CellNcr, (cellNcr) => cellNcr.cellNcrDetails, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'cellNcrId' })
+  @JoinColumn({ name: 'cell_ncr_id' })
   cellNcr: CellNcr;
 
   @CreateDateColumn()
