@@ -42,4 +42,13 @@ export class LqcController {
   ) {
     return this.lqcService.getSlurryWorklogData(productionId, electrode);
   }
+
+  @Get(':productionId/coating')
+  @ApiOperation({ summary: '코팅 작업일지 데이터 조회 (로딩량, 두께)' })
+  async getCoatingWorklogData(
+    @Param('productionId') productionId: number,
+    @Query('electrode') electrode?: 'A' | 'C',
+  ) {
+    return this.lqcService.getCoatingWorklogData(productionId, electrode);
+  }
 }
