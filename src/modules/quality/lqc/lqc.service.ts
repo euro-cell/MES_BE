@@ -7,6 +7,7 @@ import { CreateLqcSpecDto } from 'src/common/dtos/lqc-spec.dto';
 import { WorklogBinder } from 'src/common/entities/worklogs/worklog-01-binder.entity';
 import { WorklogSlurry } from 'src/common/entities/worklogs/worklog-02-slurry.entity';
 import { WorklogCoating } from 'src/common/entities/worklogs/worklog-03-coating.entity';
+import { WorklogPress } from 'src/common/entities/worklogs/worklog-04-press.entity';
 
 @Injectable()
 export class LqcService {
@@ -19,6 +20,8 @@ export class LqcService {
     private readonly worklogSlurryRepository: Repository<WorklogSlurry>,
     @InjectRepository(WorklogCoating)
     private readonly worklogCoatingRepository: Repository<WorklogCoating>,
+    @InjectRepository(WorklogPress)
+    private readonly worklogPressRepository: Repository<WorklogPress>,
   ) {}
 
   async getSpec(productionId: number, processType?: LqcProcessType, itemType?: LqcItemType): Promise<LqcSpec[]> {
@@ -231,6 +234,66 @@ export class LqcService {
         thicknessMiddle: doubleSideData.thicknessMiddle,
         thicknessBottom: doubleSideData.thicknessBottom,
       });
+    }
+
+    return result;
+  }
+
+  async getPressWorklogData(productionId: number, electrode?: 'A' | 'C') {
+    const presses = await this.worklogPressRepository.find({
+      where: { production: { id: productionId } },
+      order: { manufactureDate: 'DESC' },
+    });
+
+    const toNumber = (value: any) => (value != null ? Number(value) : null);
+
+    const result: any[] = [];
+    const processedLots = new Set<string>();
+
+    for (const press of presses) {
+      for (let i = 1; i <= 5; i++) {
+        const lot = press[`pressLot${i}`] as string;
+        if (!lot) continue;
+
+        // electrode 필터링 (LOT 5번째 문자)
+        if (electrode && lot.charAt(4) !== electrode) continue;
+
+        // 중복 LOT 방지
+        if (processedLots.has(lot)) continue;
+        processedLots.add(lot);
+
+        // 전단 행
+        result.push({
+          id: press.id,
+          lot,
+          division: '전',
+          doubleSideTop: toNumber(press[`weightPerAreaFront${i}M`]),
+          doubleSideMiddle: toNumber(press[`weightPerAreaFront${i}C`]),
+          doubleSideBottom: toNumber(press[`weightPerAreaFront${i}D`]),
+          coatingWidth: null,
+          uncoatedArea: null,
+          slittingWidth: null,
+          thicknessTop: toNumber(press[`thicknessFront${i}M`]),
+          thicknessMiddle: toNumber(press[`thicknessFront${i}C`]),
+          thicknessBottom: toNumber(press[`thicknessFront${i}D`]),
+        });
+
+        // 후단 행
+        result.push({
+          id: press.id,
+          lot,
+          division: '후',
+          doubleSideTop: toNumber(press[`weightPerAreaRear${i}M`]),
+          doubleSideMiddle: toNumber(press[`weightPerAreaRear${i}C`]),
+          doubleSideBottom: toNumber(press[`weightPerAreaRear${i}D`]),
+          coatingWidth: null,
+          uncoatedArea: null,
+          slittingWidth: null,
+          thicknessTop: toNumber(press[`thicknessRear${i}M`]),
+          thicknessMiddle: toNumber(press[`thicknessRear${i}C`]),
+          thicknessBottom: toNumber(press[`thicknessRear${i}D`]),
+        });
+      }
     }
 
     return result;

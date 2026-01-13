@@ -51,4 +51,13 @@ export class LqcController {
   ) {
     return this.lqcService.getCoatingWorklogData(productionId, electrode);
   }
+
+  @Get(':productionId/press')
+  @ApiOperation({ summary: '프레스 작업일지 데이터 조회 (면적밀도, 두께)' })
+  async getPressWorklogData(
+    @Param('productionId') productionId: number,
+    @Query('electrode') electrode?: 'A' | 'C',
+  ) {
+    return this.lqcService.getPressWorklogData(productionId, electrode);
+  }
 }
