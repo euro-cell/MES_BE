@@ -49,7 +49,7 @@ export class WorklogVd extends WorklogBase {
   @Column({ type: 'varchar', length: 50, nullable: true })
   upperInputOutputTime1: string;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   upperMoistureMeasurement1: number;
 
   // 1차 - 하부
@@ -62,7 +62,7 @@ export class WorklogVd extends WorklogBase {
   @Column({ type: 'varchar', length: 50, nullable: true })
   lowerInputOutputTime1: string;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   lowerMoistureMeasurement1: number;
 
   // 2차 - 상부
@@ -75,7 +75,7 @@ export class WorklogVd extends WorklogBase {
   @Column({ type: 'varchar', length: 50, nullable: true })
   upperInputOutputTime2: string;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   upperMoistureMeasurement2: number;
 
   // 2차 - 하부
@@ -88,7 +88,7 @@ export class WorklogVd extends WorklogBase {
   @Column({ type: 'varchar', length: 50, nullable: true })
   lowerInputOutputTime2: string;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   lowerMoistureMeasurement2: number;
 
   // 3차 - 상부
@@ -101,7 +101,7 @@ export class WorklogVd extends WorklogBase {
   @Column({ type: 'varchar', length: 50, nullable: true })
   upperInputOutputTime3: string;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   upperMoistureMeasurement3: number;
 
   // 3차 - 하부
@@ -114,7 +114,7 @@ export class WorklogVd extends WorklogBase {
   @Column({ type: 'varchar', length: 50, nullable: true })
   lowerInputOutputTime3: string;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   lowerMoistureMeasurement3: number;
 
   // 4차 - 상부
@@ -127,7 +127,7 @@ export class WorklogVd extends WorklogBase {
   @Column({ type: 'varchar', length: 50, nullable: true })
   upperInputOutputTime4: string;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   upperMoistureMeasurement4: number;
 
   // 4차 - 하부
@@ -140,7 +140,7 @@ export class WorklogVd extends WorklogBase {
   @Column({ type: 'varchar', length: 50, nullable: true })
   lowerInputOutputTime4: string;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   lowerMoistureMeasurement4: number;
 
   // 5차 - 상부
@@ -153,7 +153,7 @@ export class WorklogVd extends WorklogBase {
   @Column({ type: 'varchar', length: 50, nullable: true })
   upperInputOutputTime5: string;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   upperMoistureMeasurement5: number;
 
   // 5차 - 하부
@@ -166,7 +166,7 @@ export class WorklogVd extends WorklogBase {
   @Column({ type: 'varchar', length: 50, nullable: true })
   lowerInputOutputTime5: string;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   lowerMoistureMeasurement5: number;
 
   // ===== C. 공정 조건 (Process Conditions) =====
