@@ -17,6 +17,7 @@ import { CellInventoryModule } from 'src/modules/cell-inventory/cell-inventory.m
 import { QualityModule } from 'src/modules/quality/quality.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { multerConfig } from 'src/common/configs/multer.config';
+import { DrawingModule } from 'src/modules/drawing/drawing.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { multerConfig } from 'src/common/configs/multer.config';
     MaterialModule,
     CellInventoryModule,
     QualityModule,
+    DrawingModule,
   ],
   controllers: [AppController],
   providers: [
