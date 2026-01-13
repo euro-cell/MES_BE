@@ -8,6 +8,7 @@ import { WorklogBinder } from 'src/common/entities/worklogs/worklog-01-binder.en
 import { WorklogSlurry } from 'src/common/entities/worklogs/worklog-02-slurry.entity';
 import { WorklogCoating } from 'src/common/entities/worklogs/worklog-03-coating.entity';
 import { WorklogPress } from 'src/common/entities/worklogs/worklog-04-press.entity';
+import { WorklogVd } from 'src/common/entities/worklogs/worklog-07-vd.entity';
 
 @Injectable()
 export class LqcService {
@@ -22,6 +23,8 @@ export class LqcService {
     private readonly worklogCoatingRepository: Repository<WorklogCoating>,
     @InjectRepository(WorklogPress)
     private readonly worklogPressRepository: Repository<WorklogPress>,
+    @InjectRepository(WorklogVd)
+    private readonly worklogVdRepository: Repository<WorklogVd>,
   ) {}
 
   async getSpec(productionId: number, processType?: LqcProcessType, itemType?: LqcItemType): Promise<LqcSpec[]> {
@@ -286,6 +289,70 @@ export class LqcService {
           thicknessTop: toNumber(press[`thicknessRear${i}M`]),
           thicknessMiddle: toNumber(press[`thicknessRear${i}C`]),
           thicknessBottom: toNumber(press[`thicknessRear${i}D`]),
+        });
+      }
+    }
+
+    return result;
+  }
+
+  async getVdWorklogData(productionId: number, electrode?: 'A' | 'C') {
+    const vds = await this.worklogVdRepository.find({
+      where: { production: { id: productionId } },
+      order: { manufactureDate: 'DESC' },
+    });
+
+    const toNumber = (value: any) => (value != null ? Number(value) : null);
+    const formatDate = (date: any) => {
+      if (!date) return null;
+      if (typeof date === 'string') return date.split('T')[0];
+      if (date instanceof Date) return date.toISOString().split('T')[0];
+      return null;
+    };
+
+    const result: any[] = [];
+
+    for (const vd of vds) {
+      // 상부 행
+      const upperLots = [vd.upperLot1, vd.upperLot2, vd.upperLot3, vd.upperLot4, vd.upperLot5];
+
+      // electrode 필터링 (LOT 5번째 문자 기준)
+      const upperHasElectrode = !electrode || upperLots.some((lot) => lot && lot.charAt(4) === electrode);
+
+      if (upperHasElectrode) {
+        result.push({
+          id: vd.id,
+          workDate: formatDate(vd.manufactureDate),
+          division: '상부',
+          moisture1: toNumber(vd.upperMoistureMeasurement1),
+          moisture2: toNumber(vd.upperMoistureMeasurement2),
+          moisture3: toNumber(vd.upperMoistureMeasurement3),
+          lot1: vd.upperLot1 ?? null,
+          lot2: vd.upperLot2 ?? null,
+          lot3: vd.upperLot3 ?? null,
+          lot4: vd.upperLot4 ?? null,
+          lot5: vd.upperLot5 ?? null,
+        });
+      }
+
+      // 하부 행
+      const lowerLots = [vd.lowerLot1, vd.lowerLot2, vd.lowerLot3, vd.lowerLot4, vd.lowerLot5];
+
+      const lowerHasElectrode = !electrode || lowerLots.some((lot) => lot && lot.charAt(4) === electrode);
+
+      if (lowerHasElectrode) {
+        result.push({
+          id: vd.id,
+          workDate: formatDate(vd.manufactureDate),
+          division: '하부',
+          moisture1: toNumber(vd.lowerMoistureMeasurement1),
+          moisture2: toNumber(vd.lowerMoistureMeasurement2),
+          moisture3: toNumber(vd.lowerMoistureMeasurement3),
+          lot1: vd.lowerLot1 ?? null,
+          lot2: vd.lowerLot2 ?? null,
+          lot3: vd.lowerLot3 ?? null,
+          lot4: vd.lowerLot4 ?? null,
+          lot5: vd.lowerLot5 ?? null,
         });
       }
     }

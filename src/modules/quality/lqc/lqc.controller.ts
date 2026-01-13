@@ -60,4 +60,13 @@ export class LqcController {
   ) {
     return this.lqcService.getPressWorklogData(productionId, electrode);
   }
+
+  @Get(':productionId/vd')
+  @ApiOperation({ summary: 'VD 작업일지 데이터 조회 (수분)' })
+  async getVdWorklogData(
+    @Param('productionId') productionId: number,
+    @Query('electrode') electrode?: 'A' | 'C',
+  ) {
+    return this.lqcService.getVdWorklogData(productionId, electrode);
+  }
 }
