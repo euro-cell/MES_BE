@@ -122,49 +122,30 @@ export class VdProcessService {
           }
         : null;
 
-      const cathodeFields = [
-        { lot: log.cathodeLot1, qty: log.cathodeInputQuantity1 },
-        { lot: log.cathodeLot2, qty: log.cathodeInputQuantity2 },
-        { lot: log.cathodeLot3, qty: log.cathodeInputQuantity3 },
-        { lot: log.cathodeLot4, qty: log.cathodeInputQuantity4 },
-        { lot: log.cathodeLot5, qty: log.cathodeInputQuantity5 },
+      // 상부/하부 필드에서 데이터 수집 후 LOT 5번째 문자로 양/음극 구분
+      const allFields = [
+        { lot: log.upperLot1, qty: log.upperInputQuantity1 },
+        { lot: log.upperLot2, qty: log.upperInputQuantity2 },
+        { lot: log.upperLot3, qty: log.upperInputQuantity3 },
+        { lot: log.upperLot4, qty: log.upperInputQuantity4 },
+        { lot: log.upperLot5, qty: log.upperInputQuantity5 },
+        { lot: log.lowerLot1, qty: log.lowerInputQuantity1 },
+        { lot: log.lowerLot2, qty: log.lowerInputQuantity2 },
+        { lot: log.lowerLot3, qty: log.lowerInputQuantity3 },
+        { lot: log.lowerLot4, qty: log.lowerInputQuantity4 },
+        { lot: log.lowerLot5, qty: log.lowerInputQuantity5 },
       ];
 
-      for (const field of cathodeFields) {
+      for (const field of allFields) {
         if (this.isValidLot(field.lot)) {
           const qty = Number(field.qty) || 0;
-          cumulativeCathodeOutput += qty;
+          const isCathode = field.lot[4] === 'C';
 
-          const currentVdQty = vdLotQuantityMap.get(field.lot) || 0;
-          vdLotQuantityMap.set(field.lot, currentVdQty + qty);
-          lotLastDay.set(field.lot, { day, isCurrentMonth });
-
-          const notchingQty = notchingLotMap.get(field.lot) || 0;
-          const newVdQty = currentVdQty + qty;
-
-          if (isCurrentMonth && current) {
-            current.cathodeOutput += qty;
-
-            if (!processedLots.has(field.lot) && newVdQty >= notchingQty && notchingQty > 0) {
-              current.cathodeNotching += notchingQty;
-              processedLots.add(field.lot);
-            }
+          if (isCathode) {
+            cumulativeCathodeOutput += qty;
+          } else {
+            cumulativeAnodeOutput += qty;
           }
-        }
-      }
-
-      const anodeFields = [
-        { lot: log.anodeLot1, qty: log.anodeInputQuantity1 },
-        { lot: log.anodeLot2, qty: log.anodeInputQuantity2 },
-        { lot: log.anodeLot3, qty: log.anodeInputQuantity3 },
-        { lot: log.anodeLot4, qty: log.anodeInputQuantity4 },
-        { lot: log.anodeLot5, qty: log.anodeInputQuantity5 },
-      ];
-
-      for (const field of anodeFields) {
-        if (this.isValidLot(field.lot)) {
-          const qty = Number(field.qty) || 0;
-          cumulativeAnodeOutput += qty;
 
           const currentVdQty = vdLotQuantityMap.get(field.lot) || 0;
           vdLotQuantityMap.set(field.lot, currentVdQty + qty);
@@ -174,11 +155,18 @@ export class VdProcessService {
           const newVdQty = currentVdQty + qty;
 
           if (isCurrentMonth && current) {
-            current.anodeOutput += qty;
-
-            if (!processedLots.has(field.lot) && newVdQty >= notchingQty && notchingQty > 0) {
-              current.anodeNotching += notchingQty;
-              processedLots.add(field.lot);
+            if (isCathode) {
+              current.cathodeOutput += qty;
+              if (!processedLots.has(field.lot) && newVdQty >= notchingQty && notchingQty > 0) {
+                current.cathodeNotching += notchingQty;
+                processedLots.add(field.lot);
+              }
+            } else {
+              current.anodeOutput += qty;
+              if (!processedLots.has(field.lot) && newVdQty >= notchingQty && notchingQty > 0) {
+                current.anodeNotching += notchingQty;
+                processedLots.add(field.lot);
+              }
             }
           }
         }

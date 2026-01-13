@@ -60,215 +60,215 @@ export class CreateVdWorklogDto extends BaseWorklogDto {
 
   // ===== B. 생산 정보 (1~5차) =====
 
-  // 1차 - 양극
+  // 1차 - 상부
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  cathodeLot1?: string;
+  upperLot1?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsNumber()
-  cathodeInputQuantity1?: number;
+  upperInputQuantity1?: number;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  cathodeInputOutputTime1?: string;
+  upperInputOutputTime1?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsNumber()
-  cathodeMoistureMeasurement1?: number;
+  upperMoistureMeasurement1?: number;
 
-  // 1차 - 음극
+  // 1차 - 하부
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  anodeLot1?: string;
+  lowerLot1?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsNumber()
-  anodeInputQuantity1?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  anodeInputOutputTime1?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  anodeMoistureMeasurement1?: number;
-
-  // 2차 - 양극
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  cathodeLot2?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  cathodeInputQuantity2?: number;
+  lowerInputQuantity1?: number;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  cathodeInputOutputTime2?: string;
+  lowerInputOutputTime1?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsNumber()
-  cathodeMoistureMeasurement2?: number;
+  lowerMoistureMeasurement1?: number;
 
-  // 2차 - 음극
+  // 2차 - 상부
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  anodeLot2?: string;
+  upperLot2?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsNumber()
-  anodeInputQuantity2?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  anodeInputOutputTime2?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  anodeMoistureMeasurement2?: number;
-
-  // 3차 - 양극
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  cathodeLot3?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  cathodeInputQuantity3?: number;
+  upperInputQuantity2?: number;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  cathodeInputOutputTime3?: string;
+  upperInputOutputTime2?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsNumber()
-  cathodeMoistureMeasurement3?: number;
+  upperMoistureMeasurement2?: number;
 
-  // 3차 - 음극
+  // 2차 - 하부
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  anodeLot3?: string;
+  lowerLot2?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsNumber()
-  anodeInputQuantity3?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  anodeInputOutputTime3?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  anodeMoistureMeasurement3?: number;
-
-  // 4차 - 양극
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  cathodeLot4?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  cathodeInputQuantity4?: number;
+  lowerInputQuantity2?: number;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  cathodeInputOutputTime4?: string;
+  lowerInputOutputTime2?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsNumber()
-  cathodeMoistureMeasurement4?: number;
+  lowerMoistureMeasurement2?: number;
 
-  // 4차 - 음극
+  // 3차 - 상부
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  anodeLot4?: string;
+  upperLot3?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsNumber()
-  anodeInputQuantity4?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  anodeInputOutputTime4?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  anodeMoistureMeasurement4?: number;
-
-  // 5차 - 양극
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  cathodeLot5?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  cathodeInputQuantity5?: number;
+  upperInputQuantity3?: number;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  cathodeInputOutputTime5?: string;
+  upperInputOutputTime3?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsNumber()
-  cathodeMoistureMeasurement5?: number;
+  upperMoistureMeasurement3?: number;
 
-  // 5차 - 음극
+  // 3차 - 하부
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  anodeLot5?: string;
+  lowerLot3?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsNumber()
-  anodeInputQuantity5?: number;
+  lowerInputQuantity3?: number;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  anodeInputOutputTime5?: string;
+  lowerInputOutputTime3?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsNumber()
-  anodeMoistureMeasurement5?: number;
+  lowerMoistureMeasurement3?: number;
+
+  // 4차 - 상부
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  upperLot4?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  upperInputQuantity4?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  upperInputOutputTime4?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  upperMoistureMeasurement4?: number;
+
+  // 4차 - 하부
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  lowerLot4?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  lowerInputQuantity4?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  lowerInputOutputTime4?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  lowerMoistureMeasurement4?: number;
+
+  // 5차 - 상부
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  upperLot5?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  upperInputQuantity5?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  upperInputOutputTime5?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  upperMoistureMeasurement5?: number;
+
+  // 5차 - 하부
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  lowerLot5?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  lowerInputQuantity5?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  lowerInputOutputTime5?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  lowerMoistureMeasurement5?: number;
 
   // ===== C. 공정 조건 =====
 
@@ -280,22 +280,22 @@ export class CreateVdWorklogDto extends BaseWorklogDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsNumber()
-  cathodeSetTemperature?: number;
+  upperSetTemperature?: number;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsNumber()
-  anodeSetTemperature?: number;
+  lowerSetTemperature?: number;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsNumber()
-  cathodeTimerTime?: number;
+  upperTimerTime?: number;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsNumber()
-  anodeTimerTime?: number;
+  lowerTimerTime?: number;
 }
 
 export class UpdateVdWorklogDto extends PartialType(CreateVdWorklogDto) {}

@@ -39,135 +39,135 @@ export class WorklogVd extends WorklogBase {
 
   // ===== B. 생산 정보 (Production Info - 5회 반복) =====
 
-  // 1차 - 양극
+  // 1차 - 상부
   @Column({ type: 'varchar', length: 20, nullable: true })
-  cathodeLot1: string;
+  upperLot1: string;
 
   @Column({ type: 'smallint', nullable: true })
-  cathodeInputQuantity1: number;
+  upperInputQuantity1: number;
 
   @Column({ type: 'varchar', length: 50, nullable: true })
-  cathodeInputOutputTime1: string;
+  upperInputOutputTime1: string;
 
   @Column({ type: 'smallint', nullable: true })
-  cathodeMoistureMeasurement1: number;
+  upperMoistureMeasurement1: number;
 
-  // 1차 - 음극
+  // 1차 - 하부
   @Column({ type: 'varchar', length: 20, nullable: true })
-  anodeLot1: string;
+  lowerLot1: string;
 
   @Column({ type: 'smallint', nullable: true })
-  anodeInputQuantity1: number;
+  lowerInputQuantity1: number;
 
   @Column({ type: 'varchar', length: 50, nullable: true })
-  anodeInputOutputTime1: string;
+  lowerInputOutputTime1: string;
 
   @Column({ type: 'smallint', nullable: true })
-  anodeMoistureMeasurement1: number;
+  lowerMoistureMeasurement1: number;
 
-  // 2차 - 양극
+  // 2차 - 상부
   @Column({ type: 'varchar', length: 20, nullable: true })
-  cathodeLot2: string;
+  upperLot2: string;
 
   @Column({ type: 'smallint', nullable: true })
-  cathodeInputQuantity2: number;
+  upperInputQuantity2: number;
 
   @Column({ type: 'varchar', length: 50, nullable: true })
-  cathodeInputOutputTime2: string;
+  upperInputOutputTime2: string;
 
   @Column({ type: 'smallint', nullable: true })
-  cathodeMoistureMeasurement2: number;
+  upperMoistureMeasurement2: number;
 
-  // 2차 - 음극
+  // 2차 - 하부
   @Column({ type: 'varchar', length: 20, nullable: true })
-  anodeLot2: string;
+  lowerLot2: string;
 
   @Column({ type: 'smallint', nullable: true })
-  anodeInputQuantity2: number;
+  lowerInputQuantity2: number;
 
   @Column({ type: 'varchar', length: 50, nullable: true })
-  anodeInputOutputTime2: string;
+  lowerInputOutputTime2: string;
 
   @Column({ type: 'smallint', nullable: true })
-  anodeMoistureMeasurement2: number;
+  lowerMoistureMeasurement2: number;
 
-  // 3차 - 양극
+  // 3차 - 상부
   @Column({ type: 'varchar', length: 20, nullable: true })
-  cathodeLot3: string;
+  upperLot3: string;
 
   @Column({ type: 'smallint', nullable: true })
-  cathodeInputQuantity3: number;
+  upperInputQuantity3: number;
 
   @Column({ type: 'varchar', length: 50, nullable: true })
-  cathodeInputOutputTime3: string;
+  upperInputOutputTime3: string;
 
   @Column({ type: 'smallint', nullable: true })
-  cathodeMoistureMeasurement3: number;
+  upperMoistureMeasurement3: number;
 
-  // 3차 - 음극
+  // 3차 - 하부
   @Column({ type: 'varchar', length: 20, nullable: true })
-  anodeLot3: string;
+  lowerLot3: string;
 
   @Column({ type: 'smallint', nullable: true })
-  anodeInputQuantity3: number;
+  lowerInputQuantity3: number;
 
   @Column({ type: 'varchar', length: 50, nullable: true })
-  anodeInputOutputTime3: string;
+  lowerInputOutputTime3: string;
 
   @Column({ type: 'smallint', nullable: true })
-  anodeMoistureMeasurement3: number;
+  lowerMoistureMeasurement3: number;
 
-  // 4차 - 양극
+  // 4차 - 상부
   @Column({ type: 'varchar', length: 20, nullable: true })
-  cathodeLot4: string;
+  upperLot4: string;
 
   @Column({ type: 'smallint', nullable: true })
-  cathodeInputQuantity4: number;
+  upperInputQuantity4: number;
 
   @Column({ type: 'varchar', length: 50, nullable: true })
-  cathodeInputOutputTime4: string;
+  upperInputOutputTime4: string;
 
   @Column({ type: 'smallint', nullable: true })
-  cathodeMoistureMeasurement4: number;
+  upperMoistureMeasurement4: number;
 
-  // 4차 - 음극
+  // 4차 - 하부
   @Column({ type: 'varchar', length: 20, nullable: true })
-  anodeLot4: string;
+  lowerLot4: string;
 
   @Column({ type: 'smallint', nullable: true })
-  anodeInputQuantity4: number;
+  lowerInputQuantity4: number;
 
   @Column({ type: 'varchar', length: 50, nullable: true })
-  anodeInputOutputTime4: string;
+  lowerInputOutputTime4: string;
 
   @Column({ type: 'smallint', nullable: true })
-  anodeMoistureMeasurement4: number;
+  lowerMoistureMeasurement4: number;
 
-  // 5차 - 양극
+  // 5차 - 상부
   @Column({ type: 'varchar', length: 20, nullable: true })
-  cathodeLot5: string;
+  upperLot5: string;
 
   @Column({ type: 'smallint', nullable: true })
-  cathodeInputQuantity5: number;
+  upperInputQuantity5: number;
 
   @Column({ type: 'varchar', length: 50, nullable: true })
-  cathodeInputOutputTime5: string;
+  upperInputOutputTime5: string;
 
   @Column({ type: 'smallint', nullable: true })
-  cathodeMoistureMeasurement5: number;
+  upperMoistureMeasurement5: number;
 
-  // 5차 - 음극
+  // 5차 - 하부
   @Column({ type: 'varchar', length: 20, nullable: true })
-  anodeLot5: string;
+  lowerLot5: string;
 
   @Column({ type: 'smallint', nullable: true })
-  anodeInputQuantity5: number;
+  lowerInputQuantity5: number;
 
   @Column({ type: 'varchar', length: 50, nullable: true })
-  anodeInputOutputTime5: string;
+  lowerInputOutputTime5: string;
 
   @Column({ type: 'smallint', nullable: true })
-  anodeMoistureMeasurement5: number;
+  lowerMoistureMeasurement5: number;
 
   // ===== C. 공정 조건 (Process Conditions) =====
 
@@ -175,14 +175,14 @@ export class WorklogVd extends WorklogBase {
   vacuumDegreeSetting: number;
 
   @Column({ type: 'smallint', nullable: true })
-  cathodeSetTemperature: number;
+  upperSetTemperature: number;
 
   @Column({ type: 'smallint', nullable: true })
-  anodeSetTemperature: number;
+  lowerSetTemperature: number;
 
   @Column({ type: 'smallint', nullable: true })
-  cathodeTimerTime: number;
+  upperTimerTime: number;
 
   @Column({ type: 'smallint', nullable: true })
-  anodeTimerTime: number;
+  lowerTimerTime: number;
 }
