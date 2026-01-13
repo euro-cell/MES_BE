@@ -1,6 +1,6 @@
 import { MulterOptions } from '@nestjs/platform-express/multer/interfaces/multer-options.interface';
 import { diskStorage } from 'multer';
-import { extname } from 'path';
+import { extname, join } from 'path';
 
 function decodeFilename(filename: string) {
   return Buffer.from(filename, 'latin1').toString('utf8');
@@ -9,7 +9,7 @@ function decodeFilename(filename: string) {
 export const multerConfig: MulterOptions = {
   storage: diskStorage({
     destination: (req, file, callback) => {
-      callback(null, 'D:/MES/uploads');
+      callback(null, join(process.cwd(), 'data', 'uploads'));
     },
     filename: (req, file, callback) => {
       const timestamp = Date.now();

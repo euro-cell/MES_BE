@@ -22,7 +22,7 @@ export enum ProcessTemplateFile {
 export class WorklogService {
   async getTemplateFilePath(processName: string): Promise<string> {
     try {
-      const templatePath = join(process.cwd(), 'src', 'common', 'templates');
+      const templatePath = join(process.cwd(), 'data', 'templates');
 
       const fileName = ProcessTemplateFile[processName.toLowerCase()];
       const filePath = join(templatePath, fileName);
