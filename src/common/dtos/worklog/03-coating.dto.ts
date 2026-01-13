@@ -98,6 +98,11 @@ export class CreateCoatingWorklogDto extends BaseWorklogDto {
   @IsNumber()
   coatingWidth1?: number;
 
+  @ApiPropertyOptional({ description: '무지부 1차', example: 5.0 })
+  @IsOptional()
+  @IsNumber()
+  uncoatedWidth1?: number;
+
   @ApiPropertyOptional({ description: 'Miss Match 1차', example: 0 })
   @IsOptional()
   @IsNumber()
@@ -193,6 +198,11 @@ export class CreateCoatingWorklogDto extends BaseWorklogDto {
   @IsOptional()
   @IsNumber()
   coatingWidth2?: number;
+
+  @ApiPropertyOptional({ description: '무지부 2차' })
+  @IsOptional()
+  @IsNumber()
+  uncoatedWidth2?: number;
 
   @ApiPropertyOptional({ description: 'Miss Match 2차' })
   @IsOptional()
@@ -290,6 +300,11 @@ export class CreateCoatingWorklogDto extends BaseWorklogDto {
   @IsNumber()
   coatingWidth3?: number;
 
+  @ApiPropertyOptional({ description: '무지부 3차' })
+  @IsOptional()
+  @IsNumber()
+  uncoatedWidth3?: number;
+
   @ApiPropertyOptional({ description: 'Miss Match 3차' })
   @IsOptional()
   @IsNumber()
@@ -385,6 +400,11 @@ export class CreateCoatingWorklogDto extends BaseWorklogDto {
   @IsOptional()
   @IsNumber()
   coatingWidth4?: number;
+
+  @ApiPropertyOptional({ description: '무지부 4차' })
+  @IsOptional()
+  @IsNumber()
+  uncoatedWidth4?: number;
 
   @ApiPropertyOptional({ description: 'Miss Match 4차' })
   @IsOptional()

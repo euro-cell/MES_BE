@@ -61,6 +61,9 @@ export class WorklogCoating extends WorklogBase {
   coatingWidth1: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  uncoatedWidth1: number;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   misalignment1: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
@@ -117,6 +120,9 @@ export class WorklogCoating extends WorklogBase {
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   coatingWidth2: number;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  uncoatedWidth2: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   misalignment2: number;
@@ -177,6 +183,9 @@ export class WorklogCoating extends WorklogBase {
   coatingWidth3: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  uncoatedWidth3: number;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   misalignment3: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
@@ -233,6 +242,9 @@ export class WorklogCoating extends WorklogBase {
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   coatingWidth4: number;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  uncoatedWidth4: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   misalignment4: number;
