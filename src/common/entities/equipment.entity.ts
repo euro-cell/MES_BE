@@ -1,7 +1,6 @@
 import {
   Column,
   CreateDateColumn,
-  DeleteDateColumn,
   Entity,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -64,8 +63,4 @@ export class Equipment {
   @Exclude()
   @UpdateDateColumn()
   updatedAt: Date;
-
-  @Exclude()
-  @DeleteDateColumn()
-  deletedAt?: Date;
 }
