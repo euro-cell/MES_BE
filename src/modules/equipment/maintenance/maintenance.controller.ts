@@ -1,6 +1,6 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
 import { MaintenanceService } from './maintenance.service';
-import { CreateMaintenanceDto } from 'src/common/dtos/maintenance.dto';
+import { CreateMaintenanceDto, UpdateMaintenanceDto } from 'src/common/dtos/maintenance.dto';
 
 @Controller()
 export class MaintenanceController {
@@ -14,5 +14,10 @@ export class MaintenanceController {
   @Post()
   async create(@Body() createMaintenanceDto: CreateMaintenanceDto) {
     return this.maintenanceService.create(createMaintenanceDto);
+  }
+
+  @Patch(':id')
+  async update(@Param('id', ParseIntPipe) id: number, @Body() updateMaintenanceDto: UpdateMaintenanceDto) {
+    return this.maintenanceService.update(id, updateMaintenanceDto);
   }
 }

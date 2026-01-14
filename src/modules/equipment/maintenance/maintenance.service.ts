@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Maintenance } from 'src/common/entities/maintenance.entity';
-import { CreateMaintenanceDto } from 'src/common/dtos/maintenance.dto';
+import { CreateMaintenanceDto, UpdateMaintenanceDto } from 'src/common/dtos/maintenance.dto';
 
 @Injectable()
 export class MaintenanceService {
@@ -35,5 +35,10 @@ export class MaintenanceService {
       verifier: m.verifier,
       remark: m.remark,
     }));
+  }
+
+  async update(id: number, updateMaintenanceDto: UpdateMaintenanceDto) {
+    await this.maintenanceRepository.update(id, updateMaintenanceDto);
+    return this.maintenanceRepository.findOneBy({ id });
   }
 }
