@@ -41,4 +41,8 @@ export class MaintenanceService {
     await this.maintenanceRepository.update(id, updateMaintenanceDto);
     return this.maintenanceRepository.findOneBy({ id });
   }
+
+  async remove(id: number) {
+    return this.maintenanceRepository.delete(id);
+  }
 }
