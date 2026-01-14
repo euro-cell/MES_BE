@@ -15,4 +15,25 @@ export class MaintenanceService {
     const maintenance = this.maintenanceRepository.create(createMaintenanceDto);
     return this.maintenanceRepository.save(maintenance);
   }
+
+  async findAll() {
+    const maintenances = await this.maintenanceRepository.find({
+      relations: ['equipment'],
+      order: { inspectionDate: 'ASC' },
+    });
+
+    return maintenances.map((m) => ({
+      id: m.id,
+      equipmentId: m.equipmentId,
+      assetNo: m.equipment?.assetNo,
+      equipmentNo: m.equipment?.equipmentNo,
+      equipmentName: m.equipment?.name,
+      inspectionDate: m.inspectionDate,
+      replacementHistory: m.replacementHistory,
+      usedParts: m.usedParts,
+      maintainer: m.maintainer,
+      verifier: m.verifier,
+      remark: m.remark,
+    }));
+  }
 }
