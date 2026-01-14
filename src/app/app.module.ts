@@ -18,6 +18,7 @@ import { QualityModule } from 'src/modules/quality/quality.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { multerConfig } from 'src/common/configs/multer.config';
 import { DrawingModule } from 'src/modules/drawing/drawing.module';
+import { EquipmentModule } from 'src/modules/equipment/equipment.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { DrawingModule } from 'src/modules/drawing/drawing.module';
     CellInventoryModule,
     QualityModule,
     DrawingModule,
+    EquipmentModule,
   ],
   controllers: [AppController],
   providers: [
