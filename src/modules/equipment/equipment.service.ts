@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Equipment } from 'src/common/entities/equipment.entity';
-import { CreateEquipmentDto } from 'src/common/dtos/equipment.dto';
+import { CreateEquipmentDto, UpdateEquipmentDto } from 'src/common/dtos/equipment.dto';
 import { EquipmentCategory } from 'src/common/enums/equipment.enum';
 
 @Injectable()
@@ -22,5 +22,10 @@ export class EquipmentService {
       where: { category },
       order: { id: 'DESC' },
     });
+  }
+
+  async update(id: number, updateEquipmentDto: UpdateEquipmentDto) {
+    await this.equipmentRepository.update(id, updateEquipmentDto);
+    return this.equipmentRepository.findOneBy({ id });
   }
 }

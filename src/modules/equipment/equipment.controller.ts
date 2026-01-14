@@ -1,6 +1,6 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Query } from '@nestjs/common';
 import { EquipmentService } from './equipment.service';
-import { categoryMap, CreateEquipmentDto, EquipmentSearchDto } from 'src/common/dtos/equipment.dto';
+import { categoryMap, CreateEquipmentDto, EquipmentSearchDto, UpdateEquipmentDto } from 'src/common/dtos/equipment.dto';
 
 @Controller('equipment')
 export class EquipmentController {
@@ -15,5 +15,10 @@ export class EquipmentController {
   @Post()
   async create(@Body() createEquipmentDto: CreateEquipmentDto) {
     return this.equipmentService.create(createEquipmentDto);
+  }
+
+  @Patch(':id')
+  async update(@Param('id', ParseIntPipe) id: number, @Body() updateEquipmentDto: UpdateEquipmentDto) {
+    return this.equipmentService.update(id, updateEquipmentDto);
   }
 }
