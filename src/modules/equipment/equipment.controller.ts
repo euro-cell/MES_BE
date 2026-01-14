@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query } from '@nestjs/common';
 import { EquipmentService } from './equipment.service';
 import { categoryMap, CreateEquipmentDto, EquipmentSearchDto, UpdateEquipmentDto } from 'src/common/dtos/equipment.dto';
 
@@ -20,5 +20,10 @@ export class EquipmentController {
   @Patch(':id')
   async update(@Param('id', ParseIntPipe) id: number, @Body() updateEquipmentDto: UpdateEquipmentDto) {
     return this.equipmentService.update(id, updateEquipmentDto);
+  }
+
+  @Delete(':id')
+  async remove(@Param('id', ParseIntPipe) id: number) {
+    return this.equipmentService.remove(id);
   }
 }

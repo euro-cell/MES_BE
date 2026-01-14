@@ -28,4 +28,8 @@ export class EquipmentService {
     await this.equipmentRepository.update(id, updateEquipmentDto);
     return this.equipmentRepository.findOneBy({ id });
   }
+
+  async remove(id: number) {
+    return this.equipmentRepository.delete(id);
+  }
 }
