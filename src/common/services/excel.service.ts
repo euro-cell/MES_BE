@@ -17,6 +17,8 @@ export interface ExcelGenerateOptions<T> {
   emptyRowsAfterPage?: number;    // 페이지 후 빈 행 개수 (기본값: 2)
   pageInfoCell?: string;          // 페이지 번호 셀 위치 (기본값: 'L3')
   dateCell?: string;              // 작성일자 셀 위치 (기본값: 'L4')
+  headerRows?: number;            // 헤더 행 수 (기본값: 5)
+  updateHeader?: boolean;         // 제목/페이지/날짜 업데이트 여부 (기본값: true)
 }
 
 @Injectable()
@@ -38,6 +40,8 @@ export class ExcelService {
       emptyRowsAfterPage = 2,
       pageInfoCell = 'L3',
       dateCell = 'L4',
+      headerRows = 5,
+      updateHeader = true,
     } = options;
 
     // 템플릿 로드
@@ -56,6 +60,8 @@ export class ExcelService {
       emptyRowsAfterPage,
       pageInfoCell,
       dateCell,
+      headerRows,
+      updateHeader,
     });
 
     // 버퍼로 변환
@@ -96,33 +102,39 @@ export class ExcelService {
       emptyRowsAfterPage: number;
       pageInfoCell: string;
       dateCell: string;
+      headerRows: number;
+      updateHeader: boolean;
     }
   ): Promise<void> {
-    const { title, dataMapper, itemsPerPage, emptyRowsAfterPage, pageInfoCell, dateCell } = options;
+    const { title, dataMapper, itemsPerPage, emptyRowsAfterPage, pageInfoCell, dateCell, headerRows, updateHeader } = options;
     const totalPages = Math.ceil(data.length / itemsPerPage) || 1; // 데이터가 없어도 최소 1페이지
-    const rowsPerPage = 5 + itemsPerPage + emptyRowsAfterPage; // 34행 (헤더 5 + 데이터 27 + 빈 행 2)
+    const rowsPerPage = headerRows + itemsPerPage + emptyRowsAfterPage; // 예: 헤더 5 + 데이터 27 + 빈 행 2 = 34행
 
     // 1단계: 모든 페이지 구조 미리 생성
     for (let page = 1; page <= totalPages; page++) {
       const pageStartRow = (page - 1) * rowsPerPage + 1;
 
       if (page === 1) {
-        // 첫 페이지: 템플릿에 이미 1-5행 존재, 6-34행만 생성
-        this.updatePageHeader(worksheet, 1, page, totalPages, title, pageInfoCell, dateCell);
+        // 첫 페이지: 템플릿에 이미 헤더 존재, 데이터+빈행만 생성
+        if (updateHeader) {
+          this.updatePageHeader(worksheet, 1, page, totalPages, title, pageInfoCell, dateCell);
+        }
 
-        // 6-34행 생성 (데이터 영역 + 빈 행)
-        for (let i = 6; i <= rowsPerPage; i++) {
+        // 헤더+1부터 rowsPerPage까지 생성 (데이터 영역 + 빈 행)
+        for (let i = headerRows + 1; i <= rowsPerPage; i++) {
           const row = worksheet.getRow(i);
-          // 행 높이 복사 (템플릿 6행 기준)
-          if (i >= 6 && i <= 5 + itemsPerPage) {
-            row.height = worksheet.getRow(6).height || 15;
+          // 행 높이 복사 (템플릿 데이터 시작 행 기준)
+          if (i >= headerRows + 1 && i <= headerRows + itemsPerPage) {
+            row.height = worksheet.getRow(headerRows + 1).height || 15;
           }
           row.commit();
         }
       } else {
-        // 2페이지부터: 전체 1-34행 복사
+        // 2페이지부터: 전체 행 복사
         this.copyTemplateRows(worksheet, 1, rowsPerPage, pageStartRow);
-        this.updatePageHeader(worksheet, pageStartRow, page, totalPages, title, pageInfoCell, dateCell);
+        if (updateHeader) {
+          this.updatePageHeader(worksheet, pageStartRow, page, totalPages, title, pageInfoCell, dateCell);
+        }
       }
 
       // 페이지 나누기 설정 (마지막 페이지 제외)
@@ -137,7 +149,7 @@ export class ExcelService {
       const page = Math.floor(i / itemsPerPage) + 1;
       const pageStartRow = (page - 1) * rowsPerPage + 1;
       const rowIndexInPage = i % itemsPerPage;
-      const rowNumber = pageStartRow + 5 + rowIndexInPage; // 헤더 5행 + 데이터 행
+      const rowNumber = pageStartRow + headerRows + rowIndexInPage; // 헤더 행 + 데이터 행
 
       const row = worksheet.getRow(rowNumber);
       dataMapper(data[i], row, i); // 전체 인덱스 전달 (넘버링 연속)

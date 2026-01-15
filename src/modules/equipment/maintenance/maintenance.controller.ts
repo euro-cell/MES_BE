@@ -1,4 +1,6 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Res, StreamableFile } from '@nestjs/common';
+import type { Response } from 'express';
+import { ApiOperation } from '@nestjs/swagger';
 import { MaintenanceService } from './maintenance.service';
 import { CreateMaintenanceDto, UpdateMaintenanceDto } from 'src/common/dtos/maintenance.dto';
 
@@ -24,5 +26,21 @@ export class MaintenanceController {
   @Delete(':id')
   async remove(@Param('id', ParseIntPipe) id: number) {
     return this.maintenanceService.remove(id);
+  }
+
+  @Get('export')
+  @ApiOperation({ summary: '유지보수 목록 Excel 내보내기' })
+  async exportMaintenance(
+    @Res({ passthrough: true }) res: Response
+  ): Promise<StreamableFile> {
+    const file = await this.maintenanceService.exportMaintenance();
+    const filename = this.maintenanceService.getMaintenanceExportFilename();
+
+    res.set({
+      'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Disposition': `attachment; filename="${encodeURIComponent(filename)}"`,
+    });
+
+    return file;
   }
 }

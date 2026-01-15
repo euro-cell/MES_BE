@@ -68,6 +68,7 @@ export class EquipmentService {
   private mapEquipmentToRow(equipment: Equipment, row: ExcelJS.Row, category: EquipmentCategory, rowIndex: number): void {
     const worksheet = row.worksheet;
     const rowNumber = row.number;
+    const heights: number[] = [];
 
     // C열: 번호 (1부터 시작)
     row.getCell('C').value = rowIndex + 1;
@@ -91,6 +92,10 @@ export class EquipmentService {
       if (!row.getCell('O').isMerged) {
         worksheet.mergeCells(`O${rowNumber}:P${rowNumber}`);
       }
+
+      // 긴 텍스트 셀에 대해 높이 계산
+      heights.push(ExcelUtil.calculateRowHeight(equipment.remark, 30)); // 비고 (병합된 셀이라 너비 더 큼)
+      heights.push(ExcelUtil.calculateRowHeight(equipment.maintenanceMethod, 15)); // 보전방법
     } else {
       // 생산/개발 설비: 8개 컬럼 (D열부터 시작)
       row.getCell('D').value = ExcelUtil.sanitizeValue(equipment.assetNo);
@@ -106,14 +111,22 @@ export class EquipmentService {
       if (!row.getCell('K').isMerged) {
         worksheet.mergeCells(`K${rowNumber}:L${rowNumber}`);
       }
+
+      // 긴 텍스트 셀에 대해 높이 계산
+      heights.push(ExcelUtil.calculateRowHeight(equipment.remark, 25)); // 비고 (병합된 셀이라 너비 더 큼)
+      heights.push(ExcelUtil.calculateRowHeight(equipment.maintenanceMethod, 15)); // 보전방법
     }
 
-    // C열부터 테두리 적용 (A, B 열 제외)
+    // C열부터 테두리 및 자동 줄바꿈 적용 (A, B 열 제외)
     const endColumn = category === EquipmentCategory.MEASUREMENT ? 'P' : 'L';
     for (let col = 'C'.charCodeAt(0); col <= endColumn.charCodeAt(0); col++) {
       const cell = row.getCell(String.fromCharCode(col));
       ExcelUtil.applyCellBorder(cell);
+      ExcelUtil.applyWrapText(cell);
     }
+
+    // 행 높이 설정 (최대 높이 사용)
+    row.height = ExcelUtil.getMaxHeight(heights);
   }
 
   getEquipmentExportFilename(category: EquipmentCategory): string {
