@@ -1,12 +1,4 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { Exclude } from 'class-transformer';
 import { Equipment } from './equipment.entity';
 
@@ -25,16 +17,16 @@ export class Maintenance {
   @Column({ type: 'date' })
   inspectionDate: Date;
 
-  @Column({ length: 500 })
+  @Column({ type: 'text', nullable: true })
   replacementHistory: string;
 
-  @Column({ length: 500 })
+  @Column({ type: 'text', nullable: true })
   usedParts: string;
 
-  @Column({ length: 50 })
+  @Column({ type: 'text', nullable: true })
   maintainer: string;
 
-  @Column({ length: 50 })
+  @Column({ type: 'text', nullable: true })
   verifier: string;
 
   @Column({ type: 'text', nullable: true })
