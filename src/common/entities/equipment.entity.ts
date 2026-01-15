@@ -31,8 +31,8 @@ export class Equipment {
   @Column({ length: 100 })
   manufacturer: string;
 
-  @Column({ type: 'date' })
-  purchaseDate: Date;
+  @Column({ type: 'date', nullable: true })
+  purchaseDate?: Date;
 
   @Column({ type: 'enum', enum: EquipmentGrade, nullable: true })
   grade: EquipmentGrade;

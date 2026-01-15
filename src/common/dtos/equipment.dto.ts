@@ -40,10 +40,10 @@ export class CreateEquipmentDto {
   @IsString()
   manufacturer: string;
 
-  @ApiProperty({ description: '구입일자', example: '2024-01-15' })
-  @IsNotEmpty()
+  @ApiPropertyOptional({ description: '구입일자', example: '2024-01-15' })
+  @IsOptional()
   @IsDateString()
-  purchaseDate: string;
+  purchaseDate?: string;
 
   @ApiPropertyOptional({ description: '설비등급', enum: EquipmentGrade, example: 'A' })
   @IsOptional()
@@ -117,8 +117,8 @@ export class EquipmentResponseDto {
   @ApiProperty({ description: '제조사' })
   manufacturer: string;
 
-  @ApiProperty({ description: '구입일자' })
-  purchaseDate: Date;
+  @ApiPropertyOptional({ description: '구입일자' })
+  purchaseDate?: Date;
 
   @ApiPropertyOptional({ description: '설비등급', enum: EquipmentGrade })
   grade?: EquipmentGrade;
