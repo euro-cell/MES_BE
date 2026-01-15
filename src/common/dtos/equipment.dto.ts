@@ -20,10 +20,10 @@ export class CreateEquipmentDto {
   @IsEnum(EquipmentProcess)
   processType?: EquipmentProcess;
 
-  @ApiProperty({ description: '자산번호', example: 'AST-001' })
-  @IsNotEmpty()
+  @ApiPropertyOptional({ description: '자산번호', example: 'AST-001' })
+  @IsOptional()
   @IsString()
-  assetNo: string;
+  assetNo?: string;
 
   @ApiProperty({ description: '설비번호', example: 'EQ-001' })
   @IsNotEmpty()
@@ -105,8 +105,8 @@ export class EquipmentResponseDto {
   @ApiPropertyOptional({ description: '공정구분', enum: EquipmentProcess })
   processType?: EquipmentProcess;
 
-  @ApiProperty({ description: '자산번호' })
-  assetNo: string;
+  @ApiPropertyOptional({ description: '자산번호' })
+  assetNo?: string;
 
   @ApiProperty({ description: '설비번호' })
   equipmentNo: string;

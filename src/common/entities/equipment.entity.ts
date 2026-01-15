@@ -19,8 +19,8 @@ export class Equipment {
   @Column({ type: 'enum', enum: EquipmentProcess, nullable: true })
   processType: EquipmentProcess;
 
-  @Column({ length: 50 })
-  assetNo: string;
+  @Column({ length: 50, nullable: true })
+  assetNo?: string;
 
   @Column({ length: 50 })
   equipmentNo: string;

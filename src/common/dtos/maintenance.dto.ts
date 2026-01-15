@@ -49,8 +49,8 @@ export class MaintenanceResponseDto {
   @ApiProperty({ description: '설비 ID' })
   equipmentId: number;
 
-  @ApiProperty({ description: '자산번호' })
-  assetNo: string;
+  @ApiPropertyOptional({ description: '자산번호' })
+  assetNo?: string;
 
   @ApiProperty({ description: '설비번호' })
   equipmentNo: string;
