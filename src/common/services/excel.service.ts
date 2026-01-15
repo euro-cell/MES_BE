@@ -15,6 +15,8 @@ export interface ExcelGenerateOptions<T> {
   dataMapper: (item: T, row: ExcelJS.Row, rowIndex: number) => void;  // 데이터를 행에 매핑하는 함수
   itemsPerPage?: number;          // 페이지당 데이터 개수 (기본값: 27)
   emptyRowsAfterPage?: number;    // 페이지 후 빈 행 개수 (기본값: 2)
+  pageInfoCell?: string;          // 페이지 번호 셀 위치 (기본값: 'L3')
+  dateCell?: string;              // 작성일자 셀 위치 (기본값: 'L4')
 }
 
 @Injectable()
@@ -34,6 +36,8 @@ export class ExcelService {
       dataMapper,
       itemsPerPage = 27,
       emptyRowsAfterPage = 2,
+      pageInfoCell = 'L3',
+      dateCell = 'L4',
     } = options;
 
     // 템플릿 로드
@@ -50,6 +54,8 @@ export class ExcelService {
       dataMapper,
       itemsPerPage,
       emptyRowsAfterPage,
+      pageInfoCell,
+      dateCell,
     });
 
     // 버퍼로 변환
@@ -88,51 +94,54 @@ export class ExcelService {
       dataMapper: (item: T, row: ExcelJS.Row, rowIndex: number) => void;
       itemsPerPage: number;
       emptyRowsAfterPage: number;
+      pageInfoCell: string;
+      dateCell: string;
     }
   ): Promise<void> {
-    const { title, dataMapper, itemsPerPage, emptyRowsAfterPage } = options;
+    const { title, dataMapper, itemsPerPage, emptyRowsAfterPage, pageInfoCell, dateCell } = options;
     const totalPages = Math.ceil(data.length / itemsPerPage) || 1; // 데이터가 없어도 최소 1페이지
+    const rowsPerPage = 5 + itemsPerPage + emptyRowsAfterPage; // 34행 (헤더 5 + 데이터 27 + 빈 행 2)
 
-    // 첫 페이지 헤더 업데이트 (1-5행은 템플릿에 이미 존재)
-    this.updatePageHeader(worksheet, 1, 1, totalPages, title);
+    // 1단계: 모든 페이지 구조 미리 생성
+    for (let page = 1; page <= totalPages; page++) {
+      const pageStartRow = (page - 1) * rowsPerPage + 1;
 
-    // 첫 페이지 데이터 채우기 (6행부터 시작)
-    const firstPageDataCount = Math.min(itemsPerPage, data.length);
-    for (let i = 0; i < firstPageDataCount; i++) {
-      const row = worksheet.getRow(6 + i);
-      dataMapper(data[i], row, i);
+      if (page === 1) {
+        // 첫 페이지: 템플릿에 이미 1-5행 존재, 6-34행만 생성
+        this.updatePageHeader(worksheet, 1, page, totalPages, title, pageInfoCell, dateCell);
+
+        // 6-34행 생성 (데이터 영역 + 빈 행)
+        for (let i = 6; i <= rowsPerPage; i++) {
+          const row = worksheet.getRow(i);
+          // 행 높이 복사 (템플릿 6행 기준)
+          if (i >= 6 && i <= 5 + itemsPerPage) {
+            row.height = worksheet.getRow(6).height || 15;
+          }
+          row.commit();
+        }
+      } else {
+        // 2페이지부터: 전체 1-34행 복사
+        this.copyTemplateRows(worksheet, 1, rowsPerPage, pageStartRow);
+        this.updatePageHeader(worksheet, pageStartRow, page, totalPages, title, pageInfoCell, dateCell);
+      }
+
+      // 페이지 나누기 설정 (마지막 페이지 제외)
+      if (page < totalPages) {
+        const pageEndRow = pageStartRow + rowsPerPage - 1;
+        worksheet.getRow(pageEndRow).addPageBreak();
+      }
+    }
+
+    // 2단계: 데이터 채우기
+    for (let i = 0; i < data.length; i++) {
+      const page = Math.floor(i / itemsPerPage) + 1;
+      const pageStartRow = (page - 1) * rowsPerPage + 1;
+      const rowIndexInPage = i % itemsPerPage;
+      const rowNumber = pageStartRow + 5 + rowIndexInPage; // 헤더 5행 + 데이터 행
+
+      const row = worksheet.getRow(rowNumber);
+      dataMapper(data[i], row, i); // 전체 인덱스 전달 (넘버링 연속)
       row.commit();
-    }
-
-    // 첫 페이지 빈 행 추가
-    for (let i = 0; i < emptyRowsAfterPage; i++) {
-      worksheet.addRow([]);
-    }
-
-    // 두 번째 페이지부터 처리
-    for (let page = 2; page <= totalPages; page++) {
-      const pageStartRow = worksheet.rowCount + 1;
-      const dataStartIndex = (page - 1) * itemsPerPage;
-      const dataEndIndex = Math.min(page * itemsPerPage, data.length);
-
-      // 템플릿 헤더 복사 (1-5행)
-      this.copyTemplateRows(worksheet, 1, 5, pageStartRow);
-
-      // 페이지 헤더 업데이트
-      this.updatePageHeader(worksheet, pageStartRow, page, totalPages, title);
-
-      // 데이터 채우기
-      for (let i = dataStartIndex; i < dataEndIndex; i++) {
-        const rowIndex = i - dataStartIndex;
-        const row = worksheet.getRow(pageStartRow + 5 + rowIndex);
-        dataMapper(data[i], row, rowIndex);
-        row.commit();
-      }
-
-      // 빈 행 추가
-      for (let i = 0; i < emptyRowsAfterPage; i++) {
-        worksheet.addRow([]);
-      }
     }
   }
 
@@ -143,25 +152,39 @@ export class ExcelService {
    * @param pageNum - 현재 페이지 번호
    * @param totalPages - 전체 페이지 수
    * @param title - 문서 제목
+   * @param pageInfoCell - 페이지 번호 셀 위치 (예: 'L3', 'P3')
+   * @param dateCell - 작성일자 셀 위치 (예: 'L4', 'P4')
    */
   private updatePageHeader(
     worksheet: ExcelJS.Worksheet,
     pageStartRow: number,
     pageNum: number,
     totalPages: number,
-    title: string
+    title: string,
+    pageInfoCell: string,
+    dateCell: string
   ): void {
+    // 셀 위치 파싱 (예: 'L3' -> column: 'L', baseRow: 3)
+    const parseCell = (cellRef: string) => {
+      const match = cellRef.match(/^([A-Z]+)(\d+)$/);
+      if (!match) throw new Error(`Invalid cell reference: ${cellRef}`);
+      return { column: match[1], baseRow: parseInt(match[2]) };
+    };
+
+    const pageInfo = parseCell(pageInfoCell);
+    const dateInfo = parseCell(dateCell);
+
     // C3: 제목
     const titleCell = worksheet.getCell(`C${pageStartRow + 2}`);
     titleCell.value = title;
 
-    // L3: 페이지 정보 (예: "01/02")
-    const pageInfoCell = worksheet.getCell(`L${pageStartRow + 2}`);
-    pageInfoCell.value = `${String(pageNum).padStart(2, '0')}/${String(totalPages).padStart(2, '0')}`;
+    // 페이지 정보 (예: L3 또는 P3)
+    const pageInfoCellRef = worksheet.getCell(`${pageInfo.column}${pageStartRow + pageInfo.baseRow - 1}`);
+    pageInfoCellRef.value = `${String(pageNum).padStart(2, '0')}/${String(totalPages).padStart(2, '0')}`;
 
-    // L4: 작성일자 (예: "2026.01.15")
-    const dateCell = worksheet.getCell(`L${pageStartRow + 3}`);
-    dateCell.value = ExcelUtil.formatDateDot(new Date());
+    // 작성일자 (예: L4 또는 P4)
+    const dateCellRef = worksheet.getCell(`${dateInfo.column}${pageStartRow + dateInfo.baseRow - 1}`);
+    dateCellRef.value = ExcelUtil.formatDateDot(new Date());
   }
 
   /**
@@ -177,6 +200,29 @@ export class ExcelService {
     sourceEnd: number,
     targetStart: number
   ): void {
+    const rowOffset = targetStart - sourceStart;
+
+    // 1. 병합 정보 수집
+    const merges: string[] = [];
+    const worksheetModel = worksheet.model as any;
+    if (worksheetModel.merges) {
+      worksheetModel.merges.forEach((merge: string) => {
+        const match = merge.match(/([A-Z]+)(\d+):([A-Z]+)(\d+)/);
+        if (match) {
+          const [, startCol, startRow, endCol, endRow] = match;
+          const startRowNum = parseInt(startRow);
+          const endRowNum = parseInt(endRow);
+
+          // 복사 대상 행 범위에 포함되는 병합만 추가
+          if (startRowNum >= sourceStart && endRowNum <= sourceEnd) {
+            const newMerge = `${startCol}${startRowNum + rowOffset}:${endCol}${endRowNum + rowOffset}`;
+            merges.push(newMerge);
+          }
+        }
+      });
+    }
+
+    // 2. 행 복사
     for (let i = 0; i <= sourceEnd - sourceStart; i++) {
       const sourceRow = worksheet.getRow(sourceStart + i);
       const targetRow = worksheet.getRow(targetStart + i);
@@ -184,34 +230,27 @@ export class ExcelService {
       // 행 높이 복사
       targetRow.height = sourceRow.height;
 
-      // 각 셀 복사 (값, 스타일, 병합 등)
+      // 각 셀 복사 (값, 스타일)
       sourceRow.eachCell({ includeEmpty: true }, (cell, colNumber) => {
         const targetCell = targetRow.getCell(colNumber);
 
-        // 값 복사 (제목, 페이지 정보, 날짜는 나중에 업데이트)
+        // 값 복사
         targetCell.value = cell.value;
 
         // 스타일 복사
         targetCell.style = { ...cell.style };
-
-        // 병합 정보 복사
-        if (cell.isMerged) {
-          const master = cell.master;
-          if (master === cell) {
-            const mergeAddress = cell.address;
-            const match = mergeAddress.match(/([A-Z]+)(\d+):([A-Z]+)(\d+)/);
-            if (match) {
-              const [, startCol, startRow, endCol, endRow] = match;
-              const rowOffset = targetStart - sourceStart;
-              worksheet.mergeCells(
-                `${startCol}${parseInt(startRow) + rowOffset}:${endCol}${parseInt(endRow) + rowOffset}`
-              );
-            }
-          }
-        }
       });
 
       targetRow.commit();
     }
+
+    // 3. 병합 적용
+    merges.forEach((merge) => {
+      try {
+        worksheet.mergeCells(merge);
+      } catch (error) {
+        // 이미 병합된 경우 무시
+      }
+    });
   }
 }
