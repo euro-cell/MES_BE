@@ -19,6 +19,7 @@ import { MulterModule } from '@nestjs/platform-express';
 import { multerConfig } from 'src/common/configs/multer.config';
 import { DrawingModule } from 'src/modules/drawing/drawing.module';
 import { EquipmentModule } from 'src/modules/equipment/equipment.module';
+import { CommonModule } from 'src/common/common.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { EquipmentModule } from 'src/modules/equipment/equipment.module';
       useClass: TypeOrmConfig,
     }),
     MulterModule.register(multerConfig),
+    CommonModule,
     PermissionGuardModule,
     AuthModule,
     ProductionModule,
