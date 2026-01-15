@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, StreamableFile } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Material } from 'src/common/entities/material.entity';
 import { MaterialHistory } from 'src/common/entities/material-history.entity';
@@ -6,6 +6,9 @@ import { Production } from 'src/common/entities/production.entity';
 import { MaterialProcess, MaterialHistoryType } from 'src/common/enums/material.enum';
 import { Repository } from 'typeorm';
 import { CreateMaterialDto, UpdateMaterialDto } from 'src/common/dtos/material.dto';
+import { ExcelService } from 'src/common/services/excel.service';
+import { ExcelUtil } from 'src/common/utils/excel.util';
+import * as ExcelJS from 'exceljs';
 
 @Injectable()
 export class MaterialService {
@@ -16,6 +19,7 @@ export class MaterialService {
     private readonly materialHistoryRepository: Repository<MaterialHistory>,
     @InjectRepository(Production)
     private readonly productionRepository: Repository<Production>,
+    private readonly excelService: ExcelService,
   ) {}
 
   async findAllMaterials(category?: string) {
@@ -329,5 +333,68 @@ export class MaterialService {
     }
 
     return material;
+  }
+
+  async exportElectrodeMaterial(): Promise<StreamableFile> {
+    const materials = await this.findByElectrode(true); // 재고 0인 것도 포함
+
+    return this.excelService.generateSimpleExcel({
+      templateName: 'electrode.xlsx',
+      data: materials,
+      dataMapper: (material, row, rowIndex) => {
+        this.mapMaterialToRow(material, row, rowIndex);
+      },
+      headerRows: 2,
+      autoColumnWidth: true,
+      columns: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'],
+    });
+  }
+
+  async exportAssemblyMaterial(): Promise<StreamableFile> {
+    const materials = await this.findByAssembly(true); // 재고 0인 것도 포함
+
+    return this.excelService.generateSimpleExcel({
+      templateName: 'assembly.xlsx',
+      data: materials,
+      dataMapper: (material, row, rowIndex) => {
+        this.mapMaterialToRow(material, row, rowIndex);
+      },
+      headerRows: 2,
+      autoColumnWidth: true,
+      columns: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'],
+    });
+  }
+
+  private mapMaterialToRow(material: Material, row: ExcelJS.Row, rowIndex: number): void {
+    // A열: 번호 (1부터 시작)
+    row.getCell('A').value = rowIndex + 1;
+
+    // B~M열: 자재 데이터
+    row.getCell('B').value = ExcelUtil.sanitizeValue(material.category); // 자재(중분류)
+    row.getCell('C').value = ExcelUtil.sanitizeValue(material.type); // 종류(소분류)
+    row.getCell('D').value = ExcelUtil.sanitizeValue(material.purpose); // 용도
+    row.getCell('E').value = ExcelUtil.sanitizeValue(material.name); // 제품명
+    row.getCell('F').value = ExcelUtil.sanitizeValue(material.spec); // 규격
+    row.getCell('G').value = ExcelUtil.sanitizeValue(material.lotNo); // Lot No.
+    row.getCell('H').value = ExcelUtil.sanitizeValue(material.company); // 제조/공급처
+    row.getCell('I').value = ExcelUtil.sanitizeValue(material.origin); // 국내/외
+    row.getCell('J').value = ExcelUtil.sanitizeValue(material.unit); // 단위
+    row.getCell('K').value = material.price ? Math.floor(Number(material.price)) : ''; // 가격 (정수)
+    row.getCell('L').value = ExcelUtil.sanitizeValue(material.note); // 비고
+    row.getCell('M').value = material.stock ? Math.floor(Number(material.stock)) : 0; // 재고 (정수)
+
+    // A열부터 M열까지 테두리 적용
+    for (let col = 'A'.charCodeAt(0); col <= 'M'.charCodeAt(0); col++) {
+      const cell = row.getCell(String.fromCharCode(col));
+      ExcelUtil.applyCellBorder(cell);
+    }
+  }
+
+  getElectrodeExportFilename(): string {
+    return '전극_재고관리.xlsx';
+  }
+
+  getAssemblyExportFilename(): string {
+    return '조립_재고관리.xlsx';
   }
 }

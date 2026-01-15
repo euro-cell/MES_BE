@@ -9,16 +9,16 @@ import { ExcelUtil } from '../utils/excel.util';
  * Excel 생성 옵션 인터페이스
  */
 export interface ExcelGenerateOptions<T> {
-  templateName: string;           // 템플릿 파일명
-  title: string;                  // 문서 제목
-  data: T[];                      // 엑셀에 넣을 데이터
-  dataMapper: (item: T, row: ExcelJS.Row, rowIndex: number) => void;  // 데이터를 행에 매핑하는 함수
-  itemsPerPage?: number;          // 페이지당 데이터 개수 (기본값: 27)
-  emptyRowsAfterPage?: number;    // 페이지 후 빈 행 개수 (기본값: 2)
-  pageInfoCell?: string;          // 페이지 번호 셀 위치 (기본값: 'L3')
-  dateCell?: string;              // 작성일자 셀 위치 (기본값: 'L4')
-  headerRows?: number;            // 헤더 행 수 (기본값: 5)
-  updateHeader?: boolean;         // 제목/페이지/날짜 업데이트 여부 (기본값: true)
+  templateName: string; // 템플릿 파일명
+  title: string; // 문서 제목
+  data: T[]; // 엑셀에 넣을 데이터
+  dataMapper: (item: T, row: ExcelJS.Row, rowIndex: number) => void; // 데이터를 행에 매핑하는 함수
+  itemsPerPage?: number; // 페이지당 데이터 개수 (기본값: 27)
+  emptyRowsAfterPage?: number; // 페이지 후 빈 행 개수 (기본값: 2)
+  pageInfoCell?: string; // 페이지 번호 셀 위치 (기본값: 'L3')
+  dateCell?: string; // 작성일자 셀 위치 (기본값: 'L4')
+  headerRows?: number; // 헤더 행 수 (기본값: 5)
+  updateHeader?: boolean; // 제목/페이지/날짜 업데이트 여부 (기본값: true)
 }
 
 @Injectable()
@@ -70,6 +70,78 @@ export class ExcelService {
   }
 
   /**
+   * 페이지 나누기 없이 단순하게 데이터를 이어서 생성
+   * @param options - Excel 생성 옵션
+   * @returns StreamableFile
+   */
+  async generateSimpleExcel<T>(options: {
+    templateName: string;
+    data: T[];
+    dataMapper: (item: T, row: ExcelJS.Row, rowIndex: number) => void;
+    headerRows?: number; // 헤더 행 수 (기본값: 2)
+    autoColumnWidth?: boolean; // 열 너비 자동 조절 여부 (기본값: true)
+    columns?: string[]; // 자동 조절할 열 목록 (예: ['A', 'B', 'C', ...])
+  }): Promise<StreamableFile> {
+    const { templateName, data, dataMapper, headerRows = 2, autoColumnWidth = true, columns } = options;
+
+    // 템플릿 로드
+    const workbook = await this.loadTemplate(templateName);
+    const worksheet = workbook.getWorksheet(1);
+
+    if (!worksheet) {
+      throw new NotFoundException('워크시트를 찾을 수 없습니다.');
+    }
+
+    // 헤더 다음 행부터 데이터 채우기
+    for (let i = 0; i < data.length; i++) {
+      const rowNumber = headerRows + 1 + i; // 헤더 행 + 1 + 인덱스
+      const row = worksheet.getRow(rowNumber);
+      dataMapper(data[i], row, i);
+      row.commit();
+    }
+
+    // 열 너비 자동 조절
+    if (autoColumnWidth && columns) {
+      this.autoFitColumns(worksheet, columns, headerRows, data.length);
+    }
+
+    // 버퍼로 변환
+    const buffer = await workbook.xlsx.writeBuffer();
+    return new StreamableFile(Buffer.from(buffer));
+  }
+
+  /**
+   * 열 너비 자동 조절
+   * @param worksheet - ExcelJS Worksheet
+   * @param columns - 조절할 열 목록
+   * @param headerRows - 헤더 행 수
+   * @param dataCount - 데이터 개수
+   */
+  private autoFitColumns(worksheet: ExcelJS.Worksheet, columns: string[], headerRows: number, dataCount: number): void {
+    for (const col of columns) {
+      let maxLength = 0;
+
+      // 헤더 행 포함해서 최대 길이 계산
+      for (let rowNum = 1; rowNum <= headerRows + dataCount; rowNum++) {
+        const cell = worksheet.getRow(rowNum).getCell(col);
+        const cellValue = cell.value;
+
+        if (cellValue) {
+          const length = String(cellValue).length;
+          // 한글은 2배 너비로 계산
+          const koreanCount = (String(cellValue).match(/[ㄱ-ㅎㅏ-ㅣ가-힣]/g) || []).length;
+          const adjustedLength = length + koreanCount * 0.5;
+          maxLength = Math.max(maxLength, adjustedLength);
+        }
+      }
+
+      // 최소 너비 8, 최대 너비 50
+      const width = Math.min(Math.max(maxLength + 2, 8), 50);
+      worksheet.getColumn(col).width = width;
+    }
+  }
+
+  /**
    * 템플릿 파일 로드
    * @param templateName - 템플릿 파일명
    * @returns ExcelJS Workbook
@@ -104,7 +176,7 @@ export class ExcelService {
       dateCell: string;
       headerRows: number;
       updateHeader: boolean;
-    }
+    },
   ): Promise<void> {
     const { title, dataMapper, itemsPerPage, emptyRowsAfterPage, pageInfoCell, dateCell, headerRows, updateHeader } = options;
     const totalPages = Math.ceil(data.length / itemsPerPage) || 1; // 데이터가 없어도 최소 1페이지
@@ -174,7 +246,7 @@ export class ExcelService {
     totalPages: number,
     title: string,
     pageInfoCell: string,
-    dateCell: string
+    dateCell: string,
   ): void {
     // 셀 위치 파싱 (예: 'L3' -> column: 'L', baseRow: 3)
     const parseCell = (cellRef: string) => {
@@ -206,12 +278,7 @@ export class ExcelService {
    * @param sourceEnd - 복사 종료 행 번호
    * @param targetStart - 붙여넣기 시작 행 번호
    */
-  private copyTemplateRows(
-    worksheet: ExcelJS.Worksheet,
-    sourceStart: number,
-    sourceEnd: number,
-    targetStart: number
-  ): void {
+  private copyTemplateRows(worksheet: ExcelJS.Worksheet, sourceStart: number, sourceEnd: number, targetStart: number): void {
     const rowOffset = targetStart - sourceStart;
 
     // 1. 병합 정보 수집

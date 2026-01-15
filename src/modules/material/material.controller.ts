@@ -1,6 +1,7 @@
-import { Controller, Get, Post, Patch, Delete, Body, Query, Param, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Query, Param, ParseIntPipe, Res, StreamableFile } from '@nestjs/common';
+import type { Response } from 'express';
 import { MaterialService } from './material.service';
-import { ApiQuery } from '@nestjs/swagger';
+import { ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { CreateMaterialDto, UpdateMaterialDto } from 'src/common/dtos/material.dto';
 import { MaterialProcess } from 'src/common/enums/material.enum';
 
@@ -21,11 +22,39 @@ export class MaterialController {
     return this.materialService.findByElectrode(includeZero);
   }
 
+  @Get('electrode/export')
+  @ApiOperation({ summary: '전극 재고 Excel 내보내기' })
+  async exportElectrode(@Res({ passthrough: true }) res: Response): Promise<StreamableFile> {
+    const file = await this.materialService.exportElectrodeMaterial();
+    const filename = this.materialService.getElectrodeExportFilename();
+
+    res.set({
+      'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Disposition': `attachment; filename="${encodeURIComponent(filename)}"`,
+    });
+
+    return file;
+  }
+
   @Get('assembly')
   @ApiQuery({ name: 'isZeroStock', required: false, description: '재고 없는 자재 포함 여부 (true/false)', example: false })
   async findByAssembly(@Query('isZeroStock') isZeroStock?: string) {
     const includeZero = isZeroStock === 'true';
     return this.materialService.findByAssembly(includeZero);
+  }
+
+  @Get('assembly/export')
+  @ApiOperation({ summary: '조립 재고 Excel 내보내기' })
+  async exportAssembly(@Res({ passthrough: true }) res: Response): Promise<StreamableFile> {
+    const file = await this.materialService.exportAssemblyMaterial();
+    const filename = this.materialService.getAssemblyExportFilename();
+
+    res.set({
+      'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Disposition': `attachment; filename="${encodeURIComponent(filename)}"`,
+    });
+
+    return file;
   }
 
   @Get('production')
