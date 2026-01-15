@@ -25,7 +25,7 @@ export class EquipmentService {
   async findByCategory(category: EquipmentCategory): Promise<Equipment[]> {
     return this.equipmentRepository.find({
       where: { category },
-      order: { id: 'DESC' },
+      order: { id: 'ASC' },
     });
   }
 
