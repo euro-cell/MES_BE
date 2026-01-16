@@ -87,23 +87,37 @@ export class CellInventoryService {
 
   async getStatistics(): Promise<ProjectStatisticsDto[]> {
     const cells = await this.cellInventoryRepository.find({
-      select: ['projectName', 'grade', 'isShipped'],
-      order: { projectName: 'ASC', grade: 'ASC' },
+      select: ['projectName', 'projectNo', 'grade', 'isShipped'],
+      order: { projectName: 'ASC', projectNo: 'ASC', grade: 'ASC' },
     });
 
-    const projectMap = new Map<string, Map<string, { inStock: number; shipped: number }>>();
+    // projectName + projectNo 조합으로 그룹핑
+    const projectMap = new Map<
+      string,
+      {
+        projectName: string;
+        projectNo: string | null;
+        grades: Map<string, { inStock: number; shipped: number }>;
+      }
+    >();
 
     for (const cell of cells) {
-      if (!projectMap.has(cell.projectName)) {
-        projectMap.set(cell.projectName, new Map());
+      const key = `${cell.projectName}::${cell.projectNo || ''}`;
+
+      if (!projectMap.has(key)) {
+        projectMap.set(key, {
+          projectName: cell.projectName,
+          projectNo: cell.projectNo,
+          grades: new Map(),
+        });
       }
 
-      const gradeMap = projectMap.get(cell.projectName)!;
-      if (!gradeMap.has(cell.grade)) {
-        gradeMap.set(cell.grade, { inStock: 0, shipped: 0 });
+      const project = projectMap.get(key)!;
+      if (!project.grades.has(cell.grade)) {
+        project.grades.set(cell.grade, { inStock: 0, shipped: 0 });
       }
 
-      const stats = gradeMap.get(cell.grade)!;
+      const stats = project.grades.get(cell.grade)!;
       stats.inStock += 1;
       if (cell.isShipped) {
         stats.shipped += 1;
@@ -113,13 +127,13 @@ export class CellInventoryService {
     const result: ProjectStatisticsDto[] = [];
     const gradeValues = Object.values(CellGrade);
 
-    for (const [projectName, gradeMap] of projectMap.entries()) {
+    for (const [, project] of projectMap.entries()) {
       const grades: GradeStatisticsDto[] = [];
       let totalAvailable = 0;
 
       // 모든 등급에 대해 통계 생성 (없거나 0인 경우 null)
       for (const gradeValue of gradeValues) {
-        const stats = gradeMap.get(gradeValue);
+        const stats = project.grades.get(gradeValue);
 
         if (stats && stats.inStock > 0) {
           const available = stats.inStock - stats.shipped;
@@ -139,7 +153,12 @@ export class CellInventoryService {
           });
         }
       }
-      result.push({ projectName, grades, totalAvailable });
+      result.push({
+        projectName: project.projectName,
+        projectNo: project.projectNo,
+        grades,
+        totalAvailable,
+      });
     }
     return result;
   }

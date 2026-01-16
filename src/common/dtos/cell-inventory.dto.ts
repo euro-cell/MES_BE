@@ -100,6 +100,9 @@ export class ProjectStatisticsDto {
   @ApiProperty({ description: '프로젝트명', example: '프로젝트A' })
   projectName: string;
 
+  @ApiProperty({ description: '프로젝트 번호', example: 'V5.6', nullable: true })
+  projectNo: string | null;
+
   @ApiProperty({ type: [GradeStatisticsDto] })
   grades: GradeStatisticsDto[];
 
