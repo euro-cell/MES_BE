@@ -1,4 +1,5 @@
-import { Controller, Post, Patch, Get, Body, Query } from '@nestjs/common';
+import { Controller, Post, Patch, Get, Body, Query, Res, StreamableFile } from '@nestjs/common';
+import type { Response } from 'express';
 import { ApiTags, ApiOperation, ApiConflictResponse, ApiResponse } from '@nestjs/swagger';
 import { CellInventoryService } from './cell-inventory.service';
 import {
@@ -52,5 +53,19 @@ export class CellInventoryController {
   @ApiResponse({ type: [CellInventoryResponseDto] })
   async getProjectCells(@Query('name') projectName: string) {
     return await this.cellInventoryService.getProjectCells(projectName);
+  }
+
+  @Get('export')
+  @ApiOperation({ summary: '셀 입출고 현황 Excel 내보내기' })
+  async exportExcel(@Res({ passthrough: true }) res: Response): Promise<StreamableFile> {
+    const file = await this.cellInventoryService.downloadExcel();
+    const filename = this.cellInventoryService.getExportFilename();
+
+    res.set({
+      'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Disposition': `attachment; filename="${encodeURIComponent(filename)}"`,
+    });
+
+    return file;
   }
 }

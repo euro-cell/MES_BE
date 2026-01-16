@@ -146,7 +146,7 @@ export class ExcelService {
    * @param templateName - 템플릿 파일명
    * @returns ExcelJS Workbook
    */
-  private async loadTemplate(templateName: string): Promise<ExcelJS.Workbook> {
+  async loadTemplate(templateName: string): Promise<ExcelJS.Workbook> {
     const templateFilePath = path.join(this.templatePath, templateName);
 
     if (!fs.existsSync(templateFilePath)) {
