@@ -10,5 +10,6 @@ import { NcrController } from './ncr.controller';
   imports: [TypeOrmModule.forFeature([CellNcr, CellNcrDetail, CellInventory])],
   controllers: [NcrController],
   providers: [NcrService],
+  exports: [NcrService],
 })
 export class NcrModule {}

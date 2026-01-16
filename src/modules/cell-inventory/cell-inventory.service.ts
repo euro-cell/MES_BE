@@ -12,6 +12,7 @@ import {
 } from 'src/common/dtos/cell-inventory.dto';
 import { ExcelService } from 'src/common/services/excel.service';
 import { ExcelUtil } from 'src/common/utils/excel.util';
+import { NcrService } from './ncr/ncr.service';
 import * as ExcelJS from 'exceljs';
 
 @Injectable()
@@ -20,6 +21,7 @@ export class CellInventoryService {
     @InjectRepository(CellInventory)
     private readonly cellInventoryRepository: Repository<CellInventory>,
     private readonly excelService: ExcelService,
+    private readonly ncrService: NcrService,
   ) {}
 
   async create(dto: CreateCellInventoryDto) {
@@ -326,8 +328,172 @@ export class CellInventoryService {
     worksheet.getCell(`F${totalRow}`).value = grandTotalInStock;
     worksheet.getCell(`G${totalRow}`).value = grandTotalShipped;
 
+    // ===== 시트2: NCR 세부 수량 파악 =====
+    await this.fillNcrSheet(workbook);
+
     const buffer = await workbook.xlsx.writeBuffer();
     return new StreamableFile(Buffer.from(buffer));
+  }
+
+  private async fillNcrSheet(workbook: ExcelJS.Workbook): Promise<void> {
+    const worksheet = workbook.getWorksheet('NCR 세부 수량 파악');
+    if (!worksheet) return;
+
+    // NCR 통계 데이터 조회
+    const ncrStats = await this.ncrService.getStatistics();
+    const { data: ncrData, projects } = ncrStats;
+
+    // NCR 코드 순서 정의
+    const ncrCodeOrder = [
+      'F-NCR1',
+      'F-NCR2',
+      'F-NCR3',
+      'F-NCR4',
+      'F-NCR5',
+      'F-NCR6',
+      'F-NCR7',
+      'F-NCR8',
+      'NCR1',
+      'NCR2',
+      'NCR3',
+      'NCR4',
+      'NCR5',
+      'NCR6',
+      'NCR7',
+      'NCR8',
+      'NCR9',
+      'NCR10',
+      'NCR11',
+      '기타-1',
+      '기타-2',
+    ];
+
+    const dataStartRow = 5;
+    const dataStartCol = 6; // F열 = 6
+
+    // 공유 수식 오류 방지: 영향받는 영역의 셀을 먼저 초기화
+    // ExcelJS에서 수식이 있는 셀 접근 시 오류가 발생할 수 있으므로 워크시트 모델 직접 수정
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const worksheetModel = worksheet as any;
+    if (worksheetModel._rows) {
+      for (let rowIdx = 3; rowIdx <= 27; rowIdx++) {
+        const row = worksheetModel._rows[rowIdx];
+        if (row && row._cells) {
+          for (let colIdx = dataStartCol; colIdx <= dataStartCol + 20; colIdx++) {
+            if (row._cells[colIdx]) {
+              row._cells[colIdx] = undefined;
+            }
+          }
+        }
+      }
+    }
+
+    // 프로젝트가 1개 초과면 열 삽입 필요 (기존 열들은 오른쪽으로 밀림)
+    const additionalCols = Math.max(0, projects.length - 1);
+    if (additionalCols > 0) {
+      // G열(7)부터 열 삽입 - F열은 첫 번째 프로젝트용
+      worksheet.spliceColumns(dataStartCol + 1, 0, ...Array(additionalCols).fill([]));
+    }
+
+    // 3행: 프로젝트명, 4행: 프로젝트 번호(no) 헤더 추가
+    for (let i = 0; i < projects.length; i++) {
+      const col = dataStartCol + i;
+      const project = projects[i];
+
+      // 3행: 프로젝트명
+      const nameCell = worksheet.getCell(3, col);
+      nameCell.value = project.projectName;
+      nameCell.alignment = { vertical: 'middle', horizontal: 'center' };
+      ExcelUtil.applyCellBorder(nameCell);
+
+      // 4행: 프로젝트 번호 (no)
+      const noCell = worksheet.getCell(4, col);
+      noCell.value = project.projectNo || '';
+      noCell.alignment = { vertical: 'middle', horizontal: 'center' };
+      ExcelUtil.applyCellBorder(noCell);
+    }
+
+    // NCR 코드별 데이터를 Map으로 변환
+    const ncrDataMap = new Map<string, typeof ncrData[0]>();
+    for (const item of ncrData) {
+      ncrDataMap.set(item.code, item);
+    }
+
+    // 프로젝트별 총합 계산용
+    const projectTotals: number[] = Array(projects.length).fill(0);
+    let grandTotal = 0;
+
+    // NCR 코드별 데이터 채우기
+    for (let rowIdx = 0; rowIdx < ncrCodeOrder.length; rowIdx++) {
+      const ncrCode = ncrCodeOrder[rowIdx];
+      const rowNum = dataStartRow + rowIdx;
+      const ncrItem = ncrDataMap.get(ncrCode);
+
+      for (let colIdx = 0; colIdx < projects.length; colIdx++) {
+        const col = dataStartCol + colIdx;
+        const project = projects[colIdx];
+
+        let count = 0;
+        if (ncrItem) {
+          const countData = ncrItem.counts.find(
+            (c) => c.projectName === project.projectName && c.projectNo === project.projectNo,
+          );
+          count = countData?.count || 0;
+        }
+
+        const cell = worksheet.getCell(rowNum, col);
+        cell.value = count > 0 ? count : '';
+        cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        ExcelUtil.applyCellBorder(cell);
+
+        projectTotals[colIdx] += count;
+        grandTotal += count;
+      }
+    }
+
+    // 26행: 총 합 (각 프로젝트별) - 노란색 배경, 굵은 글씨
+    const totalSumRow = dataStartRow + ncrCodeOrder.length; // 26행
+    for (let colIdx = 0; colIdx < projects.length; colIdx++) {
+      const col = dataStartCol + colIdx;
+      const cell = worksheet.getCell(totalSumRow, col);
+      cell.value = projectTotals[colIdx] > 0 ? projectTotals[colIdx] : '';
+      cell.alignment = { vertical: 'middle', horizontal: 'center' };
+      cell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FFFFFF00' }, // 노란색
+      };
+      cell.font = { bold: true };
+      ExcelUtil.applyCellBorder(cell);
+    }
+
+    // 27행: 총 합의 합
+    const grandTotalRow = totalSumRow + 1; // 27행
+    if (projects.length > 1) {
+      // 프로젝트 열 병합
+      const startCol = this.getColumnLetter(dataStartCol);
+      const endCol = this.getColumnLetter(dataStartCol + projects.length - 1);
+      this.safeMergeCells(worksheet, `${startCol}${grandTotalRow}:${endCol}${grandTotalRow}`);
+    }
+    const grandTotalCell = worksheet.getCell(grandTotalRow, dataStartCol);
+    grandTotalCell.value = grandTotal > 0 ? grandTotal : '';
+    grandTotalCell.alignment = { vertical: 'middle', horizontal: 'center' };
+    ExcelUtil.applyCellBorder(grandTotalCell);
+
+    // 2행: 제목 행 병합 (B열부터 마지막 프로젝트 열까지)
+    const lastProjectCol = dataStartCol + projects.length - 1;
+    const endColLetter = this.getColumnLetter(lastProjectCol);
+    this.safeMergeCells(worksheet, `B2:${endColLetter}2`);
+  }
+
+  private getColumnLetter(colNumber: number): string {
+    let letter = '';
+    while (colNumber > 0) {
+      const mod = (colNumber - 1) % 26;
+      letter = String.fromCharCode(65 + mod) + letter;
+      colNumber = Math.floor((colNumber - 1) / 26);
+    }
+    return letter;
   }
 
   private copyRowStyle(worksheet: ExcelJS.Worksheet, sourceRowNum: number, targetRowNum: number): void {
