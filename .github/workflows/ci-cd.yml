@@ -55,6 +55,7 @@ jobs:
           source: .env
           target: ${{ secrets.SERVER_PATH }}/site/eurocell/be
           overwrite: true
+          timeout: 120s
 
       - name: 서버 접속
         uses: appleboy/ssh-action@master
