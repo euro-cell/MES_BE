@@ -331,6 +331,9 @@ export class CellInventoryService {
     // ===== 시트2: NCR 세부 수량 파악 =====
     await this.fillNcrSheet(workbook);
 
+    // ===== 시트3+: 프로젝트별 시트 =====
+    await this.fillProjectSheets(workbook);
+
     const buffer = await workbook.xlsx.writeBuffer();
     return new StreamableFile(Buffer.from(buffer));
   }
@@ -650,6 +653,183 @@ export class CellInventoryService {
       currentCol = currentCol + tableWidth + 1; // 테이블 3열 + 구분자 1열
       worksheet.getColumn(currentCol - 1).width = 1.38; // 구분자 열 너비
     }
+  }
+
+  private async fillProjectSheets(workbook: ExcelJS.Workbook): Promise<void> {
+    const templateSheet = workbook.getWorksheet('프로젝트');
+    if (!templateSheet) return;
+
+    // 고유한 프로젝트명 목록 조회 (projectNo가 달라도 projectName이 같으면 하나로)
+    const allCells = await this.cellInventoryRepository.find({
+      select: ['projectName'],
+    });
+
+    const uniqueProjectNames = [...new Set(allCells.map((c) => c.projectName))].sort();
+
+    // 각 프로젝트명별로 시트 생성
+    for (const projectName of uniqueProjectNames) {
+      // 템플릿 시트 복사
+      const newSheet = workbook.addWorksheet(projectName);
+
+      // 템플릿에서 열 너비 복사
+      templateSheet.columns.forEach((col, index) => {
+        if (col.width) {
+          newSheet.getColumn(index + 1).width = col.width;
+        }
+      });
+
+      // 템플릿의 모든 행/스타일 복사 (1~2행)
+      for (let rowNum = 1; rowNum <= 2; rowNum++) {
+        const srcRow = templateSheet.getRow(rowNum);
+        const destRow = newSheet.getRow(rowNum);
+        destRow.height = srcRow.height;
+        srcRow.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+          const destCell = destRow.getCell(colNumber);
+          destCell.value = cell.value;
+          destCell.style = { ...cell.style };
+        });
+        destRow.commit();
+      }
+
+      // 해당 프로젝트명의 모든 셀 데이터 조회
+      const projectCells = await this.getProjectCells(projectName);
+
+      // 데이터 채우기 (3행부터)
+      const dataStartRow = 3;
+      for (let i = 0; i < projectCells.length; i++) {
+        const cell = projectCells[i];
+        const rowNum = dataStartRow + i;
+
+        // 출고 상태면 주황색 배경
+        const orangeFill: ExcelJS.Fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FFFFC000' }, // 주황색
+        };
+
+        // B(2): No.
+        const noCell = newSheet.getCell(rowNum, 2);
+        noCell.value = i + 1;
+        noCell.alignment = { vertical: 'middle', horizontal: 'center' };
+        ExcelUtil.applyCellBorder(noCell);
+        if (cell.isShipped) noCell.fill = orangeFill;
+
+        // C(3): Lot No.
+        const lotCell = newSheet.getCell(rowNum, 3);
+        lotCell.value = cell.lot || '';
+        lotCell.alignment = { vertical: 'middle', horizontal: 'center' };
+        ExcelUtil.applyCellBorder(lotCell);
+        if (cell.isShipped) lotCell.fill = orangeFill;
+
+        // D(4): 프로젝트명
+        const projectNameCell = newSheet.getCell(rowNum, 4);
+        projectNameCell.value = cell.projectName || '';
+        projectNameCell.alignment = { vertical: 'middle', horizontal: 'center' };
+        ExcelUtil.applyCellBorder(projectNameCell);
+        if (cell.isShipped) projectNameCell.fill = orangeFill;
+
+        // E(5): Project No.
+        const projectNoCell = newSheet.getCell(rowNum, 5);
+        projectNoCell.value = cell.projectNo || '';
+        projectNoCell.alignment = { vertical: 'middle', horizontal: 'center' };
+        ExcelUtil.applyCellBorder(projectNoCell);
+        if (cell.isShipped) projectNoCell.fill = orangeFill;
+
+        // F(6): 모델
+        const modelCell = newSheet.getCell(rowNum, 6);
+        modelCell.value = cell.model || '';
+        modelCell.alignment = { vertical: 'middle', horizontal: 'center' };
+        ExcelUtil.applyCellBorder(modelCell);
+        if (cell.isShipped) modelCell.fill = orangeFill;
+
+        // G(7): 등급
+        const gradeCell = newSheet.getCell(rowNum, 7);
+        gradeCell.value = cell.grade || '';
+        gradeCell.alignment = { vertical: 'middle', horizontal: 'center' };
+        ExcelUtil.applyCellBorder(gradeCell);
+        if (cell.isShipped) gradeCell.fill = orangeFill;
+
+        // H(8): NCR 등급
+        const ncrGradeCell = newSheet.getCell(rowNum, 8);
+        ncrGradeCell.value = cell.ncrGrade || '';
+        ncrGradeCell.alignment = { vertical: 'middle', horizontal: 'center' };
+        ExcelUtil.applyCellBorder(ncrGradeCell);
+        if (cell.isShipped) ncrGradeCell.fill = orangeFill;
+
+        // I(9): 보관 일자
+        const dateCell = newSheet.getCell(rowNum, 9);
+        dateCell.value = cell.date ? ExcelUtil.formatDate(cell.date) : '';
+        dateCell.alignment = { vertical: 'middle', horizontal: 'center' };
+        ExcelUtil.applyCellBorder(dateCell);
+        if (cell.isShipped) dateCell.fill = orangeFill;
+
+        // J(10): 보관 위치
+        const storageCell = newSheet.getCell(rowNum, 10);
+        storageCell.value = cell.storageLocation || '';
+        storageCell.alignment = { vertical: 'middle', horizontal: 'center' };
+        ExcelUtil.applyCellBorder(storageCell);
+        if (cell.isShipped) storageCell.fill = orangeFill;
+
+        // K(11): 출고 일자
+        const shippingDateCell = newSheet.getCell(rowNum, 11);
+        shippingDateCell.value = cell.shippingDate ? ExcelUtil.formatDate(cell.shippingDate) : '';
+        shippingDateCell.alignment = { vertical: 'middle', horizontal: 'center' };
+        ExcelUtil.applyCellBorder(shippingDateCell);
+        if (cell.isShipped) shippingDateCell.fill = orangeFill;
+
+        // L(12): 출고 현황
+        const shippingStatusCell = newSheet.getCell(rowNum, 12);
+        shippingStatusCell.value = cell.shippingStatus || '';
+        shippingStatusCell.alignment = { vertical: 'middle', horizontal: 'center' };
+        ExcelUtil.applyCellBorder(shippingStatusCell);
+        if (cell.isShipped) shippingStatusCell.fill = orangeFill;
+
+        // M(13): 인계자
+        const delivererCell = newSheet.getCell(rowNum, 13);
+        delivererCell.value = cell.deliverer || '';
+        delivererCell.alignment = { vertical: 'middle', horizontal: 'center' };
+        ExcelUtil.applyCellBorder(delivererCell);
+        if (cell.isShipped) delivererCell.fill = orangeFill;
+
+        // N(14): 인수자
+        const receiverCell = newSheet.getCell(rowNum, 14);
+        receiverCell.value = cell.receiver || '';
+        receiverCell.alignment = { vertical: 'middle', horizontal: 'center' };
+        ExcelUtil.applyCellBorder(receiverCell);
+        if (cell.isShipped) receiverCell.fill = orangeFill;
+
+        // O(15): 상세
+        const detailsCell = newSheet.getCell(rowNum, 15);
+        detailsCell.value = cell.details || '';
+        detailsCell.alignment = { vertical: 'middle', horizontal: 'center' };
+        ExcelUtil.applyCellBorder(detailsCell);
+        if (cell.isShipped) detailsCell.fill = orangeFill;
+
+        // P(16): 상태
+        const statusCell = newSheet.getCell(rowNum, 16);
+        statusCell.value = cell.isShipped ? '출고' : '보관중';
+        statusCell.alignment = { vertical: 'middle', horizontal: 'center' };
+        ExcelUtil.applyCellBorder(statusCell);
+        if (cell.isShipped) statusCell.fill = orangeFill;
+
+        // Q(17): 재입고
+        const restockedCell = newSheet.getCell(rowNum, 17);
+        restockedCell.value = cell.isRestocked ? 'Y' : '';
+        restockedCell.alignment = { vertical: 'middle', horizontal: 'center' };
+        ExcelUtil.applyCellBorder(restockedCell);
+        if (cell.isShipped) restockedCell.fill = orangeFill;
+      }
+
+      // 2행 헤더에 필터 적용 (B2:Q2 + 데이터 영역)
+      const lastDataRow = dataStartRow + projectCells.length - 1;
+      newSheet.autoFilter = {
+        from: { row: 2, column: 2 }, // B2
+        to: { row: Math.max(2, lastDataRow), column: 17 }, // Q열
+      };
+    }
+
+    // 템플릿 시트 삭제
+    workbook.removeWorksheet(templateSheet.id);
   }
 
   private getColumnLetter(colNumber: number): string {
