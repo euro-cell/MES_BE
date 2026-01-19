@@ -371,15 +371,27 @@ export class CellInventoryService {
     const dataStartRow = 5;
     const dataStartCol = 6; // F열 = 6
 
-    // 공유 수식 오류 방지: 영향받는 영역의 셀을 먼저 초기화
+    // 공유 수식 오류 방지 및 템플릿 테두리 초기화
     // ExcelJS에서 수식이 있는 셀 접근 시 오류가 발생할 수 있으므로 워크시트 모델 직접 수정
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const worksheetModel = worksheet as any;
     if (worksheetModel._rows) {
+      // 3~27행: 프로젝트 열 영역 (수식 제거)
       for (let rowIdx = 3; rowIdx <= 27; rowIdx++) {
         const row = worksheetModel._rows[rowIdx];
         if (row && row._cells) {
           for (let colIdx = dataStartCol; colIdx <= dataStartCol + 20; colIdx++) {
+            if (row._cells[colIdx]) {
+              row._cells[colIdx] = undefined;
+            }
+          }
+        }
+      }
+      // 28행 이후: 템플릿에 있을 수 있는 테두리 완전 제거 (B열부터 넓은 범위)
+      for (let rowIdx = 28; rowIdx <= 100; rowIdx++) {
+        const row = worksheetModel._rows[rowIdx];
+        if (row && row._cells) {
+          for (let colIdx = 2; colIdx <= 30; colIdx++) {
             if (row._cells[colIdx]) {
               row._cells[colIdx] = undefined;
             }
@@ -469,21 +481,175 @@ export class CellInventoryService {
 
     // 27행: 총 합의 합
     const grandTotalRow = totalSumRow + 1; // 27행
+    // 병합 전에 모든 프로젝트 열에 스타일 적용
+    for (let colIdx = 0; colIdx < projects.length; colIdx++) {
+      const col = dataStartCol + colIdx;
+      const cell = worksheet.getCell(grandTotalRow, col);
+      cell.value = colIdx === 0 ? (grandTotal > 0 ? grandTotal : '') : '';
+      cell.alignment = { vertical: 'middle', horizontal: 'center' };
+      ExcelUtil.applyCellBorder(cell);
+    }
     if (projects.length > 1) {
       // 프로젝트 열 병합
       const startCol = this.getColumnLetter(dataStartCol);
       const endCol = this.getColumnLetter(dataStartCol + projects.length - 1);
       this.safeMergeCells(worksheet, `${startCol}${grandTotalRow}:${endCol}${grandTotalRow}`);
     }
-    const grandTotalCell = worksheet.getCell(grandTotalRow, dataStartCol);
-    grandTotalCell.value = grandTotal > 0 ? grandTotal : '';
-    grandTotalCell.alignment = { vertical: 'middle', horizontal: 'center' };
-    ExcelUtil.applyCellBorder(grandTotalCell);
 
     // 2행: 제목 행 병합 (B열부터 마지막 프로젝트 열까지)
     const lastProjectCol = dataStartCol + projects.length - 1;
     const endColLetter = this.getColumnLetter(lastProjectCol);
     this.safeMergeCells(worksheet, `B2:${endColLetter}2`);
+
+    // ===== 프로젝트별 NCR 상세 내역 테이블 추가 =====
+    await this.fillNcrDetailTables(worksheet, projects, lastProjectCol);
+
+    // fillNcrDetailTables 실행 후 생기는 테두리 제거 (내부 모델 직접 수정)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const wsModel = worksheet as any;
+    if (wsModel._rows) {
+      for (let rowIdx = 28; rowIdx <= 150; rowIdx++) {
+        const row = wsModel._rows[rowIdx];
+        if (row && row._cells) {
+          for (let colIdx = 2; colIdx <= lastProjectCol; colIdx++) {
+            if (row._cells[colIdx]) {
+              row._cells[colIdx] = undefined;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  private async fillNcrDetailTables(
+    worksheet: ExcelJS.Worksheet,
+    projects: Array<{ projectName: string; projectNo: string | null }>,
+    lastProjectCol: number,
+  ): Promise<void> {
+    // 구분자 열 (프로젝트 열 끝난 다음 열)
+    const separatorCol = lastProjectCol + 1;
+    worksheet.getColumn(separatorCol).width = 1.38;
+
+    // 각 프로젝트별 상세 테이블 시작 열
+    let currentCol = separatorCol + 1;
+
+    for (const project of projects) {
+      // 프로젝트의 NCR 상세 데이터 조회
+      const detailData = await this.ncrService.getDetail(project.projectName, project.projectNo || undefined);
+      const { ncrDetails } = detailData;
+
+      if (ncrDetails.length === 0) continue;
+
+      // 테이블은 3열 구성: 구분, title, 수량
+      const tableWidth = 3;
+      const col1 = currentCol; // 구분
+      const col2 = currentCol + 1; // title
+      const col3 = currentCol + 2; // 수량
+
+      // 2행: 프로젝트명 헤더 (3열 병합)
+      const projectHeader = project.projectNo
+        ? `${project.projectName}(${project.projectNo})`
+        : project.projectName;
+
+      // 병합 전에 모든 셀에 스타일 적용 (테두리 제외)
+      for (let c = col1; c <= col3; c++) {
+        const cell = worksheet.getCell(2, c);
+        cell.value = c === col1 ? projectHeader : '';
+        cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        cell.font = { bold: true };
+      }
+      this.safeMergeCells(worksheet, `${this.getColumnLetter(col1)}2:${this.getColumnLetter(col3)}2`);
+
+      // 3행부터 NCR별 테이블 작성
+      let currentRow = 3;
+
+      for (const ncr of ncrDetails) {
+        // items가 없으면 건너뛰기
+        if (!ncr.items || ncr.items.length === 0) continue;
+
+        // NCR 제목 행 (3열 병합) - 테두리 없음, 굵기 없음
+        for (let c = col1; c <= col3; c++) {
+          const cell = worksheet.getCell(currentRow, c);
+          cell.value = c === col1 ? ncr.title : '';
+          cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        }
+        this.safeMergeCells(
+          worksheet,
+          `${this.getColumnLetter(col1)}${currentRow}:${this.getColumnLetter(col3)}${currentRow}`,
+        );
+        currentRow++;
+
+        // 테이블 헤더: 구분, [item.title], 수량 - 흰색 배경 5% 더 어둡게
+        // 첫 번째 item의 title을 헤더로 사용
+        const firstItemTitle = ncr.items[0]?.title || '';
+        const headers = ['구분', firstItemTitle, '수량'];
+        for (let i = 0; i < headers.length; i++) {
+          const cell = worksheet.getCell(currentRow, col1 + i);
+          cell.value = headers[i];
+          cell.alignment = { vertical: 'middle', horizontal: 'center' };
+          cell.font = { bold: true };
+          cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFF2F2F2' }, // 흰색, 배경 1, 5% 더 어둡게
+          };
+          ExcelUtil.applyCellBorder(cell);
+        }
+        currentRow++;
+
+        // 항목 데이터: 구분=details, 두번째열=type, 수량=count
+        let itemTotal = 0;
+        for (const item of ncr.items) {
+          const cell1 = worksheet.getCell(currentRow, col1);
+          cell1.value = item.details || '';
+          cell1.alignment = { vertical: 'middle', horizontal: 'center' };
+          ExcelUtil.applyCellBorder(cell1);
+
+          const cell2 = worksheet.getCell(currentRow, col2);
+          cell2.value = item.type || '';
+          cell2.alignment = { vertical: 'middle', horizontal: 'center' };
+          ExcelUtil.applyCellBorder(cell2);
+
+          const cell3 = worksheet.getCell(currentRow, col3);
+          cell3.value = item.count || 0;
+          cell3.alignment = { vertical: 'middle', horizontal: 'center' };
+          ExcelUtil.applyCellBorder(cell3);
+
+          itemTotal += item.count || 0;
+          currentRow++;
+        }
+
+        // 합계 행 - 배경색 없이 테두리만
+        const sumCell1 = worksheet.getCell(currentRow, col1);
+        sumCell1.value = '합계';
+        sumCell1.alignment = { vertical: 'middle', horizontal: 'center' };
+        sumCell1.font = { bold: true };
+        ExcelUtil.applyCellBorder(sumCell1);
+
+        const sumCell2 = worksheet.getCell(currentRow, col2);
+        sumCell2.value = '';
+        ExcelUtil.applyCellBorder(sumCell2);
+
+        this.safeMergeCells(
+          worksheet,
+          `${this.getColumnLetter(col1)}${currentRow}:${this.getColumnLetter(col2)}${currentRow}`,
+        );
+
+        const sumValueCell = worksheet.getCell(currentRow, col3);
+        sumValueCell.value = itemTotal;
+        sumValueCell.alignment = { vertical: 'middle', horizontal: 'center' };
+        sumValueCell.font = { bold: true };
+        ExcelUtil.applyCellBorder(sumValueCell);
+        currentRow++;
+
+        // 한 행 건너뛰기
+        currentRow++;
+      }
+
+      // 다음 프로젝트를 위해 구분자 열 추가 후 다음 열로 이동
+      currentCol = currentCol + tableWidth + 1; // 테이블 3열 + 구분자 1열
+      worksheet.getColumn(currentCol - 1).width = 1.38; // 구분자 열 너비
+    }
   }
 
   private getColumnLetter(colNumber: number): string {
@@ -519,13 +685,46 @@ export class CellInventoryService {
   }
 
   private safeMergeCells(worksheet: ExcelJS.Worksheet, range: string): void {
-    // 먼저 해제 후 병합
-    try {
-      worksheet.unMergeCells(range);
-    } catch {
-      // 병합되어 있지 않은 경우 무시
+    // 범위 파싱
+    const match = range.match(/([A-Z]+)(\d+):([A-Z]+)(\d+)/);
+    if (!match) {
+      worksheet.mergeCells(range);
+      return;
     }
-    worksheet.mergeCells(range);
+
+    const startCol = this.columnLetterToNumber(match[1]);
+    const startRow = parseInt(match[2]);
+    const endCol = this.columnLetterToNumber(match[3]);
+    const endRow = parseInt(match[4]);
+
+    // 범위 내 모든 셀의 기존 병합 해제
+    for (let row = startRow; row <= endRow; row++) {
+      for (let col = startCol; col <= endCol; col++) {
+        try {
+          const cell = worksheet.getCell(row, col);
+          if (cell.isMerged) {
+            worksheet.unMergeCells(row, col, row, col);
+          }
+        } catch {
+          // 무시
+        }
+      }
+    }
+
+    // 새로운 병합 적용
+    try {
+      worksheet.mergeCells(range);
+    } catch {
+      // 병합 실패 시 무시
+    }
+  }
+
+  private columnLetterToNumber(letter: string): number {
+    let result = 0;
+    for (let i = 0; i < letter.length; i++) {
+      result = result * 26 + (letter.charCodeAt(i) - 64);
+    }
+    return result;
   }
 
   private async getProjectStatisticsForExcel(): Promise<
