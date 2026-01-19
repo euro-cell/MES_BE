@@ -61,15 +61,21 @@ export class NcrService {
     };
   }
 
-  async getDetail(projectName: string): Promise<NcrDetailResponseDto> {
+  async getDetail(projectName: string, projectNo?: string): Promise<NcrDetailResponseDto> {
     // Step 1: 해당 프로젝트의 NCR 코드 목록 조회
-    const ncrGrades = await this.cellInventoryRepository
+    const query = this.cellInventoryRepository
       .createQueryBuilder('ci')
       .select('DISTINCT ci.ncrGrade', 'ncrGrade')
       .where('ci.projectName = :projectName', { projectName })
-      .andWhere('ci.ncrGrade IS NOT NULL')
-      .getRawMany<{ ncrGrade: string }>();
+      .andWhere('ci.ncrGrade IS NOT NULL');
 
+    if (projectNo) {
+      query.andWhere('ci.projectNo = :projectNo', { projectNo });
+    } else {
+      query.andWhere('ci.projectNo IS NULL');
+    }
+
+    const ncrGrades = await query.getRawMany<{ ncrGrade: string }>();
     const projectNcrCodes = ncrGrades.map((n) => n.ncrGrade);
 
     // Step 2: 해당 NCR 코드들에 대한 CellNcr 정보 조회
@@ -115,7 +121,7 @@ export class NcrService {
     };
   }
 
-  async updateDetail(dto: UpdateNcrDetailRequestDto): Promise<{ message: string }> {
+  async updateDetail(dto: UpdateNcrDetailRequestDto, projectNo?: string): Promise<{ message: string }> {
     const { projectName, ncrDetails } = dto;
 
     for (const ncrDetail of ncrDetails) {

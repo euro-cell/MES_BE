@@ -18,15 +18,17 @@ export class NcrController {
   @Get('detail')
   @ApiOperation({ summary: 'NCR 세부 현황 조회 (프로젝트별)' })
   @ApiQuery({ name: 'projectName', required: true, description: '프로젝트명' })
+  @ApiQuery({ name: 'projectNo', required: false, description: '프로젝트 번호 (optional)' })
   @ApiResponse({ type: NcrDetailResponseDto })
-  async getDetail(@Query('projectName') projectName: string) {
-    return await this.ncrService.getDetail(projectName);
+  async getDetail(@Query('projectName') projectName: string, @Query('projectNo') projectNo?: string) {
+    return await this.ncrService.getDetail(projectName, projectNo);
   }
 
   @Patch('detail')
   @ApiOperation({ summary: 'NCR 세부 현황 저장 (프로젝트별)' })
+  @ApiQuery({ name: 'projectNo', required: false, description: '프로젝트 번호 (optional)' })
   @ApiResponse({ description: '저장 성공', schema: { example: { message: '저장되었습니다.' } } })
-  async updateDetail(@Body() dto: UpdateNcrDetailRequestDto) {
-    return await this.ncrService.updateDetail(dto);
+  async updateDetail(@Body() dto: UpdateNcrDetailRequestDto, @Query('projectNo') projectNo?: string) {
+    return await this.ncrService.updateDetail(dto, projectNo);
   }
 }
