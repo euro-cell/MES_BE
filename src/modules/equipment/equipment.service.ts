@@ -41,7 +41,8 @@ export class EquipmentService {
   async exportEquipmentByCategory(category: EquipmentCategory): Promise<StreamableFile> {
     const equipments = await this.findByCategory(category);
 
-    const templateName = category === EquipmentCategory.MEASUREMENT ? 'equipment_measurement_template.xlsx' : 'equipment_template.xlsx';
+    const templateName =
+      category === EquipmentCategory.MEASUREMENT ? 'equipment/equipment_measurement_template.xlsx' : 'equipment/equipment_template.xlsx';
 
     const titleMap = {
       [EquipmentCategory.PRODUCTION]: '생산 설비 관리 대장',

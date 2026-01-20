@@ -339,7 +339,7 @@ export class MaterialService {
     const materials = await this.findByElectrode(true); // 재고 0인 것도 포함
 
     return this.excelService.generateSimpleExcel({
-      templateName: 'electrode.xlsx',
+      templateName: 'material/electrode.xlsx',
       data: materials,
       dataMapper: (material, row, rowIndex) => {
         this.mapMaterialToRow(material, row, rowIndex);
@@ -354,7 +354,7 @@ export class MaterialService {
     const materials = await this.findByAssembly(true); // 재고 0인 것도 포함
 
     return this.excelService.generateSimpleExcel({
-      templateName: 'assembly.xlsx',
+      templateName: 'material/assembly.xlsx',
       data: materials,
       dataMapper: (material, row, rowIndex) => {
         this.mapMaterialToRow(material, row, rowIndex);

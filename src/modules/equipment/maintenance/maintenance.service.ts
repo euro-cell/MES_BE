@@ -55,7 +55,7 @@ export class MaintenanceService {
     const maintenanceData = await this.findAll();
 
     return this.excelService.generateExcel({
-      templateName: 'maintenance_template.xlsx',
+      templateName: 'equipment/maintenance_template.xlsx',
       title: '유지보수 관리 대장',
       data: maintenanceData,
       dataMapper: (maintenance, row, rowIndex) => {

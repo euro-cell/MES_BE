@@ -227,7 +227,7 @@ export class CellInventoryService {
   }
 
   async downloadExcel(): Promise<StreamableFile> {
-    const workbook = await this.excelService.loadTemplate('cell_inventory.xlsx');
+    const workbook = await this.excelService.loadTemplate('material/cell_inventory.xlsx');
     const worksheet = workbook.getWorksheet('셀 입출고 확인');
     if (!worksheet) {
       throw new NotFoundException('워크시트를 찾을 수 없습니다: 셀 입출고 확인');
@@ -429,7 +429,7 @@ export class CellInventoryService {
     }
 
     // NCR 코드별 데이터를 Map으로 변환
-    const ncrDataMap = new Map<string, typeof ncrData[0]>();
+    const ncrDataMap = new Map<string, (typeof ncrData)[0]>();
     for (const item of ncrData) {
       ncrDataMap.set(item.code, item);
     }
@@ -450,9 +450,7 @@ export class CellInventoryService {
 
         let count = 0;
         if (ncrItem) {
-          const countData = ncrItem.counts.find(
-            (c) => c.projectName === project.projectName && c.projectNo === project.projectNo,
-          );
+          const countData = ncrItem.counts.find((c) => c.projectName === project.projectName && c.projectNo === project.projectNo);
           count = countData?.count || 0;
         }
 
@@ -550,9 +548,7 @@ export class CellInventoryService {
       const col3 = currentCol + 2; // 수량
 
       // 2행: 프로젝트명 헤더 (3열 병합)
-      const projectHeader = project.projectNo
-        ? `${project.projectName}(${project.projectNo})`
-        : project.projectName;
+      const projectHeader = project.projectNo ? `${project.projectName}(${project.projectNo})` : project.projectName;
 
       // 병합 전에 모든 셀에 스타일 적용 (테두리 제외)
       for (let c = col1; c <= col3; c++) {
@@ -576,10 +572,7 @@ export class CellInventoryService {
           cell.value = c === col1 ? ncr.title : '';
           cell.alignment = { vertical: 'middle', horizontal: 'center' };
         }
-        this.safeMergeCells(
-          worksheet,
-          `${this.getColumnLetter(col1)}${currentRow}:${this.getColumnLetter(col3)}${currentRow}`,
-        );
+        this.safeMergeCells(worksheet, `${this.getColumnLetter(col1)}${currentRow}:${this.getColumnLetter(col3)}${currentRow}`);
         currentRow++;
 
         // 테이블 헤더: 구분, [item.title], 수량 - 흰색 배경 5% 더 어둡게
@@ -633,10 +626,7 @@ export class CellInventoryService {
         sumCell2.value = '';
         ExcelUtil.applyCellBorder(sumCell2);
 
-        this.safeMergeCells(
-          worksheet,
-          `${this.getColumnLetter(col1)}${currentRow}:${this.getColumnLetter(col2)}${currentRow}`,
-        );
+        this.safeMergeCells(worksheet, `${this.getColumnLetter(col1)}${currentRow}:${this.getColumnLetter(col2)}${currentRow}`);
 
         const sumValueCell = worksheet.getCell(currentRow, col3);
         sumValueCell.value = itemTotal;

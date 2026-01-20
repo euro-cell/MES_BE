@@ -58,7 +58,7 @@ type WorklogEntity =
 
 @Injectable()
 export class WorklogService {
-  private readonly templatePath = join(process.cwd(), 'data', 'templates');
+  private readonly templatePath = join(process.cwd(), 'data', 'templates', 'worklog');
 
   constructor(
     @InjectRepository(WorklogBinder)
@@ -105,10 +105,7 @@ export class WorklogService {
    * 다중 작업일지 Excel 내보내기
    * @returns { file: StreamableFile, productionName: string }
    */
-  async exportWorklogs(
-    processType: string,
-    dto: ExportWorklogRequestDto,
-  ): Promise<{ file: StreamableFile; productionName: string }> {
+  async exportWorklogs(processType: string, dto: ExportWorklogRequestDto): Promise<{ file: StreamableFile; productionName: string }> {
     const { projectId, worklogIds } = dto;
 
     // 1. 공정별 repository 및 템플릿 파일 가져오기
@@ -191,11 +188,7 @@ export class WorklogService {
    * @param dataBuffers 데이터가 채워진 워크북 버퍼들
    * @param sheetNames 시트명 배열 (첫 번째는 원본 시트명)
    */
-  private async mergeXlsxBuffersWithOriginal(
-    baseBuffer: ExcelJS.Buffer,
-    dataBuffers: Buffer[],
-    sheetNames: string[],
-  ): Promise<Buffer> {
+  private async mergeXlsxBuffersWithOriginal(baseBuffer: ExcelJS.Buffer, dataBuffers: Buffer[], sheetNames: string[]): Promise<Buffer> {
     // 원본 템플릿을 기준으로 시작
     const baseZip = await JSZip.loadAsync(baseBuffer);
 
@@ -372,11 +365,7 @@ export class WorklogService {
    * 시트 XML의 sharedString 참조를 재매핑
    * 소스 워크북의 인덱스를 타겟 워크북의 인덱스로 변환
    */
-  private remapSharedStringReferences(
-    sheetXml: string,
-    sourceStrings: string[],
-    targetStrings: string[],
-  ): string {
+  private remapSharedStringReferences(sheetXml: string, sourceStrings: string[], targetStrings: string[]): string {
     // 타겟 문자열의 인덱스 맵 생성
     const targetIndexMap = new Map<string, number>();
     targetStrings.forEach((str, idx) => {
@@ -411,12 +400,7 @@ export class WorklogService {
    * XML 특수문자 이스케이프
    */
   private escapeXml(str: string): string {
-    return str
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&apos;');
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;');
   }
 
   /**
