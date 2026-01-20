@@ -75,4 +75,19 @@ export class StatusController {
 
     file.getStream().pipe(res);
   }
+
+  @Get('Formation/export')
+  @ApiProduces('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+  async exportFormationStatus(@Param('productionId', ParseIntPipe) productionId: number, @Res() res: Response) {
+    const { file, productionName } = await this.statusService.exportFormationStatus(productionId);
+    const filename = `${productionName}_화성공정_생산현황.xlsx`;
+
+    res.set({
+      'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Disposition': `attachment; filename="${encodeURIComponent(filename)}"`,
+      'Access-Control-Expose-Headers': 'Content-Disposition',
+    });
+
+    file.getStream().pipe(res);
+  }
 }

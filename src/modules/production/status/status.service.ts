@@ -453,6 +453,68 @@ export class StatusService {
     };
   }
 
+  async exportFormationStatus(productionId: number): Promise<{ file: StreamableFile; productionName: string }> {
+    const productionPlan = await this.productionPlanRepository.findOne({
+      where: { production: { id: productionId } },
+      relations: ['production'],
+    });
+
+    if (!productionPlan) {
+      throw new NotFoundException('생산 계획이 존재하지 않습니다.');
+    }
+
+    const productionName = productionPlan.production.name;
+    const startDate = new Date(productionPlan.startDate);
+    const endDate = new Date(productionPlan.endDate);
+
+    const months = this.getMonthsBetween(startDate, endDate);
+
+    if (months.length === 0) {
+      throw new NotFoundException('생산 기간이 유효하지 않습니다.');
+    }
+
+    const templateFilePath = join(this.templatePath, 'formation.xlsx');
+
+    const workbookBuffers: Buffer[] = [];
+    const sheetNames: string[] = [];
+
+    for (const month of months) {
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.readFile(templateFilePath);
+
+      const sheet = workbook.worksheets[0];
+      if (!sheet) continue;
+
+      const formationData = await this.getFormationStatus(productionId, month);
+
+      this.fillFormationSheetWithExcelJS(sheet, formationData);
+
+      sheet.name = month;
+      sheetNames.push(month);
+
+      const buffer = await workbook.xlsx.writeBuffer();
+      workbookBuffers.push(Buffer.from(buffer));
+    }
+
+    if (workbookBuffers.length === 0) {
+      throw new NotFoundException('생성할 시트가 없습니다.');
+    }
+
+    if (workbookBuffers.length === 1) {
+      return {
+        file: new StreamableFile(workbookBuffers[0]),
+        productionName,
+      };
+    }
+
+    const mergedBuffer = await this.mergeElectrodeBuffers(workbookBuffers, sheetNames);
+
+    return {
+      file: new StreamableFile(Buffer.from(mergedBuffer)),
+      productionName,
+    };
+  }
+
   /**
    * ExcelJS를 사용하여 조립공정 시트에 데이터 입력
    * C열(1일) ~ AG열(31일): 일별 데이터
@@ -622,6 +684,142 @@ export class StatusService {
       }
       if (processes.filling.total?.targetQuantity > 0) {
         sheet.getCell(45, TARGET_COL).value = processes.filling.total.targetQuantity;
+      }
+    }
+  }
+
+  /**
+   * ExcelJS를 사용하여 화성공정 시트에 데이터 입력
+   * D열(1일) ~ AH열(31일): 일별 데이터
+   * AI열(35열): 합계 (수식 - 건드리지 않음)
+   * AJ열(36열): 전체합계 (cumulativeOutput)
+   * AK열(37열): 진행률 (수식 - 건드리지 않음)
+   * AL열(38열): 목표수량 (targetQuantity)
+   *
+   * 행 매핑:
+   * Row 2-4: Pre Formation (생산량, NG, 수율)
+   * Row 5-7: Degas (생산량, NG, 수율)
+   * Row 8-10: Main Formation (생산량, NG, 수율)
+   * Row 11-13: Aging OCV/IR_2 (생산량, NG, 수율)
+   * Row 14-16: Aging OCV/IR_3 (생산량, NG, 수율)
+   * Row 17-25: 외관검사 (생산량, NG, NCR 6종, 수율)
+   */
+  private fillFormationSheetWithExcelJS(sheet: ExcelJS.Worksheet, formationData: any): void {
+    const CUMULATIVE_COL = 36; // AJ열 (전체합계)
+    const TARGET_COL = 38; // AL열 (목표수량)
+
+    const { processes, month } = formationData;
+
+    // 해당 월의 일수 계산
+    const [year, monthNum] = month.split('-').map(Number);
+    const daysInMonth = new Date(year, monthNum, 0).getDate();
+
+    // 공유 수식 문제 방지: 전체합계/목표수량 열의 모든 셀 수식 클리어
+    for (let row = 2; row <= 30; row++) {
+      this.clearCellFormula(sheet, row, CUMULATIVE_COL);
+      this.clearCellFormula(sheet, row, TARGET_COL);
+    }
+
+    // Pre Formation - Row 2: 생산량, Row 3: NG
+    if (processes.preFormation?.data) {
+      for (const dayData of processes.preFormation.data) {
+        if (dayData.day > daysInMonth) continue;
+        const col = 3 + dayData.day; // D열 = 4열
+        if (dayData.output > 0) sheet.getCell(2, col).value = dayData.output;
+        if (dayData.ng > 0) sheet.getCell(3, col).value = dayData.ng;
+      }
+      if (processes.preFormation.total?.cumulativeOutput > 0) {
+        sheet.getCell(2, CUMULATIVE_COL).value = processes.preFormation.total.cumulativeOutput;
+      }
+      if (processes.preFormation.total?.targetQuantity > 0) {
+        sheet.getCell(2, TARGET_COL).value = processes.preFormation.total.targetQuantity;
+      }
+    }
+
+    // Degas - Row 5: 생산량, Row 6: NG
+    if (processes.degas?.data) {
+      for (const dayData of processes.degas.data) {
+        if (dayData.day > daysInMonth) continue;
+        const col = 3 + dayData.day;
+        if (dayData.output > 0) sheet.getCell(5, col).value = dayData.output;
+        if (dayData.ng > 0) sheet.getCell(6, col).value = dayData.ng;
+      }
+      if (processes.degas.total?.cumulativeOutput > 0) {
+        sheet.getCell(5, CUMULATIVE_COL).value = processes.degas.total.cumulativeOutput;
+      }
+      if (processes.degas.total?.targetQuantity > 0) {
+        sheet.getCell(5, TARGET_COL).value = processes.degas.total.targetQuantity;
+      }
+    }
+
+    // Main Formation - Row 8: 생산량, Row 9: NG
+    if (processes.mainFormation?.data) {
+      for (const dayData of processes.mainFormation.data) {
+        if (dayData.day > daysInMonth) continue;
+        const col = 3 + dayData.day;
+        if (dayData.output > 0) sheet.getCell(8, col).value = dayData.output;
+        if (dayData.ng > 0) sheet.getCell(9, col).value = dayData.ng;
+      }
+      if (processes.mainFormation.total?.cumulativeOutput > 0) {
+        sheet.getCell(8, CUMULATIVE_COL).value = processes.mainFormation.total.cumulativeOutput;
+      }
+      if (processes.mainFormation.total?.targetQuantity > 0) {
+        sheet.getCell(8, TARGET_COL).value = processes.mainFormation.total.targetQuantity;
+      }
+    }
+
+    // Aging OCV/IR_2 - Row 11: 생산량, Row 12: NG
+    if (processes.aging?.data) {
+      for (const dayData of processes.aging.data) {
+        if (dayData.day > daysInMonth) continue;
+        const col = 3 + dayData.day;
+        if (dayData.output > 0) sheet.getCell(11, col).value = dayData.output;
+        if (dayData.ng > 0) sheet.getCell(12, col).value = dayData.ng;
+      }
+      if (processes.aging.total?.cumulativeOutput > 0) {
+        sheet.getCell(11, CUMULATIVE_COL).value = processes.aging.total.cumulativeOutput;
+      }
+      if (processes.aging.total?.targetQuantity > 0) {
+        sheet.getCell(11, TARGET_COL).value = processes.aging.total.targetQuantity;
+      }
+    }
+
+    // Aging OCV/IR_3 (Grading) - Row 14: 생산량, Row 15: NG
+    if (processes.grading?.data) {
+      for (const dayData of processes.grading.data) {
+        if (dayData.day > daysInMonth) continue;
+        const col = 3 + dayData.day;
+        if (dayData.output > 0) sheet.getCell(14, col).value = dayData.output;
+        if (dayData.ng > 0) sheet.getCell(15, col).value = dayData.ng;
+      }
+      if (processes.grading.total?.cumulativeOutput > 0) {
+        sheet.getCell(14, CUMULATIVE_COL).value = processes.grading.total.cumulativeOutput;
+      }
+      if (processes.grading.total?.targetQuantity > 0) {
+        sheet.getCell(14, TARGET_COL).value = processes.grading.total.targetQuantity;
+      }
+    }
+
+    // 외관검사 - Row 17: 생산량, Row 18: NG, Row 19-24: NCR
+    if (processes.visualInspection?.data) {
+      for (const dayData of processes.visualInspection.data) {
+        if (dayData.day > daysInMonth) continue;
+        const col = 3 + dayData.day;
+        if (dayData.output > 0) sheet.getCell(17, col).value = dayData.output;
+        if (dayData.ng > 0) sheet.getCell(18, col).value = dayData.ng;
+        // NCR 상세
+        if (dayData.ncr?.gas > 0) sheet.getCell(19, col).value = dayData.ncr.gas;
+        if (dayData.ncr?.foreignMatter > 0) sheet.getCell(20, col).value = dayData.ncr.foreignMatter;
+        if (dayData.ncr?.scratch > 0) sheet.getCell(21, col).value = dayData.ncr.scratch;
+        if (dayData.ncr?.dent > 0) sheet.getCell(22, col).value = dayData.ncr.dent;
+        if (dayData.ncr?.leakCorrosion > 0) sheet.getCell(23, col).value = dayData.ncr.leakCorrosion;
+        if (dayData.ncr?.cellSize > 0) sheet.getCell(24, col).value = dayData.ncr.cellSize;
+      }
+      if (processes.visualInspection.total?.cumulativeOutput > 0) {
+        sheet.getCell(17, CUMULATIVE_COL).value = processes.visualInspection.total.cumulativeOutput;
+      }
+      if (processes.visualInspection.total?.targetQuantity > 0) {
+        sheet.getCell(17, TARGET_COL).value = processes.visualInspection.total.targetQuantity;
       }
     }
   }
