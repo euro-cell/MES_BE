@@ -391,6 +391,241 @@ export class StatusService {
     };
   }
 
+  async exportAssemblyStatus(productionId: number): Promise<{ file: StreamableFile; productionName: string }> {
+    const productionPlan = await this.productionPlanRepository.findOne({
+      where: { production: { id: productionId } },
+      relations: ['production'],
+    });
+
+    if (!productionPlan) {
+      throw new NotFoundException('생산 계획이 존재하지 않습니다.');
+    }
+
+    const productionName = productionPlan.production.name;
+    const startDate = new Date(productionPlan.startDate);
+    const endDate = new Date(productionPlan.endDate);
+
+    const months = this.getMonthsBetween(startDate, endDate);
+
+    if (months.length === 0) {
+      throw new NotFoundException('생산 기간이 유효하지 않습니다.');
+    }
+
+    const templateFilePath = join(this.templatePath, 'assembly.xlsx');
+
+    const workbookBuffers: Buffer[] = [];
+    const sheetNames: string[] = [];
+
+    for (const month of months) {
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.readFile(templateFilePath);
+
+      const sheet = workbook.worksheets[0];
+      if (!sheet) continue;
+
+      const assemblyData = await this.getAssemblyStatus(productionId, month);
+
+      this.fillAssemblySheetWithExcelJS(sheet, assemblyData);
+
+      sheet.name = month;
+      sheetNames.push(month);
+
+      const buffer = await workbook.xlsx.writeBuffer();
+      workbookBuffers.push(Buffer.from(buffer));
+    }
+
+    if (workbookBuffers.length === 0) {
+      throw new NotFoundException('생성할 시트가 없습니다.');
+    }
+
+    if (workbookBuffers.length === 1) {
+      return {
+        file: new StreamableFile(workbookBuffers[0]),
+        productionName,
+      };
+    }
+
+    const mergedBuffer = await this.mergeElectrodeBuffers(workbookBuffers, sheetNames);
+
+    return {
+      file: new StreamableFile(Buffer.from(mergedBuffer)),
+      productionName,
+    };
+  }
+
+  /**
+   * ExcelJS를 사용하여 조립공정 시트에 데이터 입력
+   * C열(1일) ~ AG열(31일): 일별 데이터
+   * AH열(34열): 합계 (수식 - 건드리지 않음)
+   * AI열(35열): 합계 (수식 - 건드리지 않음)
+   * AJ열(36열): 전체합계 (cumulativeOutput)
+   * AK열(37열): 진행률 (수식 - 건드리지 않음)
+   * AL열(38열): 목표수량 (targetQuantity)
+   */
+  private fillAssemblySheetWithExcelJS(sheet: ExcelJS.Worksheet, assemblyData: any): void {
+    const CUMULATIVE_COL = 36; // AJ열 (전체합계)
+    const TARGET_COL = 38; // AL열 (목표수량)
+
+    const { processes, month } = assemblyData;
+
+    // 해당 월의 일수 계산 (예: 4월은 30일, 2월은 28/29일)
+    const [year, monthNum] = month.split('-').map(Number);
+    const daysInMonth = new Date(year, monthNum, 0).getDate();
+
+    // 공유 수식 문제 방지: 전체합계/목표수량 열의 모든 셀 수식 클리어
+    // 공유 수식은 여러 행에 걸쳐 있으므로 데이터가 있는 모든 행을 클리어
+    for (let row = 2; row <= 50; row++) {
+      this.clearCellFormula(sheet, row, CUMULATIVE_COL);
+      this.clearCellFormula(sheet, row, TARGET_COL);
+    }
+
+    // V/D - Cathode & Anode
+    if (processes.vd?.data) {
+      for (const dayData of processes.vd.data) {
+        if (dayData.day > daysInMonth) continue; // 해당 월에 없는 날짜는 스킵
+        const col = 2 + dayData.day; // C열 = 3열
+        if (dayData.cathodeOutput > 0) sheet.getCell(2, col).value = dayData.cathodeOutput;
+        if (dayData.cathodeNg > 0) sheet.getCell(3, col).value = dayData.cathodeNg;
+        if (dayData.anodeOutput > 0) sheet.getCell(5, col).value = dayData.anodeOutput;
+        if (dayData.anodeNg > 0) sheet.getCell(6, col).value = dayData.anodeNg;
+      }
+      if (processes.vd.total?.cathode?.cumulativeOutput > 0) {
+        sheet.getCell(2, CUMULATIVE_COL).value = processes.vd.total.cathode.cumulativeOutput;
+      }
+      if (processes.vd.total?.cathode?.targetQuantity > 0) {
+        sheet.getCell(2, TARGET_COL).value = processes.vd.total.cathode.targetQuantity;
+      }
+      if (processes.vd.total?.anode?.cumulativeOutput > 0) {
+        sheet.getCell(5, CUMULATIVE_COL).value = processes.vd.total.anode.cumulativeOutput;
+      }
+      if (processes.vd.total?.anode?.targetQuantity > 0) {
+        sheet.getCell(5, TARGET_COL).value = processes.vd.total.anode.targetQuantity;
+      }
+    }
+
+    // Forming - Cutting, Forming, Folding, TopCutting
+    const formingRowMapping = {
+      cutting: { output: 8, ng: 12 },
+      forming: { output: 9, ng: 13 },
+      folding: { output: 10, ng: 14 },
+      topCutting: { output: 11, ng: 15 },
+    };
+    for (const [subProcess, rows] of Object.entries(formingRowMapping)) {
+      const subData = processes.forming?.[subProcess];
+      if (subData?.data) {
+        for (const dayData of subData.data) {
+          if (dayData.day > daysInMonth) continue; // 해당 월에 없는 날짜는 스킵
+          const col = 2 + dayData.day;
+          if (dayData.output > 0) sheet.getCell(rows.output, col).value = dayData.output;
+          if (dayData.ng > 0) sheet.getCell(rows.ng, col).value = dayData.ng;
+        }
+        if (subData.total?.cumulativeOutput > 0) {
+          sheet.getCell(rows.output, CUMULATIVE_COL).value = subData.total.cumulativeOutput;
+        }
+      }
+    }
+    // Forming 목표수량 (통합)
+    if (processes.forming?.targetQuantity > 0) {
+      sheet.getCell(8, TARGET_COL).value = processes.forming.targetQuantity;
+    }
+
+    // Stack
+    if (processes.stacking?.data) {
+      for (const dayData of processes.stacking.data) {
+        if (dayData.day > daysInMonth) continue; // 해당 월에 없는 날짜는 스킵
+        const col = 2 + dayData.day;
+        if (dayData.output > 0) sheet.getCell(17, col).value = dayData.output;
+        if (dayData.ng > 0) sheet.getCell(18, col).value = dayData.ng;
+        if (dayData.ncr?.hiPot > 0) sheet.getCell(19, col).value = dayData.ncr.hiPot;
+        if (dayData.ncr?.weight > 0) sheet.getCell(20, col).value = dayData.ncr.weight;
+        if (dayData.ncr?.thickness > 0) sheet.getCell(21, col).value = dayData.ncr.thickness;
+        if (dayData.ncr?.alignment > 0) sheet.getCell(22, col).value = dayData.ncr.alignment;
+      }
+      if (processes.stacking.total?.cumulativeOutput > 0) {
+        sheet.getCell(17, CUMULATIVE_COL).value = processes.stacking.total.cumulativeOutput;
+      }
+      if (processes.stacking.total?.targetQuantity > 0) {
+        sheet.getCell(17, TARGET_COL).value = processes.stacking.total.targetQuantity;
+      }
+    }
+
+    // Pre Welding
+    if (processes.preWelding?.data) {
+      for (const dayData of processes.preWelding.data) {
+        if (dayData.day > daysInMonth) continue; // 해당 월에 없는 날짜는 스킵
+        const col = 2 + dayData.day;
+        if (dayData.output > 0) sheet.getCell(24, col).value = dayData.output;
+        if (dayData.ng > 0) sheet.getCell(25, col).value = dayData.ng;
+        if (dayData.ncr?.burning > 0) sheet.getCell(26, col).value = dayData.ncr.burning;
+        if (dayData.ncr?.align > 0) sheet.getCell(27, col).value = dayData.ncr.align;
+        if (dayData.ncr?.etc > 0) sheet.getCell(28, col).value = dayData.ncr.etc;
+      }
+      if (processes.preWelding.total?.cumulativeOutput > 0) {
+        sheet.getCell(24, CUMULATIVE_COL).value = processes.preWelding.total.cumulativeOutput;
+      }
+      if (processes.preWelding.total?.targetQuantity > 0) {
+        sheet.getCell(24, TARGET_COL).value = processes.preWelding.total.targetQuantity;
+      }
+    }
+
+    // Main Welding
+    if (processes.mainWelding?.data) {
+      for (const dayData of processes.mainWelding.data) {
+        if (dayData.day > daysInMonth) continue; // 해당 월에 없는 날짜는 스킵
+        const col = 2 + dayData.day;
+        if (dayData.output > 0) sheet.getCell(30, col).value = dayData.output;
+        if (dayData.ng > 0) sheet.getCell(31, col).value = dayData.ng;
+        if (dayData.ncr?.hiPot > 0) sheet.getCell(32, col).value = dayData.ncr.hiPot;
+        if (dayData.ncr?.burning > 0) sheet.getCell(33, col).value = dayData.ncr.burning;
+        if (dayData.ncr?.align > 0) sheet.getCell(34, col).value = dayData.ncr.align;
+        if (dayData.ncr?.taping > 0) sheet.getCell(35, col).value = dayData.ncr.taping;
+        if (dayData.ncr?.etc > 0) sheet.getCell(36, col).value = dayData.ncr.etc;
+      }
+      if (processes.mainWelding.total?.cumulativeOutput > 0) {
+        sheet.getCell(30, CUMULATIVE_COL).value = processes.mainWelding.total.cumulativeOutput;
+      }
+      if (processes.mainWelding.total?.targetQuantity > 0) {
+        sheet.getCell(30, TARGET_COL).value = processes.mainWelding.total.targetQuantity;
+      }
+    }
+
+    // Sealing
+    if (processes.sealing?.data) {
+      for (const dayData of processes.sealing.data) {
+        if (dayData.day > daysInMonth) continue; // 해당 월에 없는 날짜는 스킵
+        const col = 2 + dayData.day;
+        if (dayData.output > 0) sheet.getCell(38, col).value = dayData.output;
+        if (dayData.ng > 0) sheet.getCell(39, col).value = dayData.ng;
+        if (dayData.ncr?.hiPot > 0) sheet.getCell(40, col).value = dayData.ncr.hiPot;
+        if (dayData.ncr?.appearance > 0) sheet.getCell(41, col).value = dayData.ncr.appearance;
+        if (dayData.ncr?.thickness > 0) sheet.getCell(42, col).value = dayData.ncr.thickness;
+        if (dayData.ncr?.etc > 0) sheet.getCell(43, col).value = dayData.ncr.etc;
+      }
+      if (processes.sealing.total?.cumulativeOutput > 0) {
+        sheet.getCell(38, CUMULATIVE_COL).value = processes.sealing.total.cumulativeOutput;
+      }
+      if (processes.sealing.total?.targetQuantity > 0) {
+        sheet.getCell(38, TARGET_COL).value = processes.sealing.total.targetQuantity;
+      }
+    }
+
+    // E/L Filling
+    if (processes.filling?.data) {
+      for (const dayData of processes.filling.data) {
+        if (dayData.day > daysInMonth) continue; // 해당 월에 없는 날짜는 스킵
+        const col = 2 + dayData.day;
+        if (dayData.output > 0) sheet.getCell(45, col).value = dayData.output;
+        if (dayData.ng > 0) sheet.getCell(46, col).value = dayData.ng;
+      }
+      if (processes.filling.total?.cumulativeOutput > 0) {
+        sheet.getCell(45, CUMULATIVE_COL).value = processes.filling.total.cumulativeOutput;
+      }
+      if (processes.filling.total?.targetQuantity > 0) {
+        sheet.getCell(45, TARGET_COL).value = processes.filling.total.targetQuantity;
+      }
+    }
+  }
+
   /**
    * ExcelJS를 사용하여 전극공정 시트에 데이터 입력
    * D열(1일) ~ AH열(31일): 일별 데이터
@@ -583,6 +818,16 @@ export class StatusService {
     }
 
     return strings;
+  }
+
+  private clearCellFormula(sheet: ExcelJS.Worksheet, row: number, col: number): void {
+    try {
+      const cell = sheet.getCell(row, col);
+      // 무조건 셀 값을 null로 설정하여 수식 제거
+      cell.value = null;
+    } catch {
+      // 오류 무시 - 셀이 없거나 접근 불가한 경우
+    }
   }
 
   private escapeXml(str: string): string {
