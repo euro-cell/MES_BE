@@ -1,7 +1,8 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Patch, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Patch, Query, Res } from '@nestjs/common';
 import { StatusService } from './status.service';
-import { ApiQuery } from '@nestjs/swagger';
+import { ApiQuery, ApiProduces } from '@nestjs/swagger';
 import { UpdateTargetByKeyDto } from 'src/common/dtos/production-target.dto';
+import type { Response } from 'express';
 
 @Controller(':productionId/status')
 export class StatusController {
@@ -43,5 +44,20 @@ export class StatusController {
   @Get('progress')
   async getProgress(@Param('productionId', ParseIntPipe) productionId: number) {
     return await this.statusService.getProgress(productionId);
+  }
+
+  @Get('Electrode/export')
+  @ApiProduces('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+  async exportElectrodeStatus(@Param('productionId', ParseIntPipe) productionId: number, @Res() res: Response) {
+    const { file, productionName } = await this.statusService.exportElectrodeStatus(productionId);
+    const filename = `${productionName}_전극공정_생산현황.xlsx`;
+
+    res.set({
+      'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Disposition': `attachment; filename="${encodeURIComponent(filename)}"`,
+      'Access-Control-Expose-Headers': 'Content-Disposition',
+    });
+
+    file.getStream().pipe(res);
   }
 }
