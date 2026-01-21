@@ -1,6 +1,7 @@
-import { Controller, Post, Param, Query, Get } from '@nestjs/common';
+import { Controller, Post, Param, Query, Get, Body } from '@nestjs/common';
 import { LotService } from './lot.service';
-import { ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiQuery, ApiBody } from '@nestjs/swagger';
+import { RegisterLowDataDto } from '../../../common/dtos/lot/register-lowdata.dto';
 import { MixingService } from './electrode/mixing.service';
 import { CoatingService } from './electrode/coating.service';
 import { PressService } from './electrode/press.service';
@@ -75,5 +76,12 @@ export class LotController {
   @Get('formation')
   async getFormation(@Param('productionId') productionId: number) {
     return this.formationService.getFormationLots(productionId);
+  }
+
+  @Post('lowdata')
+  @ApiOperation({ summary: 'Formation Low Data 등록' })
+  @ApiBody({ type: RegisterLowDataDto })
+  async registerLowData(@Param('productionId') productionId: number, @Body() dto: RegisterLowDataDto) {
+    return this.formationService.registerLowData(productionId, dto);
   }
 }

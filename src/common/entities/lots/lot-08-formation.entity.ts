@@ -24,8 +24,8 @@ export class LotFormation extends LotBase {
   @Column({ type: 'varchar', length: 50, nullable: true })
   preFormationEquipment: string;
 
-  @Column({ type: 'smallint', nullable: true })
-  preFormationChNo: number;
+  @Column({ type: 'varchar', length: 10, nullable: true })
+  preFormationChNo: string;
 
   @Column({ type: 'decimal', precision: 10, scale: 3, nullable: true })
   pfc: number;
@@ -55,8 +55,8 @@ export class LotFormation extends LotBase {
   @Column({ type: 'varchar', length: 50, nullable: true })
   mainFormationEquipment: string;
 
-  @Column({ type: 'smallint', nullable: true })
-  mainFormationChNo: number;
+  @Column({ type: 'varchar', length: 10, nullable: true })
+  mainFormationChNo: string;
 
   @Column({ type: 'decimal', precision: 10, scale: 3, nullable: true })
   mfc: number;
@@ -89,8 +89,8 @@ export class LotFormation extends LotBase {
   @Column({ type: 'varchar', length: 50, nullable: true })
   gradingEquipment: string;
 
-  @Column({ type: 'smallint', nullable: true })
-  gradingChNo: number;
+  @Column({ type: 'varchar', length: 10, nullable: true })
+  gradingChNo: string;
 
   @Column({ type: 'decimal', precision: 10, scale: 3, nullable: true })
   mfd: number;
@@ -107,7 +107,7 @@ export class LotFormation extends LotBase {
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   formEff3: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   gradingTemp: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })

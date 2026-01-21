@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { LotFormation } from '../../../../common/entities/lots/lot-08-formation.entity';
@@ -6,6 +6,7 @@ import { LotSealing } from '../../../../common/entities/lots/lot-07-sealing.enti
 import { LotSync } from '../../../../common/entities/lots/lot-sync.entity';
 import { WorklogFormation } from '../../../../common/entities/worklogs/worklog-13-formation.entity';
 import { WorklogGrading } from '../../../../common/entities/worklogs/worklog-14-grading.entity';
+import { RegisterLowDataDto } from '../../../../common/dtos/lot/register-lowdata.dto';
 
 @Injectable()
 export class FormationLotService {
@@ -344,6 +345,142 @@ export class FormationLotService {
     return {
       sideBottomSealingWidth: !defects.sealingWidth.includes(cellNumber),
       visualInspection: !defects.visual.includes(cellNumber),
+    };
+  }
+
+  // ===== Low Data 헤더 → 엔티티 필드 매핑 =====
+  private readonly headerToFieldMap: Record<string, keyof LotFormation> = {
+    // Pre-Formation
+    'Pre-Formation PFC': 'pfc',
+    'Pre-Formation PFD': 'rfd',
+    'Pre-Formation RFD': 'rfd',
+    'Pre-Formation For.Eff_1': 'forEff1',
+    // Final Sealing
+    'Final Sealing Pouch Sealing Thickness': 'finalPouchSealingThickness',
+    // Main Formation
+    'Main Formation MFC': 'mfc',
+    'Main Formation OCV1': 'ocv1',
+    'Main Formation IR1': 'ir1',
+    'Main Formation OCV2-4': 'ocv2_4',
+    'Main Formation IR2-4': 'ir2_4',
+    'Main Formation OCV2-7': 'ocv2_7',
+    'Main Formation IR2-7': 'ir2_7',
+    'Main Formation Delta V': 'deltaV',
+    'Main Formation MFD': 'mfd',
+    'Main Formation For.Eff_2': 'formEff2',
+    // Grading
+    'Grading MFD': 'mfd',
+    'Grading FormEff2': 'formEff2',
+    'Grading STC': 'stc',
+    'Grading STD': 'std',
+    'Grading For.Eff_3': 'formEff3',
+    'Grading FormEff3': 'formEff3',
+    'Grading Temp.': 'gradingTemp',
+    'Grading Temp': 'gradingTemp',
+    'Grading Wh': 'wh',
+    'Grading Nominal V': 'nominalV',
+    'Grading NominalV': 'nominalV',
+    // SOC
+    'SOC25 SOC': 'soc',
+    'SOC25 Capacity': 'socCapacity',
+    'SOC25 DC_IR': 'dcIr',
+    'SOC25 OCV3': 'ocv3',
+    'SOC25 IR3': 'ir3',
+  };
+
+  // CH No. 헤더 → 엔티티 필드 매핑 (문자열, 별도 처리)
+  private readonly chNoHeaderToFieldMap: Record<string, keyof LotFormation> = {
+    'Pre-Formation CH No.': 'preFormationChNo',
+    'Main Formation CH No.': 'mainFormationChNo',
+    'Grading CH No.': 'gradingChNo',
+  };
+
+  // CH No. 값 변환: "11-1-1_20260121" → "1/1"
+  private parseChNoValue(value: string): string {
+    // 앞 3글자 제거
+    const withoutPrefix = value.substring(3);
+    // 다음 3글자 추출하고 -를 /로 변환
+    const next3 = withoutPrefix.substring(0, 3);
+    return next3.replace(/-/g, '/');
+  }
+
+  async registerLowData(productionId: number, dto: RegisterLowDataDto) {
+    const { headers, data } = dto;
+
+    // lot 필드 찾기 (여러 형식 지원: "lot", "Lot Lot" 등)
+    const lotHeader = headers.find((h) => h.toLowerCase().includes('lot') && !h.toLowerCase().includes('cell'));
+    if (!lotHeader) {
+      throw new BadRequestException('headers에 lot 필드가 필요합니다.');
+    }
+
+    if (!data || data.length === 0) {
+      throw new BadRequestException('data 배열이 비어있습니다.');
+    }
+
+    const results = {
+      total: data.length,
+      updated: 0,
+      created: 0,
+      skipped: 0,
+    };
+
+    for (const row of data) {
+      const lotValue = row[lotHeader];
+      if (!lotValue) {
+        results.skipped++;
+        continue;
+      }
+
+      let lotFormation = await this.lotFormationRepo.findOne({
+        where: {
+          production: { id: productionId },
+          lot: lotValue,
+        },
+      });
+
+      if (!lotFormation) {
+        // 새 레코드 생성
+        lotFormation = this.lotFormationRepo.create({
+          lot: lotValue,
+          production: { id: productionId },
+          processDate: new Date(),
+        });
+        results.created++;
+      } else {
+        results.updated++;
+      }
+
+      // 헤더 매핑에 따라 값 설정
+      for (const header of headers) {
+        if (header === lotHeader) continue;
+
+        const value = row[header];
+        if (value === undefined || value === null || value === '') continue;
+
+        // CH No. 필드 처리 (문자열 변환)
+        const chNoFieldName = this.chNoHeaderToFieldMap[header];
+        if (chNoFieldName) {
+          (lotFormation as any)[chNoFieldName] = this.parseChNoValue(value);
+          continue;
+        }
+
+        // 일반 숫자 필드 처리
+        const fieldName = this.headerToFieldMap[header];
+        if (!fieldName) continue;
+
+        const numericValue = parseFloat(value);
+        if (!isNaN(numericValue)) {
+          (lotFormation as any)[fieldName] = numericValue;
+        }
+      }
+
+      await this.lotFormationRepo.save(lotFormation);
+    }
+
+    return {
+      success: true,
+      message: `Low Data 등록 완료: 총 ${results.total}건 중 ${results.updated}건 업데이트, ${results.created}건 생성, ${results.skipped}건 스킵`,
+      results,
     };
   }
 
