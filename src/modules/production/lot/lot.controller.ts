@@ -1,6 +1,6 @@
-import { Controller, Post, Param, Query, Get, Body } from '@nestjs/common';
+import { Controller, Post, Param, Query, Get, Body, Res, StreamableFile } from '@nestjs/common';
 import { LotService } from './lot.service';
-import { ApiTags, ApiOperation, ApiQuery, ApiBody } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiQuery, ApiBody, ApiProduces } from '@nestjs/swagger';
 import { RegisterLowDataDto } from '../../../common/dtos/lot/register-lowdata.dto';
 import { MixingService } from './electrode/mixing.service';
 import { CoatingService } from './electrode/coating.service';
@@ -10,6 +10,8 @@ import { StackingService } from './assembly/stacking.service';
 import { WeldingService } from './assembly/welding.service';
 import { SealingLotService } from './assembly/sealing.service';
 import { FormationLotService } from './formation/formation.service';
+import { LotExportService } from './lot-export.service';
+import type { Response } from 'express';
 
 @ApiTags('Lot 관리')
 @Controller(':productionId/lot')
@@ -24,6 +26,7 @@ export class LotController {
     private readonly weldingService: WeldingService,
     private readonly sealingService: SealingLotService,
     private readonly formationService: FormationLotService,
+    private readonly lotExportService: LotExportService,
   ) {}
 
   @Post('sync')
@@ -83,5 +86,21 @@ export class LotController {
   @ApiBody({ type: RegisterLowDataDto })
   async registerLowData(@Param('productionId') productionId: number, @Body() dto: RegisterLowDataDto) {
     return this.formationService.registerLowData(productionId, dto);
+  }
+
+  @Get('export')
+  @ApiOperation({ summary: 'Lot 관리 Excel 다운로드' })
+  @ApiProduces('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+  async exportLots(@Param('productionId') productionId: number, @Res() res: Response) {
+    const file = await this.lotExportService.exportLots(productionId);
+    const filename = `Lot_관리.xlsx`;
+
+    res.set({
+      'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Disposition': `attachment; filename="${encodeURIComponent(filename)}"`,
+      'Access-Control-Expose-Headers': 'Content-Disposition',
+    });
+
+    file.getStream().pipe(res);
   }
 }

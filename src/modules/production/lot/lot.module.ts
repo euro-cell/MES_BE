@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { LotService } from './lot.service';
 import { LotController } from './lot.controller';
 import { LotSearchController } from './lot-search.controller';
+import { LotExportService } from './lot-export.service';
 import { MixingService } from './electrode/mixing.service';
 import { CoatingService } from './electrode/coating.service';
 import { PressService } from './electrode/press.service';
@@ -62,6 +63,6 @@ import { ProductionMaterial } from '../../../common/entities/production-material
     ]),
   ],
   controllers: [LotController, LotSearchController],
-  providers: [LotService, MixingService, CoatingService, PressService, NotchingService, StackingService, WeldingService, SealingLotService, FormationLotService],
+  providers: [LotService, LotExportService, MixingService, CoatingService, PressService, NotchingService, StackingService, WeldingService, SealingLotService, FormationLotService],
 })
 export class LotModule {}
