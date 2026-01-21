@@ -1,32 +1,40 @@
-import { Controller, Get, Param, Res } from '@nestjs/common';
-import type { Response } from 'express';
+import { Controller, Get, Post, Query, Body, UseInterceptors, UploadedFiles } from '@nestjs/common';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { ApiOperation, ApiConflictResponse, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { DrawingService } from './drawing.service';
-import {
-  ApiNotFoundResponse,
-  ApiOkResponse,
-  ApiOperation,
-  ApiParam,
-} from '@nestjs/swagger';
+import { CreateDrawingDto, DrawingSearchDto } from 'src/common/dtos/drawing.dto';
+import { multerConfig } from 'src/common/configs/multer.config';
 
 @Controller('drawing')
 export class DrawingController {
   constructor(private readonly drawingService: DrawingService) {}
 
-  @Get(':category/:location/:floor')
-  @ApiOperation({ summary: '도면 파일 다운로드' })
-  @ApiParam({ name: 'category', description: '도면 카테고리 (예: factory)' })
-  @ApiParam({ name: 'location', description: '위치 (예: osan)' })
-  @ApiParam({ name: 'floor', description: '층 (예: floor1, floor2)' })
-  @ApiOkResponse({ description: '도면 파일 다운로드' })
-  @ApiNotFoundResponse({ description: '도면 파일을 찾을 수 없습니다.' })
-  async getDrawing(
-    @Res() res: Response,
-    @Param('category') category: string,
-    @Param('location') location: string,
-    @Param('floor') floor: string,
+  // 도면 목록 조회
+  @Get()
+  @ApiOperation({ summary: '도면 목록 조회' })
+  async findAll(@Query() searchDto: DrawingSearchDto) {
+    return this.drawingService.findAll(searchDto);
+  }
+
+  // 새 도면 등록
+  @Post()
+  @ApiOperation({ summary: '새 도면 등록' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({ type: CreateDrawingDto })
+  @ApiConflictResponse({ description: '이미 존재하는 도면 번호입니다.' })
+  @UseInterceptors(
+    FileFieldsInterceptor(
+      [
+        { name: 'drawingFile', maxCount: 1 },
+        { name: 'pdfFile', maxCount: 1 },
+      ],
+      multerConfig,
+    ),
+  )
+  async create(
+    @Body() createDto: CreateDrawingDto,
+    @UploadedFiles() files: { drawingFile?: Express.Multer.File[]; pdfFile?: Express.Multer.File[] },
   ) {
-    return res.download(
-      await this.drawingService.getDrawingFilePath(category, location, floor),
-    );
+    return this.drawingService.create(createDto, files);
   }
 }
