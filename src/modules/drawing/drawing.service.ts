@@ -113,9 +113,9 @@ export class DrawingService {
         drawingId: savedDrawing.id,
         version: versionStr,
         drawingFilePath,
-        drawingFileName: drawingFile.originalname,
+        drawingFileName: this.decodeFileName(drawingFile.originalname),
         pdfFilePath,
-        pdfFileName: pdfFile?.originalname,
+        pdfFileName: pdfFile ? this.decodeFileName(pdfFile.originalname) : undefined,
         registrationDate: new Date(dto.registrationDate),
         changeNote: dto.changeNote?.trim(),
       });
@@ -197,9 +197,9 @@ export class DrawingService {
       drawingId,
       version: dto.version,
       drawingFilePath,
-      drawingFileName: drawingFile.originalname,
+      drawingFileName: this.decodeFileName(drawingFile.originalname),
       pdfFilePath,
-      pdfFileName: pdfFile?.originalname,
+      pdfFileName: pdfFile ? this.decodeFileName(pdfFile.originalname) : undefined,
       registrationDate: new Date(dto.registrationDate),
       changeNote: dto.changeNote,
     });
@@ -215,12 +215,15 @@ export class DrawingService {
   async deleteVersion(drawingId: number, versionId: number): Promise<void> {
     const version = await this.findVersionById(drawingId, versionId);
 
-    // 파일 삭제
-    if (version.drawingFilePath && existsSync(version.drawingFilePath)) {
-      unlinkSync(version.drawingFilePath);
+    // 파일 삭제 (상대경로 → 절대경로 변환)
+    const drawingAbsPath = version.drawingFilePath ? join(process.cwd(), version.drawingFilePath) : null;
+    const pdfAbsPath = version.pdfFilePath ? join(process.cwd(), version.pdfFilePath) : null;
+
+    if (drawingAbsPath && existsSync(drawingAbsPath)) {
+      unlinkSync(drawingAbsPath);
     }
-    if (version.pdfFilePath && existsSync(version.pdfFilePath)) {
-      unlinkSync(version.pdfFilePath);
+    if (pdfAbsPath && existsSync(pdfAbsPath)) {
+      unlinkSync(pdfAbsPath);
     }
 
     await this.versionRepository.delete(versionId);
@@ -236,20 +239,22 @@ export class DrawingService {
     }
   }
 
-  // 파일 다운로드 경로 조회
+  // 파일 다운로드 경로 조회 (상대경로 → 절대경로 변환하여 반환)
   async getVersionFilePath(drawingId: number, versionId: number, fileType: 'drawing' | 'pdf'): Promise<{ filePath: string; fileName: string }> {
     const version = await this.findVersionById(drawingId, versionId);
 
     if (fileType === 'drawing') {
-      if (!version.drawingFilePath || !existsSync(version.drawingFilePath)) {
+      const absPath = version.drawingFilePath ? join(process.cwd(), version.drawingFilePath) : null;
+      if (!absPath || !existsSync(absPath)) {
         throw new NotFoundException('도면 파일을 찾을 수 없습니다.');
       }
-      return { filePath: version.drawingFilePath, fileName: version.drawingFileName };
+      return { filePath: absPath, fileName: version.drawingFileName };
     } else {
-      if (!version.pdfFilePath || !existsSync(version.pdfFilePath)) {
+      const absPath = version.pdfFilePath ? join(process.cwd(), version.pdfFilePath) : null;
+      if (!absPath || !existsSync(absPath)) {
         throw new NotFoundException('PDF 파일을 찾을 수 없습니다.');
       }
-      return { filePath: version.pdfFilePath, fileName: version.pdfFileName };
+      return { filePath: absPath, fileName: version.pdfFileName };
     }
   }
 
@@ -279,7 +284,12 @@ export class DrawingService {
     return filePath;
   }
 
-  // 파일을 도면 전용 디렉토리로 이동
+  // multer에서 latin1으로 인코딩된 파일명을 UTF-8로 디코딩
+  private decodeFileName(filename: string): string {
+    return Buffer.from(filename, 'latin1').toString('utf8');
+  }
+
+  // 파일을 도면 전용 디렉토리로 이동 (DB에는 상대경로 저장)
   private async moveFilesToDrawingDirectory(
     drawingId: number,
     drawingNumber: string,
@@ -288,11 +298,14 @@ export class DrawingService {
     drawingFile: Express.Multer.File,
     pdfFile?: Express.Multer.File,
   ): Promise<{ drawingFilePath: string; pdfFilePath?: string }> {
-    const baseDir = join(process.cwd(), 'data', 'uploads', 'drawings', String(drawingId));
+    // 상대경로 (DB 저장용)
+    const relativeDir = join('data', 'uploads', 'drawings', String(drawingId));
+    // 절대경로 (파일 시스템 작업용)
+    const absoluteDir = join(process.cwd(), relativeDir);
 
     // 디렉토리 생성
-    if (!existsSync(baseDir)) {
-      mkdirSync(baseDir, { recursive: true });
+    if (!existsSync(absoluteDir)) {
+      mkdirSync(absoluteDir, { recursive: true });
     }
 
     // 파일명 생성: 도면번호_버전_도면내용_timestamp.확장자
@@ -302,16 +315,18 @@ export class DrawingService {
     // 도면 파일 이동
     const drawingExt = extname(drawingFile.originalname);
     const drawingFileName = `${drawingNumber}_${version}_${sanitizedDescription}_${timestamp}${drawingExt}`;
-    const drawingFilePath = join(baseDir, drawingFileName);
-    renameSync(drawingFile.path, drawingFilePath);
+    const drawingAbsPath = join(absoluteDir, drawingFileName);
+    const drawingFilePath = join(relativeDir, drawingFileName); // 상대경로 (DB 저장)
+    renameSync(drawingFile.path, drawingAbsPath);
 
     // PDF 파일 이동
     let pdfFilePath: string | undefined;
     if (pdfFile) {
       const pdfExt = extname(pdfFile.originalname);
       const pdfFileName = `${drawingNumber}_${version}_${sanitizedDescription}_${timestamp}${pdfExt}`;
-      pdfFilePath = join(baseDir, pdfFileName);
-      renameSync(pdfFile.path, pdfFilePath);
+      const pdfAbsPath = join(absoluteDir, pdfFileName);
+      pdfFilePath = join(relativeDir, pdfFileName); // 상대경로 (DB 저장)
+      renameSync(pdfFile.path, pdfAbsPath);
     }
 
     return { drawingFilePath, pdfFilePath };
