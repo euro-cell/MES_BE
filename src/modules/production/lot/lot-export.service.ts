@@ -10,6 +10,7 @@ import { NotchingService } from './electrode/notching.service';
 import { StackingService } from './assembly/stacking.service';
 import { WeldingService } from './assembly/welding.service';
 import { SealingLotService } from './assembly/sealing.service';
+import { FormationLotService } from './formation/formation.service';
 
 @Injectable()
 export class LotExportService {
@@ -23,6 +24,7 @@ export class LotExportService {
     private readonly stackingService: StackingService,
     private readonly weldingService: WeldingService,
     private readonly sealingLotService: SealingLotService,
+    private readonly formationLotService: FormationLotService,
   ) {}
 
   async exportLots(productionId: number): Promise<StreamableFile> {
@@ -44,6 +46,7 @@ export class LotExportService {
     await this.fillStackingSheet(workbook, productionId);
     await this.fillWeldingSheet(workbook, productionId);
     await this.fillSealingSheet(workbook, productionId);
+    await this.fillFormationSheet(workbook, productionId);
 
     const buffer = await workbook.xlsx.writeBuffer();
 
@@ -725,6 +728,197 @@ export class LotExportService {
       pattern: 'none',
     };
     for (let col = 2; col <= 16; col++) {
+      const column = worksheet.getColumn(col);
+      column.style = { ...column.style, fill: noFill };
+    }
+  }
+
+  private async fillFormationSheet(workbook: ExcelJS.Workbook, productionId: number): Promise<void> {
+    const worksheet = workbook.getWorksheet('Formation');
+
+    if (!worksheet) {
+      return; // Formation 시트가 없으면 건너뜀
+    }
+
+    const formationLots = await this.formationLotService.getFormationLots(productionId);
+
+    // Boolean → P/NP 변환 함수
+    const boolToPNP = (value: boolean | null | undefined): string | null => {
+      if (value === null || value === undefined) return null;
+      return value ? 'P' : 'NP';
+    };
+
+    // 6행부터 데이터 입력 (한 Lot당 1행 사용)
+    let rowIndex = 6;
+    for (const lot of formationLots) {
+      // B: Date
+      if (lot.date) {
+        worksheet.getCell(rowIndex, 2).value = this.formatDate(lot.date);
+      }
+      // C: Assy Lot
+      if (lot.assyLot) {
+        worksheet.getCell(rowIndex, 3).value = lot.assyLot;
+      }
+      // D: Lot
+      if (lot.lot) {
+        worksheet.getCell(rowIndex, 4).value = lot.lot;
+      }
+      // E: Pre-Formation Equipment
+      if (lot.preFormation?.equipment) {
+        worksheet.getCell(rowIndex, 5).value = lot.preFormation.equipment;
+      }
+      // F: Pre-Formation CH No.
+      if (lot.preFormation?.chNo) {
+        worksheet.getCell(rowIndex, 6).value = lot.preFormation.chNo;
+      }
+      // G: Pre-Formation PFC
+      if (lot.preFormation?.pfc != null) {
+        worksheet.getCell(rowIndex, 7).value = lot.preFormation.pfc;
+      }
+      // H: Pre-Formation RFD
+      if (lot.preFormation?.rfd != null) {
+        worksheet.getCell(rowIndex, 8).value = lot.preFormation.rfd;
+      }
+      // I: Pre-Formation For.Eff_1
+      if (lot.preFormation?.forEff1 != null) {
+        worksheet.getCell(rowIndex, 9).value = lot.preFormation.forEff1;
+      }
+      // J: Final Sealing Pouch Sealing Thickness
+      if (lot.finalSealing?.pouchSealingThickness != null) {
+        worksheet.getCell(rowIndex, 10).value = lot.finalSealing.pouchSealingThickness;
+      }
+      // K: Final Sealing Side/Bottom Sealing Width (boolean → P/NP)
+      const sideBottomValue = boolToPNP(lot.finalSealing?.sideBottomSealingWidth);
+      if (sideBottomValue) {
+        worksheet.getCell(rowIndex, 11).value = sideBottomValue;
+      }
+      // L: Final Sealing Visual Inspection (boolean → P/NP)
+      const visualValue = boolToPNP(lot.finalSealing?.visualInspection);
+      if (visualValue) {
+        worksheet.getCell(rowIndex, 12).value = visualValue;
+      }
+      // M: Main Formation Equipment
+      if (lot.mainFormation?.equipment) {
+        worksheet.getCell(rowIndex, 13).value = lot.mainFormation.equipment;
+      }
+      // N: Main Formation CH No.
+      if (lot.mainFormation?.chNo) {
+        worksheet.getCell(rowIndex, 14).value = lot.mainFormation.chNo;
+      }
+      // O: Main Formation MFC
+      if (lot.mainFormation?.mfc != null) {
+        worksheet.getCell(rowIndex, 15).value = lot.mainFormation.mfc;
+      }
+      // P: OCV1
+      if (lot.ocvIr1?.ocv1 != null) {
+        worksheet.getCell(rowIndex, 16).value = lot.ocvIr1.ocv1;
+      }
+      // Q: IR1
+      if (lot.ocvIr1?.ir1 != null) {
+        worksheet.getCell(rowIndex, 17).value = lot.ocvIr1.ir1;
+      }
+      // R: OCV2-4
+      if (lot.aging4Days?.ocv2_4 != null) {
+        worksheet.getCell(rowIndex, 18).value = lot.aging4Days.ocv2_4;
+      }
+      // S: IR2-4
+      if (lot.aging4Days?.ir2_4 != null) {
+        worksheet.getCell(rowIndex, 19).value = lot.aging4Days.ir2_4;
+      }
+      // T: OCV2-7
+      if (lot.aging7Days?.ocv2_7 != null) {
+        worksheet.getCell(rowIndex, 20).value = lot.aging7Days.ocv2_7;
+      }
+      // U: IR2-7
+      if (lot.aging7Days?.ir2_7 != null) {
+        worksheet.getCell(rowIndex, 21).value = lot.aging7Days.ir2_7;
+      }
+      // V: Delta V
+      if (lot.aging7Days?.deltaV != null) {
+        worksheet.getCell(rowIndex, 22).value = lot.aging7Days.deltaV;
+      }
+      // W: Grading Equipment
+      if (lot.grading?.equipment) {
+        worksheet.getCell(rowIndex, 23).value = lot.grading.equipment;
+      }
+      // X: Grading CH No.
+      if (lot.grading?.chNo) {
+        worksheet.getCell(rowIndex, 24).value = lot.grading.chNo;
+      }
+      // Y: Grading MFD
+      if (lot.grading?.mfd != null) {
+        worksheet.getCell(rowIndex, 25).value = lot.grading.mfd;
+      }
+      // Z: Grading FormEff2
+      if (lot.grading?.formEff2 != null) {
+        worksheet.getCell(rowIndex, 26).value = lot.grading.formEff2;
+      }
+      // AA: Grading STC
+      if (lot.grading?.stc != null) {
+        worksheet.getCell(rowIndex, 27).value = lot.grading.stc;
+      }
+      // AB: Grading STD
+      if (lot.grading?.std != null) {
+        worksheet.getCell(rowIndex, 28).value = lot.grading.std;
+      }
+      // AC: Grading FormEff3
+      if (lot.grading?.formEff3 != null) {
+        worksheet.getCell(rowIndex, 29).value = lot.grading.formEff3;
+      }
+      // AD: Grading Temp
+      if (lot.grading?.gradingTemp != null) {
+        worksheet.getCell(rowIndex, 30).value = lot.grading.gradingTemp;
+      }
+      // AE: Grading Wh
+      if (lot.grading?.wh != null) {
+        worksheet.getCell(rowIndex, 31).value = lot.grading.wh;
+      }
+      // AF: Grading Nominal V
+      if (lot.grading?.nominalV != null) {
+        worksheet.getCell(rowIndex, 32).value = lot.grading.nominalV;
+      }
+      // AG: SOC Capacity
+      if (lot.soc?.socCapacity != null) {
+        worksheet.getCell(rowIndex, 33).value = lot.soc.socCapacity;
+      }
+      // AH: SOC
+      if (lot.soc?.soc != null) {
+        worksheet.getCell(rowIndex, 34).value = lot.soc.soc;
+      }
+      // AI: DC_IR
+      if (lot.soc?.dcIr != null) {
+        worksheet.getCell(rowIndex, 35).value = lot.soc.dcIr;
+      }
+      // AJ: OCV3
+      if (lot.ocvIr3?.ocv3 != null) {
+        worksheet.getCell(rowIndex, 36).value = lot.ocvIr3.ocv3;
+      }
+      // AK: IR3
+      if (lot.ocvIr3?.ir3 != null) {
+        worksheet.getCell(rowIndex, 37).value = lot.ocvIr3.ir3;
+      }
+
+      // 불량인 경우 배경색 적용 (연보라색 #DDA0DD)
+      if (lot.isDefective) {
+        const defectFill: ExcelJS.Fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FFDDA0DD' },
+        };
+        for (let col = 2; col <= 37; col++) {
+          worksheet.getCell(rowIndex, col).fill = defectFill;
+        }
+      }
+
+      rowIndex++;
+    }
+
+    // 컬럼 기본 스타일 제거 (템플릿 배경색 제거)
+    const noFill: ExcelJS.Fill = {
+      type: 'pattern',
+      pattern: 'none',
+    };
+    for (let col = 2; col <= 37; col++) {
       const column = worksheet.getColumn(col);
       column.style = { ...column.style, fill: noFill };
     }
