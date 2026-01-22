@@ -9,6 +9,7 @@ import { PressService } from './electrode/press.service';
 import { NotchingService } from './electrode/notching.service';
 import { StackingService } from './assembly/stacking.service';
 import { WeldingService } from './assembly/welding.service';
+import { SealingLotService } from './assembly/sealing.service';
 
 @Injectable()
 export class LotExportService {
@@ -21,6 +22,7 @@ export class LotExportService {
     private readonly notchingService: NotchingService,
     private readonly stackingService: StackingService,
     private readonly weldingService: WeldingService,
+    private readonly sealingLotService: SealingLotService,
   ) {}
 
   async exportLots(productionId: number): Promise<StreamableFile> {
@@ -41,6 +43,7 @@ export class LotExportService {
     await this.fillNotchingSheet(workbook, productionId);
     await this.fillStackingSheet(workbook, productionId);
     await this.fillWeldingSheet(workbook, productionId);
+    await this.fillSealingSheet(workbook, productionId);
 
     const buffer = await workbook.xlsx.writeBuffer();
 
@@ -613,6 +616,117 @@ export class LotExportService {
       }
 
       rowIndex++;
+    }
+  }
+
+  private async fillSealingSheet(workbook: ExcelJS.Workbook, productionId: number): Promise<void> {
+    const worksheet = workbook.getWorksheet('Sealing_Filling');
+
+    if (!worksheet) {
+      return; // Sealing_Filling 시트가 없으면 건너뜀
+    }
+
+    const sealingLots = await this.sealingLotService.getSealingLots(productionId);
+
+    // 6행부터 데이터 입력 (한 Lot당 1행 사용)
+    let rowIndex = 6;
+    for (const lot of sealingLots) {
+      if (lot.date) {
+        worksheet.getCell(rowIndex, 2).value = this.formatDate(lot.date); // B: Date
+      }
+      if (lot.lot) {
+        worksheet.getCell(rowIndex, 3).value = lot.lot; // C: Lot
+      }
+      if (lot.atAssy?.temp != null) {
+        worksheet.getCell(rowIndex, 4).value = lot.atAssy.temp; // D: Temp
+      }
+      if (lot.atAssy?.humidity != null) {
+        worksheet.getCell(rowIndex, 5).value = lot.atAssy.humidity; // E: Humidity
+      }
+      if (lot.topSealing?.sealantHeight != null) {
+        worksheet.getCell(rowIndex, 6).value = lot.topSealing.sealantHeight; // F: Sealant Height
+      }
+      if (lot.topSealing?.pouchSealingThickness != null) {
+        worksheet.getCell(rowIndex, 7).value = lot.topSealing.pouchSealingThickness; // G: Pouch Sealing Thickness
+      }
+      if (lot.topSealing?.tabSealingThickness != null) {
+        worksheet.getCell(rowIndex, 8).value = lot.topSealing.tabSealingThickness; // H: Tab Sealing Thickness
+      }
+      if (lot.topSealing?.visualInspection != null) {
+        worksheet.getCell(rowIndex, 9).value = lot.topSealing.visualInspection; // I: Visual Inspection
+      }
+      if (lot.sideSealing?.pouchSealingThickness != null) {
+        worksheet.getCell(rowIndex, 10).value = lot.sideSealing.pouchSealingThickness; // J: Pouch Sealing Thickness
+      }
+      if (lot.sideSealing?.sideBottomSealingWidth != null) {
+        worksheet.getCell(rowIndex, 11).value = lot.sideSealing.sideBottomSealingWidth; // K: Side/Bottom Sealing Width
+      }
+      if (lot.sideSealing?.visualInspection != null) {
+        worksheet.getCell(rowIndex, 12).value = lot.sideSealing.visualInspection; // L: Visual Inspection
+      }
+      if (lot.sideSealing?.irCheck != null) {
+        worksheet.getCell(rowIndex, 13).value = lot.sideSealing.irCheck; // M: IR Check
+      }
+      if (lot.filling?.injection != null) {
+        worksheet.getCell(rowIndex, 14).value = this.formatDate(lot.filling.injection); // N: Filling Injection
+      }
+      if (lot.filling?.lot != null) {
+        worksheet.getCell(rowIndex, 15).value = lot.filling.lot; // O: Filling LOT
+      }
+      if (lot.pouch?.lot != null) {
+        worksheet.getCell(rowIndex, 16).value = lot.pouch.lot; // P: Pouch LOT
+      }
+
+      // 불량 색상 적용 (스태킹 불량: 빨강, 웰딩 불량: 주황, 실링 불량: 연녹색)
+      if (lot.isDefectiveFromStacking) {
+        const redFill: ExcelJS.Fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FFFF0000' },
+        };
+        for (let col = 2; col <= 16; col++) {
+          worksheet.getCell(rowIndex, col).fill = redFill;
+        }
+      } else if (lot.isDefectiveFromWelding) {
+        const orangeFill: ExcelJS.Fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FFFFA500' },
+        };
+        for (let col = 2; col <= 16; col++) {
+          worksheet.getCell(rowIndex, col).fill = orangeFill;
+        }
+      } else if (lot.isDefectiveFromSealing) {
+        const lightGreenFill: ExcelJS.Fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FF90EE90' },
+        };
+        for (let col = 2; col <= 16; col++) {
+          worksheet.getCell(rowIndex, col).fill = lightGreenFill;
+        }
+      } else {
+        // 불량이 아닌 경우 템플릿 기본 배경색 제거
+        const noFill: ExcelJS.Fill = {
+          type: 'pattern',
+          pattern: 'none',
+        };
+        for (let col = 2; col <= 16; col++) {
+          worksheet.getCell(rowIndex, col).fill = noFill;
+        }
+      }
+
+      rowIndex++;
+    }
+
+    // B열 기본 스타일 제거 (템플릿 빨간 배경색 제거)
+    const noFill: ExcelJS.Fill = {
+      type: 'pattern',
+      pattern: 'none',
+    };
+    for (let col = 2; col <= 16; col++) {
+      const column = worksheet.getColumn(col);
+      column.style = { ...column.style, fill: noFill };
     }
   }
 
