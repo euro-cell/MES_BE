@@ -5,8 +5,7 @@ import { existsSync, mkdirSync, unlinkSync, renameSync } from 'fs';
 import { join, extname } from 'path';
 import { Drawing } from 'src/common/entities/drawing.entity';
 import { DrawingVersion } from 'src/common/entities/drawing-version.entity';
-import { CreateDrawingDto, UpdateDrawingDto, DrawingSearchDto } from 'src/common/dtos/drawing.dto';
-import { CreateDrawingVersionDto } from 'src/common/dtos/drawing-version.dto';
+import { CreateDrawingDto } from 'src/common/dtos/drawing.dto';
 
 @Injectable()
 export class DrawingService {
@@ -16,27 +15,6 @@ export class DrawingService {
     @InjectRepository(DrawingVersion)
     private readonly versionRepository: Repository<DrawingVersion>,
   ) {}
-
-  async findAll(searchDto: DrawingSearchDto): Promise<Drawing[]> {
-    const query = this.drawingRepository
-      .createQueryBuilder('drawing')
-      .leftJoinAndSelect('drawing.versions', 'versions')
-      .where('drawing.deletedAt IS NULL');
-
-    if (searchDto.category) {
-      query.andWhere('drawing.category = :category', { category: searchDto.category });
-    }
-
-    if (searchDto.projectName) {
-      query.andWhere('drawing.projectName LIKE :projectName', { projectName: `%${searchDto.projectName}%` });
-    }
-
-    if (searchDto.drawingNumber) {
-      query.andWhere('drawing.drawingNumber LIKE :drawingNumber', { drawingNumber: `%${searchDto.drawingNumber}%` });
-    }
-
-    return query.orderBy('drawing.id', 'DESC').getMany();
-  }
 
   async findOne(id: number): Promise<Drawing> {
     const drawing = await this.drawingRepository.findOne({
@@ -53,32 +31,30 @@ export class DrawingService {
 
   async create(
     dto: CreateDrawingDto,
-    files: { drawingFile?: Express.Multer.File[]; pdfFile?: Express.Multer.File[] },
+    files: { drawingFile?: Express.Multer.File[]; pdfFiles?: Express.Multer.File[] },
   ): Promise<Drawing> {
     // 입력값 trim 처리
     const drawingNumber = dto.drawingNumber.trim();
     const projectName = dto.projectName.trim();
-    const versionStr = dto.version.trim();
+    const division = dto.division.trim();
+    const version = dto.version;
 
     const drawingFile = files.drawingFile?.[0];
-    const pdfFile = files.pdfFile?.[0];
+    const pdfFiles = files.pdfFiles || [];
 
     // 에러 발생 시 업로드된 파일 삭제 헬퍼
     const cleanupFiles = () => {
       if (drawingFile?.path && existsSync(drawingFile.path)) {
         unlinkSync(drawingFile.path);
       }
-      if (pdfFile?.path && existsSync(pdfFile.path)) {
-        unlinkSync(pdfFile.path);
+      for (const pdfFile of pdfFiles) {
+        if (pdfFile?.path && existsSync(pdfFile.path)) {
+          unlinkSync(pdfFile.path);
+        }
       }
     };
 
     try {
-      // 도면 파일 필수 체크
-      if (!drawingFile) {
-        throw new NotFoundException('도면 파일은 필수입니다.');
-      }
-
       // 도면 번호 중복 체크
       const existing = await this.drawingRepository.findOne({
         where: { drawingNumber },
@@ -92,33 +68,33 @@ export class DrawingService {
       const drawing = this.drawingRepository.create({
         category: dto.category,
         projectName,
+        division,
         drawingNumber,
         description: dto.description?.trim(),
-        currentVersion: versionStr,
+        currentVersion: version,
       });
 
       const savedDrawing = await this.drawingRepository.save(drawing);
 
       // 파일 이동
-      const { drawingFilePath, pdfFilePath } = await this.moveFilesToDrawingDirectory(
+      const { drawingFilePath, drawingFileName, pdfFilePaths, pdfFileNames } = await this.moveFilesToDrawingDirectory(
         savedDrawing.id,
         savedDrawing.drawingNumber,
-        versionStr,
+        version,
         dto.description?.trim() || '',
         drawingFile,
-        pdfFile,
+        pdfFiles,
       );
 
-      const drawingVersion = this.versionRepository.create({
-        drawingId: savedDrawing.id,
-        version: versionStr,
-        drawingFilePath,
-        drawingFileName: this.decodeFileName(drawingFile.originalname),
-        pdfFilePath,
-        pdfFileName: pdfFile ? this.decodeFileName(pdfFile.originalname) : undefined,
-        registrationDate: new Date(dto.registrationDate),
-        changeNote: dto.changeNote?.trim(),
-      });
+      const drawingVersion = new DrawingVersion();
+      drawingVersion.drawing = savedDrawing;
+      drawingVersion.version = version;
+      drawingVersion.drawingFilePath = drawingFilePath ?? undefined;
+      drawingVersion.drawingFileName = drawingFileName ?? undefined;
+      drawingVersion.pdfFilePaths = pdfFilePaths ?? undefined;
+      drawingVersion.pdfFileNames = pdfFileNames ?? undefined;
+      drawingVersion.registrationDate = new Date(dto.registrationDate);
+      drawingVersion.changeNote = dto.changeNote?.trim() ?? undefined;
 
       await this.versionRepository.save(drawingVersion);
 
@@ -127,161 +103,6 @@ export class DrawingService {
       cleanupFiles();
       throw error;
     }
-  }
-
-  async update(id: number, dto: UpdateDrawingDto): Promise<Drawing> {
-    const drawing = await this.findOne(id);
-
-    await this.drawingRepository.update(id, {
-      ...dto,
-    });
-
-    return this.findOne(id);
-  }
-
-  async softDelete(id: number): Promise<void> {
-    const drawing = await this.findOne(id);
-    await this.drawingRepository.softDelete(id);
-  }
-
-  // 버전 관련 메서드
-  async findVersionsByDrawingId(drawingId: number): Promise<DrawingVersion[]> {
-    await this.findOne(drawingId); // 도면 존재 확인
-
-    return this.versionRepository.find({
-      where: { drawingId },
-      order: { createdAt: 'DESC' },
-    });
-  }
-
-  async findVersionById(drawingId: number, versionId: number): Promise<DrawingVersion> {
-    await this.findOne(drawingId); // 도면 존재 확인
-
-    const version = await this.versionRepository.findOne({
-      where: { id: versionId, drawingId },
-    });
-
-    if (!version) {
-      throw new NotFoundException('버전을 찾을 수 없습니다.');
-    }
-
-    return version;
-  }
-
-  async createVersion(
-    drawingId: number,
-    dto: CreateDrawingVersionDto,
-    files: { drawingFile?: Express.Multer.File[]; pdfFile?: Express.Multer.File[] },
-  ): Promise<DrawingVersion> {
-    const drawing = await this.findOne(drawingId);
-
-    // 도면 파일 필수 체크
-    if (!files.drawingFile || files.drawingFile.length === 0) {
-      throw new NotFoundException('도면 파일은 필수입니다.');
-    }
-
-    const drawingFile = files.drawingFile[0];
-    const pdfFile = files.pdfFile?.[0];
-
-    // 파일 이동
-    const { drawingFilePath, pdfFilePath } = await this.moveFilesToDrawingDirectory(
-      drawingId,
-      drawing.drawingNumber,
-      dto.version,
-      dto.changeNote?.trim() || '',
-      drawingFile,
-      pdfFile,
-    );
-
-    const version = this.versionRepository.create({
-      drawingId,
-      version: dto.version,
-      drawingFilePath,
-      drawingFileName: this.decodeFileName(drawingFile.originalname),
-      pdfFilePath,
-      pdfFileName: pdfFile ? this.decodeFileName(pdfFile.originalname) : undefined,
-      registrationDate: new Date(dto.registrationDate),
-      changeNote: dto.changeNote,
-    });
-
-    const savedVersion = await this.versionRepository.save(version);
-
-    // Drawing의 currentVersion 업데이트
-    await this.drawingRepository.update(drawingId, { currentVersion: dto.version });
-
-    return savedVersion;
-  }
-
-  async deleteVersion(drawingId: number, versionId: number): Promise<void> {
-    const version = await this.findVersionById(drawingId, versionId);
-
-    // 파일 삭제 (상대경로 → 절대경로 변환)
-    const drawingAbsPath = version.drawingFilePath ? join(process.cwd(), version.drawingFilePath) : null;
-    const pdfAbsPath = version.pdfFilePath ? join(process.cwd(), version.pdfFilePath) : null;
-
-    if (drawingAbsPath && existsSync(drawingAbsPath)) {
-      unlinkSync(drawingAbsPath);
-    }
-    if (pdfAbsPath && existsSync(pdfAbsPath)) {
-      unlinkSync(pdfAbsPath);
-    }
-
-    await this.versionRepository.delete(versionId);
-
-    // 삭제 후 최신 버전 업데이트
-    const latestVersion = await this.versionRepository.findOne({
-      where: { drawingId },
-      order: { createdAt: 'DESC' },
-    });
-
-    if (latestVersion) {
-      await this.drawingRepository.update(drawingId, { currentVersion: latestVersion.version });
-    }
-  }
-
-  // 파일 다운로드 경로 조회 (상대경로 → 절대경로 변환하여 반환)
-  async getVersionFilePath(drawingId: number, versionId: number, fileType: 'drawing' | 'pdf'): Promise<{ filePath: string; fileName: string }> {
-    const version = await this.findVersionById(drawingId, versionId);
-
-    if (fileType === 'drawing') {
-      const absPath = version.drawingFilePath ? join(process.cwd(), version.drawingFilePath) : null;
-      if (!absPath || !existsSync(absPath)) {
-        throw new NotFoundException('도면 파일을 찾을 수 없습니다.');
-      }
-      return { filePath: absPath, fileName: version.drawingFileName };
-    } else {
-      const absPath = version.pdfFilePath ? join(process.cwd(), version.pdfFilePath) : null;
-      if (!absPath || !existsSync(absPath)) {
-        throw new NotFoundException('PDF 파일을 찾을 수 없습니다.');
-      }
-      return { filePath: absPath, fileName: version.pdfFileName };
-    }
-  }
-
-  async getLatestVersionFilePath(drawingId: number, fileType: 'drawing' | 'pdf'): Promise<{ filePath: string; fileName: string }> {
-    const drawing = await this.findOne(drawingId);
-
-    const latestVersion = await this.versionRepository.findOne({
-      where: { drawingId, version: drawing.currentVersion },
-    });
-
-    if (!latestVersion) {
-      throw new NotFoundException('최신 버전을 찾을 수 없습니다.');
-    }
-
-    return this.getVersionFilePath(drawingId, latestVersion.id, fileType);
-  }
-
-  // 기존 정적 도면 파일 다운로드 (레거시)
-  async getDrawingFilePath(category: string, location: string, floor: string): Promise<string> {
-    const drawingPath = join(process.cwd(), 'data', 'drawings');
-    const filePath = join(drawingPath, category, location, `${floor}.pdf`);
-
-    if (!existsSync(filePath)) {
-      throw new NotFoundException('도면 파일을 찾을 수 없습니다.');
-    }
-
-    return filePath;
   }
 
   // multer에서 latin1으로 인코딩된 파일명을 UTF-8로 디코딩
@@ -293,11 +114,16 @@ export class DrawingService {
   private async moveFilesToDrawingDirectory(
     drawingId: number,
     drawingNumber: string,
-    version: string,
+    version: number,
     description: string,
-    drawingFile: Express.Multer.File,
-    pdfFile?: Express.Multer.File,
-  ): Promise<{ drawingFilePath: string; pdfFilePath?: string }> {
+    drawingFile?: Express.Multer.File,
+    pdfFiles?: Express.Multer.File[],
+  ): Promise<{
+    drawingFilePath: string | null;
+    drawingFileName: string | null;
+    pdfFilePaths: string[] | null;
+    pdfFileNames: string[] | null;
+  }> {
     // 상대경로 (DB 저장용)
     const relativeDir = join('data', 'uploads', 'drawings', String(drawingId));
     // 절대경로 (파일 시스템 작업용)
@@ -310,25 +136,38 @@ export class DrawingService {
 
     // 파일명 생성: 도면번호_버전_도면내용_timestamp.확장자
     const timestamp = Date.now();
-    const sanitizedDescription = description.replace(/[<>:"/\\|?*]/g, '_'); // 파일명에 사용 불가한 문자 제거
+    const sanitizedDescription = description.replace(/[<>:"/\\|?*]/g, '_');
 
     // 도면 파일 이동
-    const drawingExt = extname(drawingFile.originalname);
-    const drawingFileName = `${drawingNumber}_${version}_${sanitizedDescription}_${timestamp}${drawingExt}`;
-    const drawingAbsPath = join(absoluteDir, drawingFileName);
-    const drawingFilePath = join(relativeDir, drawingFileName); // 상대경로 (DB 저장)
-    renameSync(drawingFile.path, drawingAbsPath);
-
-    // PDF 파일 이동
-    let pdfFilePath: string | undefined;
-    if (pdfFile) {
-      const pdfExt = extname(pdfFile.originalname);
-      const pdfFileName = `${drawingNumber}_${version}_${sanitizedDescription}_${timestamp}${pdfExt}`;
-      const pdfAbsPath = join(absoluteDir, pdfFileName);
-      pdfFilePath = join(relativeDir, pdfFileName); // 상대경로 (DB 저장)
-      renameSync(pdfFile.path, pdfAbsPath);
+    let drawingFilePath: string | null = null;
+    let drawingFileName: string | null = null;
+    if (drawingFile) {
+      const drawingExt = extname(drawingFile.originalname);
+      const savedDrawingFileName = `${drawingNumber}_v${version}_${sanitizedDescription}_${timestamp}${drawingExt}`;
+      const drawingAbsPath = join(absoluteDir, savedDrawingFileName);
+      drawingFilePath = join(relativeDir, savedDrawingFileName);
+      drawingFileName = this.decodeFileName(drawingFile.originalname);
+      renameSync(drawingFile.path, drawingAbsPath);
     }
 
-    return { drawingFilePath, pdfFilePath };
+    // PDF 파일들 이동
+    let pdfFilePaths: string[] | null = null;
+    let pdfFileNames: string[] | null = null;
+    if (pdfFiles && pdfFiles.length > 0) {
+      pdfFilePaths = [];
+      pdfFileNames = [];
+      for (let i = 0; i < pdfFiles.length; i++) {
+        const pdfFile = pdfFiles[i];
+        const pdfExt = extname(pdfFile.originalname);
+        const savedPdfFileName = `${drawingNumber}_v${version}_${sanitizedDescription}_${timestamp}_${i + 1}${pdfExt}`;
+        const pdfAbsPath = join(absoluteDir, savedPdfFileName);
+        const pdfFilePath = join(relativeDir, savedPdfFileName);
+        pdfFilePaths.push(pdfFilePath);
+        pdfFileNames.push(this.decodeFileName(pdfFile.originalname));
+        renameSync(pdfFile.path, pdfAbsPath);
+      }
+    }
+
+    return { drawingFilePath, drawingFileName, pdfFilePaths, pdfFileNames };
   }
 }

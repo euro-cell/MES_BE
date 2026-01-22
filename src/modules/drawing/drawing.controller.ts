@@ -9,14 +9,6 @@ import { multerConfig } from 'src/common/configs/multer.config';
 export class DrawingController {
   constructor(private readonly drawingService: DrawingService) {}
 
-  // 도면 목록 조회
-  @Get()
-  @ApiOperation({ summary: '도면 목록 조회' })
-  async findAll(@Query() searchDto: DrawingSearchDto) {
-    return this.drawingService.findAll(searchDto);
-  }
-
-  // 새 도면 등록
   @Post()
   @ApiOperation({ summary: '새 도면 등록' })
   @ApiConsumes('multipart/form-data')
@@ -26,14 +18,14 @@ export class DrawingController {
     FileFieldsInterceptor(
       [
         { name: 'drawingFile', maxCount: 1 },
-        { name: 'pdfFile', maxCount: 1 },
+        { name: 'pdfFiles', maxCount: 20 },
       ],
       multerConfig,
     ),
   )
   async create(
     @Body() createDto: CreateDrawingDto,
-    @UploadedFiles() files: { drawingFile?: Express.Multer.File[]; pdfFile?: Express.Multer.File[] },
+    @UploadedFiles() files: { drawingFile?: Express.Multer.File[]; pdfFiles?: Express.Multer.File[] },
   ) {
     return this.drawingService.create(createDto, files);
   }

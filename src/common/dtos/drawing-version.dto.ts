@@ -1,47 +1,40 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsOptional } from 'class-validator';
+import { IsNotEmpty, IsString, IsOptional, IsNumber } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class DrawingVersionDto {
   @ApiProperty({ description: '버전 ID', example: 1 })
   id: number;
 
-  @ApiProperty({ description: '도면 ID', example: 1 })
-  drawingId: number;
+  @ApiProperty({ description: '버전', example: 1.0 })
+  version: number;
 
-  @ApiProperty({ description: '버전', example: '1' })
-  version: string;
+  @ApiPropertyOptional({ description: '도면 파일명', example: 'layout_v1.0.dwg' })
+  drawingFileName: string | null;
 
-  @ApiProperty({ description: '도면 파일 경로' })
-  drawingFilePath: string;
-
-  @ApiProperty({ description: '도면 파일명' })
-  drawingFileName: string;
-
-  @ApiPropertyOptional({ description: 'PDF 파일 경로' })
-  pdfFilePath?: string;
-
-  @ApiPropertyOptional({ description: 'PDF 파일명' })
-  pdfFileName?: string;
+  @ApiPropertyOptional({ description: 'PDF 파일명 목록', example: ['floor1.pdf', 'detail.pdf'] })
+  pdfFileNames: string[] | null;
 
   @ApiProperty({ description: '등록일', example: '2024-01-15' })
-  registrationDate: Date;
+  registrationDate: string;
 
-  @ApiPropertyOptional({ description: '변경 사항 메모' })
-  changeNote?: string;
+  @ApiPropertyOptional({ description: '변경 사유' })
+  changeNote: string | null;
 }
 
 export class CreateDrawingVersionDto {
-  @ApiProperty({ description: '버전', example: '1.1' })
+  @ApiProperty({ description: '버전', example: 1.1 })
   @IsNotEmpty()
-  @IsString()
-  version: string;
+  @Type(() => Number)
+  @IsNumber()
+  version: number;
 
   @ApiProperty({ description: '등록일', example: '2024-01-15' })
   @IsNotEmpty()
   @IsString()
   registrationDate: string;
 
-  @ApiPropertyOptional({ description: '변경 사항 메모' })
+  @ApiPropertyOptional({ description: '변경 사유' })
   @IsOptional()
   @IsString()
   changeNote?: string;

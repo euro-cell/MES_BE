@@ -1,12 +1,4 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { Exclude } from 'class-transformer';
 import { Drawing } from './drawing.entity';
 
@@ -15,33 +7,30 @@ export class DrawingVersion {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  drawingId: number;
-
   @ManyToOne(() => Drawing, (drawing) => drawing.versions, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'drawing_id' })
   drawing: Drawing;
 
-  @Column({ length: 20 })
-  version: string;
+  @Column({ type: 'decimal', precision: 5, scale: 1 })
+  version: number;
 
-  @Column({ length: 500 })
-  drawingFilePath: string;
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  drawingFilePath?: string;
 
-  @Column({ length: 255 })
-  drawingFileName: string;
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  drawingFileName?: string;
 
-  @Column({ length: 500, nullable: true })
-  pdfFilePath: string;
+  @Column({ type: 'json', nullable: true })
+  pdfFilePaths?: string[];
 
-  @Column({ length: 255, nullable: true })
-  pdfFileName: string;
+  @Column({ type: 'json', nullable: true })
+  pdfFileNames?: string[];
 
   @Column({ type: 'date' })
   registrationDate: Date;
 
   @Column({ type: 'text', nullable: true })
-  changeNote: string;
+  changeNote?: string;
 
   @Exclude()
   @CreateDateColumn()
