@@ -4,12 +4,16 @@ import JSZip from 'jszip';
 import * as path from 'path';
 import * as fs from 'fs';
 import { MixingService } from './electrode/mixing.service';
+import { CoatingService } from './electrode/coating.service';
 
 @Injectable()
 export class LotExportService {
   private readonly templatePath = path.join(process.cwd(), 'data', 'templates', 'lot');
 
-  constructor(private readonly mixingService: MixingService) {}
+  constructor(
+    private readonly mixingService: MixingService,
+    private readonly coatingService: CoatingService,
+  ) {}
 
   async exportLots(productionId: number): Promise<StreamableFile> {
     // 템플릿 파일 로드
@@ -22,8 +26,9 @@ export class LotExportService {
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.readFile(templateFilePath);
 
-    // Mixing 시트에 데이터 채우기
+    // 각 시트에 데이터 채우기
     await this.fillMixingSheet(workbook, productionId);
+    await this.fillCoatingSheet(workbook, productionId);
 
     const buffer = await workbook.xlsx.writeBuffer();
 
@@ -116,6 +121,177 @@ export class LotExportService {
       }
 
       rowIndex++;
+    }
+  }
+
+  private async fillCoatingSheet(workbook: ExcelJS.Workbook, productionId: number): Promise<void> {
+    const worksheet = workbook.getWorksheet('Coating');
+
+    if (!worksheet) {
+      return; // Coating 시트가 없으면 건너뜀
+    }
+
+    const coatingLots = await this.coatingService.getCoatingLots(productionId);
+
+    // 6행부터 데이터 입력 (한 Lot당 2행 사용: Start/End)
+    let rowIndex = 6;
+    for (const lot of coatingLots) {
+      const startRow = rowIndex;
+      const endRow = rowIndex + 1;
+
+      // 2행 병합 컬럼들 (첫 번째 행에만 입력)
+      if (lot.coatingDate) {
+        worksheet.getCell(startRow, 2).value = this.formatDate(lot.coatingDate); // B: Date
+      }
+      if (lot.lot) {
+        worksheet.getCell(startRow, 3).value = lot.lot; // C: Lot
+      }
+      if (lot.atCoating?.temp != null) {
+        worksheet.getCell(startRow, 4).value = lot.atCoating.temp; // D: Temp
+      }
+      if (lot.atCoating?.humidity != null) {
+        worksheet.getCell(startRow, 5).value = lot.atCoating.humidity; // E: Humidity
+      }
+      if (lot.electrodeSpec?.coatLength != null) {
+        worksheet.getCell(startRow, 6).value = lot.electrodeSpec.coatLength; // F: Coat Length
+      }
+      if (lot.electrodeSpec?.coatingWidth != null) {
+        worksheet.getCell(startRow, 7).value = lot.electrodeSpec.coatingWidth; // G: Coating Width
+      }
+      if (lot.electrodeSpec?.loadingWeight != null) {
+        worksheet.getCell(startRow, 8).value = lot.electrodeSpec.loadingWeight; // H: Loading Weight
+      }
+
+      // I열: Start/End 라벨
+      worksheet.getCell(startRow, 9).value = 'Start';
+      worksheet.getCell(endRow, 9).value = 'End';
+
+      // A-Side Coat Weight (J-N) - I열 건너뜀
+      if (lot.inspection?.aSideCoatWeight) {
+        const asCW = lot.inspection.aSideCoatWeight;
+        if (asCW.op?.start != null) worksheet.getCell(startRow, 10).value = asCW.op.start; // J: OP start
+        if (asCW.op?.end != null) worksheet.getCell(endRow, 10).value = asCW.op.end; // J: OP end
+        if (asCW.mid?.start != null) worksheet.getCell(startRow, 11).value = asCW.mid.start; // K: Mid start
+        if (asCW.mid?.end != null) worksheet.getCell(endRow, 11).value = asCW.mid.end; // K: Mid end
+        if (asCW.gear?.start != null) worksheet.getCell(startRow, 12).value = asCW.gear.start; // L: Gear start
+        if (asCW.gear?.end != null) worksheet.getCell(endRow, 12).value = asCW.gear.end; // L: Gear end
+        if (asCW.webSpeed != null) worksheet.getCell(startRow, 13).value = asCW.webSpeed; // M: Web Speed (merged)
+        if (asCW.pump?.start != null) worksheet.getCell(startRow, 14).value = asCW.pump.start; // N: Pump start
+        if (asCW.pump?.end != null) worksheet.getCell(endRow, 14).value = asCW.pump.end; // N: Pump end
+      }
+
+      // O열: Start/End 라벨
+      worksheet.getCell(startRow, 15).value = 'Start';
+      worksheet.getCell(endRow, 15).value = 'End';
+
+      // Both Coat Weight (P-T) - O열 건너뜀
+      if (lot.inspection?.bothCoatWeight) {
+        const bCW = lot.inspection.bothCoatWeight;
+        if (bCW.op?.start != null) worksheet.getCell(startRow, 16).value = bCW.op.start; // P: OP start
+        if (bCW.op?.end != null) worksheet.getCell(endRow, 16).value = bCW.op.end; // P: OP end
+        if (bCW.mid?.start != null) worksheet.getCell(startRow, 17).value = bCW.mid.start; // Q: Mid start
+        if (bCW.mid?.end != null) worksheet.getCell(endRow, 17).value = bCW.mid.end; // Q: Mid end
+        if (bCW.gear?.start != null) worksheet.getCell(startRow, 18).value = bCW.gear.start; // R: Gear start
+        if (bCW.gear?.end != null) worksheet.getCell(endRow, 18).value = bCW.gear.end; // R: Gear end
+        if (bCW.webSpeed != null) worksheet.getCell(startRow, 19).value = bCW.webSpeed; // S: Web Speed (merged)
+        if (bCW.pump != null) worksheet.getCell(startRow, 20).value = bCW.pump; // T: Pump (merged)
+      }
+
+      // Both Coat Thickness (U-W)
+      if (lot.inspection?.bothCoatThickness) {
+        const bCT = lot.inspection.bothCoatThickness;
+        if (bCT.op?.start != null) worksheet.getCell(startRow, 21).value = bCT.op.start; // U: OP start
+        if (bCT.op?.end != null) worksheet.getCell(endRow, 21).value = bCT.op.end; // U: OP end
+        if (bCT.mid?.start != null) worksheet.getCell(startRow, 22).value = bCT.mid.start; // V: Mid start
+        if (bCT.mid?.end != null) worksheet.getCell(endRow, 22).value = bCT.mid.end; // V: Mid end
+        if (bCT.gear?.start != null) worksheet.getCell(startRow, 23).value = bCT.gear.start; // W: Gear start
+        if (bCT.gear?.end != null) worksheet.getCell(endRow, 23).value = bCT.gear.end; // W: Gear end
+      }
+
+      // Misalignment (X)
+      if (lot.inspection?.misalignment != null) {
+        worksheet.getCell(startRow, 24).value = lot.inspection.misalignment; // X: Misalignment (merged)
+      }
+
+      // Drying Conditions - Temperature (Y-AB)
+      if (lot.dryingCondition?.temperature) {
+        const temp = lot.dryingCondition.temperature;
+        if (temp.zone1?.start != null) worksheet.getCell(startRow, 25).value = temp.zone1.start; // Y: Zone1 start
+        if (temp.zone1?.end != null) worksheet.getCell(endRow, 25).value = temp.zone1.end; // Y: Zone1 end
+        if (temp.zone2?.start != null) worksheet.getCell(startRow, 26).value = temp.zone2.start; // Z: Zone2 start
+        if (temp.zone2?.end != null) worksheet.getCell(endRow, 26).value = temp.zone2.end; // Z: Zone2 end
+        if (temp.zone3 != null) worksheet.getCell(startRow, 27).value = temp.zone3; // AA: Zone3 (merged)
+        if (temp.zone4 != null) worksheet.getCell(startRow, 28).value = temp.zone4; // AB: Zone4 (merged)
+      }
+
+      // Drying Conditions - Supply (AC-AF)
+      if (lot.dryingCondition?.supply) {
+        const supply = lot.dryingCondition.supply;
+        if (supply.zone1?.start != null) worksheet.getCell(startRow, 29).value = supply.zone1.start; // AC: Zone1 start
+        if (supply.zone1?.end != null) worksheet.getCell(endRow, 29).value = supply.zone1.end; // AC: Zone1 end
+        if (supply.zone2?.start != null) worksheet.getCell(startRow, 30).value = supply.zone2.start; // AD: Zone2 start
+        if (supply.zone2?.end != null) worksheet.getCell(endRow, 30).value = supply.zone2.end; // AD: Zone2 end
+        if (supply.zone3 != null) worksheet.getCell(startRow, 31).value = supply.zone3; // AE: Zone3 (merged)
+        if (supply.zone4 != null) worksheet.getCell(startRow, 32).value = supply.zone4; // AF: Zone4 (merged)
+      }
+
+      // Drying Conditions - Exhaust (AG-AH)
+      if (lot.dryingCondition?.exhaust) {
+        const exhaust = lot.dryingCondition.exhaust;
+        if (exhaust.zone2 != null) worksheet.getCell(startRow, 33).value = exhaust.zone2; // AG: Zone2 (merged)
+        if (exhaust.zone4 != null) worksheet.getCell(startRow, 34).value = exhaust.zone4; // AH: Zone4 (merged)
+      }
+
+      // Slurry Info (AI-AK)
+      if (lot.slurryInfo) {
+        if (lot.slurryInfo.lot) worksheet.getCell(startRow, 35).value = lot.slurryInfo.lot; // AI: Lot (merged)
+        if (lot.slurryInfo.viscosity != null) worksheet.getCell(startRow, 36).value = lot.slurryInfo.viscosity; // AJ: Viscosity (merged)
+        if (lot.slurryInfo.solidContent != null) worksheet.getCell(startRow, 37).value = lot.slurryInfo.solidContent; // AK: Solid Content (merged)
+      }
+
+      // Foil Info (AL-AP)
+      if (lot.foilInfo) {
+        if (lot.foilInfo.lot) worksheet.getCell(startRow, 38).value = lot.foilInfo.lot; // AL: Lot (merged)
+        if (lot.foilInfo.type) worksheet.getCell(startRow, 39).value = lot.foilInfo.type; // AM: Type (merged)
+        if (lot.foilInfo.length != null) worksheet.getCell(startRow, 40).value = lot.foilInfo.length; // AN: Length (merged)
+        if (lot.foilInfo.width != null) worksheet.getCell(startRow, 41).value = lot.foilInfo.width; // AO: Width (merged)
+        if (lot.foilInfo.thickness != null) worksheet.getCell(startRow, 42).value = lot.foilInfo.thickness; // AP: Thickness (merged)
+      }
+
+      // 2행 병합 (값이 동일한 컬럼들)
+      const mergeColumns = [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8, // B-H: Date, Lot, Temp, Humidity, Electrode Spec
+        13, // M: Web Speed
+        19,
+        20, // S-T: Web Speed, Pump
+        24, // X: Misalignment
+        27,
+        28, // AA-AB: Zone3, Zone4
+        31,
+        32, // AE-AF: Zone3, Zone4
+        33,
+        34, // AG-AH: Exhaust
+        35,
+        36,
+        37, // AI-AK: Slurry Info
+        38,
+        39,
+        40,
+        41,
+        42,
+        43, // AL-AQ: Foil Info + AQ
+      ];
+      for (const col of mergeColumns) {
+        worksheet.mergeCells(startRow, col, endRow, col);
+      }
+
+      rowIndex += 2; // 다음 Lot은 2행 뒤부터
     }
   }
 
