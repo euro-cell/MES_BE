@@ -8,6 +8,7 @@ import { CoatingService } from './electrode/coating.service';
 import { PressService } from './electrode/press.service';
 import { NotchingService } from './electrode/notching.service';
 import { StackingService } from './assembly/stacking.service';
+import { WeldingService } from './assembly/welding.service';
 
 @Injectable()
 export class LotExportService {
@@ -19,6 +20,7 @@ export class LotExportService {
     private readonly pressService: PressService,
     private readonly notchingService: NotchingService,
     private readonly stackingService: StackingService,
+    private readonly weldingService: WeldingService,
   ) {}
 
   async exportLots(productionId: number): Promise<StreamableFile> {
@@ -38,6 +40,7 @@ export class LotExportService {
     await this.fillCalenderingSheet(workbook, productionId);
     await this.fillNotchingSheet(workbook, productionId);
     await this.fillStackingSheet(workbook, productionId);
+    await this.fillWeldingSheet(workbook, productionId);
 
     const buffer = await workbook.xlsx.writeBuffer();
 
@@ -545,6 +548,71 @@ export class LotExportService {
       }
 
       rowIndex += 2; // 다음 Lot은 2행 뒤부터
+    }
+  }
+
+  private async fillWeldingSheet(workbook: ExcelJS.Workbook, productionId: number): Promise<void> {
+    const worksheet = workbook.getWorksheet('Welding');
+
+    if (!worksheet) {
+      return; // Welding 시트가 없으면 건너뜀
+    }
+
+    const weldingLots = await this.weldingService.getWeldingLots(productionId);
+
+    // 6행부터 데이터 입력 (한 Lot당 1행 사용)
+    let rowIndex = 6;
+    for (const lot of weldingLots) {
+      if (lot.weldingDate) {
+        worksheet.getCell(rowIndex, 2).value = this.formatDate(lot.weldingDate); // B: Date
+      }
+      if (lot.lot) {
+        worksheet.getCell(rowIndex, 3).value = lot.lot; // C: Lot
+      }
+      if (lot.atWelding?.temp != null) {
+        worksheet.getCell(rowIndex, 4).value = lot.atWelding.temp; // D: Temp
+      }
+      if (lot.atWelding?.humidity != null) {
+        worksheet.getCell(rowIndex, 5).value = lot.atWelding.humidity; // E: Humidity
+      }
+      if (lot.preWelding?.weldingPosition != null) {
+        worksheet.getCell(rowIndex, 6).value = lot.preWelding.weldingPosition; // F: Pre Welding Position
+      }
+      if (lot.preWelding?.trimPosition != null) {
+        worksheet.getCell(rowIndex, 7).value = lot.preWelding.trimPosition; // G: Trim Position
+      }
+      if (lot.mainWelding?.weldingPosition != null) {
+        worksheet.getCell(rowIndex, 8).value = lot.mainWelding.weldingPosition; // H: Main Welding Position
+      }
+      if (lot.mainWelding?.irCheck != null) {
+        worksheet.getCell(rowIndex, 9).value = lot.mainWelding.irCheck; // I: IR Check
+      }
+      if (lot.mainWelding?.taping != null) {
+        worksheet.getCell(rowIndex, 10).value = lot.mainWelding.taping; // J: Taping
+      }
+
+      // 불량 색상 적용 (스태킹 불량: 빨강, 웰딩 불량: 주황)
+      if (lot.isDefectiveFromStacking) {
+        const redFill: ExcelJS.Fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FFFF0000' },
+        };
+        for (let col = 2; col <= 10; col++) {
+          worksheet.getCell(rowIndex, col).fill = redFill;
+        }
+      } else if (lot.isDefectiveFromWelding) {
+        const orangeFill: ExcelJS.Fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FFFFA500' },
+        };
+        for (let col = 2; col <= 10; col++) {
+          worksheet.getCell(rowIndex, col).fill = orangeFill;
+        }
+      }
+
+      rowIndex++;
     }
   }
 
