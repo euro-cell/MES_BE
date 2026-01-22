@@ -5,7 +5,7 @@ import { existsSync, mkdirSync, unlinkSync, renameSync } from 'fs';
 import { join, extname } from 'path';
 import { Drawing } from 'src/common/entities/drawing.entity';
 import { DrawingVersion } from 'src/common/entities/drawing-version.entity';
-import { CreateDrawingDto } from 'src/common/dtos/drawing.dto';
+import { CreateDrawingDto, DrawingSearchDto } from 'src/common/dtos/drawing.dto';
 
 @Injectable()
 export class DrawingService {
@@ -15,6 +15,30 @@ export class DrawingService {
     @InjectRepository(DrawingVersion)
     private readonly versionRepository: Repository<DrawingVersion>,
   ) {}
+
+  async findAll(searchDto: DrawingSearchDto) {
+    const query = this.drawingRepository
+      .createQueryBuilder('drawing')
+      .leftJoin('drawing.versions', 'version')
+      .select([
+        'drawing.id AS id',
+        'drawing.category AS category',
+        'drawing.projectName AS "projectName"',
+        'drawing.division AS division',
+        'drawing.drawingNumber AS "drawingNumber"',
+        'drawing.description AS description',
+        'drawing.currentVersion AS "currentVersion"',
+        'MAX(version.registrationDate) AS "latestRegistrationDate"',
+      ])
+      .where('drawing.deletedAt IS NULL')
+      .groupBy('drawing.id');
+
+    if (searchDto.category) {
+      query.andWhere('drawing.category = :category', { category: searchDto.category });
+    }
+
+    return query.orderBy('drawing.id', 'DESC').getRawMany();
+  }
 
   async findOne(id: number): Promise<Drawing> {
     const drawing = await this.drawingRepository.findOne({

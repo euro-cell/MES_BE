@@ -9,6 +9,12 @@ import { multerConfig } from 'src/common/configs/multer.config';
 export class DrawingController {
   constructor(private readonly drawingService: DrawingService) {}
 
+  @Get()
+  @ApiOperation({ summary: '도면 목록 조회' })
+  async findAll(@Query() searchDto: DrawingSearchDto) {
+    return this.drawingService.findAll(searchDto);
+  }
+
   @Post()
   @ApiOperation({ summary: '새 도면 등록' })
   @ApiConsumes('multipart/form-data')
