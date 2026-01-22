@@ -5,6 +5,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { MixingService } from './electrode/mixing.service';
 import { CoatingService } from './electrode/coating.service';
+import { PressService } from './electrode/press.service';
 
 @Injectable()
 export class LotExportService {
@@ -13,6 +14,7 @@ export class LotExportService {
   constructor(
     private readonly mixingService: MixingService,
     private readonly coatingService: CoatingService,
+    private readonly pressService: PressService,
   ) {}
 
   async exportLots(productionId: number): Promise<StreamableFile> {
@@ -29,6 +31,7 @@ export class LotExportService {
     // 각 시트에 데이터 채우기
     await this.fillMixingSheet(workbook, productionId);
     await this.fillCoatingSheet(workbook, productionId);
+    await this.fillCalenderingSheet(workbook, productionId);
 
     const buffer = await workbook.xlsx.writeBuffer();
 
@@ -260,35 +263,107 @@ export class LotExportService {
 
       // 2행 병합 (값이 동일한 컬럼들)
       const mergeColumns = [
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8, // B-H: Date, Lot, Temp, Humidity, Electrode Spec
+        2, 3, 4, 5, 6, 7, 8, // B-H: Date, Lot, Temp, Humidity, Electrode Spec
         13, // M: Web Speed
-        19,
-        20, // S-T: Web Speed, Pump
+        19, 20, // S-T: Web Speed, Pump
         24, // X: Misalignment
-        27,
-        28, // AA-AB: Zone3, Zone4
-        31,
-        32, // AE-AF: Zone3, Zone4
-        33,
-        34, // AG-AH: Exhaust
-        35,
-        36,
-        37, // AI-AK: Slurry Info
-        38,
-        39,
-        40,
-        41,
-        42,
-        43, // AL-AQ: Foil Info + AQ
+        27, 28, // AA-AB: Zone3, Zone4
+        31, 32, // AE-AF: Zone3, Zone4
+        33, 34, // AG-AH: Exhaust
+        35, 36, 37, // AI-AK: Slurry Info
+        38, 39, 40, 41, 42, 43, // AL-AQ: Foil Info + AQ
       ];
       for (const col of mergeColumns) {
-        worksheet.mergeCells(startRow, col, endRow, col);
+        try {
+          worksheet.mergeCells(startRow, col, endRow, col);
+        } catch {
+          // 이미 병합된 셀은 건너뜀
+        }
+      }
+
+      rowIndex += 2; // 다음 Lot은 2행 뒤부터
+    }
+  }
+
+  private async fillCalenderingSheet(workbook: ExcelJS.Workbook, productionId: number): Promise<void> {
+    const worksheet = workbook.getWorksheet('Calendering');
+
+    if (!worksheet) {
+      return; // Calendering 시트가 없으면 건너뜀
+    }
+
+    const pressLots = await this.pressService.getPressLots(productionId);
+
+    // 6행부터 데이터 입력 (한 Lot당 2행 사용: Start/End)
+    let rowIndex = 6;
+    for (const lot of pressLots) {
+      const startRow = rowIndex;
+      const endRow = rowIndex + 1;
+
+      // 2행 병합 컬럼들 (첫 번째 행에만 입력)
+      if (lot.calenderingDate) {
+        worksheet.getCell(startRow, 2).value = this.formatDate(lot.calenderingDate); // B: Date
+      }
+      if (lot.lot) {
+        worksheet.getCell(startRow, 3).value = lot.lot; // C: Lot
+      }
+      if (lot.atCalendering?.temp != null) {
+        worksheet.getCell(startRow, 4).value = lot.atCalendering.temp; // D: Temp
+      }
+      if (lot.atCalendering?.humidity != null) {
+        worksheet.getCell(startRow, 5).value = lot.atCalendering.humidity; // E: Humidity
+      }
+      if (lot.calenderingLen != null) {
+        worksheet.getCell(startRow, 6).value = lot.calenderingLen; // F: Calendering Length
+      }
+      if (lot.electrodeSpec?.pressingThick != null) {
+        worksheet.getCell(startRow, 7).value = lot.electrodeSpec.pressingThick; // G: Pressing Thick
+      }
+      if (lot.electrodeSpec?.loadingWeight != null) {
+        worksheet.getCell(startRow, 8).value = lot.electrodeSpec.loadingWeight; // H: Loading Weight
+      }
+      if (lot.realInspection?.conditions) {
+        worksheet.getCell(startRow, 9).value = lot.realInspection.conditions; // I: Conditions
+      }
+      if (lot.realInspection?.pressingTemp != null) {
+        worksheet.getCell(startRow, 10).value = lot.realInspection.pressingTemp; // J: Pressing Temp
+      }
+
+      // K열: Start/End 라벨
+      worksheet.getCell(startRow, 11).value = 'Start';
+      worksheet.getCell(endRow, 11).value = 'End';
+
+      // Thickness (L-N) - K열 건너뜀, start/end 분리
+      if (lot.realInspection?.thickness) {
+        const thickness = lot.realInspection.thickness;
+        if (thickness.op?.start != null) worksheet.getCell(startRow, 12).value = thickness.op.start; // L: OP start
+        if (thickness.op?.end != null) worksheet.getCell(endRow, 12).value = thickness.op.end; // L: OP end
+        if (thickness.mid?.start != null) worksheet.getCell(startRow, 13).value = thickness.mid.start; // M: Mid start
+        if (thickness.mid?.end != null) worksheet.getCell(endRow, 13).value = thickness.mid.end; // M: Mid end
+        if (thickness.gear?.start != null) worksheet.getCell(startRow, 14).value = thickness.gear.start; // N: Gear start
+        if (thickness.gear?.end != null) worksheet.getCell(endRow, 14).value = thickness.gear.end; // N: Gear end
+      }
+
+      // Coat Weight (O-R) - 병합
+      if (lot.realInspection?.coatWeight) {
+        const coatWeight = lot.realInspection.coatWeight;
+        if (coatWeight.spec != null) worksheet.getCell(startRow, 15).value = coatWeight.spec; // O: Spec
+        if (coatWeight.p1 != null) worksheet.getCell(startRow, 16).value = coatWeight.p1; // P: P1
+        if (coatWeight.p3 != null) worksheet.getCell(startRow, 17).value = coatWeight.p3; // Q: P3
+        if (coatWeight.p4 != null) worksheet.getCell(startRow, 18).value = coatWeight.p4; // R: P4
+      }
+
+      // 2행 병합 (값이 동일한 컬럼들)
+      const mergeColumns = [
+        2, 3, 4, 5, 6, 7, 8, 9, 10, // B-J: Date ~ Pressing Temp
+        15, 16, 17, 18, // O-R: Coat Weight
+      ];
+      for (const col of mergeColumns) {
+        try {
+          worksheet.mergeCells(startRow, col, endRow, col);
+        } catch {
+          // 이미 병합된 셀은 건너뜀
+        }
       }
 
       rowIndex += 2; // 다음 Lot은 2행 뒤부터
