@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, StreamableFile } from '@nestjs/common';
 import * as ExcelJS from 'exceljs';
-import * as JSZip from 'jszip';
+import JSZip from 'jszip';
 import * as path from 'path';
 import * as fs from 'fs';
 import { MixingService } from './electrode/mixing.service';
@@ -13,10 +13,10 @@ export class LotExportService {
 
   async exportLots(productionId: number): Promise<StreamableFile> {
     // 템플릿 파일 로드
-    const templateFilePath = path.join(this.templatePath, 'Mixing.xlsx');
+    const templateFilePath = path.join(this.templatePath, 'manage.xlsx');
 
     if (!fs.existsSync(templateFilePath)) {
-      throw new NotFoundException(`템플릿 파일을 찾을 수 없습니다: Mixing.xlsx`);
+      throw new NotFoundException(`템플릿 파일을 찾을 수 없습니다: manage.xlsx`);
     }
 
     const workbook = new ExcelJS.Workbook();
@@ -49,8 +49,8 @@ export class LotExportService {
   }
 
   private async fillMixingSheet(workbook: ExcelJS.Workbook, productionId: number): Promise<void> {
-    // 첫 번째 시트 (Mixing)
-    const worksheet = workbook.getWorksheet(1);
+    // Mixing 시트 찾기 (이름 또는 첫 번째 시트)
+    const worksheet = workbook.getWorksheet('Mixing') || workbook.worksheets[0];
 
     if (!worksheet) {
       throw new NotFoundException('Mixing 시트를 찾을 수 없습니다.');
