@@ -7,6 +7,7 @@ import { MixingService } from './electrode/mixing.service';
 import { CoatingService } from './electrode/coating.service';
 import { PressService } from './electrode/press.service';
 import { NotchingService } from './electrode/notching.service';
+import { StackingService } from './assembly/stacking.service';
 
 @Injectable()
 export class LotExportService {
@@ -17,6 +18,7 @@ export class LotExportService {
     private readonly coatingService: CoatingService,
     private readonly pressService: PressService,
     private readonly notchingService: NotchingService,
+    private readonly stackingService: StackingService,
   ) {}
 
   async exportLots(productionId: number): Promise<StreamableFile> {
@@ -35,6 +37,7 @@ export class LotExportService {
     await this.fillCoatingSheet(workbook, productionId);
     await this.fillCalenderingSheet(workbook, productionId);
     await this.fillNotchingSheet(workbook, productionId);
+    await this.fillStackingSheet(workbook, productionId);
 
     const buffer = await workbook.xlsx.writeBuffer();
 
@@ -443,6 +446,105 @@ export class LotExportService {
       }
 
       rowIndex++;
+    }
+  }
+
+  private async fillStackingSheet(workbook: ExcelJS.Workbook, productionId: number): Promise<void> {
+    const worksheet = workbook.getWorksheet('Stacking');
+
+    if (!worksheet) {
+      return; // Stacking 시트가 없으면 건너뜀
+    }
+
+    const stackingLots = await this.stackingService.getStackingLots(productionId);
+
+    // 6행부터 데이터 입력 (한 Lot당 2행 사용)
+    let rowIndex = 6;
+    for (const lot of stackingLots) {
+      const startRow = rowIndex;
+      const endRow = rowIndex + 1;
+
+      // 행 높이 설정
+      worksheet.getRow(startRow).height = 10;
+      worksheet.getRow(endRow).height = 10;
+
+      // 2행 병합 컬럼들 (첫 번째 행에만 입력)
+      if (lot.productionDate) {
+        worksheet.getCell(startRow, 2).value = this.formatDate(lot.productionDate); // B: Date
+      }
+      if (lot.lot) {
+        worksheet.getCell(startRow, 3).value = lot.lot; // C: Lot
+      }
+      if (lot.atStacking?.temp != null) {
+        worksheet.getCell(startRow, 4).value = lot.atStacking.temp; // D: Temp
+      }
+      if (lot.atStacking?.humidity != null) {
+        worksheet.getCell(startRow, 5).value = lot.atStacking.humidity; // E: Humidity
+      }
+      if (lot.jellyrollSpec?.stack != null) {
+        worksheet.getCell(startRow, 6).value = lot.jellyrollSpec.stack; // F: Stack
+      }
+      if (lot.jellyrollSpec?.weight != null) {
+        worksheet.getCell(startRow, 7).value = lot.jellyrollSpec.weight; // G: Weight
+      }
+      if (lot.jellyrollSpec?.thickness != null) {
+        worksheet.getCell(startRow, 8).value = lot.jellyrollSpec.thickness; // H: Thickness
+      }
+      if (lot.jellyrollSpec?.alignment != null) {
+        worksheet.getCell(startRow, 9).value = lot.jellyrollSpec.alignment; // I: Alignment
+      }
+      if (lot.jellyrollSpec?.ir != null) {
+        worksheet.getCell(startRow, 10).value = lot.jellyrollSpec.ir; // J: IR
+      }
+
+      // K열: Notching 양극 (row1/row2 분리, 병합 안함)
+      if (lot.magazine?.notchingAnode?.row1 != null) {
+        worksheet.getCell(startRow, 11).value = lot.magazine.notchingAnode.row1; // K: row1
+      }
+      if (lot.magazine?.notchingAnode?.row2 != null) {
+        worksheet.getCell(endRow, 11).value = lot.magazine.notchingAnode.row2; // K: row2
+      }
+
+      // L열: Notching 음극 (row1/row2 분리, 병합 안함)
+      if (lot.magazine?.notchingCathode?.row1 != null) {
+        worksheet.getCell(startRow, 12).value = lot.magazine.notchingCathode.row1; // L: row1
+      }
+      if (lot.magazine?.notchingCathode?.row2 != null) {
+        worksheet.getCell(endRow, 12).value = lot.magazine.notchingCathode.row2; // L: row2
+      }
+
+      // M열: Separate (병합)
+      if (lot.magazine?.separate != null) {
+        worksheet.getCell(startRow, 13).value = lot.magazine.separate; // M: Separate
+      }
+
+      // 2행 병합 (K, L 제외)
+      const mergeColumns = [
+        2, 3, 4, 5, 6, 7, 8, 9, 10, // B-J
+        13, // M: Separate
+      ];
+      for (const col of mergeColumns) {
+        try {
+          worksheet.mergeCells(startRow, col, endRow, col);
+        } catch {
+          // 이미 병합된 셀은 건너뜀
+        }
+      }
+
+      // 불량인 경우 빨간 배경색 적용
+      if (lot.isDefective) {
+        const redFill: ExcelJS.Fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FFFF0000' },
+        };
+        for (let col = 2; col <= 13; col++) {
+          worksheet.getCell(startRow, col).fill = redFill;
+          worksheet.getCell(endRow, col).fill = redFill;
+        }
+      }
+
+      rowIndex += 2; // 다음 Lot은 2행 뒤부터
     }
   }
 
