@@ -28,7 +28,7 @@ export class DrawingService {
         'drawing.drawingNumber AS "drawingNumber"',
         'drawing.description AS description',
         'drawing.currentVersion AS "currentVersion"',
-        'MAX(version.registrationDate) AS "latestRegistrationDate"',
+        "TO_CHAR(MAX(version.registrationDate), 'YYYY-MM-DD') AS \"latestRegistrationDate\"",
       ])
       .where('drawing.deletedAt IS NULL')
       .groupBy('drawing.id');
