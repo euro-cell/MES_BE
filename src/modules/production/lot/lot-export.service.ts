@@ -6,6 +6,7 @@ import * as fs from 'fs';
 import { MixingService } from './electrode/mixing.service';
 import { CoatingService } from './electrode/coating.service';
 import { PressService } from './electrode/press.service';
+import { NotchingService } from './electrode/notching.service';
 
 @Injectable()
 export class LotExportService {
@@ -15,6 +16,7 @@ export class LotExportService {
     private readonly mixingService: MixingService,
     private readonly coatingService: CoatingService,
     private readonly pressService: PressService,
+    private readonly notchingService: NotchingService,
   ) {}
 
   async exportLots(productionId: number): Promise<StreamableFile> {
@@ -32,6 +34,7 @@ export class LotExportService {
     await this.fillMixingSheet(workbook, productionId);
     await this.fillCoatingSheet(workbook, productionId);
     await this.fillCalenderingSheet(workbook, productionId);
+    await this.fillNotchingSheet(workbook, productionId);
 
     const buffer = await workbook.xlsx.writeBuffer();
 
@@ -367,6 +370,79 @@ export class LotExportService {
       }
 
       rowIndex += 2; // 다음 Lot은 2행 뒤부터
+    }
+  }
+
+  private async fillNotchingSheet(workbook: ExcelJS.Workbook, productionId: number): Promise<void> {
+    const worksheet = workbook.getWorksheet('Notching');
+
+    if (!worksheet) {
+      return; // Notching 시트가 없으면 건너뜀
+    }
+
+    const notchingLots = await this.notchingService.getNotchingLots(productionId);
+
+    // 디버그: Notching 데이터 출력
+    console.log('=== Notching Data Debug ===');
+    console.log('Total Lots:', notchingLots.length);
+    notchingLots.forEach((lot, index) => {
+      console.log(`\n[Lot ${index + 1}]`);
+      console.log('  B (Date):', lot.notchingDate);
+      console.log('  C (Lot):', lot.lot);
+      console.log('  D (Temp):', lot.atNotching?.temp);
+      console.log('  E (Humidity):', lot.atNotching?.humidity);
+      console.log('  F (Over Tab):', lot.electrodeSpec?.overTab);
+      console.log('  G (Wide):', lot.electrodeSpec?.wide);
+      console.log('  H (Length):', lot.electrodeSpec?.length);
+      console.log('  I (Miss Match):', lot.electrodeSpec?.missMatch);
+      console.log('  J (Total Output):', lot.production?.totalOutput);
+      console.log('  K (Defective):', lot.production?.defective);
+      console.log('  L (Quantity):', lot.production?.quantity);
+      console.log('  M (Fraction Defective):', lot.production?.fractionDefective);
+    });
+    console.log('=== End Notching Debug ===\n');
+
+    // 6행부터 데이터 입력 (한 Lot당 1행 사용)
+    let rowIndex = 6;
+    for (const lot of notchingLots) {
+      if (lot.notchingDate) {
+        worksheet.getCell(rowIndex, 2).value = this.formatDate(lot.notchingDate); // B: Date
+      }
+      if (lot.lot) {
+        worksheet.getCell(rowIndex, 3).value = lot.lot; // C: Lot
+      }
+      if (lot.atNotching?.temp != null) {
+        worksheet.getCell(rowIndex, 4).value = lot.atNotching.temp; // D: Temp
+      }
+      if (lot.atNotching?.humidity != null) {
+        worksheet.getCell(rowIndex, 5).value = lot.atNotching.humidity; // E: Humidity
+      }
+      if (lot.electrodeSpec?.overTab != null) {
+        worksheet.getCell(rowIndex, 6).value = lot.electrodeSpec.overTab; // F: Over Tab
+      }
+      if (lot.electrodeSpec?.wide != null) {
+        worksheet.getCell(rowIndex, 7).value = lot.electrodeSpec.wide; // G: Wide
+      }
+      if (lot.electrodeSpec?.length != null) {
+        worksheet.getCell(rowIndex, 8).value = lot.electrodeSpec.length; // H: Length
+      }
+      if (lot.electrodeSpec?.missMatch != null) {
+        worksheet.getCell(rowIndex, 9).value = lot.electrodeSpec.missMatch; // I: Miss Match
+      }
+      if (lot.production?.totalOutput != null) {
+        worksheet.getCell(rowIndex, 10).value = lot.production.totalOutput; // J: Total Output
+      }
+      if (lot.production?.defective != null) {
+        worksheet.getCell(rowIndex, 11).value = lot.production.defective; // K: Defective
+      }
+      if (lot.production?.quantity != null) {
+        worksheet.getCell(rowIndex, 12).value = lot.production.quantity; // L: Quantity
+      }
+      if (lot.production?.fractionDefective != null) {
+        worksheet.getCell(rowIndex, 13).value = lot.production.fractionDefective / 100; // M: Fraction defective (퍼센트 서식용)
+      }
+
+      rowIndex++;
     }
   }
 
