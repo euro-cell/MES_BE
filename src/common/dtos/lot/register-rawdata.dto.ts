@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsArray, IsString, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 
-export class RegisterLowDataDto {
+export class RegisterRawDataDto {
   @ApiProperty({
     description: '헤더 목록 (예: ["lot", "Pre-Formation PFC", ...])',
     example: ['lot', 'Pre-Formation PFC', 'Pre-Formation RFD'],
@@ -12,7 +12,7 @@ export class RegisterLowDataDto {
   headers: string[];
 
   @ApiProperty({
-    description: 'Low Data 배열',
+    description: 'Raw Data 배열',
     example: [
       { lot: 'O1CD010001', 'Pre-Formation PFC': '0.123', 'Pre-Formation RFD': '0.456' },
       { lot: 'O1CD010002', 'Pre-Formation PFC': '0.234', 'Pre-Formation RFD': '0.567' },

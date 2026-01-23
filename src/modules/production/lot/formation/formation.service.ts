@@ -6,7 +6,7 @@ import { LotSealing } from '../../../../common/entities/lots/lot-07-sealing.enti
 import { LotSync } from '../../../../common/entities/lots/lot-sync.entity';
 import { WorklogFormation } from '../../../../common/entities/worklogs/worklog-13-formation.entity';
 import { WorklogGrading } from '../../../../common/entities/worklogs/worklog-14-grading.entity';
-import { RegisterLowDataDto } from '../../../../common/dtos/lot/register-lowdata.dto';
+import { RegisterRawDataDto } from '../../../../common/dtos/lot/register-rawdata.dto';
 
 @Injectable()
 export class FormationLotService {
@@ -348,7 +348,7 @@ export class FormationLotService {
     };
   }
 
-  // ===== Low Data 헤더 → 엔티티 필드 매핑 =====
+  // ===== Raw Data 헤더 → 엔티티 필드 매핑 =====
   private readonly headerToFieldMap: Record<string, keyof LotFormation> = {
     // Pre-Formation
     'Pre-Formation PFC': 'pfc',
@@ -404,7 +404,7 @@ export class FormationLotService {
     return next3.replace(/-/g, '/');
   }
 
-  async registerLowData(productionId: number, dto: RegisterLowDataDto) {
+  async registerRawData(productionId: number, dto: RegisterRawDataDto) {
     const { headers, data } = dto;
 
     // lot 필드 찾기 (여러 형식 지원: "lot", "Lot Lot" 등)
@@ -479,7 +479,7 @@ export class FormationLotService {
 
     return {
       success: true,
-      message: `Low Data 등록 완료: 총 ${results.total}건 중 ${results.updated}건 업데이트, ${results.created}건 생성, ${results.skipped}건 스킵`,
+      message: `Raw Data 등록 완료: 총 ${results.total}건 중 ${results.updated}건 업데이트, ${results.created}건 생성, ${results.skipped}건 스킵`,
       results,
     };
   }
