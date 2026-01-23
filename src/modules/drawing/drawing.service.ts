@@ -5,7 +5,7 @@ import { existsSync, mkdirSync, unlinkSync, renameSync } from 'fs';
 import { join, extname } from 'path';
 import { Drawing } from 'src/common/entities/drawing.entity';
 import { DrawingVersion } from 'src/common/entities/drawing-version.entity';
-import { CreateDrawingDto, DrawingSearchDto } from 'src/common/dtos/drawing.dto';
+import { CreateDrawingDto, CreateDrawingVersionDto, DrawingSearchDto } from 'src/common/dtos/drawing.dto';
 
 @Injectable()
 export class DrawingService {
@@ -28,7 +28,7 @@ export class DrawingService {
         'drawing.drawingNumber AS "drawingNumber"',
         'drawing.description AS description',
         'drawing.currentVersion AS "currentVersion"',
-        "TO_CHAR(MAX(version.registrationDate), 'YYYY-MM-DD') AS \"latestRegistrationDate\"",
+        'TO_CHAR(MAX(version.registrationDate), \'YYYY-MM-DD\') AS "latestRegistrationDate"',
       ])
       .where('drawing.deletedAt IS NULL')
       .groupBy('drawing.id');
@@ -74,10 +74,7 @@ export class DrawingService {
     };
   }
 
-  async create(
-    dto: CreateDrawingDto,
-    files: { drawingFile?: Express.Multer.File[]; pdfFiles?: Express.Multer.File[] },
-  ) {
+  async create(dto: CreateDrawingDto, files: { drawingFile?: Express.Multer.File[]; pdfFiles?: Express.Multer.File[] }) {
     // 입력값 trim 처리
     const drawingNumber = dto.drawingNumber.trim();
     const projectName = dto.projectName.trim();
@@ -150,9 +147,68 @@ export class DrawingService {
     }
   }
 
-  // multer에서 latin1으로 인코딩된 파일명을 UTF-8로 디코딩
-  private decodeFileName(filename: string): string {
-    return Buffer.from(filename, 'latin1').toString('utf8');
+  async addVersion(
+    drawingId: number,
+    dto: CreateDrawingVersionDto,
+    files: { drawingFile?: Express.Multer.File[]; pdfFiles?: Express.Multer.File[] },
+  ) {
+    const drawingFile = files.drawingFile?.[0];
+    const pdfFiles = files.pdfFiles || [];
+
+    // 에러 발생 시 업로드된 파일 삭제 헬퍼
+    const cleanupFiles = () => {
+      if (drawingFile?.path && existsSync(drawingFile.path)) {
+        unlinkSync(drawingFile.path);
+      }
+      for (const pdfFile of pdfFiles) {
+        if (pdfFile?.path && existsSync(pdfFile.path)) {
+          unlinkSync(pdfFile.path);
+        }
+      }
+    };
+
+    try {
+      // 도면 조회
+      const drawing = await this.drawingRepository.findOne({
+        where: { id: drawingId, deletedAt: IsNull() },
+      });
+
+      if (!drawing) {
+        throw new NotFoundException('도면을 찾을 수 없습니다.');
+      }
+
+      // 파일 이동
+      const { drawingFilePath, drawingFileName, pdfFilePaths, pdfFileNames } = await this.moveFilesToDrawingDirectory(
+        drawing.id,
+        drawing.drawingNumber,
+        dto.version,
+        drawing.description || '',
+        drawingFile,
+        pdfFiles,
+      );
+
+      // 버전 생성
+      const drawingVersion = new DrawingVersion();
+      drawingVersion.drawing = drawing;
+      drawingVersion.version = dto.version;
+      drawingVersion.drawingFilePath = drawingFilePath ?? undefined;
+      drawingVersion.drawingFileName = drawingFileName ?? undefined;
+      drawingVersion.pdfFilePaths = pdfFilePaths ?? undefined;
+      drawingVersion.pdfFileNames = pdfFileNames ?? undefined;
+      drawingVersion.registrationDate = new Date(dto.registrationDate);
+      drawingVersion.changeNote = dto.changeNote?.trim() ?? undefined;
+
+      await this.versionRepository.save(drawingVersion);
+
+      // 도면의 currentVersion 업데이트
+      drawing.currentVersion = dto.version;
+      await this.drawingRepository.save(drawing);
+
+      return this.findOne(drawing.id);
+    } catch (error) {
+      cleanupFiles();
+      throw error;
+    }
   }
 
   // 파일을 도면 전용 디렉토리로 이동 (DB에는 상대경로 저장)
@@ -191,7 +247,8 @@ export class DrawingService {
       const savedDrawingFileName = `${drawingNumber}_v${version}_${sanitizedDescription}_${timestamp}${drawingExt}`;
       const drawingAbsPath = join(absoluteDir, savedDrawingFileName);
       drawingFilePath = join(relativeDir, savedDrawingFileName);
-      drawingFileName = this.decodeFileName(drawingFile.originalname);
+      // 파일명 자동 생성: 도면번호_V버전 (도면내용).확장자
+      drawingFileName = `${drawingNumber}_V${version} (${sanitizedDescription})${drawingExt}`;
       renameSync(drawingFile.path, drawingAbsPath);
     }
 
@@ -208,7 +265,8 @@ export class DrawingService {
         const pdfAbsPath = join(absoluteDir, savedPdfFileName);
         const pdfFilePath = join(relativeDir, savedPdfFileName);
         pdfFilePaths.push(pdfFilePath);
-        pdfFileNames.push(this.decodeFileName(pdfFile.originalname));
+        // 파일명 자동 생성: 도면번호_V버전 (도면내용)_순번.확장자
+        pdfFileNames.push(`${drawingNumber}_V${version} (${sanitizedDescription})_${i + 1}${pdfExt}`);
         renameSync(pdfFile.path, pdfAbsPath);
       }
     }

@@ -79,6 +79,30 @@ export class UpdateDrawingDto extends PartialType(
   OmitType(CreateDrawingDto, ['drawingNumber', 'version', 'registrationDate', 'changeNote', 'drawingFile', 'pdfFiles'] as const),
 ) {}
 
+export class CreateDrawingVersionDto {
+  @ApiProperty({ description: '버전', example: 2.0 })
+  @IsNotEmpty()
+  @Type(() => Number)
+  @IsNumber()
+  version: number;
+
+  @ApiProperty({ description: '등록일', example: '2024-03-20' })
+  @IsNotEmpty()
+  @IsString()
+  registrationDate: string;
+
+  @ApiPropertyOptional({ description: '변경 사유' })
+  @IsOptional()
+  @IsString()
+  changeNote?: string;
+
+  @ApiPropertyOptional({ type: 'string', format: 'binary', description: '도면 파일 (.dwg)' })
+  drawingFile?: Express.Multer.File;
+
+  @ApiPropertyOptional({ type: 'array', items: { type: 'string', format: 'binary' }, description: 'PDF 파일 (복수)' })
+  pdfFiles?: Express.Multer.File[];
+}
+
 export class DrawingSearchDto {
   @ApiPropertyOptional({ description: '구분 필터', enum: DrawingCategory })
   @IsOptional()
