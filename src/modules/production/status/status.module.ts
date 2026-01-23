@@ -10,5 +10,6 @@ import { ProductionTarget } from 'src/common/entities/production-target.entity';
   imports: [TypeOrmModule.forFeature([ProductionPlan, ProductionTarget]), ProcessModule],
   controllers: [StatusController],
   providers: [StatusService],
+  exports: [StatusService],
 })
 export class StatusModule {}

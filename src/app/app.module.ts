@@ -20,6 +20,7 @@ import { multerConfig } from 'src/common/configs/multer.config';
 import { DrawingModule } from 'src/modules/drawing/drawing.module';
 import { EquipmentModule } from 'src/modules/equipment/equipment.module';
 import { CommonModule } from 'src/common/common.module';
+import { DashboardModule } from 'src/modules/dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { CommonModule } from 'src/common/common.module';
     QualityModule,
     DrawingModule,
     EquipmentModule,
+    DashboardModule,
   ],
   controllers: [AppController],
   providers: [
