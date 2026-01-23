@@ -53,9 +53,9 @@ export class ProductionService {
 
   async create(dto: CreateProductionDto) {
     const company = dto.company.toUpperCase();
-    const mode = dto.mode.toUpperCase() as 'OME' | 'ODM';
+    const mode = dto.mode.toUpperCase() as 'OEM' | 'ODM';
     const batteryType = dto.batteryType.toUpperCase();
-    const type = mode === 'OME' ? 'E' : 'D';
+    const type = mode === 'OEM' ? 'E' : 'D';
 
     // 이름 규칙: NA + E + 25 + A + 1 + TNP + 38
     const name = this.generateProjectName({
