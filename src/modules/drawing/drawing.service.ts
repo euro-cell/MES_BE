@@ -40,7 +40,7 @@ export class DrawingService {
     return query.orderBy('drawing.id', 'DESC').getRawMany();
   }
 
-  async findOne(id: number): Promise<Drawing> {
+  async findOne(id: number) {
     const drawing = await this.drawingRepository.findOne({
       where: { id, deletedAt: IsNull() },
       relations: ['versions'],
@@ -50,13 +50,34 @@ export class DrawingService {
       throw new NotFoundException('도면을 찾을 수 없습니다.');
     }
 
-    return drawing;
+    // 응답 형식에 맞게 가공
+    return {
+      id: drawing.id,
+      category: drawing.category,
+      projectName: drawing.projectName,
+      division: drawing.division,
+      drawingNumber: drawing.drawingNumber,
+      description: drawing.description,
+      currentVersion: drawing.currentVersion,
+      versions: drawing.versions
+        .sort((a, b) => a.version - b.version)
+        .map((v) => ({
+          id: v.id,
+          version: v.version,
+          drawingFileName: v.drawingFileName ?? null,
+          drawingFilePath: v.drawingFilePath ?? null,
+          pdfFileNames: v.pdfFileNames ?? [],
+          pdfFilePaths: v.pdfFilePaths ?? [],
+          registrationDate: new Date(v.registrationDate).toISOString().split('T')[0],
+          changeNote: v.changeNote ?? null,
+        })),
+    };
   }
 
   async create(
     dto: CreateDrawingDto,
     files: { drawingFile?: Express.Multer.File[]; pdfFiles?: Express.Multer.File[] },
-  ): Promise<Drawing> {
+  ) {
     // 입력값 trim 처리
     const drawingNumber = dto.drawingNumber.trim();
     const projectName = dto.projectName.trim();
