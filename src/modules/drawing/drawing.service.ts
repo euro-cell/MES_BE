@@ -60,7 +60,7 @@ export class DrawingService {
       description: drawing.description,
       currentVersion: drawing.currentVersion,
       versions: drawing.versions
-        .sort((a, b) => a.version - b.version)
+        .sort((a, b) => b.version - a.version)
         .map((v) => ({
           id: v.id,
           version: v.version,
