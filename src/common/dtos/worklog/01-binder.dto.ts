@@ -4,6 +4,11 @@ import { PartialType } from '@nestjs/swagger';
 import { BaseWorklogDto, BaseWorklogListResponseDto } from './00-base-worklog.dto';
 
 export class CreateBinderWorklogDto extends BaseWorklogDto {
+  @ApiPropertyOptional({ description: 'PD Mixer 명칭', example: 'PD Mixer-1' })
+  @IsOptional()
+  @IsString()
+  pdMixerName?: string;
+
   @ApiPropertyOptional({ description: '원료1 명칭', example: 'PVDF' })
   @IsOptional()
   @IsString()

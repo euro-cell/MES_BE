@@ -14,6 +14,12 @@ export class EquipmentController {
     return this.equipmentService.findByCategory(category);
   }
 
+  @Get('mixers')
+  async findMixersByCategory(@Query() query: EquipmentSearchDto) {
+    const category = categoryMap[query.category];
+    return this.equipmentService.findMixersByCategory(category);
+  }
+
   @Post()
   async create(@Body() createEquipmentDto: CreateEquipmentDto) {
     return this.equipmentService.create(createEquipmentDto);

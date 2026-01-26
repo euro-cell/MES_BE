@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { WorklogBinder } from 'src/common/entities/worklogs/worklog-01-binder.entity';
 import { CreateBinderWorklogDto, BinderWorklogListResponseDto, UpdateBinderWorklogDto } from 'src/common/dtos/worklog/01-binder.dto';
 import { MaterialService } from 'src/modules/material/material.service';
+import { EquipmentService } from 'src/modules/equipment/equipment.service';
 import { MaterialProcess } from 'src/common/enums/material.enum';
 
 @Injectable()
@@ -12,12 +13,21 @@ export class BinderService {
     @InjectRepository(WorklogBinder)
     private readonly worklogBinderRepository: Repository<WorklogBinder>,
     private readonly materialService: MaterialService,
+    private readonly equipmentService: EquipmentService,
   ) {}
 
   async createBinderWorklog(productionId: number, dto: CreateBinderWorklogDto): Promise<WorklogBinder> {
+    // pdMixerName을 pdMixerId로 변환
+    let pdMixerId: number | null = null;
+    if (dto.pdMixerName) {
+      pdMixerId = await this.equipmentService.findIdByName(dto.pdMixerName);
+    }
+
+    const { pdMixerName, ...createData } = dto;
     const worklog = this.worklogBinderRepository.create({
-      ...dto,
+      ...createData,
       production: { id: productionId },
+      pdMixerId,
     });
     const savedWorklog = await this.worklogBinderRepository.save(worklog);
 
@@ -68,10 +78,17 @@ export class BinderService {
       return null;
     }
 
-    const { production, ...rest } = worklog;
+    // pdMixerId를 pdMixerName으로 변환
+    let pdMixerName: string | null = null;
+    if (worklog.pdMixerId) {
+      pdMixerName = await this.equipmentService.findNameById(worklog.pdMixerId);
+    }
+
+    const { production, pdMixerId, ...rest } = worklog;
     return {
       ...rest,
       productionId: production?.name || '',
+      pdMixerName,
     };
   }
 
@@ -88,7 +105,16 @@ export class BinderService {
       previousMaterialData[`material${i}ActualInput`] = worklog[`material${i}ActualInput`] || 0;
     }
 
-    Object.assign(worklog, updateBinderWorklogDto);
+    // pdMixerName이 제공되면 pdMixerId로 변환
+    if (updateBinderWorklogDto.pdMixerName) {
+      const pdMixerId = await this.equipmentService.findIdByName(updateBinderWorklogDto.pdMixerName);
+      worklog.pdMixerId = pdMixerId;
+    }
+
+    // pdMixerName을 제외한 나머지 필드 업데이트
+    const updateData = { ...updateBinderWorklogDto };
+    delete (updateData as any).pdMixerName;
+    Object.assign(worklog, updateData);
     const savedWorklog = await this.worklogBinderRepository.save(worklog);
 
     // 자재 사용 이력 수정 - 사용량이 변경된 경우

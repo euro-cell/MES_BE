@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, ILike } from 'typeorm';
 import { StreamableFile } from '@nestjs/common';
 import { Equipment } from 'src/common/entities/equipment.entity';
 import { CreateEquipmentDto, UpdateEquipmentDto } from 'src/common/dtos/equipment.dto';
@@ -27,6 +27,29 @@ export class EquipmentService {
       where: { category },
       order: { id: 'ASC' },
     });
+  }
+
+  async findMixersByCategory(category: EquipmentCategory): Promise<Equipment[]> {
+    return this.equipmentRepository.find({
+      where: { category, name: ILike('%Mixer%') },
+      order: { id: 'ASC' },
+    });
+  }
+
+  async findIdByName(name: string): Promise<number | null> {
+    const equipment = await this.equipmentRepository.findOne({
+      where: { name },
+      select: ['id'],
+    });
+    return equipment?.id || null;
+  }
+
+  async findNameById(id: number): Promise<string | null> {
+    const equipment = await this.equipmentRepository.findOne({
+      where: { id },
+      select: ['name'],
+    });
+    return equipment?.name || null;
   }
 
   async update(id: number, updateEquipmentDto: UpdateEquipmentDto) {

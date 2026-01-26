@@ -1,5 +1,6 @@
-import { Entity, Column } from 'typeorm';
+import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { WorklogBase } from './worklog-00-base.entity';
+import { Equipment } from '../equipment.entity';
 
 @Entity('worklog_binders')
 export class WorklogBinder extends WorklogBase {
@@ -50,6 +51,13 @@ export class WorklogBinder extends WorklogBase {
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   solidContent3: number;
+
+  @Column({ type: 'int', nullable: true })
+  pdMixerId: number | null;
+
+  @ManyToOne(() => Equipment, { nullable: true })
+  @JoinColumn()
+  pdMixer: Equipment;
 
   @Column({ type: 'decimal', precision: 15, scale: 2, nullable: true })
   nmpWeightInput: number;
