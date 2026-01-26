@@ -231,6 +231,20 @@ export class DrawingService {
     return this.findOne(id);
   }
 
+  async remove(id: number) {
+    const drawing = await this.drawingRepository.findOne({
+      where: { id, deletedAt: IsNull() },
+    });
+
+    if (!drawing) {
+      throw new NotFoundException('도면을 찾을 수 없습니다.');
+    }
+
+    await this.drawingRepository.softDelete(id);
+
+    return { message: '도면이 삭제되었습니다.' };
+  }
+
   // 파일을 도면 전용 디렉토리로 이동 (DB에는 상대경로 저장)
   private async moveFilesToDrawingDirectory(
     drawingId: number,

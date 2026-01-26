@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Param, Query, Body, UseInterceptors, UploadedFiles } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Param, Query, Body, UseInterceptors, UploadedFiles } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { ApiOperation, ApiConflictResponse, ApiConsumes, ApiBody, ApiNotFoundResponse } from '@nestjs/swagger';
 import { DrawingService } from './drawing.service';
@@ -70,5 +70,12 @@ export class DrawingController {
   @ApiNotFoundResponse({ description: '도면을 찾을 수 없습니다.' })
   async update(@Param('id') id: number, @Body() dto: UpdateDrawingDto) {
     return this.drawingService.update(id, dto);
+  }
+
+  @Delete(':id')
+  @ApiOperation({ summary: '도면 삭제' })
+  @ApiNotFoundResponse({ description: '도면을 찾을 수 없습니다.' })
+  async remove(@Param('id') id: number) {
+    return this.drawingService.remove(id);
   }
 }
