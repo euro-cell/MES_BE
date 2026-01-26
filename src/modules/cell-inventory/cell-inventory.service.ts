@@ -222,7 +222,7 @@ export class CellInventoryService {
   async getProjectCells(projectName: string) {
     return await this.cellInventoryRepository.find({
       where: { projectName },
-      order: { lot: 'ASC', grade: 'ASC' },
+      order: { projectNo: 'ASC', lot: 'ASC' },
     });
   }
 
