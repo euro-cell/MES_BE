@@ -103,6 +103,19 @@ export class CreateDrawingVersionDto {
   pdfFiles?: Express.Multer.File[];
 }
 
+export class UpdateDrawingVersionDto {
+  @ApiPropertyOptional({ description: '변경 사유' })
+  @IsOptional()
+  @IsString()
+  changeNote?: string;
+
+  @ApiPropertyOptional({ type: 'string', format: 'binary', description: '도면 파일 (.dwg)' })
+  drawingFile?: Express.Multer.File;
+
+  @ApiPropertyOptional({ type: 'array', items: { type: 'string', format: 'binary' }, description: 'PDF 파일 (복수)' })
+  pdfFiles?: Express.Multer.File[];
+}
+
 export class DrawingSearchDto {
   @ApiPropertyOptional({ description: '구분 필터', enum: DrawingCategory })
   @IsOptional()

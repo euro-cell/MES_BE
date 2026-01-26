@@ -2,7 +2,13 @@ import { Controller, Get, Post, Patch, Delete, Param, Query, Body, UseIntercepto
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { ApiOperation, ApiConflictResponse, ApiConsumes, ApiBody, ApiNotFoundResponse } from '@nestjs/swagger';
 import { DrawingService } from './drawing.service';
-import { CreateDrawingDto, CreateDrawingVersionDto, UpdateDrawingDto, DrawingSearchDto } from 'src/common/dtos/drawing.dto';
+import {
+  CreateDrawingDto,
+  CreateDrawingVersionDto,
+  UpdateDrawingDto,
+  UpdateDrawingVersionDto,
+  DrawingSearchDto,
+} from 'src/common/dtos/drawing.dto';
 import { multerConfig } from 'src/common/configs/multer.config';
 
 @Controller('drawing')
@@ -77,5 +83,35 @@ export class DrawingController {
   @ApiNotFoundResponse({ description: '도면을 찾을 수 없습니다.' })
   async remove(@Param('id') id: number) {
     return this.drawingService.remove(id);
+  }
+
+  @Patch(':drawingId/version/:versionId')
+  @ApiOperation({ summary: '도면 버전 수정' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({ type: UpdateDrawingVersionDto })
+  @ApiNotFoundResponse({ description: '도면 또는 버전을 찾을 수 없습니다.' })
+  @UseInterceptors(
+    FileFieldsInterceptor(
+      [
+        { name: 'drawingFile', maxCount: 1 },
+        { name: 'pdfFiles', maxCount: 20 },
+      ],
+      multerConfig,
+    ),
+  )
+  async updateVersion(
+    @Param('drawingId') drawingId: number,
+    @Param('versionId') versionId: number,
+    @Body() dto: UpdateDrawingVersionDto,
+    @UploadedFiles() files: { drawingFile?: Express.Multer.File[]; pdfFiles?: Express.Multer.File[] },
+  ) {
+    return this.drawingService.updateVersion(drawingId, versionId, dto, files);
+  }
+
+  @Delete(':drawingId/version/:versionId')
+  @ApiOperation({ summary: '도면 버전 삭제' })
+  @ApiNotFoundResponse({ description: '도면 또는 버전을 찾을 수 없습니다.' })
+  async removeVersion(@Param('drawingId') drawingId: number, @Param('versionId') versionId: number) {
+    return this.drawingService.removeVersion(drawingId, versionId);
   }
 }

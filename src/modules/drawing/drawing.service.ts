@@ -5,7 +5,13 @@ import { existsSync, mkdirSync, unlinkSync, renameSync } from 'fs';
 import { join, extname } from 'path';
 import { Drawing } from 'src/common/entities/drawing.entity';
 import { DrawingVersion } from 'src/common/entities/drawing-version.entity';
-import { CreateDrawingDto, CreateDrawingVersionDto, UpdateDrawingDto, DrawingSearchDto } from 'src/common/dtos/drawing.dto';
+import {
+  CreateDrawingDto,
+  CreateDrawingVersionDto,
+  UpdateDrawingDto,
+  UpdateDrawingVersionDto,
+  DrawingSearchDto,
+} from 'src/common/dtos/drawing.dto';
 
 @Injectable()
 export class DrawingService {
@@ -243,6 +249,161 @@ export class DrawingService {
     await this.drawingRepository.softDelete(id);
 
     return { message: '도면이 삭제되었습니다.' };
+  }
+
+  async updateVersion(
+    drawingId: number,
+    versionId: number,
+    dto: UpdateDrawingVersionDto,
+    files: { drawingFile?: Express.Multer.File[]; pdfFiles?: Express.Multer.File[] },
+  ) {
+    const drawingFile = files.drawingFile?.[0];
+    const pdfFiles = files.pdfFiles || [];
+
+    // 에러 발생 시 업로드된 파일 삭제 헬퍼
+    const cleanupFiles = () => {
+      if (drawingFile?.path && existsSync(drawingFile.path)) {
+        unlinkSync(drawingFile.path);
+      }
+      for (const pdfFile of pdfFiles) {
+        if (pdfFile?.path && existsSync(pdfFile.path)) {
+          unlinkSync(pdfFile.path);
+        }
+      }
+    };
+
+    try {
+      // 도면 조회
+      const drawing = await this.drawingRepository.findOne({
+        where: { id: drawingId, deletedAt: IsNull() },
+      });
+
+      if (!drawing) {
+        throw new NotFoundException('도면을 찾을 수 없습니다.');
+      }
+
+      // 버전 조회
+      const version = await this.versionRepository.findOne({
+        where: { id: versionId, drawing: { id: drawingId } },
+      });
+
+      if (!version) {
+        throw new NotFoundException('버전을 찾을 수 없습니다.');
+      }
+
+      // changeNote 업데이트
+      if (dto.changeNote !== undefined) {
+        version.changeNote = dto.changeNote?.trim() ?? undefined;
+      }
+
+      // 도면 파일 교체
+      if (drawingFile) {
+        // 기존 파일 삭제
+        if (version.drawingFilePath) {
+          const oldPath = join(process.cwd(), version.drawingFilePath);
+          if (existsSync(oldPath)) {
+            unlinkSync(oldPath);
+          }
+        }
+
+        // 새 파일 저장
+        const { drawingFilePath, drawingFileName } = await this.moveFilesToDrawingDirectory(
+          drawing.id,
+          drawing.drawingNumber,
+          version.version,
+          drawing.description || '',
+          drawingFile,
+          undefined,
+        );
+
+        version.drawingFilePath = drawingFilePath ?? undefined;
+        version.drawingFileName = drawingFileName ?? undefined;
+      }
+
+      // PDF 파일들 교체
+      if (pdfFiles.length > 0) {
+        // 기존 PDF 파일들 삭제
+        if (version.pdfFilePaths && version.pdfFilePaths.length > 0) {
+          for (const oldPdfPath of version.pdfFilePaths) {
+            const fullPath = join(process.cwd(), oldPdfPath);
+            if (existsSync(fullPath)) {
+              unlinkSync(fullPath);
+            }
+          }
+        }
+
+        // 새 PDF 파일들 저장
+        const { pdfFilePaths, pdfFileNames } = await this.moveFilesToDrawingDirectory(
+          drawing.id,
+          drawing.drawingNumber,
+          version.version,
+          drawing.description || '',
+          undefined,
+          pdfFiles,
+        );
+
+        version.pdfFilePaths = pdfFilePaths ?? undefined;
+        version.pdfFileNames = pdfFileNames ?? undefined;
+      }
+
+      await this.versionRepository.save(version);
+
+      return this.findOne(drawingId);
+    } catch (error) {
+      cleanupFiles();
+      throw error;
+    }
+  }
+
+  async removeVersion(drawingId: number, versionId: number) {
+    // 도면 조회
+    const drawing = await this.drawingRepository.findOne({
+      where: { id: drawingId, deletedAt: IsNull() },
+      relations: ['versions'],
+    });
+
+    if (!drawing) {
+      throw new NotFoundException('도면을 찾을 수 없습니다.');
+    }
+
+    // 버전 조회
+    const version = await this.versionRepository.findOne({
+      where: { id: versionId, drawing: { id: drawingId } },
+    });
+
+    if (!version) {
+      throw new NotFoundException('버전을 찾을 수 없습니다.');
+    }
+
+    // 파일 삭제
+    if (version.drawingFilePath) {
+      const drawingPath = join(process.cwd(), version.drawingFilePath);
+      if (existsSync(drawingPath)) {
+        unlinkSync(drawingPath);
+      }
+    }
+
+    if (version.pdfFilePaths && version.pdfFilePaths.length > 0) {
+      for (const pdfPath of version.pdfFilePaths) {
+        const fullPath = join(process.cwd(), pdfPath);
+        if (existsSync(fullPath)) {
+          unlinkSync(fullPath);
+        }
+      }
+    }
+
+    // 버전 삭제
+    await this.versionRepository.delete(versionId);
+
+    // 남은 버전 중 최신 버전으로 currentVersion 업데이트
+    const remainingVersions = drawing.versions.filter((v) => v.id !== versionId);
+    if (remainingVersions.length > 0) {
+      const latestVersion = remainingVersions.reduce((max, v) => (v.version > max.version ? v : max));
+      drawing.currentVersion = latestVersion.version;
+      await this.drawingRepository.save(drawing);
+    }
+
+    return this.findOne(drawingId);
   }
 
   // 파일을 도면 전용 디렉토리로 이동 (DB에는 상대경로 저장)
