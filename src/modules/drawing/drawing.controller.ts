@@ -1,8 +1,8 @@
-import { Controller, Get, Post, Param, Query, Body, UseInterceptors, UploadedFiles } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Param, Query, Body, UseInterceptors, UploadedFiles } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { ApiOperation, ApiConflictResponse, ApiConsumes, ApiBody, ApiNotFoundResponse } from '@nestjs/swagger';
 import { DrawingService } from './drawing.service';
-import { CreateDrawingDto, CreateDrawingVersionDto, DrawingSearchDto } from 'src/common/dtos/drawing.dto';
+import { CreateDrawingDto, CreateDrawingVersionDto, UpdateDrawingDto, DrawingSearchDto } from 'src/common/dtos/drawing.dto';
 import { multerConfig } from 'src/common/configs/multer.config';
 
 @Controller('drawing')
@@ -63,5 +63,12 @@ export class DrawingController {
     @UploadedFiles() files: { drawingFile?: Express.Multer.File[]; pdfFiles?: Express.Multer.File[] },
   ) {
     return this.drawingService.addVersion(drawingId, dto, files);
+  }
+
+  @Patch(':id')
+  @ApiOperation({ summary: '도면 수정' })
+  @ApiNotFoundResponse({ description: '도면을 찾을 수 없습니다.' })
+  async update(@Param('id') id: number, @Body() dto: UpdateDrawingDto) {
+    return this.drawingService.update(id, dto);
   }
 }

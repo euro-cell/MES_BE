@@ -5,7 +5,7 @@ import { existsSync, mkdirSync, unlinkSync, renameSync } from 'fs';
 import { join, extname } from 'path';
 import { Drawing } from 'src/common/entities/drawing.entity';
 import { DrawingVersion } from 'src/common/entities/drawing-version.entity';
-import { CreateDrawingDto, CreateDrawingVersionDto, DrawingSearchDto } from 'src/common/dtos/drawing.dto';
+import { CreateDrawingDto, CreateDrawingVersionDto, UpdateDrawingDto, DrawingSearchDto } from 'src/common/dtos/drawing.dto';
 
 @Injectable()
 export class DrawingService {
@@ -209,6 +209,26 @@ export class DrawingService {
       cleanupFiles();
       throw error;
     }
+  }
+
+  async update(id: number, dto: UpdateDrawingDto) {
+    const drawing = await this.drawingRepository.findOne({
+      where: { id, deletedAt: IsNull() },
+    });
+
+    if (!drawing) {
+      throw new NotFoundException('도면을 찾을 수 없습니다.');
+    }
+
+    // 변경된 필드만 업데이트
+    if (dto.category !== undefined) drawing.category = dto.category;
+    if (dto.projectName !== undefined) drawing.projectName = dto.projectName.trim();
+    if (dto.division !== undefined) drawing.division = dto.division.trim();
+    if (dto.description !== undefined) drawing.description = dto.description?.trim();
+
+    await this.drawingRepository.save(drawing);
+
+    return this.findOne(id);
   }
 
   // 파일을 도면 전용 디렉토리로 이동 (DB에는 상대경로 저장)
