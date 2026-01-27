@@ -27,13 +27,13 @@ export class LotFormation extends LotBase {
   @Column({ type: 'varchar', length: 10, nullable: true })
   preFormationChNo: string;
 
-  @Column({ type: 'decimal', precision: 10, scale: 3, nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   pfc: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 3, nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   rfd: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 1, nullable: true })
   forEff1: number;
 
   // ===== Final Sealing =====
@@ -58,28 +58,28 @@ export class LotFormation extends LotBase {
   @Column({ type: 'varchar', length: 10, nullable: true })
   mainFormationChNo: string;
 
-  @Column({ type: 'decimal', precision: 10, scale: 3, nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   mfc: number;
 
   // ===== OCV/IR 1 =====
   @Column({ type: 'decimal', precision: 10, scale: 3, nullable: true })
   ocv1: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 3, nullable: true })
   ir1: number;
 
   // ===== Aging 4 Days =====
   @Column({ type: 'decimal', precision: 10, scale: 3, nullable: true })
   ocv2_4: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 3, nullable: true })
   ir2_4: number;
 
   // ===== Aging 7 Days =====
   @Column({ type: 'decimal', precision: 10, scale: 3, nullable: true })
   ocv2_7: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 3, nullable: true })
   ir2_7: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 3, nullable: true })
@@ -92,19 +92,19 @@ export class LotFormation extends LotBase {
   @Column({ type: 'varchar', length: 10, nullable: true })
   gradingChNo: string;
 
-  @Column({ type: 'decimal', precision: 10, scale: 3, nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   mfd: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 1, nullable: true })
   formEff2: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 3, nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   stc: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 3, nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   std: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 1, nullable: true })
   formEff3: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
@@ -117,19 +117,19 @@ export class LotFormation extends LotBase {
   nominalV: number;
 
   // ===== SOC =====
-  @Column({ type: 'decimal', precision: 10, scale: 3, nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   socCapacity: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 1, nullable: true })
   soc: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 3, nullable: true })
   dcIr: number;
 
   // ===== OCV/IR 3 =====
   @Column({ type: 'decimal', precision: 10, scale: 3, nullable: true })
   ocv3: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 3, nullable: true })
   ir3: number;
 }
