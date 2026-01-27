@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { WorklogForming } from 'src/common/entities/worklogs/worklog-08-forming.entity';
 import { CreateFormingWorklogDto, FormingWorklogListResponseDto, UpdateFormingWorklogDto } from 'src/common/dtos/worklog/08-forming.dto';
 import { MaterialService } from 'src/modules/material/material.service';
+import { EquipmentService } from 'src/modules/equipment/equipment.service';
 import { MaterialProcess } from 'src/common/enums/material.enum';
 
 @Injectable()
@@ -12,6 +13,7 @@ export class FormingService {
     @InjectRepository(WorklogForming)
     private readonly worklogFormingRepository: Repository<WorklogForming>,
     private readonly materialService: MaterialService,
+    private readonly equipmentService: EquipmentService,
   ) {}
 
   async createFormingWorklog(productionId: number, dto: CreateFormingWorklogDto): Promise<WorklogForming> {
@@ -52,10 +54,28 @@ export class FormingService {
     return worklogsWithRound.reverse();
   }
 
-  async findWorklogById(worklogId: string): Promise<WorklogForming | null> {
-    return await this.worklogFormingRepository.findOne({
+  async findWorklogById(worklogId: string) {
+    const worklog = await this.worklogFormingRepository.findOne({
       where: { id: +worklogId },
+      relations: ['production'],
     });
+
+    if (!worklog) {
+      return null;
+    }
+
+    // plant ID를 plant name으로 변환
+    let plantName: string | null = null;
+    if (worklog.plant) {
+      plantName = await this.equipmentService.findNameById(worklog.plant);
+    }
+
+    const { production, plant, ...rest } = worklog;
+    return {
+      ...rest,
+      productionId: production?.name || '',
+      plant: plantName,
+    };
   }
 
   async updateFormingWorklog(worklogId: string, updateFormingWorklogDto: UpdateFormingWorklogDto): Promise<WorklogForming> {

@@ -8,6 +8,7 @@ import {
   UpdateStackingWorklogDto,
 } from 'src/common/dtos/worklog/09-stacking.dto';
 import { MaterialService } from 'src/modules/material/material.service';
+import { EquipmentService } from 'src/modules/equipment/equipment.service';
 import { MaterialProcess } from 'src/common/enums/material.enum';
 
 @Injectable()
@@ -16,6 +17,7 @@ export class StackingService {
     @InjectRepository(WorklogStacking)
     private readonly worklogStackingRepository: Repository<WorklogStacking>,
     private readonly materialService: MaterialService,
+    private readonly equipmentService: EquipmentService,
   ) {}
 
   async createStackingWorklog(productionId: number, dto: CreateStackingWorklogDto): Promise<WorklogStacking> {
@@ -56,10 +58,28 @@ export class StackingService {
     return worklogsWithRound.reverse();
   }
 
-  async findWorklogById(worklogId: string): Promise<WorklogStacking | null> {
-    return await this.worklogStackingRepository.findOne({
+  async findWorklogById(worklogId: string) {
+    const worklog = await this.worklogStackingRepository.findOne({
       where: { id: +worklogId },
+      relations: ['production'],
     });
+
+    if (!worklog) {
+      return null;
+    }
+
+    // plant ID를 plant name으로 변환
+    let plantName: string | null = null;
+    if (worklog.plant) {
+      plantName = await this.equipmentService.findNameById(worklog.plant);
+    }
+
+    const { production, plant, ...rest } = worklog;
+    return {
+      ...rest,
+      productionId: production?.name || '',
+      plant: plantName,
+    };
   }
 
   async updateStackingWorklog(worklogId: string, updateStackingWorklogDto: UpdateStackingWorklogDto): Promise<WorklogStacking> {

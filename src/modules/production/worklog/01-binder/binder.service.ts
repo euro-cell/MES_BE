@@ -84,11 +84,18 @@ export class BinderService {
       pdMixerName = await this.equipmentService.findNameById(worklog.pdMixerId);
     }
 
-    const { production, pdMixerId, ...rest } = worklog;
+    // plant ID를 plant name으로 변환
+    let plantName: string | null = null;
+    if (worklog.plant) {
+      plantName = await this.equipmentService.findNameById(worklog.plant);
+    }
+
+    const { production, pdMixerId, plant, ...rest } = worklog;
     return {
       ...rest,
       productionId: production?.name || '',
       pdMixerName,
+      plant: plantName,
     };
   }
 

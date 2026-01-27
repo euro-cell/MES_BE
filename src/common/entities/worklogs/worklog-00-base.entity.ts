@@ -1,5 +1,6 @@
 import { PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { Production } from '../production.entity';
+import { Equipment } from '../equipment.entity';
 
 export abstract class WorklogBase {
   @PrimaryGeneratedColumn()
@@ -18,8 +19,12 @@ export abstract class WorklogBase {
   @Column({ type: 'varchar', length: 50 })
   line: string;
 
-  @Column({ type: 'varchar', length: 100 })
-  plant: string;
+  @Column({ type: 'int', nullable: true })
+  plant: number | null;
+
+  @ManyToOne(() => Equipment, { nullable: true })
+  @JoinColumn({ name: 'plant' })
+  plantEquipment: Equipment;
 
   @Column({ type: 'varchar', length: 20 })
   shift: string;

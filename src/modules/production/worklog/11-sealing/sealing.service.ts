@@ -3,12 +3,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { WorklogSealing } from 'src/common/entities/worklogs/worklog-11-sealing.entity';
 import { CreateSealingWorklogDto, SealingWorklogListResponseDto, UpdateSealingWorklogDto } from 'src/common/dtos/worklog/11-sealing.dto';
+import { EquipmentService } from 'src/modules/equipment/equipment.service';
 
 @Injectable()
 export class SealingService {
   constructor(
     @InjectRepository(WorklogSealing)
     private readonly worklogSealingRepository: Repository<WorklogSealing>,
+    private readonly equipmentService: EquipmentService,
   ) {}
 
   async createSealingWorklog(productionId: number, dto: CreateSealingWorklogDto): Promise<WorklogSealing> {
@@ -42,10 +44,28 @@ export class SealingService {
     return worklogsWithRound.reverse();
   }
 
-  async findWorklogById(worklogId: string): Promise<WorklogSealing | null> {
-    return await this.worklogSealingRepository.findOne({
+  async findWorklogById(worklogId: string) {
+    const worklog = await this.worklogSealingRepository.findOne({
       where: { id: +worklogId },
+      relations: ['production'],
     });
+
+    if (!worklog) {
+      return null;
+    }
+
+    // plant ID를 plant name으로 변환
+    let plantName: string | null = null;
+    if (worklog.plant) {
+      plantName = await this.equipmentService.findNameById(worklog.plant);
+    }
+
+    const { production, plant, ...rest } = worklog;
+    return {
+      ...rest,
+      productionId: production?.name || '',
+      plant: plantName,
+    };
   }
 
   async updateSealingWorklog(worklogId: string, updateSealingWorklogDto: UpdateSealingWorklogDto): Promise<WorklogSealing> {

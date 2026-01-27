@@ -3,12 +3,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { WorklogPress } from 'src/common/entities/worklogs/worklog-04-press.entity';
 import { CreatePressWorklogDto, PressWorklogListResponseDto, UpdatePressWorklogDto } from 'src/common/dtos/worklog/04-press.dto';
+import { EquipmentService } from 'src/modules/equipment/equipment.service';
 
 @Injectable()
 export class PressService {
   constructor(
     @InjectRepository(WorklogPress)
     private readonly worklogPressRepository: Repository<WorklogPress>,
+    private readonly equipmentService: EquipmentService,
   ) {}
 
   async createPressWorklog(productionId: number, dto: CreatePressWorklogDto): Promise<WorklogPress> {
@@ -52,10 +54,17 @@ export class PressService {
       return null;
     }
 
-    const { production, ...rest } = worklog;
+    // plant ID를 plant name으로 변환
+    let plantName: string | null = null;
+    if (worklog.plant) {
+      plantName = await this.equipmentService.findNameById(worklog.plant);
+    }
+
+    const { production, plant, ...rest } = worklog;
     return {
       ...rest,
       productionId: production?.name || '',
+      plant: plantName,
     };
   }
 

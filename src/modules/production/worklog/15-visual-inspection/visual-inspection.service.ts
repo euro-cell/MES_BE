@@ -7,12 +7,14 @@ import {
   VisualInspectionWorklogListResponseDto,
   UpdateVisualInspectionWorklogDto,
 } from 'src/common/dtos/worklog/15-visual-inspection.dto';
+import { EquipmentService } from 'src/modules/equipment/equipment.service';
 
 @Injectable()
 export class VisualInspectionService {
   constructor(
     @InjectRepository(WorklogVisualInspection)
     private readonly worklogVisualInspectionRepository: Repository<WorklogVisualInspection>,
+    private readonly equipmentService: EquipmentService,
   ) {}
 
   async createVisualInspectionWorklog(productionId: number, dto: CreateVisualInspectionWorklogDto): Promise<WorklogVisualInspection> {
@@ -46,10 +48,28 @@ export class VisualInspectionService {
     return worklogsWithRound.reverse();
   }
 
-  async findWorklogById(worklogId: string): Promise<WorklogVisualInspection | null> {
-    return await this.worklogVisualInspectionRepository.findOne({
+  async findWorklogById(worklogId: string) {
+    const worklog = await this.worklogVisualInspectionRepository.findOne({
       where: { id: +worklogId },
+      relations: ['production'],
     });
+
+    if (!worklog) {
+      return null;
+    }
+
+    // plant ID를 plant name으로 변환
+    let plantName: string | null = null;
+    if (worklog.plant) {
+      plantName = await this.equipmentService.findNameById(worklog.plant);
+    }
+
+    const { production, plant, ...rest } = worklog;
+    return {
+      ...rest,
+      productionId: production?.name || '',
+      plant: plantName,
+    };
   }
 
   async updateVisualInspectionWorklog(

@@ -3,12 +3,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { WorklogNotching } from 'src/common/entities/worklogs/worklog-06-notching.entity';
 import { CreateNotchingWorklogDto, NotchingWorklogListResponseDto, UpdateNotchingWorklogDto } from 'src/common/dtos/worklog/06-notching.dto';
+import { EquipmentService } from 'src/modules/equipment/equipment.service';
 
 @Injectable()
 export class NotchingService {
   constructor(
     @InjectRepository(WorklogNotching)
     private readonly worklogNotchingRepository: Repository<WorklogNotching>,
+    private readonly equipmentService: EquipmentService,
   ) {}
 
   async createNotchingWorklog(productionId: number, dto: CreateNotchingWorklogDto): Promise<WorklogNotching> {
@@ -52,10 +54,17 @@ export class NotchingService {
       return null;
     }
 
-    const { production, ...rest } = worklog;
+    // plant ID를 plant name으로 변환
+    let plantName: string | null = null;
+    if (worklog.plant) {
+      plantName = await this.equipmentService.findNameById(worklog.plant);
+    }
+
+    const { production, plant, ...rest } = worklog;
     return {
       ...rest,
       productionId: production?.name || '',
+      plant: plantName,
     };
   }
 

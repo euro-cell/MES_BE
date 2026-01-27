@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { WorklogWelding } from 'src/common/entities/worklogs/worklog-10-welding.entity';
 import { CreateWeldingWorklogDto, WeldingWorklogListResponseDto, UpdateWeldingWorklogDto } from 'src/common/dtos/worklog/10-welding.dto';
 import { MaterialService } from 'src/modules/material/material.service';
+import { EquipmentService } from 'src/modules/equipment/equipment.service';
 import { MaterialProcess } from 'src/common/enums/material.enum';
 
 @Injectable()
@@ -12,6 +13,7 @@ export class WeldingService {
     @InjectRepository(WorklogWelding)
     private readonly worklogWeldingRepository: Repository<WorklogWelding>,
     private readonly materialService: MaterialService,
+    private readonly equipmentService: EquipmentService,
   ) {}
 
   async createWeldingWorklog(productionId: number, dto: CreateWeldingWorklogDto): Promise<WorklogWelding> {
@@ -58,10 +60,28 @@ export class WeldingService {
     return worklogsWithRound.reverse();
   }
 
-  async findWorklogById(worklogId: string): Promise<WorklogWelding | null> {
-    return await this.worklogWeldingRepository.findOne({
+  async findWorklogById(worklogId: string) {
+    const worklog = await this.worklogWeldingRepository.findOne({
       where: { id: +worklogId },
+      relations: ['production'],
     });
+
+    if (!worklog) {
+      return null;
+    }
+
+    // plant ID를 plant name으로 변환
+    let plantName: string | null = null;
+    if (worklog.plant) {
+      plantName = await this.equipmentService.findNameById(worklog.plant);
+    }
+
+    const { production, plant, ...rest } = worklog;
+    return {
+      ...rest,
+      productionId: production?.name || '',
+      plant: plantName,
+    };
   }
 
   async updateWeldingWorklog(worklogId: string, updateWeldingWorklogDto: UpdateWeldingWorklogDto): Promise<WorklogWelding> {

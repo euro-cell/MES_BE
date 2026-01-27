@@ -3,12 +3,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { WorklogGrading } from 'src/common/entities/worklogs/worklog-14-grading.entity';
 import { CreateGradingWorklogDto, GradingWorklogListResponseDto, UpdateGradingWorklogDto } from 'src/common/dtos/worklog/14-grading.dto';
+import { EquipmentService } from 'src/modules/equipment/equipment.service';
 
 @Injectable()
 export class GradingService {
   constructor(
     @InjectRepository(WorklogGrading)
     private readonly worklogGradingRepository: Repository<WorklogGrading>,
+    private readonly equipmentService: EquipmentService,
   ) {}
 
   async createGradingWorklog(productionId: number, dto: CreateGradingWorklogDto): Promise<WorklogGrading> {
@@ -42,10 +44,28 @@ export class GradingService {
     return worklogsWithRound.reverse();
   }
 
-  async findWorklogById(worklogId: string): Promise<WorklogGrading | null> {
-    return await this.worklogGradingRepository.findOne({
+  async findWorklogById(worklogId: string) {
+    const worklog = await this.worklogGradingRepository.findOne({
       where: { id: +worklogId },
+      relations: ['production'],
     });
+
+    if (!worklog) {
+      return null;
+    }
+
+    // plant ID를 plant name으로 변환
+    let plantName: string | null = null;
+    if (worklog.plant) {
+      plantName = await this.equipmentService.findNameById(worklog.plant);
+    }
+
+    const { production, plant, ...rest } = worklog;
+    return {
+      ...rest,
+      productionId: production?.name || '',
+      plant: plantName,
+    };
   }
 
   async updateGradingWorklog(worklogId: string, updateGradingWorklogDto: UpdateGradingWorklogDto): Promise<WorklogGrading> {

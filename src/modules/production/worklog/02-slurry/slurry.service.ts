@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { WorklogSlurry } from 'src/common/entities/worklogs/worklog-02-slurry.entity';
 import { CreateSlurryWorklogDto, SlurryWorklogListResponseDto, UpdateSlurryWorklogDto } from 'src/common/dtos/worklog/02-slurry.dto';
 import { MaterialService } from 'src/modules/material/material.service';
+import { EquipmentService } from 'src/modules/equipment/equipment.service';
 import { MaterialProcess } from 'src/common/enums/material.enum';
 
 @Injectable()
@@ -12,6 +13,7 @@ export class SlurryService {
     @InjectRepository(WorklogSlurry)
     private readonly worklogSlurryRepository: Repository<WorklogSlurry>,
     private readonly materialService: MaterialService,
+    private readonly equipmentService: EquipmentService,
   ) {}
 
   async createSlurryWorklog(productionId: number, createSlurryWorklogDto: CreateSlurryWorklogDto): Promise<WorklogSlurry> {
@@ -68,10 +70,17 @@ export class SlurryService {
       return null;
     }
 
-    const { production, ...rest } = worklog;
+    // plant ID를 plant name으로 변환
+    let plantName: string | null = null;
+    if (worklog.plant) {
+      plantName = await this.equipmentService.findNameById(worklog.plant);
+    }
+
+    const { production, plant, ...rest } = worklog;
     return {
       ...rest,
       productionId: production?.name || '',
+      plant: plantName,
     };
   }
 

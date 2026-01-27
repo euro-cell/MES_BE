@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsOptional, IsDateString } from 'class-validator';
+import { IsString, IsOptional, IsDateString, IsNumber } from 'class-validator';
 
 export class BaseWorklogDto {
   @ApiProperty({ description: '제조 일자', example: '2025-12-01' })
@@ -14,9 +14,10 @@ export class BaseWorklogDto {
   @IsString()
   line: string;
 
-  @ApiProperty({ description: '설비명', example: 'Mixer 20L' })
-  @IsString()
-  plant: string;
+  @ApiPropertyOptional({ description: '설비 ID', example: 24 })
+  @IsOptional()
+  @IsNumber()
+  plant?: number;
 
   @ApiProperty({ description: 'shift', example: '1 shift' })
   @IsString()

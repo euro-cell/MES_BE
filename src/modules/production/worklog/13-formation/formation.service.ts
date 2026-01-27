@@ -3,12 +3,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { WorklogFormation } from 'src/common/entities/worklogs/worklog-13-formation.entity';
 import { CreateFormationWorklogDto, FormationWorklogListResponseDto, UpdateFormationWorklogDto } from 'src/common/dtos/worklog/13-formation.dto';
+import { EquipmentService } from 'src/modules/equipment/equipment.service';
 
 @Injectable()
 export class FormationService {
   constructor(
     @InjectRepository(WorklogFormation)
     private readonly worklogFormationRepository: Repository<WorklogFormation>,
+    private readonly equipmentService: EquipmentService,
   ) {}
 
   async createFormationWorklog(productionId: number, dto: CreateFormationWorklogDto): Promise<WorklogFormation> {
@@ -42,10 +44,28 @@ export class FormationService {
     return worklogsWithRound.reverse();
   }
 
-  async findWorklogById(worklogId: string): Promise<WorklogFormation | null> {
-    return await this.worklogFormationRepository.findOne({
+  async findWorklogById(worklogId: string) {
+    const worklog = await this.worklogFormationRepository.findOne({
       where: { id: +worklogId },
+      relations: ['production'],
     });
+
+    if (!worklog) {
+      return null;
+    }
+
+    // plant ID를 plant name으로 변환
+    let plantName: string | null = null;
+    if (worklog.plant) {
+      plantName = await this.equipmentService.findNameById(worklog.plant);
+    }
+
+    const { production, plant, ...rest } = worklog;
+    return {
+      ...rest,
+      productionId: production?.name || '',
+      plant: plantName,
+    };
   }
 
   async updateFormationWorklog(worklogId: string, updateFormationWorklogDto: UpdateFormationWorklogDto): Promise<WorklogFormation> {
