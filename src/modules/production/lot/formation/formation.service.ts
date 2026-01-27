@@ -38,14 +38,30 @@ export class FormationLotService {
 
   private parseCellNumberRange(range: string): number[] {
     if (!range) return [];
-    const match = range.match(/(\d+)\s*~\s*(\d+)/);
-    if (!match) return [];
-    const start = Number(match[1]);
-    const end = Number(match[2]);
+
     const numbers: number[] = [];
-    for (let i = start; i <= end; i++) {
-      numbers.push(i);
+    // 콤마로 구분된 각 부분을 처리
+    const parts = range.split(',').map((part) => part.trim());
+
+    for (const part of parts) {
+      // 범위 형식 (1-5 또는 1~5)
+      const rangeMatch = part.match(/^(\d+)\s*[-~]\s*(\d+)$/);
+      if (rangeMatch) {
+        const start = Number(rangeMatch[1]);
+        const end = Number(rangeMatch[2]);
+        for (let i = start; i <= end; i++) {
+          numbers.push(i);
+        }
+        continue;
+      }
+
+      // 단일 숫자
+      const singleMatch = part.match(/^(\d+)$/);
+      if (singleMatch) {
+        numbers.push(Number(singleMatch[1]));
+      }
     }
+
     return numbers;
   }
 
