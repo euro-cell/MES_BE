@@ -4,7 +4,7 @@ import { Repository, ILike } from 'typeorm';
 import { StreamableFile } from '@nestjs/common';
 import { Equipment } from 'src/common/entities/equipment.entity';
 import { CreateEquipmentDto, UpdateEquipmentDto } from 'src/common/dtos/equipment.dto';
-import { EquipmentCategory } from 'src/common/enums/equipment.enum';
+import { EquipmentCategory, EquipmentProcess } from 'src/common/enums/equipment.enum';
 import { ExcelService } from 'src/common/services/excel.service';
 import { ExcelUtil } from 'src/common/utils/excel.util';
 import * as ExcelJS from 'exceljs';
@@ -34,6 +34,22 @@ export class EquipmentService {
       where: { category, name: ILike('%Mixer%') },
       order: { id: 'ASC' },
     });
+  }
+
+  async findLinesByProcess(processType: EquipmentProcess): Promise<any[]> {
+    const equipments = await this.equipmentRepository.find({
+      where: { processType },
+      order: { id: 'ASC' },
+    });
+
+    // API 응답에 타임스탬프 포함
+    return equipments.map((eq) => ({
+      id: eq.id,
+      name: eq.name,
+      category: processType,
+      createdAt: eq.createdAt,
+      updatedAt: eq.updatedAt,
+    }));
   }
 
   async findIdByName(name: string): Promise<number | null> {

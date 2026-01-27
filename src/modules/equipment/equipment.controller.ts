@@ -2,7 +2,8 @@ import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query,
 import type { Response } from 'express';
 import { ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { EquipmentService } from './equipment.service';
-import { categoryMap, CreateEquipmentDto, EquipmentSearchDto, UpdateEquipmentDto } from 'src/common/dtos/equipment.dto';
+import { categoryMap, CreateEquipmentDto, EquipmentSearchDto, LineSearchDto, UpdateEquipmentDto } from 'src/common/dtos/equipment.dto';
+import { EquipmentProcess } from 'src/common/enums/equipment.enum';
 
 @Controller('equipment')
 export class EquipmentController {
@@ -18,6 +19,17 @@ export class EquipmentController {
   async findMixersByCategory(@Query() query: EquipmentSearchDto) {
     const category = categoryMap[query.category];
     return this.equipmentService.findMixersByCategory(category);
+  }
+
+  @Get('lines')
+  async findLinesByProcess(@Query() query: LineSearchDto) {
+    const processTypeMap: Record<string, EquipmentProcess> = {
+      Electrode: EquipmentProcess.ELECTRODE,
+      Assembly: EquipmentProcess.ASSEMBLY,
+      Formation: EquipmentProcess.FORMATION,
+    };
+    const processType = processTypeMap[query.category];
+    return this.equipmentService.findLinesByProcess(processType);
   }
 
   @Post()

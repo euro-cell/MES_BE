@@ -95,6 +95,17 @@ export class EquipmentSearchDto {
   category: string;
 }
 
+export class LineSearchDto {
+  @ApiProperty({
+    description: '공정구분 (Electrode/Assembly/Formation)',
+    enum: ['Electrode', 'Assembly', 'Formation'],
+    example: 'Electrode',
+  })
+  @IsNotEmpty()
+  @IsIn(['Electrode', 'Assembly', 'Formation'])
+  category: string;
+}
+
 export class EquipmentResponseDto {
   @ApiProperty({ description: '설비 ID', example: 1 })
   id: number;
