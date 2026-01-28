@@ -67,6 +67,15 @@ export class MaterialController {
     return this.materialService.getDistinctCategories();
   }
 
+  @Get('lots')
+  @ApiOperation({ summary: '카테고리별 자재 LOT 목록 조회 (재고 있는 것만, 선입선출 순서)' })
+  @ApiQuery({ name: 'category', required: false, description: '자재 카테고리 (예: NMP, CMC, SBR)' })
+  @ApiQuery({ name: 'materialId', required: false, description: '특정 자재 ID' })
+  async getLotsByCategory(@Query('category') category?: string, @Query('materialId') materialId?: string) {
+    const matId = materialId ? parseInt(materialId, 10) : undefined;
+    return this.materialService.getLotsByCategory(category, matId);
+  }
+
   @Post('electrode')
   async createElectrodeMaterial(@Body() dto: CreateMaterialDto) {
     return this.materialService.createElectrodeMaterial(dto);

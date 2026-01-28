@@ -89,6 +89,36 @@ export class MaterialService {
     return categories.map((c) => c.category);
   }
 
+  /**
+   * 카테고리별 자재 LOT 목록 조회
+   * - 재고가 있는(stock > 0) LOT만 조회
+   * - 입고일(createdAt) 기준 오래된 순서로 정렬 (선입선출)
+   */
+  async getLotsByCategory(category?: string, materialId?: number) {
+    const query = this.materialRepository
+      .createQueryBuilder('material')
+      .select(['material.id', 'material.lotNo', 'material.name', 'material.stock', 'material.createdAt'])
+      .where('material.deletedAt IS NULL')
+      .andWhere('material.stock > 0')
+      .andWhere('material.lotNo IS NOT NULL');
+
+    if (materialId) {
+      query.andWhere('material.id = :materialId', { materialId });
+    } else if (category) {
+      query.andWhere('material.category = :category', { category });
+    }
+
+    const materials = await query.orderBy('material.createdAt', 'ASC').getMany();
+
+    return materials.map((m) => ({
+      id: m.id,
+      lot: m.lotNo,
+      name: m.name,
+      receivedDate: m.createdAt,
+      remainingQty: m.stock,
+    }));
+  }
+
   async createElectrodeMaterial(dto: CreateMaterialDto) {
     const material = this.materialRepository.create({
       ...dto,
