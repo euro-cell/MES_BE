@@ -99,41 +99,39 @@ export class WorklogSlurry extends WorklogBase {
   @Column({ type: 'decimal', precision: 15, scale: 2, nullable: true })
   material6ActualInput: number;
 
-  // 자재 투입 정보 - 원료7
-  @Column({ type: 'varchar', length: 50, nullable: true })
-  material7Name: string;
-
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  material7Composition: number;
+  // 바인더용액 (Binder Solution)
+  @Column({ type: 'decimal', precision: 5, scale: 1, nullable: true })
+  binderSolutionComposition: number;
 
   @Column({ type: 'varchar', length: 100, nullable: true })
-  material7Lot: string;
-
-  @Column({ type: 'decimal', precision: 15, scale: 2, nullable: true })
-  material7PlannedInput: number;
-
-  @Column({ type: 'decimal', precision: 15, scale: 2, nullable: true })
-  material7ActualInput: number;
-
-  // 자재 투입 정보 - 원료8
-  @Column({ type: 'varchar', length: 50, nullable: true })
-  material8Name: string;
+  binderSolutionLot: string;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  material8Composition: number;
+  binderSolutionPlannedInput: number;
 
-  @Column({ type: 'varchar', length: 100, nullable: true })
-  material8Lot: string;
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  binderSolutionActualInput: number;
 
-  @Column({ type: 'decimal', precision: 15, scale: 2, nullable: true })
-  material8PlannedInput: number;
+  // 용매 (Solvent)
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  solventAddPlannedInput: number;
 
-  @Column({ type: 'decimal', precision: 15, scale: 2, nullable: true })
-  material8ActualInput: number;
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  solventAddActualInput: number;
 
-  // Solide Content
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  solventTotalPlannedInput: number;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  solventTotalActualInput: number;
+
+  // Solid Content
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   solidContent: number;
+
+  // Binder Solution
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  binderSolution: number;
 
   // 생산 정보 - 슬러리 Lot
   @Column({ type: 'varchar', length: 100, nullable: true })

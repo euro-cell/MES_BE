@@ -155,55 +155,47 @@ export class CreateSlurryWorklogDto extends BaseWorklogDto {
   @IsNumber()
   material6ActualInput?: number;
 
-  @ApiPropertyOptional({ description: '원료7 명칭' })
+  // 바인더용액 (Binder Solution)
+  @ApiPropertyOptional({ description: '바인더용액 조성 (%)', example: 4.5 })
+  @IsOptional()
+  @IsNumber()
+  binderSolutionComposition?: number;
+
+  @ApiPropertyOptional({ description: '바인더용액 LOT', example: 'BS-2024-001' })
   @IsOptional()
   @IsString()
-  material7Name?: string;
+  binderSolutionLot?: string;
 
-  @ApiPropertyOptional({ description: '원료7 조성' })
+  @ApiPropertyOptional({ description: '바인더용액 투입량 설계', example: 500.0 })
   @IsOptional()
   @IsNumber()
-  material7Composition?: number;
+  binderSolutionPlannedInput?: number;
 
-  @ApiPropertyOptional({ description: '원료7 LOT' })
-  @IsOptional()
-  @IsString()
-  material7Lot?: string;
-
-  @ApiPropertyOptional({ description: '원료7 투입계획' })
+  @ApiPropertyOptional({ description: '바인더용액 투입량 실제', example: 498.5 })
   @IsOptional()
   @IsNumber()
-  material7PlannedInput?: number;
+  binderSolutionActualInput?: number;
 
-  @ApiPropertyOptional({ description: '원료7 투입실적' })
+  // 용매 (Solvent)
+  @ApiPropertyOptional({ description: '용매 Add 투입량 설계', example: 100.0 })
   @IsOptional()
   @IsNumber()
-  material7ActualInput?: number;
+  solventAddPlannedInput?: number;
 
-  @ApiPropertyOptional({ description: '원료8 명칭' })
-  @IsOptional()
-  @IsString()
-  material8Name?: string;
-
-  @ApiPropertyOptional({ description: '원료8 조성' })
+  @ApiPropertyOptional({ description: '용매 Add 투입량 실제', example: 99.8 })
   @IsOptional()
   @IsNumber()
-  material8Composition?: number;
+  solventAddActualInput?: number;
 
-  @ApiPropertyOptional({ description: '원료8 LOT' })
-  @IsOptional()
-  @IsString()
-  material8Lot?: string;
-
-  @ApiPropertyOptional({ description: '원료8 투입계획' })
+  @ApiPropertyOptional({ description: '용매 Total 투입량 설계', example: 1000.0 })
   @IsOptional()
   @IsNumber()
-  material8PlannedInput?: number;
+  solventTotalPlannedInput?: number;
 
-  @ApiPropertyOptional({ description: '원료8 투입실적' })
+  @ApiPropertyOptional({ description: '용매 Total 투입량 실제', example: 998.5 })
   @IsOptional()
   @IsNumber()
-  material8ActualInput?: number;
+  solventTotalActualInput?: number;
 
   // 바인더 정보
   @ApiPropertyOptional({ description: '바인더 LOT' })
@@ -236,6 +228,11 @@ export class CreateSlurryWorklogDto extends BaseWorklogDto {
   @IsOptional()
   @IsNumber()
   solidContent?: number;
+
+  @ApiPropertyOptional({ description: 'Binder Solution', example: 5.5 })
+  @IsOptional()
+  @IsNumber()
+  binderSolution?: number;
 
   @ApiPropertyOptional({ description: '점도' })
   @IsOptional()
