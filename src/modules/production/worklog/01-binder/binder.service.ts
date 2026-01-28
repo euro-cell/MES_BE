@@ -153,4 +153,29 @@ export class BinderService {
     }
     await this.worklogBinderRepository.remove(worklog);
   }
+
+  /**
+   * Binder 작업일지 LOT 목록 조회
+   * - LOT이 있는 작업일지만 조회
+   * - 고형분(solidContent)은 solidContent1~3의 평균값
+   */
+  async getBinderLots(): Promise<{ lotNumber: string; solidContent: number }[]> {
+    const worklogs = await this.worklogBinderRepository
+      .createQueryBuilder('worklog')
+      .select(['worklog.lot', 'worklog.solidContent1', 'worklog.solidContent2', 'worklog.solidContent3'])
+      .where('worklog.lot IS NOT NULL')
+      .andWhere("worklog.lot != ''")
+      .orderBy('worklog.createdAt', 'DESC')
+      .getMany();
+
+    return worklogs.map((w) => {
+      const values = [w.solidContent1, w.solidContent2, w.solidContent3].filter((v) => v != null).map((v) => Number(v));
+      const avgSolidContent = values.length > 0 ? values.reduce((a, b) => a + b, 0) / values.length : 0;
+
+      return {
+        lotNumber: w.lot,
+        solidContent: Math.round(avgSolidContent * 100) / 100,
+      };
+    });
+  }
 }

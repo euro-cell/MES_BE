@@ -19,6 +19,12 @@ export class BinderController {
     return await this.binderService.getWorklogs(productionId);
   }
 
+  @Get('binder/lots')
+  @ApiOkResponse({ description: 'Binder 작업일지 LOT 목록' })
+  async getBinderLots() {
+    return await this.binderService.getBinderLots();
+  }
+
   @Get(':worklogId/binder')
   async getWorklogById(@Param('productionId', ParseIntPipe) productionId: number, @Param('worklogId') worklogId: string) {
     return await this.binderService.findWorklogById(worklogId);
