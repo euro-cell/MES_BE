@@ -40,7 +40,7 @@ export class WorklogBinder extends WorklogBase {
   @Column({ type: 'varchar', length: 100, nullable: true })
   lot: string;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'int', nullable: true })
   viscosity: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
@@ -65,10 +65,10 @@ export class WorklogBinder extends WorklogBase {
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   nmpWeightTemp: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'int', nullable: true })
   nmpWeightRpmLow: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'int', nullable: true })
   nmpWeightRpmHigh: number;
 
   @Column({ type: 'time', nullable: true })
@@ -83,10 +83,10 @@ export class WorklogBinder extends WorklogBase {
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   binderWeightTemp: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'int', nullable: true })
   binderWeightRpmLow: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'int', nullable: true })
   binderWeightRpmHigh: number;
 
   @Column({ type: 'time', nullable: true })
@@ -101,10 +101,10 @@ export class WorklogBinder extends WorklogBase {
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   mixing1Temp: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'int', nullable: true })
   mixing1RpmLow: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'int', nullable: true })
   mixing1RpmHigh: number;
 
   @Column({ type: 'time', nullable: true })
@@ -119,10 +119,10 @@ export class WorklogBinder extends WorklogBase {
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   scrappingTemp: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'int', nullable: true })
   scrappingRpmLow: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'int', nullable: true })
   scrappingRpmHigh: number;
 
   @Column({ type: 'time', nullable: true })
@@ -137,10 +137,10 @@ export class WorklogBinder extends WorklogBase {
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   mixing2Temp: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'int', nullable: true })
   mixing2RpmLow: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'int', nullable: true })
   mixing2RpmHigh: number;
 
   @Column({ type: 'time', nullable: true })
@@ -155,10 +155,10 @@ export class WorklogBinder extends WorklogBase {
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   stabilizationTemp: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'int', nullable: true })
   stabilizationRpmLow: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'int', nullable: true })
   stabilizationRpmHigh: number;
 
   @Column({ type: 'time', nullable: true })
