@@ -22,6 +22,12 @@ export class SlurryController {
     return await this.slurryService.getWorklogs(productionId);
   }
 
+  @Get('slurry/lots')
+  @ApiOkResponse({ description: '슬러리 LOT 목록 (고형분, 점도 포함)' })
+  async getLots(@Param('productionId', ParseIntPipe) productionId: number) {
+    return await this.slurryService.getLots(productionId);
+  }
+
   @Get(':worklogId/slurry')
   async getWorklogById(@Param('productionId', ParseIntPipe) productionId: number, @Param('worklogId') worklogId: string) {
     return await this.slurryService.findWorklogById(worklogId);

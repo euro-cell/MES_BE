@@ -130,4 +130,20 @@ export class SlurryService {
 
     await this.worklogSlurryRepository.remove(worklog);
   }
+
+  async getLots(productionId: number) {
+    const worklogs = await this.worklogSlurryRepository.find({
+      where: { production: { id: productionId } },
+      select: ['lot', 'solidContent', 'viscosityAfterStabilization'],
+      order: { createdAt: 'ASC' },
+    });
+
+    return worklogs
+      .filter((w) => w.lot)
+      .map((w) => ({
+        lotNumber: w.lot,
+        solidContent: w.solidContent ? Number(w.solidContent) : null,
+        viscosity: w.viscosityAfterStabilization ? Number(w.viscosityAfterStabilization) : null,
+      }));
+  }
 }

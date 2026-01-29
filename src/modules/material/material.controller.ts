@@ -72,6 +72,7 @@ export class MaterialController {
   @ApiQuery({ name: 'category', required: false, description: '자재 카테고리 (예: NMP, CMC, SBR)' })
   @ApiQuery({ name: 'type', required: false, description: '자재 타입 (예: Al Foil, Cu Foil)' })
   async getLotsByCategory(@Query('category') category?: string, @Query('type') type?: string) {
+    console.log('🚀 ~ type:', type);
     return this.materialService.getLotsByCategory(category, type);
   }
 
