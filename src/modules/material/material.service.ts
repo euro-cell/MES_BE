@@ -90,20 +90,28 @@ export class MaterialService {
   }
 
   /**
-   * 카테고리별 자재 LOT 목록 조회
+   * 카테고리/타입별 자재 LOT 목록 조회
    * - 재고가 있는(stock > 0) LOT만 조회
    * - 입고일(createdAt) 기준 오래된 순서로 정렬 (선입선출)
    */
-  async getLotsByCategory(category?: string, materialId?: number) {
+  async getLotsByCategory(category?: string, type?: string) {
     const query = this.materialRepository
       .createQueryBuilder('material')
-      .select(['material.id', 'material.lotNo', 'material.name', 'material.stock', 'material.createdAt'])
+      .select([
+        'material.id',
+        'material.lotNo',
+        'material.name',
+        'material.stock',
+        'material.createdAt',
+        'material.company',
+        'material.spec',
+      ])
       .where('material.deletedAt IS NULL')
       .andWhere('material.stock > 0')
       .andWhere('material.lotNo IS NOT NULL');
 
-    if (materialId) {
-      query.andWhere('material.id = :materialId', { materialId });
+    if (type) {
+      query.andWhere('material.type = :type', { type });
     } else if (category) {
       query.andWhere('material.category = :category', { category });
     }
@@ -116,6 +124,8 @@ export class MaterialService {
       name: m.name,
       receivedDate: m.createdAt,
       remainingQty: m.stock,
+      manufacturer: m.company,
+      spec: m.spec,
     }));
   }
 
