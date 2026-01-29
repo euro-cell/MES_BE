@@ -87,4 +87,34 @@ export class NotchingService {
     }
     await this.worklogNotchingRepository.remove(worklog);
   }
+
+  async getLots(productionId: number): Promise<{ cathodeLots: string[]; anodeLots: string[] }> {
+    const worklogs = await this.worklogNotchingRepository.find({
+      where: { production: { id: productionId } },
+      select: ['notchingLot1', 'notchingLot2', 'notchingLot3', 'notchingLot4', 'notchingLot5'],
+    });
+
+    const cathodeLots = new Set<string>();
+    const anodeLots = new Set<string>();
+
+    for (const worklog of worklogs) {
+      const lots = [worklog.notchingLot1, worklog.notchingLot2, worklog.notchingLot3, worklog.notchingLot4, worklog.notchingLot5];
+
+      for (const lot of lots) {
+        if (lot && lot.length >= 5) {
+          const fifthChar = lot.charAt(4);
+          if (fifthChar === 'C') {
+            cathodeLots.add(lot);
+          } else if (fifthChar === 'A') {
+            anodeLots.add(lot);
+          }
+        }
+      }
+    }
+
+    return {
+      cathodeLots: Array.from(cathodeLots),
+      anodeLots: Array.from(anodeLots),
+    };
+  }
 }

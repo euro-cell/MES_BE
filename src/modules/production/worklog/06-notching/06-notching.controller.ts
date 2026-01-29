@@ -19,6 +19,12 @@ export class NotchingController {
     return await this.notchingService.getWorklogs(productionId);
   }
 
+  @Get('notching/lots')
+  @ApiOkResponse({ description: '노칭 LOT 목록 (양극/음극 구분)' })
+  async getLots(@Param('productionId', ParseIntPipe) productionId: number) {
+    return await this.notchingService.getLots(productionId);
+  }
+
   @Get(':worklogId/notching')
   async getWorklogById(@Param('productionId', ParseIntPipe) productionId: number, @Param('worklogId') worklogId: string) {
     return await this.notchingService.findWorklogById(worklogId);
