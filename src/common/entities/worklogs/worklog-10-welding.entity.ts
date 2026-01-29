@@ -6,6 +6,9 @@ export class WorklogWelding extends WorklogBase {
   // ===== A. 자재 투입 정보 (Material Input) =====
 
   // 리드탭
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  leadTabType: string;
+
   @Column({ type: 'varchar', length: 20, nullable: true })
   leadTabLot: string;
 
@@ -17,6 +20,22 @@ export class WorklogWelding extends WorklogBase {
 
   @Column({ type: 'smallint', nullable: true })
   leadTabUsage: number;
+
+  // 리드탭 2
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  leadTab2Type: string;
+
+  @Column({ type: 'varchar', length: 20, nullable: true })
+  leadTab2Lot: string;
+
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  leadTab2Manufacturer: string;
+
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  leadTab2Spec: string;
+
+  @Column({ type: 'smallint', nullable: true })
+  leadTab2Usage: number;
 
   // PI tape
   @Column({ type: 'varchar', length: 20, nullable: true })

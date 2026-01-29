@@ -10,6 +10,11 @@ export class CreateWeldingWorklogDto extends BaseWorklogDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
+  leadTabType?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
   leadTabLot?: string;
 
   @ApiPropertyOptional()
@@ -26,6 +31,32 @@ export class CreateWeldingWorklogDto extends BaseWorklogDto {
   @IsOptional()
   @IsNumber()
   leadTabUsage?: number;
+
+  // 리드탭 2
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  leadTab2Type?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  leadTab2Lot?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  leadTab2Manufacturer?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  leadTab2Spec?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  leadTab2Usage?: number;
 
   // PI 테이프
   @ApiPropertyOptional()
