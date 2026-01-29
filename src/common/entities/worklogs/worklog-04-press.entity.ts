@@ -40,22 +40,22 @@ export class WorklogPress extends WorklogBase {
   @Column({ type: 'smallint', nullable: true })
   pressQuantity1: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   weightPerAreaFront1M: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   weightPerAreaFront1C: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   weightPerAreaFront1D: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   weightPerAreaRear1M: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   weightPerAreaRear1C: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   weightPerAreaRear1D: number;
 
   @Column({ type: 'smallint', nullable: true })
@@ -89,22 +89,22 @@ export class WorklogPress extends WorklogBase {
   @Column({ type: 'smallint', nullable: true })
   pressQuantity2: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   weightPerAreaFront2M: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   weightPerAreaFront2C: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   weightPerAreaFront2D: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   weightPerAreaRear2M: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   weightPerAreaRear2C: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   weightPerAreaRear2D: number;
 
   @Column({ type: 'smallint', nullable: true })
@@ -138,22 +138,22 @@ export class WorklogPress extends WorklogBase {
   @Column({ type: 'smallint', nullable: true })
   pressQuantity3: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   weightPerAreaFront3M: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   weightPerAreaFront3C: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   weightPerAreaFront3D: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   weightPerAreaRear3M: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   weightPerAreaRear3C: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   weightPerAreaRear3D: number;
 
   @Column({ type: 'smallint', nullable: true })
@@ -187,22 +187,22 @@ export class WorklogPress extends WorklogBase {
   @Column({ type: 'smallint', nullable: true })
   pressQuantity4: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   weightPerAreaFront4M: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   weightPerAreaFront4C: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   weightPerAreaFront4D: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   weightPerAreaRear4M: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   weightPerAreaRear4C: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   weightPerAreaRear4D: number;
 
   @Column({ type: 'smallint', nullable: true })
@@ -236,22 +236,22 @@ export class WorklogPress extends WorklogBase {
   @Column({ type: 'smallint', nullable: true })
   pressQuantity5: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   weightPerAreaFront5M: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   weightPerAreaFront5C: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   weightPerAreaFront5D: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   weightPerAreaRear5M: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   weightPerAreaRear5C: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   weightPerAreaRear5D: number;
 
   @Column({ type: 'smallint', nullable: true })
