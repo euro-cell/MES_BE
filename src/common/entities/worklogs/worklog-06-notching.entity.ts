@@ -27,129 +27,129 @@ export class WorklogNotching extends WorklogBase {
   @Column({ type: 'varchar', length: 20, nullable: true })
   pressLot1: string;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'int', nullable: true })
   pressQuantity1: number;
 
   @Column({ type: 'varchar', length: 20, nullable: true })
   notchingLot1: string;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'int', nullable: true })
   notchingQuantity1: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'int', nullable: true })
   defectQuantity1: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'int', nullable: true })
   goodQuantity1: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 1, nullable: true })
   dimension1: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'int', nullable: true })
   burr1: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'int', nullable: true })
   damage1: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'int', nullable: true })
   nonCutting1: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'int', nullable: true })
   overTab1: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 1, nullable: true })
   wide1: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 1, nullable: true })
   length1: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 1, nullable: true })
   missMatch1: number;
 
   // 2차
   @Column({ type: 'varchar', length: 20, nullable: true })
   pressLot2: string;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'int', nullable: true })
   pressQuantity2: number;
 
   @Column({ type: 'varchar', length: 20, nullable: true })
   notchingLot2: string;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'int', nullable: true })
   notchingQuantity2: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'int', nullable: true })
   defectQuantity2: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'int', nullable: true })
   goodQuantity2: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 1, nullable: true })
   dimension2: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'int', nullable: true })
   burr2: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'int', nullable: true })
   damage2: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'int', nullable: true })
   nonCutting2: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'int', nullable: true })
   overTab2: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 1, nullable: true })
   wide2: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 1, nullable: true })
   length2: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 1, nullable: true })
   missMatch2: number;
 
   // 3차
   @Column({ type: 'varchar', length: 20, nullable: true })
   pressLot3: string;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'int', nullable: true })
   pressQuantity3: number;
 
   @Column({ type: 'varchar', length: 20, nullable: true })
   notchingLot3: string;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'int', nullable: true })
   notchingQuantity3: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'int', nullable: true })
   defectQuantity3: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'int', nullable: true })
   goodQuantity3: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 1, nullable: true })
   dimension3: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'int', nullable: true })
   burr3: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'int', nullable: true })
   damage3: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'int', nullable: true })
   nonCutting3: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'int', nullable: true })
   overTab3: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 1, nullable: true })
   wide3: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 1, nullable: true })
   length3: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 1, nullable: true })
   missMatch3: number;
 
   // 4차
@@ -159,40 +159,40 @@ export class WorklogNotching extends WorklogBase {
   @Column({ type: 'varchar', length: 20, nullable: true })
   notchingLot4: string;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'int', nullable: true })
   pressQuantity4: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'int', nullable: true })
   notchingQuantity4: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'int', nullable: true })
   defectQuantity4: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'int', nullable: true })
   goodQuantity4: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 1, nullable: true })
   dimension4: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'int', nullable: true })
   burr4: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'int', nullable: true })
   damage4: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'int', nullable: true })
   nonCutting4: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'int', nullable: true })
   overTab4: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 1, nullable: true })
   wide4: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 1, nullable: true })
   length4: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 1, nullable: true })
   missMatch4: number;
 
   // 5차
@@ -202,47 +202,47 @@ export class WorklogNotching extends WorklogBase {
   @Column({ type: 'varchar', length: 20, nullable: true })
   notchingLot5: string;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'int', nullable: true })
   pressQuantity5: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'int', nullable: true })
   notchingQuantity5: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'int', nullable: true })
   defectQuantity5: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'int', nullable: true })
   goodQuantity5: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 1, nullable: true })
   dimension5: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'int', nullable: true })
   burr5: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'int', nullable: true })
   damage5: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'int', nullable: true })
   nonCutting5: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'int', nullable: true })
   overTab5: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 1, nullable: true })
   wide5: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 1, nullable: true })
   length5: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 1, nullable: true })
   missMatch5: number;
 
   // ===== C. 공정 조건 (Process Conditions) =====
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'int', nullable: true })
   tension: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'int', nullable: true })
   punchingSpeed: number;
 }
