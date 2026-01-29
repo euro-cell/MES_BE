@@ -576,15 +576,15 @@ export class CreateCoatingWorklogDto extends BaseWorklogDto {
   tensionReT?: number;
 
   // 코팅 조건
-  @ApiPropertyOptional({ description: '코팅 조건 단면', example: '10μm' })
+  @ApiPropertyOptional({ description: '코팅 조건 단면', example: 10.5 })
   @IsOptional()
-  @IsString()
-  coatingConditionSingle?: string;
+  @IsNumber()
+  coatingConditionSingle?: number;
 
-  @ApiPropertyOptional({ description: '코팅 조건 양면', example: '20μm' })
+  @ApiPropertyOptional({ description: '코팅 조건 양면', example: 20.5 })
   @IsOptional()
-  @IsString()
-  coatingConditionDouble?: string;
+  @IsNumber()
+  coatingConditionDouble?: number;
 }
 
 export class UpdateCoatingWorklogDto extends PartialType(CreateCoatingWorklogDto) {}
