@@ -287,15 +287,15 @@ export class CreateVdWorklogDto extends BaseWorklogDto {
   @IsNumber()
   lowerSetTemperature?: number;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ description: '상부 타이머 시간 (HH:mm)', example: '09:30' })
   @IsOptional()
-  @IsNumber()
-  upperTimerTime?: number;
+  @IsString()
+  upperTimerTime?: string;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ description: '하부 타이머 시간 (HH:mm)', example: '14:45' })
   @IsOptional()
-  @IsNumber()
-  lowerTimerTime?: number;
+  @IsString()
+  lowerTimerTime?: string;
 }
 
 export class UpdateVdWorklogDto extends PartialType(CreateVdWorklogDto) {}

@@ -180,9 +180,9 @@ export class WorklogVd extends WorklogBase {
   @Column({ type: 'smallint', nullable: true })
   lowerSetTemperature: number;
 
-  @Column({ type: 'smallint', nullable: true })
-  upperTimerTime: number;
+  @Column({ type: 'varchar', length: 10, nullable: true })
+  upperTimerTime: string;
 
-  @Column({ type: 'smallint', nullable: true })
-  lowerTimerTime: number;
+  @Column({ type: 'varchar', length: 10, nullable: true })
+  lowerTimerTime: string;
 }
