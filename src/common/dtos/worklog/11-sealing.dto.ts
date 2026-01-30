@@ -131,28 +131,13 @@ export class CreateSealingWorklogDto extends BaseWorklogDto {
   // 탑
   @ApiPropertyOptional()
   @IsOptional()
-  @IsNumber()
-  topUpperTemperature?: number;
+  @IsString()
+  topTemperature?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
-  @IsNumber()
-  topLowerTemperature?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  topPressureLeft?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  topPressureCenter?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  topPressureRight?: number;
+  @IsString()
+  topPressure?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
@@ -167,28 +152,13 @@ export class CreateSealingWorklogDto extends BaseWorklogDto {
   // 사이드
   @ApiPropertyOptional()
   @IsOptional()
-  @IsNumber()
-  sideUpperTemperature?: number;
+  @IsString()
+  sideTemperature?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
-  @IsNumber()
-  sideLowerTemperature?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  sidePressureLeft?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  sidePressureCenter?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  sidePressureRight?: number;
+  @IsString()
+  sidePressure?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
@@ -203,28 +173,13 @@ export class CreateSealingWorklogDto extends BaseWorklogDto {
   // 바텀
   @ApiPropertyOptional()
   @IsOptional()
-  @IsNumber()
-  bottomUpperTemperature?: number;
+  @IsString()
+  bottomTemperature?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
-  @IsNumber()
-  bottomLowerTemperature?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  bottomPressureLeft?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  bottomPressureCenter?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  bottomPressureRight?: number;
+  @IsString()
+  bottomPressure?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
@@ -236,16 +191,16 @@ export class CreateSealingWorklogDto extends BaseWorklogDto {
   @IsString()
   bottomChecklist?: string;
 
-  // 하이팟3
+  // 하이팟
   @ApiPropertyOptional()
   @IsOptional()
   @IsNumber()
-  hipot3Voltage?: number;
+  hipotVoltage?: number;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsNumber()
-  hipot3Time?: number;
+  hipotTime?: number;
 
   // ===== D. 비고 =====
 

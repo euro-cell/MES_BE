@@ -11,7 +11,7 @@ export class WorklogSealing extends WorklogBase {
   @Column({ type: 'varchar', length: 100, nullable: true })
   pouchManufacturer: string;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true })
   pouchDepth: number;
 
   @Column({ type: 'varchar', length: 50, nullable: true })
