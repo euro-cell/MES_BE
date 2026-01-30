@@ -156,14 +156,15 @@ export class BinderService {
 
   /**
    * Binder 작업일지 LOT 목록 조회
-   * - LOT이 있는 작업일지만 조회
+   * - 해당 production의 LOT이 있는 작업일지만 조회
    * - 고형분(solidContent)은 solidContent1~3의 평균값
    */
-  async getBinderLots(): Promise<{ lotNumber: string; solidContent: number }[]> {
+  async getBinderLots(productionId: number): Promise<{ lotNumber: string; solidContent: number }[]> {
     const worklogs = await this.worklogBinderRepository
       .createQueryBuilder('worklog')
       .select(['worklog.lot', 'worklog.solidContent1', 'worklog.solidContent2', 'worklog.solidContent3'])
-      .where('worklog.lot IS NOT NULL')
+      .where('worklog.production_id = :productionId', { productionId })
+      .andWhere('worklog.lot IS NOT NULL')
       .andWhere("worklog.lot != ''")
       .orderBy('worklog.createdAt', 'DESC')
       .getMany();

@@ -21,8 +21,8 @@ export class BinderController {
 
   @Get('binder/lots')
   @ApiOkResponse({ description: 'Binder 작업일지 LOT 목록' })
-  async getBinderLots() {
-    return await this.binderService.getBinderLots();
+  async getBinderLots(@Param('productionId', ParseIntPipe) productionId: number) {
+    return await this.binderService.getBinderLots(productionId);
   }
 
   @Get(':worklogId/binder')
