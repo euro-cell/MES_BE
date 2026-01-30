@@ -18,7 +18,7 @@ export class TypeOrmConfig implements TypeOrmOptionsFactory {
       entities: [__dirname + '/../entities/**/*{.ts,.js}'],
       synchronize: true,
       dropSchema: false,
-      logging: true,
+      logging: ['error', 'warn'],
       namingStrategy: new SnakeNamingStrategy(),
     };
   }
