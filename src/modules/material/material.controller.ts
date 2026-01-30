@@ -2,7 +2,7 @@ import { Controller, Get, Post, Patch, Delete, Body, Query, Param, ParseIntPipe,
 import type { Response } from 'express';
 import { MaterialService } from './material.service';
 import { ApiOperation, ApiQuery } from '@nestjs/swagger';
-import { CreateMaterialDto, UpdateMaterialDto } from 'src/common/dtos/material.dto';
+import { CreateMaterialDto, UpdateMaterialDto, ImportMaterialDto, ImportMaterialResultDto } from 'src/common/dtos/material.dto';
 import { MaterialProcess } from 'src/common/enums/material.enum';
 
 @Controller('material')
@@ -36,6 +36,12 @@ export class MaterialController {
     return file;
   }
 
+  @Post('electrode/import')
+  @ApiOperation({ summary: '전극 자재 일괄 등록/수정 (Excel 업로드)' })
+  async importElectrodeMaterial(@Body() dto: ImportMaterialDto): Promise<ImportMaterialResultDto> {
+    return this.materialService.importElectrodeMaterials(dto.materials);
+  }
+
   @Get('assembly')
   @ApiQuery({ name: 'isZeroStock', required: false, description: '재고 없는 자재 포함 여부 (true/false)', example: false })
   async findByAssembly(@Query('isZeroStock') isZeroStock?: string) {
@@ -55,6 +61,12 @@ export class MaterialController {
     });
 
     return file;
+  }
+
+  @Post('assembly/import')
+  @ApiOperation({ summary: '조립 자재 일괄 등록/수정 (Excel 업로드)' })
+  async importAssemblyMaterial(@Body() dto: ImportMaterialDto): Promise<ImportMaterialResultDto> {
+    return this.materialService.importAssemblyMaterials(dto.materials);
   }
 
   @Get('production')

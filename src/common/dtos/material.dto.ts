@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional, OmitType, PartialType } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsEnum, IsOptional, IsNumber, IsDecimal } from 'class-validator';
+import { IsNotEmpty, IsString, IsEnum, IsOptional, IsNumber } from 'class-validator';
 import { Type } from 'class-transformer';
 import { MaterialOrigin, MaterialProcess, MaterialPurpose } from '../enums/material.enum';
 
@@ -122,3 +122,82 @@ export class CreateMaterialDto extends OmitType(MaterialDto, ['id'] as const) {
 }
 
 export class UpdateMaterialDto extends PartialType(CreateMaterialDto) {}
+
+// Import 관련 DTO
+export class ImportMaterialItemDto {
+  @ApiProperty({ description: '자재 분류 (중분류)', example: '양극재' })
+  @IsNotEmpty()
+  @IsString()
+  category: string;
+
+  @ApiPropertyOptional({ description: '자재 종류 (소분류)', example: 'NCM622' })
+  @IsOptional()
+  @IsString()
+  type?: string;
+
+  @ApiPropertyOptional({ description: '용도', example: '생산' })
+  @IsOptional()
+  @IsString()
+  purpose?: string;
+
+  @ApiPropertyOptional({ description: '제품명', example: 'ME-6E2XP' })
+  @IsOptional()
+  @IsString()
+  name?: string;
+
+  @ApiPropertyOptional({ description: '규격', example: '10kg/bag' })
+  @IsOptional()
+  @IsString()
+  spec?: string;
+
+  @ApiProperty({ description: 'Lot No.', example: 'CZ-ME6E2XP-24051401' })
+  @IsNotEmpty()
+  @IsString()
+  lotNo: string;
+
+  @ApiPropertyOptional({ description: '제조/공급처', example: 'EASPRING' })
+  @IsOptional()
+  @IsString()
+  company?: string;
+
+  @ApiPropertyOptional({ description: '국내/외 (기본값: 국내)', example: '국내' })
+  @IsOptional()
+  @IsString()
+  origin?: string;
+
+  @ApiPropertyOptional({ description: '단위', example: 'kg' })
+  @IsOptional()
+  @IsString()
+  unit?: string;
+
+  @ApiPropertyOptional({ description: '가격', example: 50000 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  price?: number;
+
+  @ApiPropertyOptional({ description: '비고' })
+  @IsOptional()
+  @IsString()
+  note?: string;
+
+  @ApiPropertyOptional({ description: '재고', example: 100 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  stock?: number;
+}
+
+export class ImportMaterialDto {
+  @ApiProperty({ description: '자재 목록', type: [ImportMaterialItemDto] })
+  @IsNotEmpty()
+  materials: ImportMaterialItemDto[];
+}
+
+export class ImportMaterialResultDto {
+  @ApiProperty({ description: '신규 등록된 건수', example: 5 })
+  created: number;
+
+  @ApiProperty({ description: '수정된 건수', example: 10 })
+  updated: number;
+}

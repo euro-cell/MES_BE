@@ -5,7 +5,8 @@ import { MaterialHistory } from 'src/common/entities/material-history.entity';
 import { Production } from 'src/common/entities/production.entity';
 import { MaterialProcess, MaterialHistoryType } from 'src/common/enums/material.enum';
 import { Repository } from 'typeorm';
-import { CreateMaterialDto, UpdateMaterialDto } from 'src/common/dtos/material.dto';
+import { CreateMaterialDto, UpdateMaterialDto, ImportMaterialItemDto, ImportMaterialResultDto } from 'src/common/dtos/material.dto';
+import { MaterialOrigin, MaterialPurpose } from 'src/common/enums/material.enum';
 import { ExcelService } from 'src/common/services/excel.service';
 import { ExcelUtil } from 'src/common/utils/excel.util';
 import * as ExcelJS from 'exceljs';
@@ -436,5 +437,169 @@ export class MaterialService {
 
   getAssemblyExportFilename(): string {
     return '조립_재고관리.xlsx';
+  }
+
+  /**
+   * 전극 자재 일괄 등록/수정 (Upsert)
+   * - lotNo + category 조합으로 기존 데이터 식별
+   * - 해당 조합이 없으면 INSERT, 있으면 UPDATE
+   * - 트랜잭션 처리 (전체 성공 또는 전체 롤백)
+   */
+  async importElectrodeMaterials(materials: ImportMaterialItemDto[]): Promise<ImportMaterialResultDto> {
+    return this.importMaterials(materials, MaterialProcess.ELECTRODE);
+  }
+
+  /**
+   * 조립 자재 일괄 등록/수정 (Upsert)
+   * - lotNo + category 조합으로 기존 데이터 식별
+   * - 해당 조합이 없으면 INSERT, 있으면 UPDATE
+   * - 트랜잭션 처리 (전체 성공 또는 전체 롤백)
+   */
+  async importAssemblyMaterials(materials: ImportMaterialItemDto[]): Promise<ImportMaterialResultDto> {
+    return this.importMaterials(materials, MaterialProcess.ASSEMBLY);
+  }
+
+  /**
+   * 자재 일괄 등록/수정 공통 로직
+   */
+  private async importMaterials(
+    materials: ImportMaterialItemDto[],
+    process: MaterialProcess,
+  ): Promise<ImportMaterialResultDto> {
+    const queryRunner = this.materialRepository.manager.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    let created = 0;
+    let updated = 0;
+
+    try {
+      for (const item of materials) {
+        // lotNo + category 조합으로 기존 자재 조회
+        const existingMaterial = await queryRunner.manager.findOne(Material, {
+          where: {
+            lotNo: item.lotNo,
+            category: item.category,
+            process,
+            deletedAt: null,
+          } as any,
+        });
+
+        // origin 값 변환 (문자열 -> enum)
+        const originValue = this.parseOrigin(item.origin);
+        // purpose 값 변환 (문자열 -> enum)
+        const purposeValue = this.parsePurpose(item.purpose);
+
+        if (existingMaterial) {
+          // UPDATE: 기존 데이터와 비교하여 변경 여부 확인
+          const previousStock = existingMaterial.stock || 0;
+          const currentStock = item.stock ?? 0;
+
+          const hasChanges =
+            existingMaterial.type !== (item.type ?? '') ||
+            existingMaterial.purpose !== purposeValue ||
+            existingMaterial.name !== (item.name ?? '') ||
+            existingMaterial.spec !== (item.spec ?? '') ||
+            existingMaterial.company !== (item.company ?? '') ||
+            existingMaterial.origin !== originValue ||
+            existingMaterial.unit !== (item.unit ?? '') ||
+            Number(existingMaterial.price) !== (item.price ?? 0) ||
+            existingMaterial.note !== (item.note ?? '') ||
+            previousStock !== currentStock;
+
+          if (hasChanges) {
+            await queryRunner.manager.update(Material, existingMaterial.id, {
+              type: item.type ?? '',
+              purpose: purposeValue,
+              name: item.name ?? '',
+              spec: item.spec ?? undefined,
+              company: item.company ?? undefined,
+              origin: originValue,
+              unit: item.unit ?? '',
+              price: item.price ?? undefined,
+              note: item.note ?? undefined,
+              stock: currentStock,
+            });
+
+            // 재고 변경 시 이력 기록 (IMPORT 타입)
+            if (previousStock !== currentStock) {
+              await queryRunner.manager.save(MaterialHistory, {
+                materialId: existingMaterial.id,
+                process,
+                type: MaterialHistoryType.IMPORT,
+                previousStock,
+                currentStock,
+              });
+            }
+
+            updated++;
+          }
+        } else {
+          // INSERT: 신규 등록
+          const newMaterial = new Material();
+          newMaterial.process = process;
+          newMaterial.category = item.category;
+          newMaterial.type = item.type ?? '';
+          newMaterial.purpose = purposeValue;
+          newMaterial.name = item.name ?? '';
+          newMaterial.spec = item.spec ?? '';
+          newMaterial.lotNo = item.lotNo;
+          newMaterial.company = item.company ?? '';
+          newMaterial.origin = originValue;
+          newMaterial.unit = item.unit ?? '';
+          newMaterial.price = item.price ?? 0;
+          newMaterial.note = item.note ?? '';
+          newMaterial.stock = item.stock ?? 0;
+
+          const savedMaterial = await queryRunner.manager.save(Material, newMaterial);
+
+          // 재고가 있으면 일괄등록 이력 기록 (IMPORT 타입)
+          if (savedMaterial.stock && savedMaterial.stock > 0) {
+            await queryRunner.manager.save(MaterialHistory, {
+              materialId: savedMaterial.id,
+              process,
+              type: MaterialHistoryType.IMPORT,
+              previousStock: 0,
+              currentStock: savedMaterial.stock,
+            });
+          }
+
+          created++;
+        }
+      }
+
+      await queryRunner.commitTransaction();
+      return { created, updated };
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  /**
+   * origin 문자열을 MaterialOrigin enum으로 변환
+   */
+  private parseOrigin(origin?: string): MaterialOrigin {
+    if (!origin) return MaterialOrigin.DOMESTIC;
+    if (origin === '해외' || origin.toLowerCase() === 'overseas') {
+      return MaterialOrigin.OVERSEAS;
+    }
+    return MaterialOrigin.DOMESTIC;
+  }
+
+  /**
+   * purpose 문자열을 MaterialPurpose enum으로 변환
+   */
+  private parsePurpose(purpose?: string): MaterialPurpose {
+    if (!purpose) return MaterialPurpose.PRODUCTION;
+    if (purpose === '개발' || purpose.toLowerCase() === 'development') {
+      return MaterialPurpose.DEVELOPMENT;
+    }
+    if (purpose === '불용' || purpose.toLowerCase() === 'unused') {
+      return MaterialPurpose.UNUSED;
+    }
+    return MaterialPurpose.PRODUCTION;
   }
 }

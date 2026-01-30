@@ -41,4 +41,5 @@ export enum MaterialHistoryType {
   IN = '입고',
   OUT = '출고',
   USE = '사용',
+  IMPORT = '일괄등록',
 }
