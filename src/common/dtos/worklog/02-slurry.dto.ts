@@ -155,27 +155,6 @@ export class CreateSlurryWorklogDto extends BaseWorklogDto {
   @IsNumber()
   material6ActualInput?: number;
 
-  // 바인더용액 (Binder Solution)
-  @ApiPropertyOptional({ description: '바인더용액 조성 (%)', example: 4.5 })
-  @IsOptional()
-  @IsNumber()
-  binderSolutionComposition?: number;
-
-  @ApiPropertyOptional({ description: '바인더용액 LOT', example: 'BS-2024-001' })
-  @IsOptional()
-  @IsString()
-  binderSolutionLot?: string;
-
-  @ApiPropertyOptional({ description: '바인더용액 투입량 설계', example: 500.0 })
-  @IsOptional()
-  @IsNumber()
-  binderSolutionPlannedInput?: number;
-
-  @ApiPropertyOptional({ description: '바인더용액 투입량 실제', example: 498.5 })
-  @IsOptional()
-  @IsNumber()
-  binderSolutionActualInput?: number;
-
   // 용매 (Solvent)
   @ApiPropertyOptional({ description: '용매 Add 투입량 설계', example: 100.0 })
   @IsOptional()

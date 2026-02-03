@@ -64,7 +64,6 @@ export class MixingProcessService {
         { lot: log.material4Lot, input: log.material4ActualInput },
         { lot: log.material5Lot, input: log.material5ActualInput },
         { lot: log.material6Lot, input: log.material6ActualInput },
-        { lot: log.binderSolutionLot, input: log.binderSolutionActualInput },
       ];
 
       let logTotal = 0;

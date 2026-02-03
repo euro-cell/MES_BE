@@ -99,19 +99,6 @@ export class WorklogSlurry extends WorklogBase {
   @Column({ type: 'decimal', precision: 15, scale: 2, nullable: true })
   material6ActualInput: number;
 
-  // 바인더용액 (Binder Solution)
-  @Column({ type: 'decimal', precision: 5, scale: 1, nullable: true })
-  binderSolutionComposition: number;
-
-  @Column({ type: 'varchar', length: 100, nullable: true })
-  binderSolutionLot: string;
-
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  binderSolutionPlannedInput: number;
-
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  binderSolutionActualInput: number;
-
   // 용매 (Solvent)
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   solventAddPlannedInput: number;
