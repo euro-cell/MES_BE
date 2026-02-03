@@ -109,12 +109,7 @@ export class SlurryService {
 
       // 사용량이 변경된 경우에만 이력 수정
       if (materialName && newActualInput !== previousActualInput) {
-        await this.materialService.updateMaterialUsageHistory(
-          materialName,
-          materialLot,
-          newActualInput,
-          MaterialProcess.ELECTRODE,
-        );
+        await this.materialService.updateMaterialUsageHistory(materialName, materialLot, newActualInput, MaterialProcess.ELECTRODE);
       }
     }
 
@@ -145,5 +140,53 @@ export class SlurryService {
         solidContent: w.solidContent ? Number(w.solidContent) : null,
         viscosity: w.viscosityAfterStabilization ? Number(w.viscosityAfterStabilization) : null,
       }));
+  }
+
+  /**
+   * Binder 작업일지에서 사용할 Slurry 믹싱 정보 조회
+   * - LOT이 존재하는 Slurry 작업일지만 조회
+   * - material1~6 중 Name이 '바인더'인 행의 PlannedInput 값 반환
+   */
+  async getMixingInfoForBinder(productionId: number) {
+    const worklogs = await this.worklogSlurryRepository.find({
+      where: { production: { id: productionId } },
+      order: { manufactureDate: 'DESC', createdAt: 'DESC' },
+    });
+
+    // 회차 계산을 위한 맵 (날짜별로 역순 카운트)
+    const dateWorklogsMap = new Map<string, typeof worklogs>();
+    for (const worklog of worklogs) {
+      const dateKey = worklog.manufactureDate.toString();
+      if (!dateWorklogsMap.has(dateKey)) {
+        dateWorklogsMap.set(dateKey, []);
+      }
+      dateWorklogsMap.get(dateKey)!.push(worklog);
+    }
+
+    return worklogs.map((worklog) => {
+      const dateKey = worklog.manufactureDate.toString();
+      const dateWorklogs = dateWorklogsMap.get(dateKey)!;
+      // 해당 날짜의 작업일지들 중에서 현재 작업일지의 순서 (createdAt 기준 오름차순)
+      const sortedByCreatedAt = [...dateWorklogs].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+      const round = sortedByCreatedAt.findIndex((w) => w.id === worklog.id) + 1;
+
+      // material1~6 중 Name이 '바인더'인 행의 PlannedInput 값 찾기
+      let binderPlannedInput: number | null = null;
+      for (let i = 1; i <= 6; i++) {
+        const materialName = worklog[`material${i}Name` as keyof typeof worklog] as string | null;
+        if (materialName && materialName.includes('바인더')) {
+          binderPlannedInput = worklog[`material${i}PlannedInput` as keyof typeof worklog] as number | null;
+          break;
+        }
+      }
+
+      return {
+        id: worklog.id,
+        lot: worklog.lot,
+        workDate: worklog.manufactureDate.toString(),
+        round,
+        binderPlannedInput: binderPlannedInput ? Number(binderPlannedInput) : null,
+      };
+    });
   }
 }

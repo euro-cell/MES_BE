@@ -28,6 +28,12 @@ export class SlurryController {
     return await this.slurryService.getLots(productionId);
   }
 
+  @Get('slurry/mixing-info')
+  @ApiOkResponse({ description: 'Binder 작업일지용 Slurry 믹싱 정보 (LOT, 작업일, 회차, 바인더 투입량설계)' })
+  async getMixingInfoForBinder(@Param('productionId', ParseIntPipe) productionId: number) {
+    return await this.slurryService.getMixingInfoForBinder(productionId);
+  }
+
   @Get(':worklogId/slurry')
   async getWorklogById(@Param('productionId', ParseIntPipe) productionId: number, @Param('worklogId') worklogId: string) {
     return await this.slurryService.findWorklogById(worklogId);
