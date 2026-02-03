@@ -26,6 +26,9 @@ export class DrawingVersion {
   @Column({ type: 'json', nullable: true })
   pdfFileNames?: string[];
 
+  @Column({ type: 'json', nullable: true })
+  imageFilePaths?: string[];
+
   @Column({ type: 'date' })
   registrationDate: Date;
 
