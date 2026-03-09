@@ -251,15 +251,20 @@ export class IqcService {
     productionId: number,
     manager?: any,
   ): Promise<void> {
-    const repo = manager || this.cathodeMaterial1ResultRepository;
-
     // 양극재1 불합격 개수
-    const cathode1FailCount = await repo.count({
-      where: {
-        cathodeMaterial1: { production: { id: productionId } },
-        pass: false,
-      },
-    });
+    const cathode1FailCount = manager
+      ? await manager.count(IQCCathodeMaterial1Result, {
+          where: {
+            cathodeMaterial1: { production: { id: productionId } },
+            pass: false,
+          },
+        })
+      : await this.cathodeMaterial1ResultRepository.count({
+          where: {
+            cathodeMaterial1: { production: { id: productionId } },
+            pass: false,
+          },
+        });
 
     // TODO: 양극재2 구현 시 추가
     // 현재는 양극재1만 계산
