@@ -55,6 +55,9 @@ export class IQC {
   @Column({ type: 'text', nullable: true })
   remark: string | null;
 
+  @Column({ type: 'json', nullable: true })
+  psdData: { size: number; volumeIn: number }[] | null;
+
   @OneToMany(() => IQCResult, (result) => result.iqc, { cascade: true })
   results: IQCResult[];
 

@@ -10,6 +10,16 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
+export class PsdDataItemDto {
+  @ApiProperty({ description: '입자 크기 (㎛)' })
+  @IsNumber()
+  size: number;
+
+  @ApiProperty({ description: '부피 비율 (%)' })
+  @IsNumber()
+  volumeIn: number;
+}
+
 export class CreateIQCResultDto {
   @ApiProperty({ description: '검사 카테고리 (입도, 수분, Half cell ...)' })
   @IsString()
@@ -138,6 +148,13 @@ export class CreateIQCDto {
   @IsOptional()
   @IsString()
   remark?: string;
+
+  @ApiProperty({ type: [PsdDataItemDto], required: false, description: 'PSD Raw Data (빈 배열이면 초기화)' })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => PsdDataItemDto)
+  psdData?: PsdDataItemDto[];
 
   @ApiProperty({ type: [CreateIQCResultDto], required: false, description: '검사 결과 목록' })
   @IsOptional()
