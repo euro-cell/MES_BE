@@ -1,6 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
+import { existsSync, mkdirSync, renameSync, unlinkSync } from 'fs';
+import { join } from 'path';
 import { IQC } from 'src/common/entities/iqc.entity';
 import { IQCResult } from 'src/common/entities/iqc-result.entity';
 import { IQCCoaRef } from 'src/common/entities/iqc-coa-ref.entity';
@@ -13,6 +15,8 @@ export class IqcService {
   constructor(
     @InjectRepository(IQC)
     private readonly iqcRepository: Repository<IQC>,
+    @InjectRepository(IQCImage)
+    private readonly iqcImageRepository: Repository<IQCImage>,
     private readonly dataSource: DataSource,
   ) {}
 
@@ -209,6 +213,53 @@ export class IqcService {
     if (result.affected === 0) {
       throw new NotFoundException(`IQC with ID ${id} not found`);
     }
+  }
+
+  async uploadImages(iqcId: number, imageType: string, files: Express.Multer.File[]): Promise<IQCImage[]> {
+    const iqc = await this.iqcRepository.findOne({ where: { id: iqcId } });
+
+    if (!iqc) throw new NotFoundException(`IQC with ID ${iqcId} not found`);
+
+    const relativeDir = join('data', 'uploads', 'iqc', String(iqcId));
+    const absoluteDir = join(process.cwd(), relativeDir);
+
+    if (!existsSync(absoluteDir)) {
+      mkdirSync(absoluteDir, { recursive: true });
+    }
+
+    const images = files.map((file) => {
+      const timestamp = Date.now();
+      const sanitizedType = imageType.replace(/[<>:"/\\|?*()]/g, '_');
+      const sanitizedName = file.originalname.replace(/[<>:"/\\|?*()]/g, '_');
+      const fileName = `${sanitizedType}_${timestamp}_${sanitizedName}`;
+      const absolutePath = join(absoluteDir, fileName);
+      const filePath = join(relativeDir, fileName).replace(/\\/g, '/');
+
+      renameSync(file.path, absolutePath);
+
+      return this.iqcImageRepository.create({
+        iqc: { id: iqcId },
+        imageType,
+        filePath,
+      });
+    });
+
+    return this.iqcImageRepository.save(images);
+  }
+
+  async removeImage(imageId: number): Promise<void> {
+    const image = await this.iqcImageRepository.findOne({ where: { id: imageId } });
+
+    if (!image) throw new NotFoundException(`IQC Image with ID ${imageId} not found`);
+
+    if (image.filePath) {
+      const absolutePath = join(process.cwd(), image.filePath);
+      if (existsSync(absolutePath)) {
+        unlinkSync(absolutePath);
+      }
+    }
+
+    await this.iqcImageRepository.delete(imageId);
   }
 
   /**

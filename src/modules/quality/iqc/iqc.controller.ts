@@ -1,7 +1,9 @@
-import { Controller, Get, Post, Put, Delete, Body, Param } from '@nestjs/common';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { Controller, Get, Post, Put, Delete, Body, Param, UseInterceptors, UploadedFiles } from '@nestjs/common';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { ApiTags, ApiOperation, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { IqcService } from './iqc.service';
-import { CreateIQCDto, UpdateIQCDto } from 'src/common/dtos/iqc.dto';
+import { CreateIQCDto, UpdateIQCDto, UploadIQCImagesDto } from 'src/common/dtos/iqc.dto';
+import { multerConfig } from 'src/common/configs/multer.config';
 
 @ApiTags('Quality - IQC')
 @Controller()
@@ -42,5 +44,27 @@ export class IqcController {
   @ApiOperation({ summary: 'IQC 검사 이력 삭제' })
   async remove(@Param('id') id: number) {
     return this.iqcService.remove(id);
+  }
+
+  @Post('detail/:id/images')
+  @ApiOperation({
+    summary: 'IQC 이미지 업로드',
+    description: 'multipart/form-data로 이미지 파일을 업로드합니다. imageType 필드와 files를 함께 전송하세요.',
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({ type: UploadIQCImagesDto })
+  @UseInterceptors(FileFieldsInterceptor([{ name: 'files', maxCount: 10 }], multerConfig))
+  async uploadImages(
+    @Param('id') id: number,
+    @Body() dto: UploadIQCImagesDto,
+    @UploadedFiles() uploaded: { files?: Express.Multer.File[] },
+  ) {
+    return this.iqcService.uploadImages(id, dto.imageType, uploaded.files ?? []);
+  }
+
+  @Delete('images/:imageId')
+  @ApiOperation({ summary: 'IQC 이미지 삭제' })
+  async removeImage(@Param('imageId') imageId: number) {
+    return this.iqcService.removeImage(imageId);
   }
 }

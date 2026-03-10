@@ -162,3 +162,9 @@ export class CreateIQCDto {
 }
 
 export class UpdateIQCDto extends PartialType(CreateIQCDto) {}
+
+export class UploadIQCImagesDto {
+  @ApiProperty({ description: '이미지 종류 (PSD / Half cell / FE-SEM)' })
+  @IsString()
+  imageType: string;
+}
