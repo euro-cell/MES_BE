@@ -139,7 +139,7 @@ export class IqcService {
       if (dto.inspectionDate !== undefined) iqc.inspectionDate = dto.inspectionDate ? new Date(dto.inspectionDate) : null;
       if (dto.inspector !== undefined) iqc.inspector = dto.inspector ?? null;
       if (dto.remark !== undefined) iqc.remark = dto.remark ?? null;
-      if (dto.psdData !== undefined) iqc.psdData = dto.psdData.length > 0 ? dto.psdData : null;
+      if (dto.psdData !== undefined) iqc.psdData = dto.psdData && dto.psdData.length > 0 ? dto.psdData : null;
 
       await manager.save(IQC, iqc);
 
