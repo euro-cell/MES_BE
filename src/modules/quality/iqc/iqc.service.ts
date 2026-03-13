@@ -7,6 +7,7 @@ import { IQC } from 'src/common/entities/iqc.entity';
 import { IQCResult } from 'src/common/entities/iqc-result.entity';
 import { IQCCoaRef } from 'src/common/entities/iqc-coa-ref.entity';
 import { IQCImage } from 'src/common/entities/iqc-image.entity';
+import { IQCFile } from 'src/common/entities/iqc-file.entity';
 import { CreateIQCDto, UpdateIQCDto } from 'src/common/dtos/iqc.dto';
 
 
@@ -17,13 +18,15 @@ export class IqcService {
     private readonly iqcRepository: Repository<IQC>,
     @InjectRepository(IQCImage)
     private readonly iqcImageRepository: Repository<IQCImage>,
+    @InjectRepository(IQCFile)
+    private readonly iqcFileRepository: Repository<IQCFile>,
     private readonly dataSource: DataSource,
   ) {}
 
   async findAll(productionId: number): Promise<IQC[]> {
     return this.iqcRepository.find({
       where: { production: { id: productionId } },
-      relations: ['results', 'coaRefs', 'images'],
+      relations: ['results', 'coaRefs', 'images', 'files'],
       order: { createdAt: 'ASC' },
     });
   }
@@ -31,7 +34,7 @@ export class IqcService {
   async findOne(id: number): Promise<IQC> {
     const iqc = await this.iqcRepository.findOne({
       where: { id },
-      relations: ['production', 'results', 'coaRefs', 'images'],
+      relations: ['production', 'results', 'coaRefs', 'images', 'files'],
     });
 
     if (!iqc) throw new NotFoundException(`IQC with ID ${id} not found`);
@@ -113,7 +116,7 @@ export class IqcService {
 
       return manager.findOneOrFail(IQC, {
         where: { id: savedIqc.id },
-        relations: ['production', 'results', 'coaRefs', 'images'],
+        relations: ['production', 'results', 'coaRefs', 'images', 'files'],
       });
     });
   }
@@ -206,7 +209,7 @@ export class IqcService {
 
       return manager.findOneOrFail(IQC, {
         where: { id },
-        relations: ['production', 'results', 'coaRefs', 'images'],
+        relations: ['production', 'results', 'coaRefs', 'images', 'files'],
       });
     });
   }
@@ -250,6 +253,52 @@ export class IqcService {
     });
 
     return this.iqcImageRepository.save(images);
+  }
+
+  async uploadFile(iqcId: number, fileType: string, file: Express.Multer.File): Promise<IQCFile> {
+    const iqc = await this.iqcRepository.findOne({ where: { id: iqcId } });
+
+    if (!iqc) throw new NotFoundException(`IQC with ID ${iqcId} not found`);
+
+    const relativeDir = join('data', 'uploads', 'iqc', String(iqcId));
+    const absoluteDir = join(process.cwd(), relativeDir);
+
+    if (!existsSync(absoluteDir)) {
+      mkdirSync(absoluteDir, { recursive: true });
+    }
+
+    const timestamp = Date.now();
+    const sanitizedType = fileType.replace(/[<>:"/\\|?*()]/g, '_');
+    const sanitizedName = file.originalname.replace(/[<>:"/\\|?*()]/g, '_');
+    const fileName = `${sanitizedType}_${timestamp}_${sanitizedName}`;
+    const absolutePath = join(absoluteDir, fileName);
+    const filePath = join(relativeDir, fileName).replace(/\\/g, '/');
+
+    renameSync(file.path, absolutePath);
+
+    const iqcFile = this.iqcFileRepository.create({
+      iqc: { id: iqcId },
+      fileType,
+      fileName: file.originalname,
+      filePath,
+    });
+
+    return this.iqcFileRepository.save(iqcFile);
+  }
+
+  async removeFile(fileId: number): Promise<void> {
+    const file = await this.iqcFileRepository.findOne({ where: { id: fileId } });
+
+    if (!file) throw new NotFoundException(`IQC File with ID ${fileId} not found`);
+
+    if (file.filePath) {
+      const absolutePath = join(process.cwd(), file.filePath);
+      if (existsSync(absolutePath)) {
+        unlinkSync(absolutePath);
+      }
+    }
+
+    await this.iqcFileRepository.delete(fileId);
   }
 
   async updateImageLabel(imageId: number, imageLabel: string): Promise<IQCImage> {

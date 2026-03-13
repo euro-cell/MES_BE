@@ -191,6 +191,15 @@ export class CreateIQCDto {
 
 export class UpdateIQCDto extends PartialType(CreateIQCDto) {}
 
+export class UploadIQCFileDto {
+  @ApiProperty({ description: '파일 종류 (예: PSD_DOC)' })
+  @IsString()
+  fileType: string;
+
+  @ApiProperty({ type: 'string', format: 'binary', description: '업로드할 파일' })
+  file: any;
+}
+
 export class UploadIQCImagesDto {
   @ApiProperty({ description: '이미지 종류 (PSD / Half cell / FE-SEM)' })
   @IsString()

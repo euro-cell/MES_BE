@@ -6,10 +6,11 @@ import { IQC } from 'src/common/entities/iqc.entity';
 import { IQCResult } from 'src/common/entities/iqc-result.entity';
 import { IQCCoaRef } from 'src/common/entities/iqc-coa-ref.entity';
 import { IQCImage } from 'src/common/entities/iqc-image.entity';
+import { IQCFile } from 'src/common/entities/iqc-file.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([IQC, IQCResult, IQCCoaRef, IQCImage]),
+    TypeOrmModule.forFeature([IQC, IQCResult, IQCCoaRef, IQCImage, IQCFile]),
   ],
   controllers: [IqcController],
   providers: [IqcService],

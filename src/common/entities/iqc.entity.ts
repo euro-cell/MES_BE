@@ -12,6 +12,7 @@ import { Production } from './production.entity';
 import { IQCResult } from './iqc-result.entity';
 import { IQCCoaRef } from './iqc-coa-ref.entity';
 import { IQCImage } from './iqc-image.entity';
+import { IQCFile } from './iqc-file.entity';
 
 @Entity('iqc')
 export class IQC {
@@ -66,6 +67,9 @@ export class IQC {
 
   @OneToMany(() => IQCImage, (image) => image.iqc, { cascade: true })
   images: IQCImage[];
+
+  @OneToMany(() => IQCFile, (file) => file.iqc, { cascade: true })
+  files: IQCFile[];
 
   @CreateDateColumn()
   createdAt: Date;
