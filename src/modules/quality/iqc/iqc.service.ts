@@ -101,6 +101,7 @@ export class IqcService {
           manager.create(IQCImage, {
             iqc: { id: savedIqc.id },
             imageType: img.imageType,
+            imageLabel: img.imageLabel ?? null,
             filePath: img.filePath ?? null,
           }),
         );
@@ -192,6 +193,7 @@ export class IqcService {
             manager.create(IQCImage, {
               iqc: { id },
               imageType: img.imageType,
+              imageLabel: img.imageLabel ?? null,
               filePath: img.filePath ?? null,
             }),
           );
@@ -217,7 +219,7 @@ export class IqcService {
     }
   }
 
-  async uploadImages(iqcId: number, imageType: string, files: Express.Multer.File[]): Promise<IQCImage[]> {
+  async uploadImages(iqcId: number, imageType: string, files: Express.Multer.File[], imageLabel?: string): Promise<IQCImage[]> {
     const iqc = await this.iqcRepository.findOne({ where: { id: iqcId } });
 
     if (!iqc) throw new NotFoundException(`IQC with ID ${iqcId} not found`);
@@ -242,11 +244,21 @@ export class IqcService {
       return this.iqcImageRepository.create({
         iqc: { id: iqcId },
         imageType,
+        imageLabel: imageLabel ?? null,
         filePath,
       });
     });
 
     return this.iqcImageRepository.save(images);
+  }
+
+  async updateImageLabel(imageId: number, imageLabel: string): Promise<IQCImage> {
+    const image = await this.iqcImageRepository.findOne({ where: { id: imageId } });
+
+    if (!image) throw new NotFoundException(`IQC Image with ID ${imageId} not found`);
+
+    image.imageLabel = imageLabel;
+    return this.iqcImageRepository.save(image);
   }
 
   async removeImage(imageId: number): Promise<void> {

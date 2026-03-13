@@ -1,8 +1,8 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseInterceptors, UploadedFiles } from '@nestjs/common';
+import { Controller, Get, Post, Put, Patch, Delete, Body, Param, UseInterceptors, UploadedFiles } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiOperation, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { IqcService } from './iqc.service';
-import { CreateIQCDto, UpdateIQCDto, UploadIQCImagesDto } from 'src/common/dtos/iqc.dto';
+import { CreateIQCDto, UpdateIQCDto, UpdateImageLabelDto, UploadIQCImagesDto } from 'src/common/dtos/iqc.dto';
 import { multerConfig } from 'src/common/configs/multer.config';
 
 @ApiTags('Quality - IQC')
@@ -59,7 +59,13 @@ export class IqcController {
     @Body() dto: UploadIQCImagesDto,
     @UploadedFiles() uploaded: { files?: Express.Multer.File[] },
   ) {
-    return this.iqcService.uploadImages(id, dto.imageType, uploaded.files ?? []);
+    return this.iqcService.uploadImages(id, dto.imageType, uploaded.files ?? [], dto.imageLabel);
+  }
+
+  @Patch('images/:imageId/label')
+  @ApiOperation({ summary: 'IQC 이미지 레이블 수정' })
+  async updateImageLabel(@Param('imageId') imageId: number, @Body() dto: UpdateImageLabelDto) {
+    return this.iqcService.updateImageLabel(imageId, dto.imageLabel);
   }
 
   @Delete('images/:imageId')

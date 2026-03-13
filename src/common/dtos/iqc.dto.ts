@@ -91,10 +91,21 @@ export class CreateIQCImageDto {
   @IsString()
   imageType: string;
 
+  @ApiProperty({ required: false, description: '이미지 레이블 (사용자 입력 텍스트)' })
+  @IsOptional()
+  @IsString()
+  imageLabel?: string;
+
   @ApiProperty({ required: false, description: '파일 경로 또는 S3 URL' })
   @IsOptional()
   @IsString()
   filePath?: string;
+}
+
+export class UpdateImageLabelDto {
+  @ApiProperty({ description: '이미지 레이블 (사용자 입력 텍스트)' })
+  @IsString()
+  imageLabel: string;
 }
 
 export class CreateIQCDto {
@@ -184,4 +195,9 @@ export class UploadIQCImagesDto {
   @ApiProperty({ description: '이미지 종류 (PSD / Half cell / FE-SEM)' })
   @IsString()
   imageType: string;
+
+  @ApiProperty({ required: false, description: '이미지 레이블 (사용자 입력 텍스트)' })
+  @IsOptional()
+  @IsString()
+  imageLabel?: string;
 }

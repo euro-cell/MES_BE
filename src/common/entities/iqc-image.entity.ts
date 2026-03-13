@@ -20,6 +20,9 @@ export class IQCImage {
   @Column({ type: 'varchar', length: 50 })
   imageType: string;
 
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  imageLabel: string | null;
+
   @Column({ type: 'varchar', length: 500, nullable: true })
   filePath: string | null;
 
