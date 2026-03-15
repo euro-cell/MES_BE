@@ -394,26 +394,6 @@ export class LotExportService {
 
     const notchingLots = await this.notchingService.getNotchingLots(productionId);
 
-    // 디버그: Notching 데이터 출력
-    console.log('=== Notching Data Debug ===');
-    console.log('Total Lots:', notchingLots.length);
-    notchingLots.forEach((lot, index) => {
-      console.log(`\n[Lot ${index + 1}]`);
-      console.log('  B (Date):', lot.notchingDate);
-      console.log('  C (Lot):', lot.lot);
-      console.log('  D (Temp):', lot.atNotching?.temp);
-      console.log('  E (Humidity):', lot.atNotching?.humidity);
-      console.log('  F (Over Tab):', lot.electrodeSpec?.overTab);
-      console.log('  G (Wide):', lot.electrodeSpec?.wide);
-      console.log('  H (Length):', lot.electrodeSpec?.length);
-      console.log('  I (Miss Match):', lot.electrodeSpec?.missMatch);
-      console.log('  J (Total Output):', lot.production?.totalOutput);
-      console.log('  K (Defective):', lot.production?.defective);
-      console.log('  L (Quantity):', lot.production?.quantity);
-      console.log('  M (Fraction Defective):', lot.production?.fractionDefective);
-    });
-    console.log('=== End Notching Debug ===\n');
-
     // 6행부터 데이터 입력 (한 Lot당 1행 사용)
     let rowIndex = 6;
     for (const lot of notchingLots) {
