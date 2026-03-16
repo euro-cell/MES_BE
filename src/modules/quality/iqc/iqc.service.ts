@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
-import { existsSync, mkdirSync, renameSync, unlinkSync } from 'fs';
+import { copyFileSync, existsSync, mkdirSync, unlinkSync } from 'fs';
 import { join } from 'path';
 import { IQC } from 'src/common/entities/iqc.entity';
 import { IQCResult } from 'src/common/entities/iqc-result.entity';
@@ -242,7 +242,8 @@ export class IqcService {
       const absolutePath = join(absoluteDir, fileName);
       const filePath = join(relativeDir, fileName).replace(/\\/g, '/');
 
-      renameSync(file.path, absolutePath);
+      copyFileSync(file.path, absolutePath);
+      unlinkSync(file.path);
 
       return this.iqcImageRepository.create({
         iqc: { id: iqcId },
@@ -274,7 +275,8 @@ export class IqcService {
     const absolutePath = join(absoluteDir, fileName);
     const filePath = join(relativeDir, fileName).replace(/\\/g, '/');
 
-    renameSync(file.path, absolutePath);
+    copyFileSync(file.path, absolutePath);
+    unlinkSync(file.path);
 
     const iqcFile = this.iqcFileRepository.create({
       iqc: { id: iqcId },
