@@ -121,6 +121,90 @@ export class NcrService {
     };
   }
 
+  async getAllDetails(projects: Array<{ projectName: string; projectNo: string | null }>): Promise<Map<string, NcrDetailResponseDto>> {
+    if (projects.length === 0) return new Map();
+
+    const projectNames = [...new Set(projects.map((p) => p.projectName))];
+
+    // 한 번에 모든 ncrGrade 조회
+    const ncrGradesRaw = await this.cellInventoryRepository
+      .createQueryBuilder('ci')
+      .select('ci.projectName', 'projectName')
+      .addSelect('ci.projectNo', 'projectNo')
+      .addSelect('ci.ncrGrade', 'ncrGrade')
+      .where('ci.projectName IN (:...projectNames)', { projectNames })
+      .andWhere('ci.ncrGrade IS NOT NULL')
+      .distinct(true)
+      .getRawMany<{ projectName: string; projectNo: string | null; ncrGrade: string }>();
+
+    // 한 번에 모든 CellNcr 조회
+    const allNcrCodes = [...new Set(ncrGradesRaw.map((r) => r.ncrGrade))];
+    const allNcrItems = allNcrCodes.length > 0
+      ? await this.cellNcrRepository.find({ where: allNcrCodes.map((code) => ({ code })) })
+      : [];
+    const ncrItemByCode = new Map(allNcrItems.map((item) => [item.code, item]));
+
+    // 한 번에 모든 CellNcrDetail 조회
+    const allDetails = projectNames.length > 0
+      ? await this.cellNcrDetailRepository
+          .createQueryBuilder('d')
+          .leftJoinAndSelect('d.cellNcr', 'ncr')
+          .where('d.projectName IN (:...projectNames)', { projectNames })
+          .orderBy('d.id', 'ASC')
+          .getMany()
+      : [];
+
+    // projectName+ncrId 키로 detail 그룹핑
+    const detailsByKey = new Map<string, typeof allDetails>();
+    for (const detail of allDetails) {
+      const key = `${detail.projectName}::${detail.cellNcr.id}`;
+      if (!detailsByKey.has(key)) detailsByKey.set(key, []);
+      detailsByKey.get(key)!.push(detail);
+    }
+
+    const categoryOrder: Record<string, number> = { Formation: 0, Inspection: 1, Other: 2 };
+
+    const result = new Map<string, NcrDetailResponseDto>();
+    for (const project of projects) {
+      const key = `${project.projectName}::${project.projectNo ?? ''}`;
+      const projectNcrCodes = ncrGradesRaw
+        .filter((r) => r.projectName === project.projectName && (r.projectNo ?? '') === (project.projectNo ?? ''))
+        .map((r) => r.ncrGrade);
+
+      const ncrItems = projectNcrCodes
+        .map((code) => ncrItemByCode.get(code))
+        .filter((item): item is NonNullable<typeof item> => item != null)
+        .sort((a, b) => {
+          const catA = categoryOrder[a.category] ?? 3;
+          const catB = categoryOrder[b.category] ?? 3;
+          if (catA !== catB) return catA - catB;
+          return a.id - b.id;
+        });
+
+      const ncrDetails: NcrDetailDto[] = ncrItems.map((ncrItem) => {
+        const details = detailsByKey.get(`${project.projectName}::${ncrItem.id}`) ?? [];
+        return {
+          id: ncrItem.id,
+          code: ncrItem.code,
+          title: ncrItem.title,
+          category: ncrItem.category,
+          ncrType: ncrItem.ncrType,
+          items: details.map((d) => ({
+            id: d.id,
+            title: d.title,
+            details: d.details,
+            type: d.type,
+            count: d.count,
+          })),
+        };
+      });
+
+      result.set(key, { projectName: project.projectName, ncrDetails });
+    }
+
+    return result;
+  }
+
   async updateDetail(dto: UpdateNcrDetailRequestDto, projectNo?: string): Promise<{ message: string }> {
     const { projectName, ncrDetails } = dto;
 

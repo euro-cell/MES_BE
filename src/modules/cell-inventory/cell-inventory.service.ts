@@ -531,13 +531,16 @@ export class CellInventoryService {
     const separatorCol = lastProjectCol + 1;
     worksheet.getColumn(separatorCol).width = 1.38;
 
+    // 모든 프로젝트의 detail을 한 번에 조회
+    const allDetailsMap = await this.ncrService.getAllDetails(projects);
+
     // 각 프로젝트별 상세 테이블 시작 열
     let currentCol = separatorCol + 1;
 
     for (const project of projects) {
-      // 프로젝트의 NCR 상세 데이터 조회
-      const detailData = await this.ncrService.getDetail(project.projectName, project.projectNo || undefined);
-      const { ncrDetails } = detailData;
+      const detailKey = `${project.projectName}::${project.projectNo ?? ''}`;
+      const detailData = allDetailsMap.get(detailKey);
+      const ncrDetails = detailData?.ncrDetails ?? [];
 
       if (ncrDetails.length === 0) continue;
 
