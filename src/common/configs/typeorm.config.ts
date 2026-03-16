@@ -20,6 +20,11 @@ export class TypeOrmConfig implements TypeOrmOptionsFactory {
       dropSchema: false,
       logging: ['error', 'warn'],
       namingStrategy: new SnakeNamingStrategy(),
+      extra: {
+        max: 10,
+        idleTimeoutMillis: 30000,
+        connectionTimeoutMillis: 5000,
+      },
     };
   }
 }
