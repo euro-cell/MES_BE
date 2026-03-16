@@ -264,13 +264,13 @@ export class WorklogFormation extends WorklogBase {
   @Column({ type: 'varchar', length: 50, nullable: true })
   preFormationVoltageCondition: string;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'float', nullable: true })
   preFormationLowerVoltage: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'float', nullable: true })
   preFormationUpperVoltage: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'float', nullable: true })
   preFormationAppliedCurrent: number;
 
   @Column({ type: 'smallint', nullable: true })
@@ -280,13 +280,13 @@ export class WorklogFormation extends WorklogBase {
   @Column({ type: 'varchar', length: 50, nullable: true })
   mainFormationVoltageCondition: string;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'float', nullable: true })
   mainFormationLowerVoltage: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'float', nullable: true })
   mainFormationUpperVoltage: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'float', nullable: true })
   mainFormationAppliedCurrent: number;
 
   @Column({ type: 'smallint', nullable: true })
