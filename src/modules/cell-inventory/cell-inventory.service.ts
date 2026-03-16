@@ -227,7 +227,7 @@ export class CellInventoryService {
   }
 
   async downloadExcel(): Promise<StreamableFile> {
-    const workbook = await this.excelService.loadTemplate('material/cell_inventory.xlsx');
+    const workbook = await this.excelService.loadTemplate('cell/cell_inventory.xlsx');
     const worksheet = workbook.getWorksheet('셀 입출고 확인');
     if (!worksheet) {
       throw new NotFoundException('워크시트를 찾을 수 없습니다: 셀 입출고 확인');

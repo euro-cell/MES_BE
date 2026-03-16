@@ -5,10 +5,12 @@ import { CellInventory } from 'src/common/entities/cell-inventory.entity';
 import { CellInventoryService } from './cell-inventory.service';
 import { CellInventoryController } from './cell-inventory.controller';
 import { NcrModule } from './ncr/ncr.module';
+import { CommonModule } from 'src/common/common.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([CellInventory]),
+    CommonModule,
     NcrModule,
     RouterModule.register([
       {
