@@ -8,6 +8,7 @@ export enum LqcProcessType {
   VD_CATHODE = 'VD_CATHODE',
   VD_ANODE = 'VD_ANODE',
   ASSEMBLY_SEALING = 'ASSEMBLY_SEALING',
+  ASSEMBLY_FINAL_SEALING = 'ASSEMBLY_FINAL_SEALING',
 }
 
 export enum LqcItemType {
@@ -17,4 +18,5 @@ export enum LqcItemType {
   PRESS = 'PRESS',
   VD = 'VD',
   SEALING = 'SEALING',
+  FINAL_SEALING = 'FINAL_SEALING',
 }
