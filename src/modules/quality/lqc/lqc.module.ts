@@ -8,9 +8,10 @@ import { WorklogSlurry } from 'src/common/entities/worklogs/worklog-02-slurry.en
 import { WorklogCoating } from 'src/common/entities/worklogs/worklog-03-coating.entity';
 import { WorklogPress } from 'src/common/entities/worklogs/worklog-04-press.entity';
 import { WorklogVd } from 'src/common/entities/worklogs/worklog-07-vd.entity';
+import { WorklogSealing } from 'src/common/entities/worklogs/worklog-11-sealing.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([LqcSpec, WorklogBinder, WorklogSlurry, WorklogCoating, WorklogPress, WorklogVd])],
+  imports: [TypeOrmModule.forFeature([LqcSpec, WorklogBinder, WorklogSlurry, WorklogCoating, WorklogPress, WorklogVd, WorklogSealing])],
   controllers: [LqcController],
   providers: [LqcService],
 })

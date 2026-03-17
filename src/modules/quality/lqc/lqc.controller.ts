@@ -69,4 +69,10 @@ export class LqcController {
   ) {
     return this.lqcService.getVdWorklogData(productionId, electrode);
   }
+
+  @Get(':productionId/sealing')
+  @ApiOperation({ summary: '실링 작업일지 데이터 조회 (Side/Top 두께)' })
+  async getSealingWorklogData(@Param('productionId') productionId: number) {
+    return this.lqcService.getSealingWorklogData(productionId);
+  }
 }

@@ -9,6 +9,7 @@ import { WorklogSlurry } from 'src/common/entities/worklogs/worklog-02-slurry.en
 import { WorklogCoating } from 'src/common/entities/worklogs/worklog-03-coating.entity';
 import { WorklogPress } from 'src/common/entities/worklogs/worklog-04-press.entity';
 import { WorklogVd } from 'src/common/entities/worklogs/worklog-07-vd.entity';
+import { WorklogSealing } from 'src/common/entities/worklogs/worklog-11-sealing.entity';
 
 @Injectable()
 export class LqcService {
@@ -25,6 +26,8 @@ export class LqcService {
     private readonly worklogPressRepository: Repository<WorklogPress>,
     @InjectRepository(WorklogVd)
     private readonly worklogVdRepository: Repository<WorklogVd>,
+    @InjectRepository(WorklogSealing)
+    private readonly worklogSealingRepository: Repository<WorklogSealing>,
   ) {}
 
   async getSpec(productionId: number, processType?: LqcProcessType, itemType?: LqcItemType): Promise<LqcSpec[]> {
@@ -358,5 +361,49 @@ export class LqcService {
     }
 
     return result;
+  }
+
+  async getSealingWorklogData(productionId: number) {
+    const sealings = await this.worklogSealingRepository.find({
+      where: { production: { id: productionId } },
+      order: { manufactureDate: 'DESC' },
+    });
+
+    // "번호 - v1/v2/v3/..." 형식 파싱 → { no, values }[]
+    const parseChecklist = (checklist: string): { no: number | null; values: (number | null)[] }[] => {
+      if (!checklist) return [];
+      return checklist
+        .split('\n')
+        .map((line) => line.trim())
+        .filter((line) => line.includes('-'))
+        .map((line) => {
+          const [noPart, valuesPart] = line.split('-');
+          const no = noPart.trim() !== '' ? Number(noPart.trim()) : null;
+          const values = (valuesPart?.trim() ?? '').split('/').map((v) => (v.trim() !== '' ? Number(v.trim()) : null)) as (number | null)[];
+          return { no, values };
+        });
+    };
+
+    return sealings.map((sealing) => {
+      const topRows = parseChecklist(sealing.topChecklist);
+      const sideRows = parseChecklist(sealing.sideChecklist);
+
+      // Top: 3행 각각에서 index 1, 2 (2번째, 3번째 값) 추출
+      const topThickness = topRows.flatMap((row) => [row.values[1] ?? null, row.values[2] ?? null]);
+
+      // Side: 1행(index 0) 전체 3개 + 3행(index 2) 전체 3개
+      const sideThickness = [...(sideRows[0]?.values ?? [null, null, null]), ...(sideRows[2]?.values ?? [null, null, null])];
+
+      const allRows = [...topRows, ...sideRows];
+      const lot = allRows.length > 0 ? `${allRows[0].no}~${allRows[allRows.length - 1].no}` : null;
+
+      return {
+        id: sealing.id,
+        workDate: sealing.manufactureDate,
+        lot,
+        sideSealing: sideThickness,
+        topSealing: topThickness,
+      };
+    });
   }
 }
