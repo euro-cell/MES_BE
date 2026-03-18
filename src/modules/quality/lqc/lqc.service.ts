@@ -366,7 +366,7 @@ export class LqcService {
   async getSealingWorklogData(productionId: number) {
     const sealings = await this.worklogSealingRepository.find({
       where: { production: { id: productionId } },
-      order: { manufactureDate: 'DESC' },
+      order: { manufactureDate: 'ASC' },
     });
 
     // "번호 - v1/v2/v3/..." 형식 파싱 → { no, values }[]
