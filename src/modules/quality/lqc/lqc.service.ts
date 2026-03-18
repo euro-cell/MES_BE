@@ -11,6 +11,7 @@ import { WorklogPress } from 'src/common/entities/worklogs/worklog-04-press.enti
 import { WorklogVd } from 'src/common/entities/worklogs/worklog-07-vd.entity';
 import { WorklogSealing } from 'src/common/entities/worklogs/worklog-11-sealing.entity';
 import { WorklogFormation } from 'src/common/entities/worklogs/worklog-13-formation.entity';
+import { LotFormation } from 'src/common/entities/lots/lot-08-formation.entity';
 
 @Injectable()
 export class LqcService {
@@ -31,6 +32,8 @@ export class LqcService {
     private readonly worklogSealingRepository: Repository<WorklogSealing>,
     @InjectRepository(WorklogFormation)
     private readonly worklogFormationRepository: Repository<WorklogFormation>,
+    @InjectRepository(LotFormation)
+    private readonly lotFormationRepository: Repository<LotFormation>,
   ) {}
 
   async getSpec(productionId: number, processType?: LqcProcessType, itemType?: LqcItemType): Promise<LqcSpec[]> {
@@ -364,6 +367,19 @@ export class LqcService {
     }
 
     return result;
+  }
+
+  async getFormationLotData(productionId: number) {
+    const lots = await this.lotFormationRepository.find({
+      where: { production: { id: productionId } },
+      order: { lot: 'ASC' },
+    });
+
+    return lots.map((l) => ({
+      lot: l.lot,
+      pfc: l.pfc ?? null,
+      pfd: l.pfd ?? null,
+    }));
   }
 
   async getFinalSealingWorklogData(productionId: number) {

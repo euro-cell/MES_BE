@@ -27,46 +27,31 @@ export class LqcController {
 
   @Get(':productionId/binder')
   @ApiOperation({ summary: '바인더 작업일지 데이터 조회 (고형분, 점도)' })
-  async getBinderWorklogData(
-    @Param('productionId') productionId: number,
-    @Query('electrode') electrode?: 'A' | 'C',
-  ) {
+  async getBinderWorklogData(@Param('productionId') productionId: number, @Query('electrode') electrode?: 'A' | 'C') {
     return this.lqcService.getBinderWorklogData(productionId, electrode);
   }
 
   @Get(':productionId/slurry')
   @ApiOperation({ summary: '슬러리 작업일지 데이터 조회 (입도, 점도)' })
-  async getSlurryWorklogData(
-    @Param('productionId') productionId: number,
-    @Query('electrode') electrode?: 'A' | 'C',
-  ) {
+  async getSlurryWorklogData(@Param('productionId') productionId: number, @Query('electrode') electrode?: 'A' | 'C') {
     return this.lqcService.getSlurryWorklogData(productionId, electrode);
   }
 
   @Get(':productionId/coating')
   @ApiOperation({ summary: '코팅 작업일지 데이터 조회 (로딩량, 두께)' })
-  async getCoatingWorklogData(
-    @Param('productionId') productionId: number,
-    @Query('electrode') electrode?: 'A' | 'C',
-  ) {
+  async getCoatingWorklogData(@Param('productionId') productionId: number, @Query('electrode') electrode?: 'A' | 'C') {
     return this.lqcService.getCoatingWorklogData(productionId, electrode);
   }
 
   @Get(':productionId/press')
   @ApiOperation({ summary: '프레스 작업일지 데이터 조회 (면적밀도, 두께)' })
-  async getPressWorklogData(
-    @Param('productionId') productionId: number,
-    @Query('electrode') electrode?: 'A' | 'C',
-  ) {
+  async getPressWorklogData(@Param('productionId') productionId: number, @Query('electrode') electrode?: 'A' | 'C') {
     return this.lqcService.getPressWorklogData(productionId, electrode);
   }
 
   @Get(':productionId/vd')
   @ApiOperation({ summary: 'VD 작업일지 데이터 조회 (수분)' })
-  async getVdWorklogData(
-    @Param('productionId') productionId: number,
-    @Query('electrode') electrode?: 'A' | 'C',
-  ) {
+  async getVdWorklogData(@Param('productionId') productionId: number, @Query('electrode') electrode?: 'A' | 'C') {
     return this.lqcService.getVdWorklogData(productionId, electrode);
   }
 
@@ -80,5 +65,11 @@ export class LqcController {
   @ApiOperation({ summary: '파이널 실링 작업일지 데이터 조회 (실링 두께)' })
   async getFinalSealingWorklogData(@Param('productionId') productionId: number) {
     return this.lqcService.getFinalSealingWorklogData(productionId);
+  }
+
+  @Get(':productionId/pre-formation')
+  @ApiOperation({ summary: '포메이션 Lot 데이터 조회 (pfc, pfd)' })
+  async getFormationLotData(@Param('productionId') productionId: number) {
+    return this.lqcService.getFormationLotData(productionId);
   }
 }
