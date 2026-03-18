@@ -5,7 +5,7 @@ import { Type } from 'class-transformer';
 export class RegisterRawDataDto {
   @ApiProperty({
     description: '헤더 목록 (예: ["lot", "Pre-Formation PFC", ...])',
-    example: ['lot', 'Pre-Formation PFC', 'Pre-Formation RFD'],
+    example: ['lot', 'Pre-Formation PFC', 'Pre-Formation PFD'],
   })
   @IsArray()
   @IsString({ each: true })
@@ -14,8 +14,8 @@ export class RegisterRawDataDto {
   @ApiProperty({
     description: 'Raw Data 배열',
     example: [
-      { lot: 'O1CD010001', 'Pre-Formation PFC': '0.123', 'Pre-Formation RFD': '0.456' },
-      { lot: 'O1CD010002', 'Pre-Formation PFC': '0.234', 'Pre-Formation RFD': '0.567' },
+      { lot: 'O1CD010001', 'Pre-Formation PFC': '0.123', 'Pre-Formation PFD': '0.456' },
+      { lot: 'O1CD010002', 'Pre-Formation PFC': '0.234', 'Pre-Formation PFD': '0.567' },
     ],
   })
   @IsArray()

@@ -31,7 +31,7 @@ export class LotFormation extends LotBase {
   pfc: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  rfd: number;
+  pfd: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 1, nullable: true })
   forEff1: number;

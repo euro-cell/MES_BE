@@ -755,9 +755,9 @@ export class LotExportService {
       if (lot.preFormation?.pfc != null) {
         worksheet.getCell(rowIndex, 7).value = lot.preFormation.pfc;
       }
-      // H: Pre-Formation RFD
-      if (lot.preFormation?.rfd != null) {
-        worksheet.getCell(rowIndex, 8).value = lot.preFormation.rfd;
+      // H: Pre-Formation PFD
+      if (lot.preFormation?.pfd != null) {
+        worksheet.getCell(rowIndex, 8).value = lot.preFormation.pfd;
       }
       // I: Pre-Formation For.Eff_1
       if (lot.preFormation?.forEff1 != null) {

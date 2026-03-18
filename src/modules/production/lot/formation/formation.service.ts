@@ -368,8 +368,8 @@ export class FormationLotService {
   private readonly headerToFieldMap: Record<string, keyof LotFormation> = {
     // Pre-Formation
     'Pre-Formation PFC': 'pfc',
-    'Pre-Formation PFD': 'rfd',
-    'Pre-Formation RFD': 'rfd',
+    'Pre-Formation PFD': 'pfd',
+    'Pre-Formation RFD': 'pfd',
     'Pre-Formation For.Eff_1': 'forEff1',
     // Final Sealing
     'Final Sealing Pouch Sealing Thickness': 'finalPouchSealingThickness',
@@ -532,7 +532,7 @@ export class FormationLotService {
           equipment: lotEntry.preFormationEquipment,
           chNo: lotEntry.preFormationChNo,
           pfc: lotEntry.pfc,
-          rfd: lotEntry.rfd,
+          pfd: lotEntry.pfd,
           forEff1: lotEntry.forEff1,
         },
         finalSealing: {
