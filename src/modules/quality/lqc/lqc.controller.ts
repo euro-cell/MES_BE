@@ -75,4 +75,10 @@ export class LqcController {
   async getSealingWorklogData(@Param('productionId') productionId: number) {
     return this.lqcService.getSealingWorklogData(productionId);
   }
+
+  @Get(':productionId/final-sealing')
+  @ApiOperation({ summary: '파이널 실링 작업일지 데이터 조회 (실링 두께)' })
+  async getFinalSealingWorklogData(@Param('productionId') productionId: number) {
+    return this.lqcService.getFinalSealingWorklogData(productionId);
+  }
 }

@@ -10,6 +10,7 @@ import { WorklogCoating } from 'src/common/entities/worklogs/worklog-03-coating.
 import { WorklogPress } from 'src/common/entities/worklogs/worklog-04-press.entity';
 import { WorklogVd } from 'src/common/entities/worklogs/worklog-07-vd.entity';
 import { WorklogSealing } from 'src/common/entities/worklogs/worklog-11-sealing.entity';
+import { WorklogFormation } from 'src/common/entities/worklogs/worklog-13-formation.entity';
 
 @Injectable()
 export class LqcService {
@@ -28,6 +29,8 @@ export class LqcService {
     private readonly worklogVdRepository: Repository<WorklogVd>,
     @InjectRepository(WorklogSealing)
     private readonly worklogSealingRepository: Repository<WorklogSealing>,
+    @InjectRepository(WorklogFormation)
+    private readonly worklogFormationRepository: Repository<WorklogFormation>,
   ) {}
 
   async getSpec(productionId: number, processType?: LqcProcessType, itemType?: LqcItemType): Promise<LqcSpec[]> {
@@ -361,6 +364,26 @@ export class LqcService {
     }
 
     return result;
+  }
+
+  async getFinalSealingWorklogData(productionId: number) {
+    const formations = await this.worklogFormationRepository.find({
+      where: { production: { id: productionId } },
+      order: { manufactureDate: 'ASC' },
+    });
+
+    return formations.map((f) => ({
+      id: f.id,
+      workDate: f.manufactureDate,
+      lot: f.lotRange ?? null,
+      thicknesses: [
+        f.sealingThickness1,
+        f.sealingThickness2,
+        f.sealingThickness3,
+        f.sealingThickness4,
+        f.sealingThickness5,
+      ].filter((v) => v != null),
+    }));
   }
 
   async getSealingWorklogData(productionId: number) {
