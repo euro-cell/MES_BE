@@ -72,4 +72,10 @@ export class LqcController {
   async getFormationLotData(@Param('productionId') productionId: number) {
     return this.lqcService.getFormationLotData(productionId);
   }
+
+  @Get(':productionId/main-formation')
+  @ApiOperation({ summary: '메인포메이션 Lot 데이터 조회 (mfc, mfd, ocv1, ocv2)' })
+  async getMainFormationLotData(@Param('productionId') productionId: number) {
+    return this.lqcService.getMainFormationLotData(productionId);
+  }
 }

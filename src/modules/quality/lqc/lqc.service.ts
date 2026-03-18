@@ -382,6 +382,21 @@ export class LqcService {
     }));
   }
 
+  async getMainFormationLotData(productionId: number) {
+    const lots = await this.lotFormationRepository.find({
+      where: { production: { id: productionId } },
+      order: { lot: 'ASC' },
+    });
+
+    return lots.map((l) => ({
+      lot: l.lot,
+      mfc: l.mfc ?? null,
+      mfd: l.mfd ?? null,
+      ocv1: l.ocv1 ?? null,
+      ocv2: l.ocv2_7 ?? l.ocv2_4 ?? null,
+    }));
+  }
+
   async getFinalSealingWorklogData(productionId: number) {
     const formations = await this.worklogFormationRepository.find({
       where: { production: { id: productionId } },
