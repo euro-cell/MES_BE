@@ -9,6 +9,8 @@ export enum LqcProcessType {
   VD_ANODE = 'VD_ANODE',
   ASSEMBLY_SEALING = 'ASSEMBLY_SEALING',
   ASSEMBLY_FINAL_SEALING = 'ASSEMBLY_FINAL_SEALING',
+  FORMATION_PRE = 'FORMATION_PRE',
+  FORMATION_MAIN = 'FORMATION_MAIN',
 }
 
 export enum LqcItemType {
@@ -19,4 +21,5 @@ export enum LqcItemType {
   VD = 'VD',
   SEALING = 'SEALING',
   FINAL_SEALING = 'FINAL_SEALING',
+  OCV = 'OCV',
 }
