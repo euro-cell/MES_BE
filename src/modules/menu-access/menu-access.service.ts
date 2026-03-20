@@ -20,21 +20,36 @@ export class MenuAccessService {
     private readonly rolePermRepo: Repository<MenuPermissionByRole>,
   ) {}
 
+  /** 트리 순서(부모 displayOrder → 자식 displayOrder)로 메뉴 정렬 + depth 계산 */
+  private sortMenusAsTree(menus: Menu[]): { name: string; depth: number }[] {
+    const result: { name: string; depth: number }[] = [];
+    const roots = menus.filter((m) => !m.parentId).sort((a, b) => a.displayOrder - b.displayOrder);
+    const addNode = (node: Menu, depth: number) => {
+      result.push({ name: node.name, depth });
+      const children = menus.filter((m) => m.parentId === node.id).sort((a, b) => a.displayOrder - b.displayOrder);
+      children.forEach((child) => addNode(child, depth + 1));
+    };
+    roots.forEach((root) => addNode(root, 1));
+    return result;
+  }
+
   /** ✅ 사용자별 권한 테이블 조회 */
   async getAllUserPermissions() {
     const users = await this.userRepo.find({ order: { id: 'ASC' } });
 
-    const menus = await this.menuRepo.find({ order: { id: 'ASC' } });
+    const allMenus = await this.menuRepo.find();
+    const sortedMenus = this.sortMenusAsTree(allMenus);
 
     const perms = await this.permRepo.find({ relations: ['user', 'menu'] });
 
     const result = users.map((user) => {
       const userMenus: Record<string, { canCreate: boolean; canUpdate: boolean; canDelete: boolean }> = {};
 
-      for (const menu of menus) {
-        const match = perms.find((p) => p.user?.id === user.id && p.menu?.id === menu.id);
+      for (const { name } of sortedMenus) {
+        const menuEntity = allMenus.find((m) => m.name === name)!;
+        const match = perms.find((p) => p.user?.id === user.id && p.menu?.id === menuEntity.id);
 
-        userMenus[menu.name] = {
+        userMenus[name] = {
           canCreate: match?.canCreate ?? false,
           canUpdate: match?.canUpdate ?? false,
           canDelete: match?.canDelete ?? false,
@@ -42,7 +57,7 @@ export class MenuAccessService {
       }
       return { userId: user.id, name: user.name, menus: userMenus };
     });
-    return { menus: menus.map((m) => m.name), users: result };
+    return { menus: sortedMenus, users: result };
   }
 
   /** ✅ 사용자별 권한 저장 */
@@ -81,7 +96,8 @@ export class MenuAccessService {
 
   /** ✅ 직급별 권한 테이블 조회 */
   async getAllRolePermissions() {
-    const menus = await this.menuRepo.find({ order: { id: 'ASC' } });
+    const allMenus = await this.menuRepo.find();
+    const sortedMenus = this.sortMenusAsTree(allMenus);
 
     const permissions = await this.rolePermRepo.find({ relations: ['menu'] });
 
@@ -90,16 +106,13 @@ export class MenuAccessService {
     const rolePermissions = allRoles.map((role) => {
       const roleMenus: Record<string, { canCreate: boolean; canUpdate: boolean; canDelete: boolean }> = {};
 
-      for (const menu of menus) {
+      for (const { name } of sortedMenus) {
+        const menuEntity = allMenus.find((m) => m.name === name)!;
         if (role === UserRole.ADMIN) {
-          roleMenus[menu.name] = {
-            canCreate: true,
-            canUpdate: true,
-            canDelete: true,
-          };
+          roleMenus[name] = { canCreate: true, canUpdate: true, canDelete: true };
         } else {
-          const found = permissions.find((p) => p.role === role && p.menu.id === menu.id);
-          roleMenus[menu.name] = {
+          const found = permissions.find((p) => p.role === role && p.menu.id === menuEntity.id);
+          roleMenus[name] = {
             canCreate: found?.canCreate ?? false,
             canUpdate: found?.canUpdate ?? false,
             canDelete: found?.canDelete ?? false,
@@ -108,7 +121,7 @@ export class MenuAccessService {
       }
       return { role, menus: roleMenus };
     });
-    return { menus: menus.map((m) => m.name), roles: rolePermissions };
+    return { menus: sortedMenus, roles: rolePermissions };
   }
 
   /** ✅ 직급별 권한 저장 */

@@ -65,9 +65,21 @@ export class MenuSeedService implements OnApplicationBootstrap {
 
     // 3depth: 설비 관리 > 생산 하위
     const plantProduction = children.find((c) => c.name === '생산' && c.parentId === pid('설비 관리'))!;
+    const etcCondition = children.find((c) => c.name === '환경관리')!;
+    const stockMaterial = children.find((c) => c.name === '원자재 관리')!;
+    const stockCell = children.find((c) => c.name === '셀 관리')!;
     await this.menuRepo.save([
       { name: '설비 관리 대장', path: '/plant/production/list', parentId: plantProduction.id, displayOrder: 1 },
       { name: '유지보수 관리 대장', path: '/plant/production/history', parentId: plantProduction.id, displayOrder: 2 },
+      { name: '공정 온/습도', path: '/etc/condition/humidity', parentId: etcCondition.id, displayOrder: 1 },
+      // 원자재 관리 하위
+      { name: '전극', path: '/stock/material/electrode', parentId: stockMaterial.id, displayOrder: 1 },
+      { name: '조립', path: '/stock/material/assembly', parentId: stockMaterial.id, displayOrder: 2 },
+      // 셀 관리 하위
+      { name: '입/출고 등록', path: '/stock/cell/in-out', parentId: stockCell.id, displayOrder: 1 },
+      { name: 'RACK 보관 현황', path: '/stock/cell/rack-storage', parentId: stockCell.id, displayOrder: 2 },
+      { name: 'NCR 세부 현황', path: '/stock/cell/ncr', parentId: stockCell.id, displayOrder: 3 },
+      { name: '프로젝트별 입/출고 현황', path: '/stock/cell/project', parentId: stockCell.id, displayOrder: 4 },
     ]);
   }
 }
