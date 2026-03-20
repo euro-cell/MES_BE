@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(for module:*)",
+      "Bash(do echo:*)",
+      "Read(//c/Users/user/Desktop/eurocell-mes-be/src/modules/**)",
+      "Bash(done)",
+      "WebSearch"
+    ]
+  }
+}
