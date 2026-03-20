@@ -15,6 +15,9 @@ export class Menu {
 
   @Column({ nullable: true })
   parentId: number;
+
+  @Column({ default: 0 })
+  displayOrder: number;
   @OneToMany(() => MenuPermissionByRole, (perm: MenuPermissionByRole) => perm.menu)
   rolePermissions: MenuPermissionByRole[];
 
