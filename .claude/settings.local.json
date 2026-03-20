@@ -5,7 +5,9 @@
       "Bash(do echo:*)",
       "Read(//c/Users/user/Desktop/eurocell-mes-be/src/modules/**)",
       "Bash(done)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(find /c/Users/user/Desktop/eurocell-mes-be -type f \\\\\\(-name *seed* -o -name *init* -o -name *migrations* -o -name *factory* \\\\\\))",
+      "Bash(xargs grep:*)"
     ]
   }
 }
