@@ -1,26 +1,7 @@
 import { MulterOptions } from '@nestjs/platform-express/multer/interfaces/multer-options.interface';
-import { diskStorage } from 'multer';
-import { extname, join } from 'path';
-import { mkdirSync } from 'fs';
-
-function decodeFilename(filename: string) {
-  return Buffer.from(filename, 'latin1').toString('utf8');
-}
+import { memoryStorage } from 'multer';
 
 export const multerConfig: MulterOptions = {
-  storage: diskStorage({
-    destination: (req, file, callback) => {
-      const uploadPath = join(process.cwd(), 'data', 'uploads');
-      mkdirSync(uploadPath, { recursive: true });
-      callback(null, uploadPath);
-    },
-    filename: (req, file, callback) => {
-      const timestamp = Date.now();
-      const utf8Name = decodeFilename(file.originalname);
-      const ext = extname(utf8Name);
-      const baseName = utf8Name.replace(ext, '');
-      callback(null, `${timestamp}_${baseName}${ext}`);
-    },
-  }),
+  storage: memoryStorage(),
   limits: { fileSize: 10 * 1024 * 1024 },
 };
