@@ -1,15 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
-import { copyFileSync, existsSync, mkdirSync, unlinkSync } from 'fs';
-import { join } from 'path';
 import { IQC } from 'src/common/entities/iqc.entity';
 import { IQCResult } from 'src/common/entities/iqc-result.entity';
 import { IQCCoaRef } from 'src/common/entities/iqc-coa-ref.entity';
 import { IQCImage } from 'src/common/entities/iqc-image.entity';
 import { IQCFile } from 'src/common/entities/iqc-file.entity';
 import { CreateIQCDto, UpdateIQCDto } from 'src/common/dtos/iqc.dto';
-
+import { RustfsService } from 'src/common/services/rustfs.service';
 
 @Injectable()
 export class IqcService {
@@ -21,6 +19,7 @@ export class IqcService {
     @InjectRepository(IQCFile)
     private readonly iqcFileRepository: Repository<IQCFile>,
     private readonly dataSource: DataSource,
+    private readonly rustfsService: RustfsService,
   ) {}
 
   async findAll(projectId: number): Promise<IQC[]> {
@@ -44,7 +43,6 @@ export class IqcService {
 
   async create(projectId: number, dto: CreateIQCDto): Promise<IQC> {
     return this.dataSource.transaction(async (manager) => {
-      // 1. IQC 기본 정보 저장
       const iqc = manager.create(IQC, {
         project: { id: projectId },
         category: dto.category,
@@ -63,7 +61,6 @@ export class IqcService {
 
       const savedIqc = await manager.save(IQC, iqc);
 
-      // 2. 검사 결과 저장
       if (dto.results && dto.results.length > 0) {
         const results = dto.results.map((r) => {
           const result = manager.create(IQCResult, {
@@ -86,7 +83,6 @@ export class IqcService {
         await manager.save(IQCResult, results);
       }
 
-      // 3. CoA 참조 저장
       if (dto.coaRefs && dto.coaRefs.length > 0) {
         const coaRefs = dto.coaRefs.map((c) =>
           manager.create(IQCCoaRef, {
@@ -98,7 +94,6 @@ export class IqcService {
         await manager.save(IQCCoaRef, coaRefs);
       }
 
-      // 4. 이미지 저장
       if (dto.images && dto.images.length > 0) {
         const images = dto.images.map((img) =>
           manager.create(IQCImage, {
@@ -111,7 +106,6 @@ export class IqcService {
         await manager.save(IQCImage, images);
       }
 
-      // 5. 결과 기반 최종 합불 자동 업데이트
       await this.syncIsPassed(savedIqc.id, manager);
 
       return manager.findOneOrFail(IQC, {
@@ -132,7 +126,6 @@ export class IqcService {
         throw new NotFoundException(`IQC with ID ${id} not found`);
       }
 
-      // 1. 기본 정보 업데이트
       if (dto.category !== undefined) iqc.category = dto.category;
       if (dto.type !== undefined) iqc.type = dto.type;
       if (dto.name !== undefined) iqc.name = dto.name;
@@ -147,7 +140,6 @@ export class IqcService {
 
       await manager.save(IQC, iqc);
 
-      // 2. 결과 교체 (전달 시)
       if (dto.results !== undefined) {
         await manager.delete(IQCResult, { iqc: { id } });
         if (dto.results.length > 0) {
@@ -173,7 +165,6 @@ export class IqcService {
         }
       }
 
-      // 3. CoA 참조 교체 (전달 시)
       if (dto.coaRefs !== undefined) {
         await manager.delete(IQCCoaRef, { iqc: { id } });
         if (dto.coaRefs.length > 0) {
@@ -188,7 +179,6 @@ export class IqcService {
         }
       }
 
-      // 4. 이미지 교체 (전달 시)
       if (dto.images !== undefined) {
         await manager.delete(IQCImage, { iqc: { id } });
         if (dto.images.length > 0) {
@@ -204,7 +194,6 @@ export class IqcService {
         }
       }
 
-      // 5. 결과 기반 최종 합불 자동 업데이트
       await this.syncIsPassed(id, manager);
 
       return manager.findOneOrFail(IQC, {
@@ -224,65 +213,37 @@ export class IqcService {
 
   async uploadImages(iqcId: number, imageType: string, files: Express.Multer.File[], imageLabel?: string): Promise<IQCImage[]> {
     const iqc = await this.iqcRepository.findOne({ where: { id: iqcId } });
-
     if (!iqc) throw new NotFoundException(`IQC with ID ${iqcId} not found`);
 
-    const relativeDir = join('data', 'uploads', 'iqc', String(iqcId));
-    const absoluteDir = join(process.cwd(), relativeDir);
+    const images = await Promise.all(
+      files.map(async (file) => {
+        const sanitizedType = imageType.replace(/[<>:"/\\|?*()]/g, '_');
+        const { key } = await this.rustfsService.uploadFile(`iqc/${iqcId}/${sanitizedType}`, file);
 
-    if (!existsSync(absoluteDir)) {
-      mkdirSync(absoluteDir, { recursive: true });
-    }
-
-    const images = files.map((file) => {
-      const timestamp = Date.now();
-      const sanitizedType = imageType.replace(/[<>:"/\\|?*()]/g, '_');
-      const sanitizedName = file.originalname.replace(/[<>:"/\\|?*()]/g, '_');
-      const fileName = `${sanitizedType}_${timestamp}_${sanitizedName}`;
-      const absolutePath = join(absoluteDir, fileName);
-      const filePath = join(relativeDir, fileName).replace(/\\/g, '/');
-
-      copyFileSync(file.path, absolutePath);
-      unlinkSync(file.path);
-
-      return this.iqcImageRepository.create({
-        iqc: { id: iqcId },
-        imageType,
-        imageLabel: imageLabel ?? null,
-        filePath,
-      });
-    });
+        return this.iqcImageRepository.create({
+          iqc: { id: iqcId },
+          imageType,
+          imageLabel: imageLabel ?? null,
+          filePath: key,
+        });
+      }),
+    );
 
     return this.iqcImageRepository.save(images);
   }
 
   async uploadFile(iqcId: number, fileType: string, file: Express.Multer.File): Promise<IQCFile> {
     const iqc = await this.iqcRepository.findOne({ where: { id: iqcId } });
-
     if (!iqc) throw new NotFoundException(`IQC with ID ${iqcId} not found`);
 
-    const relativeDir = join('data', 'uploads', 'iqc', String(iqcId));
-    const absoluteDir = join(process.cwd(), relativeDir);
-
-    if (!existsSync(absoluteDir)) {
-      mkdirSync(absoluteDir, { recursive: true });
-    }
-
-    const timestamp = Date.now();
     const sanitizedType = fileType.replace(/[<>:"/\\|?*()]/g, '_');
-    const sanitizedName = file.originalname.replace(/[<>:"/\\|?*()]/g, '_');
-    const fileName = `${sanitizedType}_${timestamp}_${sanitizedName}`;
-    const absolutePath = join(absoluteDir, fileName);
-    const filePath = join(relativeDir, fileName).replace(/\\/g, '/');
-
-    copyFileSync(file.path, absolutePath);
-    unlinkSync(file.path);
+    const { key } = await this.rustfsService.uploadFile(`iqc/${iqcId}/${sanitizedType}`, file);
 
     const iqcFile = this.iqcFileRepository.create({
       iqc: { id: iqcId },
       fileType,
       fileName: file.originalname,
-      filePath,
+      filePath: key,
     });
 
     return this.iqcFileRepository.save(iqcFile);
@@ -290,22 +251,14 @@ export class IqcService {
 
   async removeFile(fileId: number): Promise<void> {
     const file = await this.iqcFileRepository.findOne({ where: { id: fileId } });
-
     if (!file) throw new NotFoundException(`IQC File with ID ${fileId} not found`);
 
-    if (file.filePath) {
-      const absolutePath = join(process.cwd(), file.filePath);
-      if (existsSync(absolutePath)) {
-        unlinkSync(absolutePath);
-      }
-    }
-
+    if (file.filePath) await this.rustfsService.delete(file.filePath);
     await this.iqcFileRepository.delete(fileId);
   }
 
   async updateImageLabel(imageId: number, imageLabel: string): Promise<IQCImage> {
     const image = await this.iqcImageRepository.findOne({ where: { id: imageId } });
-
     if (!image) throw new NotFoundException(`IQC Image with ID ${imageId} not found`);
 
     image.imageLabel = imageLabel;
@@ -314,22 +267,12 @@ export class IqcService {
 
   async removeImage(imageId: number): Promise<void> {
     const image = await this.iqcImageRepository.findOne({ where: { id: imageId } });
-
     if (!image) throw new NotFoundException(`IQC Image with ID ${imageId} not found`);
 
-    if (image.filePath) {
-      const absolutePath = join(process.cwd(), image.filePath);
-      if (existsSync(absolutePath)) {
-        unlinkSync(absolutePath);
-      }
-    }
-
+    if (image.filePath) await this.rustfsService.delete(image.filePath);
     await this.iqcImageRepository.delete(imageId);
   }
 
-  /**
-   * results 중 isPassed=false 항목이 하나라도 있으면 iqc.isPassed를 false로 업데이트
-   */
   private async syncIsPassed(iqcId: number, manager: any): Promise<void> {
     const failCount = await manager.count(IQCResult, {
       where: { iqc: { id: iqcId }, isPassed: false },

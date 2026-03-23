@@ -1,8 +1,9 @@
 import { Injectable, NotFoundException, ConflictException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, IsNull } from 'typeorm';
-import { existsSync, mkdirSync, unlinkSync, renameSync, rmSync } from 'fs';
+import { mkdirSync, writeFileSync, readdirSync, readFileSync, rmSync, existsSync } from 'fs';
 import { join, extname } from 'path';
+import { tmpdir } from 'os';
 import { Drawing } from 'src/common/entities/drawing.entity';
 import { DrawingVersion } from 'src/common/entities/drawing-version.entity';
 import {
@@ -12,6 +13,7 @@ import {
   UpdateDrawingVersionDto,
   DrawingSearchDto,
 } from 'src/common/dtos/drawing.dto';
+import { RustfsService } from 'src/common/services/rustfs.service';
 import { convertPdfToImages } from 'src/common/utils/pdf-converter.util';
 
 @Injectable()
@@ -23,6 +25,7 @@ export class DrawingService {
     private readonly drawingRepository: Repository<Drawing>,
     @InjectRepository(DrawingVersion)
     private readonly versionRepository: Repository<DrawingVersion>,
+    private readonly rustfsService: RustfsService,
   ) {}
 
   async findAll(searchDto: DrawingSearchDto) {
@@ -59,7 +62,6 @@ export class DrawingService {
       throw new NotFoundException('도면을 찾을 수 없습니다.');
     }
 
-    // 응답 형식에 맞게 가공
     return {
       id: drawing.id,
       category: drawing.category,
@@ -85,7 +87,6 @@ export class DrawingService {
   }
 
   async create(dto: CreateDrawingDto, files: { drawingFile?: Express.Multer.File[]; pdfFiles?: Express.Multer.File[] }) {
-    // 입력값 trim 처리
     const drawingNumber = dto.drawingNumber.trim();
     const projectName = dto.projectName.trim();
     const division = dto.division.trim();
@@ -94,74 +95,50 @@ export class DrawingService {
     const drawingFile = files.drawingFile?.[0];
     const pdfFiles = files.pdfFiles || [];
 
-    // 에러 발생 시 업로드된 파일 삭제 헬퍼
-    const cleanupFiles = () => {
-      if (drawingFile?.path && existsSync(drawingFile.path)) {
-        unlinkSync(drawingFile.path);
-      }
-      for (const pdfFile of pdfFiles) {
-        if (pdfFile?.path && existsSync(pdfFile.path)) {
-          unlinkSync(pdfFile.path);
-        }
-      }
-    };
-
-    try {
-      // 도면 번호 중복 체크
-      const existing = await this.drawingRepository.findOne({
-        where: { drawingNumber },
-      });
-
-      if (existing) {
-        throw new ConflictException('이미 존재하는 도면 번호입니다.');
-      }
-
-      // 도면 생성
-      const drawing = this.drawingRepository.create({
-        category: dto.category,
-        projectName,
-        division,
-        drawingNumber,
-        description: dto.description?.trim(),
-        currentVersion: version,
-      });
-
-      const savedDrawing = await this.drawingRepository.save(drawing);
-
-      // 파일 이동
-      const { drawingFilePath, drawingFileName, pdfFilePaths, pdfFileNames } = await this.moveFilesToDrawingDirectory(
-        savedDrawing.id,
-        savedDrawing.drawingNumber,
-        version,
-        dto.description?.trim() || '',
-        drawingFile,
-        pdfFiles,
-      );
-
-      const drawingVersion = new DrawingVersion();
-      drawingVersion.drawing = savedDrawing;
-      drawingVersion.version = version;
-      drawingVersion.drawingFilePath = drawingFilePath ?? undefined;
-      drawingVersion.drawingFileName = drawingFileName ?? undefined;
-      drawingVersion.pdfFilePaths = pdfFilePaths ?? undefined;
-      drawingVersion.pdfFileNames = pdfFileNames ?? undefined;
-      drawingVersion.registrationDate = new Date(dto.registrationDate);
-      drawingVersion.changeNote = dto.changeNote?.trim() ?? undefined;
-
-      const savedVersion = await this.versionRepository.save(drawingVersion);
-
-      // PDF 파일들을 이미지로 변환 (비동기로 처리)
-      if (pdfFilePaths && pdfFilePaths.length > 0) {
-        this.convertPdfFilesToImages(savedDrawing.id, savedVersion.id, pdfFilePaths).catch((err) => {
-          this.logger.error(`PDF 이미지 변환 실패: ${err.message}`, err.stack);
-        });
-      }
-
-      return this.findOne(savedDrawing.id);
-    } catch (error) {
-      cleanupFiles();
-      throw error;
+    const existing = await this.drawingRepository.findOne({ where: { drawingNumber } });
+    if (existing) {
+      throw new ConflictException('이미 존재하는 도면 번호입니다.');
     }
+
+    const drawing = this.drawingRepository.create({
+      category: dto.category,
+      projectName,
+      division,
+      drawingNumber,
+      description: dto.description?.trim(),
+      currentVersion: version,
+    });
+
+    const savedDrawing = await this.drawingRepository.save(drawing);
+
+    const { drawingFilePath, drawingFileName, pdfFilePaths, pdfFileNames } = await this.uploadFilesToStorage(
+      savedDrawing.id,
+      savedDrawing.drawingNumber,
+      version,
+      dto.description?.trim() || '',
+      drawingFile,
+      pdfFiles,
+    );
+
+    const drawingVersion = new DrawingVersion();
+    drawingVersion.drawing = savedDrawing;
+    drawingVersion.version = version;
+    drawingVersion.drawingFilePath = drawingFilePath ?? undefined;
+    drawingVersion.drawingFileName = drawingFileName ?? undefined;
+    drawingVersion.pdfFilePaths = pdfFilePaths ?? undefined;
+    drawingVersion.pdfFileNames = pdfFileNames ?? undefined;
+    drawingVersion.registrationDate = new Date(dto.registrationDate);
+    drawingVersion.changeNote = dto.changeNote?.trim() ?? undefined;
+
+    const savedVersion = await this.versionRepository.save(drawingVersion);
+
+    if (pdfFilePaths && pdfFilePaths.length > 0) {
+      this.convertAndUploadPdfImages(savedDrawing.id, savedVersion.id, pdfFilePaths).catch((err) => {
+        this.logger.error(`PDF 이미지 변환 실패: ${err.message}`, err.stack);
+      });
+    }
+
+    return this.findOne(savedDrawing.id);
   }
 
   async addVersion(
@@ -172,67 +149,45 @@ export class DrawingService {
     const drawingFile = files.drawingFile?.[0];
     const pdfFiles = files.pdfFiles || [];
 
-    // 에러 발생 시 업로드된 파일 삭제 헬퍼
-    const cleanupFiles = () => {
-      if (drawingFile?.path && existsSync(drawingFile.path)) {
-        unlinkSync(drawingFile.path);
-      }
-      for (const pdfFile of pdfFiles) {
-        if (pdfFile?.path && existsSync(pdfFile.path)) {
-          unlinkSync(pdfFile.path);
-        }
-      }
-    };
+    const drawing = await this.drawingRepository.findOne({
+      where: { id: drawingId, deletedAt: IsNull() },
+    });
 
-    try {
-      // 도면 조회
-      const drawing = await this.drawingRepository.findOne({
-        where: { id: drawingId, deletedAt: IsNull() },
-      });
-
-      if (!drawing) {
-        throw new NotFoundException('도면을 찾을 수 없습니다.');
-      }
-
-      // 파일 이동
-      const { drawingFilePath, drawingFileName, pdfFilePaths, pdfFileNames } = await this.moveFilesToDrawingDirectory(
-        drawing.id,
-        drawing.drawingNumber,
-        dto.version,
-        drawing.description || '',
-        drawingFile,
-        pdfFiles,
-      );
-
-      // 버전 생성
-      const drawingVersion = new DrawingVersion();
-      drawingVersion.drawing = drawing;
-      drawingVersion.version = dto.version;
-      drawingVersion.drawingFilePath = drawingFilePath ?? undefined;
-      drawingVersion.drawingFileName = drawingFileName ?? undefined;
-      drawingVersion.pdfFilePaths = pdfFilePaths ?? undefined;
-      drawingVersion.pdfFileNames = pdfFileNames ?? undefined;
-      drawingVersion.registrationDate = new Date(dto.registrationDate);
-      drawingVersion.changeNote = dto.changeNote?.trim() ?? undefined;
-
-      const savedVersion = await this.versionRepository.save(drawingVersion);
-
-      // 도면의 currentVersion 업데이트
-      drawing.currentVersion = dto.version;
-      await this.drawingRepository.save(drawing);
-
-      // PDF 파일들을 이미지로 변환 (비동기로 처리)
-      if (pdfFilePaths && pdfFilePaths.length > 0) {
-        this.convertPdfFilesToImages(drawing.id, savedVersion.id, pdfFilePaths).catch((err) => {
-          this.logger.error(`PDF 이미지 변환 실패: ${err.message}`, err.stack);
-        });
-      }
-
-      return this.findOne(drawing.id);
-    } catch (error) {
-      cleanupFiles();
-      throw error;
+    if (!drawing) {
+      throw new NotFoundException('도면을 찾을 수 없습니다.');
     }
+
+    const { drawingFilePath, drawingFileName, pdfFilePaths, pdfFileNames } = await this.uploadFilesToStorage(
+      drawing.id,
+      drawing.drawingNumber,
+      dto.version,
+      drawing.description || '',
+      drawingFile,
+      pdfFiles,
+    );
+
+    const drawingVersion = new DrawingVersion();
+    drawingVersion.drawing = drawing;
+    drawingVersion.version = dto.version;
+    drawingVersion.drawingFilePath = drawingFilePath ?? undefined;
+    drawingVersion.drawingFileName = drawingFileName ?? undefined;
+    drawingVersion.pdfFilePaths = pdfFilePaths ?? undefined;
+    drawingVersion.pdfFileNames = pdfFileNames ?? undefined;
+    drawingVersion.registrationDate = new Date(dto.registrationDate);
+    drawingVersion.changeNote = dto.changeNote?.trim() ?? undefined;
+
+    const savedVersion = await this.versionRepository.save(drawingVersion);
+
+    drawing.currentVersion = dto.version;
+    await this.drawingRepository.save(drawing);
+
+    if (pdfFilePaths && pdfFilePaths.length > 0) {
+      this.convertAndUploadPdfImages(drawing.id, savedVersion.id, pdfFilePaths).catch((err) => {
+        this.logger.error(`PDF 이미지 변환 실패: ${err.message}`, err.stack);
+      });
+    }
+
+    return this.findOne(drawing.id);
   }
 
   async update(id: number, dto: UpdateDrawingDto) {
@@ -244,7 +199,6 @@ export class DrawingService {
       throw new NotFoundException('도면을 찾을 수 없습니다.');
     }
 
-    // 변경된 필드만 업데이트
     if (dto.category !== undefined) drawing.category = dto.category;
     if (dto.projectName !== undefined) drawing.projectName = dto.projectName.trim();
     if (dto.division !== undefined) drawing.division = dto.division.trim();
@@ -278,123 +232,80 @@ export class DrawingService {
     const drawingFile = files.drawingFile?.[0];
     const pdfFiles = files.pdfFiles || [];
 
-    // 에러 발생 시 업로드된 파일 삭제 헬퍼
-    const cleanupFiles = () => {
-      if (drawingFile?.path && existsSync(drawingFile.path)) {
-        unlinkSync(drawingFile.path);
-      }
-      for (const pdfFile of pdfFiles) {
-        if (pdfFile?.path && existsSync(pdfFile.path)) {
-          unlinkSync(pdfFile.path);
-        }
-      }
-    };
+    const drawing = await this.drawingRepository.findOne({
+      where: { id: drawingId, deletedAt: IsNull() },
+    });
 
-    try {
-      // 도면 조회
-      const drawing = await this.drawingRepository.findOne({
-        where: { id: drawingId, deletedAt: IsNull() },
-      });
-
-      if (!drawing) {
-        throw new NotFoundException('도면을 찾을 수 없습니다.');
-      }
-
-      // 버전 조회
-      const version = await this.versionRepository.findOne({
-        where: { id: versionId, drawing: { id: drawingId } },
-      });
-
-      if (!version) {
-        throw new NotFoundException('버전을 찾을 수 없습니다.');
-      }
-
-      // changeNote 업데이트
-      if (dto.changeNote !== undefined) {
-        version.changeNote = dto.changeNote?.trim() ?? undefined;
-      }
-
-      // 도면 파일 교체
-      if (drawingFile) {
-        // 기존 파일 삭제
-        if (version.drawingFilePath) {
-          const oldPath = join(process.cwd(), version.drawingFilePath);
-          if (existsSync(oldPath)) {
-            unlinkSync(oldPath);
-          }
-        }
-
-        // 새 파일 저장
-        const { drawingFilePath, drawingFileName } = await this.moveFilesToDrawingDirectory(
-          drawing.id,
-          drawing.drawingNumber,
-          version.version,
-          drawing.description || '',
-          drawingFile,
-          undefined,
-        );
-
-        version.drawingFilePath = drawingFilePath ?? undefined;
-        version.drawingFileName = drawingFileName ?? undefined;
-      }
-
-      // PDF 파일들 교체
-      if (pdfFiles.length > 0) {
-        // 기존 PDF 파일들 삭제
-        if (version.pdfFilePaths && version.pdfFilePaths.length > 0) {
-          for (const oldPdfPath of version.pdfFilePaths) {
-            const fullPath = join(process.cwd(), oldPdfPath);
-            if (existsSync(fullPath)) {
-              unlinkSync(fullPath);
-            }
-          }
-        }
-
-        // 기존 이미지 파일들 삭제
-        if (version.imageFilePaths && version.imageFilePaths.length > 0) {
-          for (const oldImagePath of version.imageFilePaths) {
-            const fullPath = join(process.cwd(), oldImagePath);
-            if (existsSync(fullPath)) {
-              unlinkSync(fullPath);
-            }
-          }
-        }
-
-        // 새 PDF 파일들 저장
-        const { pdfFilePaths, pdfFileNames } = await this.moveFilesToDrawingDirectory(
-          drawing.id,
-          drawing.drawingNumber,
-          version.version,
-          drawing.description || '',
-          undefined,
-          pdfFiles,
-        );
-
-        version.pdfFilePaths = pdfFilePaths ?? undefined;
-        version.pdfFileNames = pdfFileNames ?? undefined;
-        version.imageFilePaths = undefined; // 이미지 경로 초기화
-
-        await this.versionRepository.save(version);
-
-        // PDF 파일들을 이미지로 변환 (비동기로 처리)
-        if (pdfFilePaths && pdfFilePaths.length > 0) {
-          this.convertPdfFilesToImages(drawing.id, version.id, pdfFilePaths).catch((err) => {
-            this.logger.error(`PDF 이미지 변환 실패: ${err.message}`, err.stack);
-          });
-        }
-      } else {
-        await this.versionRepository.save(version);
-      }
-
-      return this.findOne(drawingId);
-    } catch (error) {
-      cleanupFiles();
-      throw error;
+    if (!drawing) {
+      throw new NotFoundException('도면을 찾을 수 없습니다.');
     }
+
+    const version = await this.versionRepository.findOne({
+      where: { id: versionId, drawing: { id: drawingId } },
+    });
+
+    if (!version) {
+      throw new NotFoundException('버전을 찾을 수 없습니다.');
+    }
+
+    if (dto.changeNote !== undefined) {
+      version.changeNote = dto.changeNote?.trim() ?? undefined;
+    }
+
+    if (drawingFile) {
+      if (version.drawingFilePath) {
+        await this.rustfsService.delete(version.drawingFilePath);
+      }
+
+      const { drawingFilePath, drawingFileName } = await this.uploadFilesToStorage(
+        drawing.id,
+        drawing.drawingNumber,
+        version.version,
+        drawing.description || '',
+        drawingFile,
+        undefined,
+      );
+
+      version.drawingFilePath = drawingFilePath ?? undefined;
+      version.drawingFileName = drawingFileName ?? undefined;
+    }
+
+    if (pdfFiles.length > 0) {
+      if (version.pdfFilePaths && version.pdfFilePaths.length > 0) {
+        await this.rustfsService.deleteMany(version.pdfFilePaths);
+      }
+      if (version.imageFilePaths && version.imageFilePaths.length > 0) {
+        await this.rustfsService.deleteMany(version.imageFilePaths);
+      }
+
+      const { pdfFilePaths, pdfFileNames } = await this.uploadFilesToStorage(
+        drawing.id,
+        drawing.drawingNumber,
+        version.version,
+        drawing.description || '',
+        undefined,
+        pdfFiles,
+      );
+
+      version.pdfFilePaths = pdfFilePaths ?? undefined;
+      version.pdfFileNames = pdfFileNames ?? undefined;
+      version.imageFilePaths = undefined;
+
+      await this.versionRepository.save(version);
+
+      if (pdfFilePaths && pdfFilePaths.length > 0) {
+        this.convertAndUploadPdfImages(drawing.id, version.id, pdfFilePaths).catch((err) => {
+          this.logger.error(`PDF 이미지 변환 실패: ${err.message}`, err.stack);
+        });
+      }
+    } else {
+      await this.versionRepository.save(version);
+    }
+
+    return this.findOne(drawingId);
   }
 
   async removeVersion(drawingId: number, versionId: number) {
-    // 도면 조회
     const drawing = await this.drawingRepository.findOne({
       where: { id: drawingId, deletedAt: IsNull() },
       relations: ['versions'],
@@ -404,7 +315,6 @@ export class DrawingService {
       throw new NotFoundException('도면을 찾을 수 없습니다.');
     }
 
-    // 버전 조회
     const version = await this.versionRepository.findOne({
       where: { id: versionId, drawing: { id: drawingId } },
     });
@@ -413,37 +323,14 @@ export class DrawingService {
       throw new NotFoundException('버전을 찾을 수 없습니다.');
     }
 
-    // 파일 삭제
-    if (version.drawingFilePath) {
-      const drawingPath = join(process.cwd(), version.drawingFilePath);
-      if (existsSync(drawingPath)) {
-        unlinkSync(drawingPath);
-      }
-    }
+    const keysToDelete: string[] = [];
+    if (version.drawingFilePath) keysToDelete.push(version.drawingFilePath);
+    if (version.pdfFilePaths) keysToDelete.push(...version.pdfFilePaths);
+    if (version.imageFilePaths) keysToDelete.push(...version.imageFilePaths);
+    if (keysToDelete.length > 0) await this.rustfsService.deleteMany(keysToDelete);
 
-    if (version.pdfFilePaths && version.pdfFilePaths.length > 0) {
-      for (const pdfPath of version.pdfFilePaths) {
-        const fullPath = join(process.cwd(), pdfPath);
-        if (existsSync(fullPath)) {
-          unlinkSync(fullPath);
-        }
-      }
-    }
-
-    // 이미지 파일 삭제
-    if (version.imageFilePaths && version.imageFilePaths.length > 0) {
-      for (const imagePath of version.imageFilePaths) {
-        const fullPath = join(process.cwd(), imagePath);
-        if (existsSync(fullPath)) {
-          unlinkSync(fullPath);
-        }
-      }
-    }
-
-    // 버전 삭제
     await this.versionRepository.delete(versionId);
 
-    // 남은 버전 중 최신 버전으로 currentVersion 업데이트
     const remainingVersions = drawing.versions.filter((v) => v.id !== versionId);
     if (remainingVersions.length > 0) {
       const latestVersion = remainingVersions.reduce((max, v) => (v.version > max.version ? v : max));
@@ -454,8 +341,10 @@ export class DrawingService {
     return this.findOne(drawingId);
   }
 
-  // 파일을 도면 전용 디렉토리로 이동 (DB에는 상대경로 저장)
-  private async moveFilesToDrawingDirectory(
+  /**
+   * Multer 메모리 파일을 RustFS에 업로드하고 key를 반환
+   */
+  private async uploadFilesToStorage(
     drawingId: number,
     drawingNumber: string,
     version: number,
@@ -468,49 +357,36 @@ export class DrawingService {
     pdfFilePaths: string[] | null;
     pdfFileNames: string[] | null;
   }> {
-    // 상대경로 (DB 저장용)
-    const relativeDir = join('data', 'uploads', 'drawings', String(drawingId));
-    // 절대경로 (파일 시스템 작업용)
-    const absoluteDir = join(process.cwd(), relativeDir);
-
-    // 디렉토리 생성
-    if (!existsSync(absoluteDir)) {
-      mkdirSync(absoluteDir, { recursive: true });
-    }
-
-    // 파일명 생성: 도면번호_버전_도면내용_timestamp.확장자
     const timestamp = Date.now();
     const sanitizedDescription = description.replace(/[<>:"/\\|?*]/g, '_');
+    const prefix = `drawings/${drawingId}`;
 
-    // 도면 파일 이동
     let drawingFilePath: string | null = null;
     let drawingFileName: string | null = null;
+
     if (drawingFile) {
       const drawingExt = extname(drawingFile.originalname);
-      const savedDrawingFileName = `${drawingNumber}_v${version}_${sanitizedDescription}_${timestamp}${drawingExt}`;
-      const drawingAbsPath = join(absoluteDir, savedDrawingFileName);
-      drawingFilePath = join(relativeDir, savedDrawingFileName);
-      // 파일명 자동 생성: 도면번호_V버전 (도면내용).확장자
+      const savedName = `${drawingNumber}_v${version}_${sanitizedDescription}_${timestamp}${drawingExt}`;
+      const key = `${prefix}/${savedName}`;
+      await this.rustfsService.upload(key, drawingFile.buffer, drawingFile.mimetype);
+      drawingFilePath = key;
       drawingFileName = `${drawingNumber}_V${version} (${sanitizedDescription})${drawingExt}`;
-      renameSync(drawingFile.path, drawingAbsPath);
     }
 
-    // PDF 파일들 이동
     let pdfFilePaths: string[] | null = null;
     let pdfFileNames: string[] | null = null;
+
     if (pdfFiles && pdfFiles.length > 0) {
       pdfFilePaths = [];
       pdfFileNames = [];
       for (let i = 0; i < pdfFiles.length; i++) {
         const pdfFile = pdfFiles[i];
         const pdfExt = extname(pdfFile.originalname);
-        const savedPdfFileName = `${drawingNumber}_v${version}_${sanitizedDescription}_${timestamp}_${i + 1}${pdfExt}`;
-        const pdfAbsPath = join(absoluteDir, savedPdfFileName);
-        const pdfFilePath = join(relativeDir, savedPdfFileName);
-        pdfFilePaths.push(pdfFilePath);
-        // 파일명 자동 생성: 도면번호_V버전 (도면내용)_순번.확장자
+        const savedPdfName = `${drawingNumber}_v${version}_${sanitizedDescription}_${timestamp}_${i + 1}${pdfExt}`;
+        const key = `${prefix}/${savedPdfName}`;
+        await this.rustfsService.upload(key, pdfFile.buffer, pdfFile.mimetype);
+        pdfFilePaths.push(key);
         pdfFileNames.push(`${drawingNumber}_V${version} (${sanitizedDescription})_${i + 1}${pdfExt}`);
-        renameSync(pdfFile.path, pdfAbsPath);
       }
     }
 
@@ -518,49 +394,60 @@ export class DrawingService {
   }
 
   /**
-   * PDF 파일들을 WebP 이미지로 변환하고 DB에 저장
+   * RustFS에서 PDF를 내려받아 임시 파일로 변환 후 이미지를 다시 RustFS에 업로드
    */
-  private async convertPdfFilesToImages(drawingId: number, versionId: number, pdfFilePaths: string[]): Promise<void> {
-    const allImagePaths: string[] = [];
+  private async convertAndUploadPdfImages(drawingId: number, versionId: number, pdfKeys: string[]): Promise<void> {
+    const allImageKeys: string[] = [];
+    const tmpBase = join(tmpdir(), `drawing-${drawingId}-v${versionId}-${Date.now()}`);
+    mkdirSync(tmpBase, { recursive: true });
 
-    for (let pdfIndex = 0; pdfIndex < pdfFilePaths.length; pdfIndex++) {
-      const pdfRelativePath = pdfFilePaths[pdfIndex];
-      const pdfAbsolutePath = join(process.cwd(), pdfRelativePath);
+    try {
+      for (let pdfIndex = 0; pdfIndex < pdfKeys.length; pdfIndex++) {
+        const pdfKey = pdfKeys[pdfIndex];
+        const tmpPdfPath = join(tmpBase, `pdf-${pdfIndex + 1}.pdf`);
+        const tmpImageDir = join(tmpBase, `images-${pdfIndex + 1}`);
+        mkdirSync(tmpImageDir, { recursive: true });
 
-      if (!existsSync(pdfAbsolutePath)) {
-        this.logger.warn(`PDF 파일을 찾을 수 없음: ${pdfAbsolutePath}`);
-        continue;
+        try {
+          // RustFS에서 PDF 다운로드 → 임시 파일
+          const stream = await this.rustfsService.getStream(pdfKey);
+          await new Promise<void>((resolve, reject) => {
+            const chunks: Buffer[] = [];
+            stream.on('data', (chunk) => chunks.push(chunk));
+            stream.on('end', () => {
+              writeFileSync(tmpPdfPath, Buffer.concat(chunks));
+              resolve();
+            });
+            stream.on('error', reject);
+          });
+
+          // PDF → 이미지 변환
+          const imagePaths = await convertPdfToImages(tmpPdfPath, tmpImageDir, { scale: 2048, format: 'png' });
+
+          // 변환된 이미지 → RustFS 업로드
+          for (let imgIndex = 0; imgIndex < imagePaths.length; imgIndex++) {
+            const imgPath = imagePaths[imgIndex];
+            const imgBuffer = readFileSync(imgPath);
+            const key = `drawings/${drawingId}/images/pdf-${pdfIndex + 1}/page-${imgIndex + 1}.png`;
+            await this.rustfsService.upload(key, imgBuffer, 'image/png');
+            allImageKeys.push(key);
+          }
+
+          this.logger.log(`PDF ${pdfIndex + 1} 변환 완료: ${imagePaths.length}페이지`);
+        } catch (err) {
+          this.logger.error(`PDF 변환 실패 (${pdfKey}): ${err.message}`);
+        }
       }
 
-      // 이미지 출력 디렉토리: data/uploads/drawings/{drawingId}/images/pdf-{index}
-      const imageRelativeDir = join('data', 'uploads', 'drawings', String(drawingId), 'images', `pdf-${pdfIndex + 1}`);
-      const imageAbsoluteDir = join(process.cwd(), imageRelativeDir);
-
-      try {
-        const imagePaths = await convertPdfToImages(pdfAbsolutePath, imageAbsoluteDir, {
-          scale: 2048,
-          format: 'png',
-        });
-
-        // 상대 경로로 변환하여 저장
-        const relativeImagePaths = imagePaths.map((absPath) => {
-          const relativePath = absPath.replace(process.cwd(), '').replace(/^[\\/]/, '');
-          return relativePath;
-        });
-
-        allImagePaths.push(...relativeImagePaths);
-        this.logger.log(`PDF ${pdfIndex + 1} 변환 완료: ${relativeImagePaths.length}페이지`);
-      } catch (err) {
-        this.logger.error(`PDF 변환 실패 (${pdfRelativePath}): ${err.message}`);
+      if (allImageKeys.length > 0) {
+        await this.versionRepository.update(versionId, { imageFilePaths: allImageKeys });
+        this.logger.log(`버전 ${versionId}에 이미지 경로 저장 완료: ${allImageKeys.length}개`);
       }
-    }
-
-    // DB 업데이트
-    if (allImagePaths.length > 0) {
-      await this.versionRepository.update(versionId, {
-        imageFilePaths: allImagePaths,
-      });
-      this.logger.log(`버전 ${versionId}에 이미지 경로 저장 완료: ${allImagePaths.length}개`);
+    } finally {
+      // 임시 디렉토리 정리
+      if (existsSync(tmpBase)) {
+        rmSync(tmpBase, { recursive: true, force: true });
+      }
     }
   }
 }
