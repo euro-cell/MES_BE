@@ -53,7 +53,7 @@ export class LqcService {
   async upsertSpec(productionId: number, dto: CreateLqcSpecDto): Promise<LqcSpec> {
     const existing = await this.lqcSpecRepository.findOne({
       where: {
-        production: { id: productionId },
+        project: { id: productionId },
         processType: dto.processType,
         itemType: dto.itemType,
       },
@@ -65,7 +65,7 @@ export class LqcService {
     }
 
     const newSpec = this.lqcSpecRepository.create({
-      production: { id: productionId },
+      project: { id: productionId },
       processType: dto.processType,
       itemType: dto.itemType,
       specs: dto.specs,
@@ -124,7 +124,7 @@ export class LqcService {
 
   async getCoatingWorklogData(productionId: number, electrode?: 'A' | 'C') {
     const coatings = await this.worklogCoatingRepository.find({
-      where: { production: { id: productionId } },
+      where: { project: { id: productionId } },
       order: { manufactureDate: 'DESC' },
     });
 
@@ -253,7 +253,7 @@ export class LqcService {
 
   async getPressWorklogData(productionId: number, electrode?: 'A' | 'C') {
     const presses = await this.worklogPressRepository.find({
-      where: { production: { id: productionId } },
+      where: { project: { id: productionId } },
       order: { manufactureDate: 'DESC' },
     });
 
@@ -307,7 +307,7 @@ export class LqcService {
 
   async getVdWorklogData(productionId: number, electrode?: 'A' | 'C') {
     const vds = await this.worklogVdRepository.find({
-      where: { production: { id: productionId } },
+      where: { project: { id: productionId } },
       order: { manufactureDate: 'DESC' },
     });
 
@@ -371,7 +371,7 @@ export class LqcService {
 
   async getFormationLotData(productionId: number) {
     const lots = await this.lotFormationRepository.find({
-      where: { production: { id: productionId } },
+      where: { project: { id: productionId } },
       order: { lot: 'ASC' },
     });
 
@@ -384,7 +384,7 @@ export class LqcService {
 
   async getMainFormationLotData(productionId: number) {
     const lots = await this.lotFormationRepository.find({
-      where: { production: { id: productionId } },
+      where: { project: { id: productionId } },
       order: { lot: 'ASC' },
     });
 
@@ -399,7 +399,7 @@ export class LqcService {
 
   async getFinalSealingWorklogData(productionId: number) {
     const formations = await this.worklogFormationRepository.find({
-      where: { production: { id: productionId } },
+      where: { project: { id: productionId } },
       order: { manufactureDate: 'ASC' },
     });
 
@@ -419,7 +419,7 @@ export class LqcService {
 
   async getSealingWorklogData(productionId: number) {
     const sealings = await this.worklogSealingRepository.find({
-      where: { production: { id: productionId } },
+      where: { project: { id: productionId } },
       order: { manufactureDate: 'ASC' },
     });
 

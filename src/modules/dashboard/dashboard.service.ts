@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Production } from 'src/common/entities/production.entity';
+import { Project } from 'src/common/entities/project.entity';
 import { Repository } from 'typeorm';
-import { StatusService } from '../production/status/status.service';
+import { StatusService } from '../project/status/status.service';
 import { ProductionProgressDto } from 'src/common/dtos/production-progress.dto';
 
 export interface DashboardSummaryItem {
@@ -22,25 +22,23 @@ export interface DashboardSummaryItem {
 @Injectable()
 export class DashboardService {
   constructor(
-    @InjectRepository(Production)
-    private readonly productionRepository: Repository<Production>,
+    @InjectRepository(Project)
+    private readonly projectRepository: Repository<Project>,
     private readonly statusService: StatusService,
   ) {}
 
   async getSummary(): Promise<DashboardSummaryItem[]> {
-    // 1. 모든 프로젝트 목록 조회 (plan 관계 포함)
-    const productions = await this.productionRepository.find({
+    const projects = await this.projectRepository.find({
       order: { id: 'DESC' },
       relations: ['plan'],
     });
 
-    if (productions.length === 0) {
+    if (projects.length === 0) {
       return [];
     }
 
-    // 2. 모든 프로젝트의 progress를 병렬로 조회
-    const progressPromises = productions.map((production) =>
-      this.statusService.getProgress(production.id).catch(
+    const progressPromises = projects.map((project) =>
+      this.statusService.getProgress(project.id).catch(
         (): ProductionProgressDto => ({
           electrode: 0,
           assembly: 0,
@@ -52,9 +50,8 @@ export class DashboardService {
 
     const progressResults = await Promise.all(progressPromises);
 
-    // 3. 데이터 조합하여 반환
-    return productions.map((production, index) => {
-      const { plan, ...rest } = production;
+    return projects.map((project, index) => {
+      const { plan, ...rest } = project;
       return {
         ...rest,
         isPlan: !!plan,

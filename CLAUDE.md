@@ -48,7 +48,7 @@ src/
 └── modules/          # Feature domains
     ├── auth/         # Login/logout, Passport LocalStrategy
     ├── user/         # User CRUD
-    ├── production/   # Core MES: plan, material, specification, worklog, status, lot
+    ├── production/   # Core MES: plan, material, specification, worklog, status, lot (API prefix: /project)
     ├── material/     # Material master data + COA
     ├── specification/# Specs and certificates
     ├── quality/      # IQC / LQC / OQC quality control
@@ -63,7 +63,7 @@ src/
 
 - **Permission system**: Decorate controller methods with `@RequirePermission(menu, action)`. `PermissionGuard` (global `APP_GUARD`) checks the authenticated user's role and menu permissions. GET requests bypass the guard by default.
 - **Entities**: All shared TypeORM entities live in `src/common/entities/`. Use `@DeleteDateColumn()` for soft deletes.
-- **Routing**: Sub-modules under `production/` are registered via NestJS `RouterModule` with a `/production` prefix.
+- **Routing**: Sub-modules under `production/` are registered via NestJS `RouterModule` with a `/project` prefix (controller also uses `@Controller('project')`).
 - **File uploads**: Multer middleware; uploaded files are served as static assets at `/uploads/` from `/data/uploads`.
 - **Excel export**: Use the shared `ExcelService` from `src/common/services/`.
 - **API docs**: Swagger available at `/docs` in development.
@@ -76,7 +76,7 @@ src/
 
 ### TypeORM
 
-- Auto-sync enabled (`synchronize: true`) — schema changes apply on restart
+- Auto-sync enabled (`synchronize: true`) — 운영 서버 전환 시 반드시 `false`로 변경 후 마이그레이션 사용
 - Connection pool: 10 connections
 - All entities must be registered in `src/common/configs/typeorm.config.ts`
 

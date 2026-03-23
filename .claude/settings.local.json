@@ -7,7 +7,8 @@
       "Bash(done)",
       "WebSearch",
       "Bash(find /c/Users/user/Desktop/eurocell-mes-be -type f \\\\\\(-name *seed* -o -name *init* -o -name *migrations* -o -name *factory* \\\\\\))",
-      "Bash(xargs grep:*)"
+      "Bash(xargs grep:*)",
+      "Bash(grep -h \"@Entity\" c:/Users/user/Desktop/eurocell-mes-be/src/common/entities/lots/lot-*.entity.ts)"
     ]
   }
 }

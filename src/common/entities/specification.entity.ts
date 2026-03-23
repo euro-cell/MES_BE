@@ -8,7 +8,7 @@ import {
   JoinColumn,
   DeleteDateColumn,
 } from 'typeorm';
-import { Production } from './production.entity';
+import { Project } from './project.entity';
 import { CreateBatteryDesignDto } from '../dtos/specification.dto';
 
 @Entity('specifications')
@@ -37,7 +37,7 @@ export class Specification {
   @DeleteDateColumn()
   deletedAt?: Date | null;
 
-  @OneToOne(() => Production, (production) => production.specification, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'productionId' })
-  production: Production;
+  @OneToOne(() => Project, (project) => project.specification, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'project_id' })
+  project: Project;
 }

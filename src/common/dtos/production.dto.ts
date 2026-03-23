@@ -33,5 +33,7 @@ class ProductionDto {
 }
 
 export class CreateProductionDto extends OmitType(ProductionDto, ['id'] as const) {}
+export class CreateProjectDto extends OmitType(ProductionDto, ['id'] as const) {}
 
 export class UpdateProductionDto extends PartialType(OmitType(ProductionDto, ['id'] as const)) {}
+export class UpdateProjectDto extends PartialType(OmitType(ProductionDto, ['id'] as const)) {}

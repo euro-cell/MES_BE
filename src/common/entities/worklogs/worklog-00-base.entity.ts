@@ -1,5 +1,5 @@
 import { PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
-import { Production } from '../production.entity';
+import { Project } from '../project.entity';
 import { Equipment } from '../equipment.entity';
 
 export abstract class WorklogBase {
@@ -9,9 +9,9 @@ export abstract class WorklogBase {
   @Column({ type: 'date' })
   manufactureDate: Date;
 
-  @ManyToOne(() => Production, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'production_id' })
-  production: Production;
+  @ManyToOne(() => Project, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'project_id' })
+  project: Project;
 
   @Column({ type: 'varchar', length: 50 })
   worker: string;

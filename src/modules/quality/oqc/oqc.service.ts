@@ -16,7 +16,7 @@ export class OqcService {
 
   async getGradingData(projectId: number) {
     const lots = await this.lotFormationRepository.find({
-      where: { production: { id: projectId } },
+      where: { project: { id: projectId } },
       order: { lot: 'ASC' },
     });
 
@@ -30,14 +30,14 @@ export class OqcService {
 
   async getSpec(projectId: number): Promise<OqcSpec[]> {
     return this.oqcSpecRepository.find({
-      where: { production: { id: projectId } },
+      where: { project: { id: projectId } },
     });
   }
 
   async upsertSpec(projectId: number, dto: SaveOqcSpecDto): Promise<OqcSpec> {
     const existing = await this.oqcSpecRepository.findOne({
       where: {
-        production: { id: projectId },
+        project: { id: projectId },
         processType: dto.processType,
         itemType: dto.itemType,
       },
@@ -49,7 +49,7 @@ export class OqcService {
     }
 
     const newSpec = this.oqcSpecRepository.create({
-      production: { id: projectId },
+      project: { id: projectId },
       processType: dto.processType,
       itemType: dto.itemType,
       specs: dto.specs,

@@ -8,7 +8,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Production } from './production.entity';
+import { Project } from './project.entity';
 import { IQCResult } from './iqc-result.entity';
 import { IQCCoaRef } from './iqc-coa-ref.entity';
 import { IQCImage } from './iqc-image.entity';
@@ -19,9 +19,9 @@ export class IQC {
   @PrimaryGeneratedColumn({ type: 'bigint' })
   id: number;
 
-  @ManyToOne(() => Production)
-  @JoinColumn({ name: 'production_id' })
-  production: Production;
+  @ManyToOne(() => Project)
+  @JoinColumn({ name: 'project_id' })
+  project: Project;
 
   @Column({ type: 'varchar', length: 50 })
   category: string;

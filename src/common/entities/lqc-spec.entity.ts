@@ -7,7 +7,7 @@ import {
   Unique,
 } from 'typeorm';
 import { LqcProcessType, LqcItemType } from '../enums/lqc.enum';
-import { Production } from './production.entity';
+import { Project } from './project.entity';
 
 export interface SpecValue {
   target?: number;
@@ -20,14 +20,14 @@ export interface SpecValue {
 export type LqcSpecs = Record<string, SpecValue>;
 
 @Entity('lqc_spec')
-@Unique('uk_lqc_spec', ['production', 'processType', 'itemType'])
+@Unique('uk_lqc_spec', ['project', 'processType', 'itemType'])
 export class LqcSpec {
   @PrimaryGeneratedColumn({ type: 'bigint' })
   id: number;
 
-  @ManyToOne(() => Production)
-  @JoinColumn({ name: 'production_id' })
-  production: Production;
+  @ManyToOne(() => Project)
+  @JoinColumn({ name: 'project_id' })
+  project: Project;
 
   @Column({ type: 'varchar', length: 50, enum: LqcProcessType })
   processType: LqcProcessType;

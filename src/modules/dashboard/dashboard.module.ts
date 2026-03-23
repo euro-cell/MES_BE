@@ -2,11 +2,11 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DashboardController } from './dashboard.controller';
 import { DashboardService } from './dashboard.service';
-import { Production } from 'src/common/entities/production.entity';
-import { StatusModule } from '../production/status/status.module';
+import { Project } from 'src/common/entities/project.entity';
+import { StatusModule } from '../project/status/status.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Production]), StatusModule],
+  imports: [TypeOrmModule.forFeature([Project]), StatusModule],
   controllers: [DashboardController],
   providers: [DashboardService],
 })

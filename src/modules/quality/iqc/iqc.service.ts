@@ -25,7 +25,7 @@ export class IqcService {
 
   async findAll(productionId: number): Promise<IQC[]> {
     return this.iqcRepository.find({
-      where: { production: { id: productionId } },
+      where: { project: { id: productionId } },
       relations: ['results', 'coaRefs', 'images', 'files'],
       order: { createdAt: 'ASC' },
     });
@@ -46,7 +46,7 @@ export class IqcService {
     return this.dataSource.transaction(async (manager) => {
       // 1. IQC 기본 정보 저장
       const iqc = manager.create(IQC, {
-        production: { id: productionId },
+        project: { id: productionId },
         category: dto.category,
         type: dto.type,
         name: dto.name,

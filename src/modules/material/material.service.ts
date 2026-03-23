@@ -2,7 +2,7 @@ import { Injectable, StreamableFile } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Material } from 'src/common/entities/material.entity';
 import { MaterialHistory } from 'src/common/entities/material-history.entity';
-import { Production } from 'src/common/entities/production.entity';
+import { Project } from 'src/common/entities/project.entity';
 import { MaterialProcess, MaterialHistoryType } from 'src/common/enums/material.enum';
 import { Repository } from 'typeorm';
 import { CreateMaterialDto, UpdateMaterialDto, ImportMaterialItemDto, ImportMaterialResultDto } from 'src/common/dtos/material.dto';
@@ -18,8 +18,8 @@ export class MaterialService {
     private readonly materialRepository: Repository<Material>,
     @InjectRepository(MaterialHistory)
     private readonly materialHistoryRepository: Repository<MaterialHistory>,
-    @InjectRepository(Production)
-    private readonly productionRepository: Repository<Production>,
+    @InjectRepository(Project)
+    private readonly projectRepository: Repository<Project>,
     private readonly excelService: ExcelService,
   ) {}
 
@@ -65,7 +65,7 @@ export class MaterialService {
   }
 
   async findByMaterialProduction() {
-    const productions = await this.productionRepository.find({ order: { id: 'DESC' }, relations: ['productionMaterials'] });
+    const productions = await this.projectRepository.find({ order: { id: 'DESC' }, relations: ['projectMaterials'] });
     const result = productions.map((p) => ({
       id: p.id,
       name: p.name,
@@ -76,7 +76,7 @@ export class MaterialService {
       round: p.round,
       batteryType: p.batteryType,
       capacity: p.capacity,
-      hasMaterials: p.productionMaterials && p.productionMaterials.length > 0,
+      hasMaterials: p.projectMaterials && p.projectMaterials.length > 0,
     }));
     return result;
   }

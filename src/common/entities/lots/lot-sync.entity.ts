@@ -1,14 +1,14 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
-import { Production } from '../production.entity';
+import { Project } from '../project.entity';
 
 @Entity('lot_syncs')
 export class LotSync {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Production, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Project, { onDelete: 'CASCADE' })
   @JoinColumn()
-  production: Production;
+  project: Project;
 
   @Column({ type: 'varchar', length: 50 })
   process: string;

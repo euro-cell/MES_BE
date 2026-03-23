@@ -1,5 +1,5 @@
 import { PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
-import { Production } from '../production.entity';
+import { Project } from '../project.entity';
 
 export abstract class LotBase {
   @PrimaryGeneratedColumn()
@@ -8,9 +8,9 @@ export abstract class LotBase {
   @Column({ type: 'varchar', length: 100 })
   lot: string;
 
-  @ManyToOne(() => Production, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Project, { onDelete: 'CASCADE' })
   @JoinColumn()
-  production: Production;
+  project: Project;
 
   @Column({ type: 'date', nullable: true })
   processDate: Date;
