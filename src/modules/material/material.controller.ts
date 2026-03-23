@@ -69,7 +69,7 @@ export class MaterialController {
     return this.materialService.importAssemblyMaterials(dto.materials);
   }
 
-  @Get('production')
+  @Get('project')
   findByMaterialProduction() {
     return this.materialService.findByMaterialProduction();
   }

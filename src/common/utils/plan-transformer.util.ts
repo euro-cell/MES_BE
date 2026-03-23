@@ -247,7 +247,7 @@ export class PlanTransformerUtil {
       id: plan.id,
       startDate: plan.startDate,
       endDate: plan.endDate,
-      production: plan.production,
+      project: plan.project,
       weekHeaders,
       processes,
       planData: processData,

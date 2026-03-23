@@ -65,8 +65,8 @@ export class MaterialService {
   }
 
   async findByMaterialProduction() {
-    const productions = await this.projectRepository.find({ order: { id: 'DESC' }, relations: ['projectMaterials'] });
-    const result = productions.map((p) => ({
+    const projects = await this.projectRepository.find({ order: { id: 'DESC' }, relations: ['projectMaterials'] });
+    const result = projects.map((p) => ({
       id: p.id,
       name: p.name,
       company: p.company,
