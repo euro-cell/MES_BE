@@ -56,7 +56,7 @@ export class MaterialItemDto {
   quantity: number;
 }
 
-export class CreateProductionMaterialDto {
+export class CreateProjectMaterialDto {
   @ApiProperty({
     description: '등록할 자재 목록 배열',
     type: [MaterialItemDto],
@@ -67,4 +67,4 @@ export class CreateProductionMaterialDto {
   materials: MaterialItemDto[];
 }
 
-export class UpdateProductionMaterialDto extends PartialType(CreateProductionMaterialDto) {}
+export class UpdateProjectMaterialDto extends PartialType(CreateProjectMaterialDto) {}

@@ -1,6 +1,6 @@
 import { ProjectPlan } from '../entities/project-plan.entity';
 
-export const PRODUCTION_PLAN_MAPPING: Record<string, keyof ProjectPlan> = {
+export const PROJECT_PLAN_MAPPING: Record<string, keyof ProjectPlan> = {
   'Electrode_Slurry Mixing_Cathode': 'mixingCathode',
   'Electrode_Slurry Mixing_Anode': 'mixingAnode',
   Electrode_Coating_Cathode: 'coatingCathode',

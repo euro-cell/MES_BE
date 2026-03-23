@@ -36,8 +36,8 @@ export class LqcService {
     private readonly lotFormationRepository: Repository<LotFormation>,
   ) {}
 
-  async getSpec(productionId: number, processType?: LqcProcessType, itemType?: LqcItemType): Promise<LqcSpec[]> {
-    const query = this.lqcSpecRepository.createQueryBuilder('spec').where('spec.production_id = :productionId', { productionId });
+  async getSpec(projectId: number, processType?: LqcProcessType, itemType?: LqcItemType): Promise<LqcSpec[]> {
+    const query = this.lqcSpecRepository.createQueryBuilder('spec').where('spec.production_id = :projectId', { projectId });
 
     if (processType) {
       query.andWhere('spec.processType = :processType', { processType });
@@ -50,10 +50,10 @@ export class LqcService {
     return query.getMany();
   }
 
-  async upsertSpec(productionId: number, dto: CreateLqcSpecDto): Promise<LqcSpec> {
+  async upsertSpec(projectId: number, dto: CreateLqcSpecDto): Promise<LqcSpec> {
     const existing = await this.lqcSpecRepository.findOne({
       where: {
-        project: { id: productionId },
+        project: { id: projectId },
         processType: dto.processType,
         itemType: dto.itemType,
       },
@@ -65,7 +65,7 @@ export class LqcService {
     }
 
     const newSpec = this.lqcSpecRepository.create({
-      project: { id: productionId },
+      project: { id: projectId },
       processType: dto.processType,
       itemType: dto.itemType,
       specs: dto.specs,
@@ -74,7 +74,7 @@ export class LqcService {
     return this.lqcSpecRepository.save(newSpec);
   }
 
-  async getBinderWorklogData(productionId: number, electrode?: 'A' | 'C') {
+  async getBinderWorklogData(projectId: number, electrode?: 'A' | 'C') {
     const query = this.worklogBinderRepository
       .createQueryBuilder('binder')
       .select([
@@ -86,7 +86,7 @@ export class LqcService {
         'binder.solidContent3',
         'binder.viscosity',
       ])
-      .where('binder.production_id = :productionId', { productionId });
+      .where('binder.production_id = :projectId', { projectId });
 
     if (electrode) {
       // LOT 5번째 인덱스(index 4)로 양극(C)/음극(A) 구분
@@ -98,7 +98,7 @@ export class LqcService {
     return query.getMany();
   }
 
-  async getSlurryWorklogData(productionId: number, electrode?: 'A' | 'C') {
+  async getSlurryWorklogData(projectId: number, electrode?: 'A' | 'C') {
     const query = this.worklogSlurryRepository
       .createQueryBuilder('slurry')
       .select([
@@ -111,7 +111,7 @@ export class LqcService {
         'slurry.grindGageFineParticle2',
         'slurry.viscosityAfterStabilization',
       ])
-      .where('slurry.production_id = :productionId', { productionId });
+      .where('slurry.production_id = :projectId', { projectId });
 
     if (electrode) {
       query.andWhere('SUBSTRING(slurry.lot, 5, 1) = :electrode', { electrode });
@@ -122,9 +122,9 @@ export class LqcService {
     return query.getMany();
   }
 
-  async getCoatingWorklogData(productionId: number, electrode?: 'A' | 'C') {
+  async getCoatingWorklogData(projectId: number, electrode?: 'A' | 'C') {
     const coatings = await this.worklogCoatingRepository.find({
-      where: { project: { id: productionId } },
+      where: { project: { id: projectId } },
       order: { manufactureDate: 'DESC' },
     });
 
@@ -251,9 +251,9 @@ export class LqcService {
     return result;
   }
 
-  async getPressWorklogData(productionId: number, electrode?: 'A' | 'C') {
+  async getPressWorklogData(projectId: number, electrode?: 'A' | 'C') {
     const presses = await this.worklogPressRepository.find({
-      where: { project: { id: productionId } },
+      where: { project: { id: projectId } },
       order: { manufactureDate: 'DESC' },
     });
 
@@ -305,9 +305,9 @@ export class LqcService {
     return result;
   }
 
-  async getVdWorklogData(productionId: number, electrode?: 'A' | 'C') {
+  async getVdWorklogData(projectId: number, electrode?: 'A' | 'C') {
     const vds = await this.worklogVdRepository.find({
-      where: { project: { id: productionId } },
+      where: { project: { id: projectId } },
       order: { manufactureDate: 'DESC' },
     });
 
@@ -369,9 +369,9 @@ export class LqcService {
     return result;
   }
 
-  async getFormationLotData(productionId: number) {
+  async getFormationLotData(projectId: number) {
     const lots = await this.lotFormationRepository.find({
-      where: { project: { id: productionId } },
+      where: { project: { id: projectId } },
       order: { lot: 'ASC' },
     });
 
@@ -382,9 +382,9 @@ export class LqcService {
     }));
   }
 
-  async getMainFormationLotData(productionId: number) {
+  async getMainFormationLotData(projectId: number) {
     const lots = await this.lotFormationRepository.find({
-      where: { project: { id: productionId } },
+      where: { project: { id: projectId } },
       order: { lot: 'ASC' },
     });
 
@@ -397,9 +397,9 @@ export class LqcService {
     }));
   }
 
-  async getFinalSealingWorklogData(productionId: number) {
+  async getFinalSealingWorklogData(projectId: number) {
     const formations = await this.worklogFormationRepository.find({
-      where: { project: { id: productionId } },
+      where: { project: { id: projectId } },
       order: { manufactureDate: 'ASC' },
     });
 
@@ -417,9 +417,9 @@ export class LqcService {
     }));
   }
 
-  async getSealingWorklogData(productionId: number) {
+  async getSealingWorklogData(projectId: number) {
     const sealings = await this.worklogSealingRepository.find({
-      where: { project: { id: productionId } },
+      where: { project: { id: projectId } },
       order: { manufactureDate: 'ASC' },
     });
 

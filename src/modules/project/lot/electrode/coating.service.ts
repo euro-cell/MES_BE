@@ -22,11 +22,11 @@ export class CoatingService {
     private readonly materialRepo: Repository<Material>,
   ) {}
 
-  async sync(productionId: number) {
-    const lastSync = await this.getLastSync(productionId);
+  async sync(projectId: number) {
+    const lastSync = await this.getLastSync(projectId);
 
     const coatingWorklogs = await this.worklogCoatingRepo.find({
-      where: lastSync ? { project: { id: productionId }, createdAt: MoreThan(lastSync.syncedAt) } : { project: { id: productionId } },
+      where: lastSync ? { project: { id: projectId }, createdAt: MoreThan(lastSync.syncedAt) } : { project: { id: projectId } },
     });
 
     for (const coating of coatingWorklogs) {
@@ -34,19 +34,19 @@ export class CoatingService {
 
       for (const lot of lots) {
         const exists = await this.lotCoatingRepo.findOne({
-          where: { lot, project: { id: productionId } },
+          where: { lot, project: { id: projectId } },
         });
 
         if (!exists) {
           const slurry = coating.materialLot2
             ? await this.worklogSlurryRepo.findOne({
-                where: { lot: coating.materialLot2, project: { id: productionId } },
+                where: { lot: coating.materialLot2, project: { id: projectId } },
               })
             : null;
 
           const lotCoating = this.lotCoatingRepo.create({
             lot,
-            project: { id: productionId },
+            project: { id: projectId },
             processDate: coating.manufactureDate,
             worklogCoating: coating,
             worklogSlurry: slurry ?? undefined,
@@ -61,23 +61,23 @@ export class CoatingService {
       await this.lotSyncRepo.save(lastSync);
     } else {
       await this.lotSyncRepo.save({
-        project: { id: productionId },
+        project: { id: projectId },
         process: 'coating',
         syncedAt: new Date(),
       });
     }
   }
 
-  async getLastSync(productionId: number) {
+  async getLastSync(projectId: number) {
     return this.lotSyncRepo.findOne({
-      where: { project: { id: productionId }, process: 'coating' },
+      where: { project: { id: projectId }, process: 'coating' },
       order: { syncedAt: 'DESC' },
     });
   }
 
-  async getCoatingLots(productionId: number) {
+  async getCoatingLots(projectId: number) {
     const lots = await this.lotCoatingRepo.find({
-      where: { project: { id: productionId } },
+      where: { project: { id: projectId } },
       relations: ['worklogCoating', 'worklogSlurry'],
       order: { processDate: 'DESC' },
     });

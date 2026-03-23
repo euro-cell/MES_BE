@@ -72,12 +72,12 @@ export class FormationLotService {
     return isNaN(cellNumber) ? 0 : cellNumber;
   }
 
-  async sync(productionId: number) {
-    const lastSync = await this.getLastSync(productionId);
+  async sync(projectId: number) {
+    const lastSync = await this.getLastSync(projectId);
 
     const goodSealingLots = await this.lotSealingRepo.find({
       where: {
-        project: { id: productionId },
+        project: { id: projectId },
         isDefectiveFromStacking: false,
         isDefectiveFromWelding: false,
         isDefectiveFromSealing: false,
@@ -86,12 +86,12 @@ export class FormationLotService {
     });
 
     const formationWorklogs = await this.worklogFormationRepo.find({
-      where: { project: { id: productionId } },
+      where: { project: { id: projectId } },
       order: { manufactureDate: 'ASC' },
     });
 
     const gradingWorklogs = await this.worklogGradingRepo.find({
-      where: { project: { id: productionId } },
+      where: { project: { id: projectId } },
       order: { manufactureDate: 'ASC' },
     });
 
@@ -99,7 +99,7 @@ export class FormationLotService {
       const existsFormation = await this.lotFormationRepo.findOne({
         where: {
           lotSealing: { id: sealingLot.id },
-          project: { id: productionId },
+          project: { id: projectId },
         },
         relations: ['worklogFormation', 'worklogGrading'],
       });
@@ -115,7 +115,7 @@ export class FormationLotService {
 
       const lotFormation = this.lotFormationRepo.create({
         lot: formationLotNumber,
-        project: { id: productionId },
+        project: { id: projectId },
         processDate: processDate,
         lotSealing: sealingLot,
       });
@@ -129,7 +129,7 @@ export class FormationLotService {
       await this.lotSyncRepo.save(lastSync);
     } else {
       await this.lotSyncRepo.save({
-        project: { id: productionId },
+        project: { id: projectId },
         process: 'formation',
         syncedAt: new Date(),
       });
@@ -287,9 +287,9 @@ export class FormationLotService {
     return false;
   }
 
-  async getLastSync(productionId: number) {
+  async getLastSync(projectId: number) {
     return this.lotSyncRepo.findOne({
-      where: { project: { id: productionId }, process: 'formation' },
+      where: { project: { id: projectId }, process: 'formation' },
       order: { syncedAt: 'DESC' },
     });
   }
@@ -420,7 +420,7 @@ export class FormationLotService {
     return next3.replace(/-/g, '/');
   }
 
-  async registerRawData(productionId: number, dto: RegisterRawDataDto) {
+  async registerRawData(projectId: number, dto: RegisterRawDataDto) {
     const { headers, data } = dto;
 
     // lot 필드 찾기 (여러 형식 지원: "lot", "Lot Lot" 등)
@@ -449,7 +449,7 @@ export class FormationLotService {
 
       let lotFormation = await this.lotFormationRepo.findOne({
         where: {
-          project: { id: productionId },
+          project: { id: projectId },
           lot: lotValue,
         },
       });
@@ -458,7 +458,7 @@ export class FormationLotService {
         // 새 레코드 생성
         lotFormation = this.lotFormationRepo.create({
           lot: lotValue,
-          project: { id: productionId },
+          project: { id: projectId },
           processDate: new Date(),
         });
         results.created++;
@@ -500,9 +500,9 @@ export class FormationLotService {
     };
   }
 
-  async getFormationLots(productionId: number) {
+  async getFormationLots(projectId: number) {
     const lots = await this.lotFormationRepo.find({
-      where: { project: { id: productionId } },
+      where: { project: { id: projectId } },
       relations: ['lotSealing', 'worklogFormation'],
       order: { lot: 'ASC' },
     });

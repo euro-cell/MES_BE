@@ -10,10 +10,10 @@ import { multerConfig } from 'src/common/configs/multer.config';
 export class IqcController {
   constructor(private readonly iqcService: IqcService) {}
 
-  @Get(':productionId')
+  @Get(':projectId')
   @ApiOperation({ summary: 'IQC 목록 조회' })
-  async findAll(@Param('productionId') productionId: number) {
-    return this.iqcService.findAll(productionId);
+  async findAll(@Param('projectId') projectId: number) {
+    return this.iqcService.findAll(projectId);
   }
 
   @Get('detail/:id')
@@ -22,13 +22,13 @@ export class IqcController {
     return this.iqcService.findOne(id);
   }
 
-  @Post(':productionId')
+  @Post(':projectId')
   @ApiOperation({
     summary: 'IQC 검사 이력 생성',
     description: 'results 중 isPassed=false 항목이 있으면 최종 합불(isPassed)이 자동으로 false로 설정됩니다.',
   })
-  async create(@Param('productionId') productionId: number, @Body() dto: CreateIQCDto) {
-    return this.iqcService.create(productionId, dto);
+  async create(@Param('projectId') projectId: number, @Body() dto: CreateIQCDto) {
+    return this.iqcService.create(projectId, dto);
   }
 
   @Put('detail/:id')

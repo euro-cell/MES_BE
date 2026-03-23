@@ -1,28 +1,28 @@
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
 import { PlanService } from './plan.service';
-import { CreateProductionPlanDto, UpdateProductionPlanDto } from 'src/common/dtos/production-plan.dto';
+import { CreateProjectPlanDto, UpdateProjectPlanDto } from 'src/common/dtos/project-plan.dto';
 
-@Controller(':productionId/plan')
+@Controller(':projectId/plan')
 export class PlanController {
   constructor(private readonly planService: PlanService) {}
 
   @Post()
-  async saveProjectPlan(@Param('productionId') productionId: number, @Body() dto: CreateProductionPlanDto) {
-    return this.planService.savePlan(productionId, dto);
+  async saveProjectPlan(@Param('projectId') projectId: number, @Body() dto: CreateProjectPlanDto) {
+    return this.planService.savePlan(projectId, dto);
   }
 
   @Get()
-  async searchPlans(@Param('productionId') productionId: number) {
-    return this.planService.searchPlans({ productionId });
+  async searchPlans(@Param('projectId') projectId: number) {
+    return this.planService.searchPlans({ projectId });
   }
 
   @Patch()
-  async updatePlan(@Param('productionId') productionId: number, @Body() dto: UpdateProductionPlanDto) {
-    return this.planService.updatePlan(productionId, dto);
+  async updatePlan(@Param('projectId') projectId: number, @Body() dto: UpdateProjectPlanDto) {
+    return this.planService.updatePlan(projectId, dto);
   }
 
   @Delete()
-  async deletePlan(@Param('productionId', ParseIntPipe) productionId: number) {
-    return await this.planService.deletePlan(productionId);
+  async deletePlan(@Param('projectId', ParseIntPipe) projectId: number) {
+    return await this.planService.deletePlan(projectId);
   }
 }

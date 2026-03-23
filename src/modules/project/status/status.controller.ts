@@ -1,55 +1,55 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Patch, Query, Res } from '@nestjs/common';
 import { StatusService } from './status.service';
 import { ApiQuery, ApiProduces } from '@nestjs/swagger';
-import { UpdateTargetByKeyDto } from 'src/common/dtos/production-target.dto';
+import { UpdateTargetByKeyDto } from 'src/common/dtos/project-target.dto';
 import type { Response } from 'express';
 
-@Controller(':productionId/status')
+@Controller(':projectId/status')
 export class StatusController {
   constructor(private readonly statusService: StatusService) {}
 
   @Get()
-  async getStatusData(@Param('productionId', ParseIntPipe) productionId: number) {
-    return await this.statusService.getStatusData(productionId);
+  async getStatusData(@Param('projectId', ParseIntPipe) projectId: number) {
+    return await this.statusService.getStatusData(projectId);
   }
 
   @Get('Electrode')
   @ApiQuery({ name: 'month', required: true, type: String, description: 'YYYY-MM 형식 (예: 2025-01)' })
   @ApiQuery({ name: 'type', required: true, enum: ['cathode', 'anode'], description: 'cathode 또는 anode' })
   async getElectrodeStatus(
-    @Param('productionId', ParseIntPipe) productionId: number,
+    @Param('projectId', ParseIntPipe) projectId: number,
     @Query('month') month: string,
     @Query('type') type: 'cathode' | 'anode',
   ) {
-    return await this.statusService.getElectrodeStatus(productionId, month, type);
+    return await this.statusService.getElectrodeStatus(projectId, month, type);
   }
 
   @Get('Assembly')
   @ApiQuery({ name: 'month', required: true, type: String, description: 'YYYY-MM 형식 (예: 2025-01)' })
-  async getAssemblyStatus(@Param('productionId', ParseIntPipe) productionId: number, @Query('month') month: string) {
-    return await this.statusService.getAssemblyStatus(productionId, month);
+  async getAssemblyStatus(@Param('projectId', ParseIntPipe) projectId: number, @Query('month') month: string) {
+    return await this.statusService.getAssemblyStatus(projectId, month);
   }
 
   @Get('Formation')
   @ApiQuery({ name: 'month', required: true, type: String, description: 'YYYY-MM 형식 (예: 2025-01)' })
-  async getFormationStatus(@Param('productionId', ParseIntPipe) productionId: number, @Query('month') month: string) {
-    return await this.statusService.getFormationStatus(productionId, month);
+  async getFormationStatus(@Param('projectId', ParseIntPipe) projectId: number, @Query('month') month: string) {
+    return await this.statusService.getFormationStatus(projectId, month);
   }
 
   @Patch('target')
-  async updateTargetStatus(@Param('productionId', ParseIntPipe) productionId: number, @Body() dto: UpdateTargetByKeyDto) {
-    return await this.statusService.updateTargetStatus(productionId, dto);
+  async updateTargetStatus(@Param('projectId', ParseIntPipe) projectId: number, @Body() dto: UpdateTargetByKeyDto) {
+    return await this.statusService.updateTargetStatus(projectId, dto);
   }
 
   @Get('progress')
-  async getProgress(@Param('productionId', ParseIntPipe) productionId: number) {
-    return await this.statusService.getProgress(productionId);
+  async getProgress(@Param('projectId', ParseIntPipe) projectId: number) {
+    return await this.statusService.getProgress(projectId);
   }
 
   @Get('Electrode/export')
   @ApiProduces('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-  async exportElectrodeStatus(@Param('productionId', ParseIntPipe) productionId: number, @Res() res: Response) {
-    const { file, productionName } = await this.statusService.exportElectrodeStatus(productionId);
+  async exportElectrodeStatus(@Param('projectId', ParseIntPipe) projectId: number, @Res() res: Response) {
+    const { file, productionName } = await this.statusService.exportElectrodeStatus(projectId);
     const filename = `${productionName}_전극공정_생산현황.xlsx`;
 
     res.set({
@@ -63,8 +63,8 @@ export class StatusController {
 
   @Get('Assembly/export')
   @ApiProduces('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-  async exportAssemblyStatus(@Param('productionId', ParseIntPipe) productionId: number, @Res() res: Response) {
-    const { file, productionName } = await this.statusService.exportAssemblyStatus(productionId);
+  async exportAssemblyStatus(@Param('projectId', ParseIntPipe) projectId: number, @Res() res: Response) {
+    const { file, productionName } = await this.statusService.exportAssemblyStatus(projectId);
     const filename = `${productionName}_조립공정_생산현황.xlsx`;
 
     res.set({
@@ -78,8 +78,8 @@ export class StatusController {
 
   @Get('Formation/export')
   @ApiProduces('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-  async exportFormationStatus(@Param('productionId', ParseIntPipe) productionId: number, @Res() res: Response) {
-    const { file, productionName } = await this.statusService.exportFormationStatus(productionId);
+  async exportFormationStatus(@Param('projectId', ParseIntPipe) projectId: number, @Res() res: Response) {
+    const { file, productionName } = await this.statusService.exportFormationStatus(projectId);
     const filename = `${productionName}_화성공정_생산현황.xlsx`;
 
     res.set({

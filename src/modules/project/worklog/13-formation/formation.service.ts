@@ -13,17 +13,17 @@ export class FormationService {
     private readonly equipmentService: EquipmentService,
   ) {}
 
-  async createFormationWorklog(productionId: number, dto: CreateFormationWorklogDto): Promise<WorklogFormation> {
+  async createFormationWorklog(projectId: number, dto: CreateFormationWorklogDto): Promise<WorklogFormation> {
     const worklog = this.worklogFormationRepository.create({
       ...dto,
-      project: { id: productionId },
+      project: { id: projectId },
     });
     return await this.worklogFormationRepository.save(worklog);
   }
 
-  async getWorklogs(productionId: number): Promise<FormationWorklogListResponseDto[]> {
+  async getWorklogs(projectId: number): Promise<FormationWorklogListResponseDto[]> {
     const worklogs = await this.worklogFormationRepository.find({
-      where: { project: { id: productionId } },
+      where: { project: { id: projectId } },
       order: { manufactureDate: 'ASC', createdAt: 'ASC' },
     });
     const dateRoundMap = new Map<string, number>();
@@ -63,7 +63,7 @@ export class FormationService {
     const { project, plant, ...rest } = worklog;
     return {
       ...rest,
-      productionId: project?.name || '',
+      projectId: project?.name || '',
       plant: plantName,
     };
   }

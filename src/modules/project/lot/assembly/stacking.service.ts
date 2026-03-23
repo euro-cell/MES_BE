@@ -16,13 +16,13 @@ export class StackingService {
     private readonly worklogStackingRepo: Repository<WorklogStacking>,
   ) {}
 
-  async sync(productionId: number) {
-    const lastSync = await this.getLastSync(productionId);
+  async sync(projectId: number) {
+    const lastSync = await this.getLastSync(projectId);
 
     const stackingWorklogs = await this.worklogStackingRepo.find({
       where: lastSync
-        ? { project: { id: productionId }, createdAt: MoreThan(lastSync.syncedAt) }
-        : { project: { id: productionId } },
+        ? { project: { id: projectId }, createdAt: MoreThan(lastSync.syncedAt) }
+        : { project: { id: projectId } },
     });
 
     for (const stacking of stackingWorklogs) {
@@ -110,7 +110,7 @@ export class StackingService {
           const exists = await this.lotStackingRepo.findOne({
             where: {
               lot: lotNumber,
-              project: { id: productionId },
+              project: { id: projectId },
               worklogStacking: { id: stacking.id },
             },
           });
@@ -119,7 +119,7 @@ export class StackingService {
             const lotStacking = this.lotStackingRepo.create({
               lot: lotNumber,
               jrRange: jr.jrRange,
-              project: { id: productionId },
+              project: { id: projectId },
               processDate: stacking.manufactureDate,
               worklogStacking: stacking,
               isDefective: hasDefect,
@@ -139,23 +139,23 @@ export class StackingService {
       await this.lotSyncRepo.save(lastSync);
     } else {
       await this.lotSyncRepo.save({
-        project: { id: productionId },
+        project: { id: projectId },
         process: 'stacking',
         syncedAt: new Date(),
       });
     }
   }
 
-  async getLastSync(productionId: number) {
+  async getLastSync(projectId: number) {
     return this.lotSyncRepo.findOne({
-      where: { project: { id: productionId }, process: 'stacking' },
+      where: { project: { id: projectId }, process: 'stacking' },
       order: { syncedAt: 'DESC' },
     });
   }
 
-  async getStackingLots(productionId: number) {
+  async getStackingLots(projectId: number) {
     const lots = await this.lotStackingRepo.find({
-      where: { project: { id: productionId } },
+      where: { project: { id: projectId } },
       relations: ['worklogStacking'],
       order: { processDate: 'DESC' },
     });

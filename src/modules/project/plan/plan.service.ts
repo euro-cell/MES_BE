@@ -3,8 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ProjectPlan } from '../../../common/entities/project-plan.entity';
 import { Project } from '../../../common/entities/project.entity';
 import { Repository } from 'typeorm';
-import { CreateProductionPlanDto, UpdateProductionPlanDto } from 'src/common/dtos/production-plan.dto';
-import { PRODUCTION_PLAN_MAPPING } from 'src/common/types/production-plan.mapping';
+import { CreateProjectPlanDto, UpdateProjectPlanDto } from 'src/common/dtos/project-plan.dto';
+import { PROJECT_PLAN_MAPPING } from 'src/common/types/project-plan.mapping';
 import { PlanTransformerUtil } from 'src/common/utils/plan-transformer.util';
 
 @Injectable()
@@ -16,9 +16,9 @@ export class PlanService {
     private readonly projectRepository: Repository<Project>,
   ) {}
 
-  async savePlan(productionId: number, dto: CreateProductionPlanDto) {
+  async savePlan(projectId: number, dto: CreateProjectPlanDto) {
     const project = await this.projectRepository.findOne({
-      where: { id: productionId },
+      where: { id: projectId },
     });
     if (!project) throw new NotFoundException('프로젝트를 찾을 수 없습니다.');
 
@@ -31,7 +31,7 @@ export class PlanService {
     };
 
     for (const [key, value] of Object.entries(processPlans)) {
-      const field = PRODUCTION_PLAN_MAPPING[key];
+      const field = PROJECT_PLAN_MAPPING[key];
       if (!field) {
         console.warn(`⚠️ 매칭되지 않은 공정명: ${key}`);
         continue;
@@ -48,7 +48,7 @@ export class PlanService {
     }
 
     let plan = await this.planRepository.findOne({
-      where: { project: { id: productionId } },
+      where: { project: { id: projectId } },
     });
 
     if (plan) {
@@ -59,26 +59,26 @@ export class PlanService {
     return await this.planRepository.save(plan);
   }
 
-  async searchPlans(filters: { productionId?: number }) {
-    const { productionId } = filters;
-    if (!productionId) return [];
+  async searchPlans(filters: { projectId?: number }) {
+    const { projectId } = filters;
+    if (!projectId) return [];
 
     const plans = await this.planRepository.find({
-      where: { project: { id: productionId } },
+      where: { project: { id: projectId } },
       relations: ['project'],
       order: { startDate: 'ASC' },
     });
     return plans.map((plan) => PlanTransformerUtil.transformPlanData(plan));
   }
 
-  async updatePlan(productionId: number, dto: UpdateProductionPlanDto) {
+  async updatePlan(projectId: number, dto: UpdateProjectPlanDto) {
     const project = await this.projectRepository.findOne({
-      where: { id: productionId },
+      where: { id: projectId },
     });
     if (!project) throw new NotFoundException('프로젝트를 찾을 수 없습니다.');
 
     const plan = await this.planRepository.findOne({
-      where: { project: { id: productionId } },
+      where: { project: { id: projectId } },
     });
 
     if (!plan) throw new NotFoundException('등록된 생산계획이 없습니다.');
@@ -91,7 +91,7 @@ export class PlanService {
     };
 
     for (const [key, value] of Object.entries(processPlans || {})) {
-      const field = PRODUCTION_PLAN_MAPPING[key];
+      const field = PROJECT_PLAN_MAPPING[key];
       if (!field) continue;
 
       const { start, end } = value;
@@ -110,8 +110,8 @@ export class PlanService {
     return await this.planRepository.save(plan);
   }
 
-  async deletePlan(productionId: number) {
-    const plan = await this.planRepository.findOne({ where: { project: { id: productionId } } });
+  async deletePlan(projectId: number) {
+    const plan = await this.planRepository.findOne({ where: { project: { id: projectId } } });
     if (!plan) {
       throw new NotFoundException('해당 생산에 등록된 계획이 없습니다.');
     }

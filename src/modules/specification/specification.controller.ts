@@ -6,18 +6,18 @@ import { CreateBatteryDesignDto } from 'src/common/dtos/specification.dto';
 export class SpecificationController {
   constructor(private readonly specificationService: SpecificationService) {}
 
-  @Post(':productionId')
-  async createSpecification(@Param('productionId', ParseIntPipe) productionId: number, @Body() dto: CreateBatteryDesignDto) {
-    return this.specificationService.createSpecification(productionId, dto);
+  @Post(':projectId')
+  async createSpecification(@Param('projectId', ParseIntPipe) projectId: number, @Body() dto: CreateBatteryDesignDto) {
+    return this.specificationService.createSpecification(projectId, dto);
   }
 
-  @Get(':productionId')
-  async findSpecification(@Param('productionId', ParseIntPipe) productionId: number) {
-    return this.specificationService.findSpecification(productionId);
+  @Get(':projectId')
+  async findSpecification(@Param('projectId', ParseIntPipe) projectId: number) {
+    return this.specificationService.findSpecification(projectId);
   }
 
-  @Delete(':productionId')
-  async softDeleteSpecification(@Param('productionId', ParseIntPipe) productionId: number) {
-    return this.specificationService.softDeleteSpecification(productionId);
+  @Delete(':projectId')
+  async softDeleteSpecification(@Param('projectId', ParseIntPipe) projectId: number) {
+    return this.specificationService.softDeleteSpecification(projectId);
   }
 }

@@ -16,10 +16,10 @@ export class WeldingService {
     private readonly equipmentService: EquipmentService,
   ) {}
 
-  async createWeldingWorklog(productionId: number, dto: CreateWeldingWorklogDto): Promise<WorklogWelding> {
+  async createWeldingWorklog(projectId: number, dto: CreateWeldingWorklogDto): Promise<WorklogWelding> {
     const worklog = this.worklogWeldingRepository.create({
       ...dto,
-      project: { id: productionId },
+      project: { id: projectId },
     });
     const savedWorklog = await this.worklogWeldingRepository.save(worklog);
 
@@ -37,9 +37,9 @@ export class WeldingService {
     return savedWorklog;
   }
 
-  async getWorklogs(productionId: number): Promise<WeldingWorklogListResponseDto[]> {
+  async getWorklogs(projectId: number): Promise<WeldingWorklogListResponseDto[]> {
     const worklogs = await this.worklogWeldingRepository.find({
-      where: { project: { id: productionId } },
+      where: { project: { id: projectId } },
       order: { manufactureDate: 'ASC', createdAt: 'ASC' },
     });
     const dateRoundMap = new Map<string, number>();
@@ -79,7 +79,7 @@ export class WeldingService {
     const { project, plant, ...rest } = worklog;
     return {
       ...rest,
-      productionId: project?.name || '',
+      projectId: project?.name || '',
       plant: plantName,
     };
   }

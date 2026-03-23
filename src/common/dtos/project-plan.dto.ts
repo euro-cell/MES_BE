@@ -11,7 +11,7 @@ class ProcessDateRange {
   end: string;
 }
 
-export class CreateProductionPlanDto {
+export class CreateProjectPlanDto {
   @IsString()
   @IsNotEmpty()
   startDate: string;
@@ -27,4 +27,4 @@ export class CreateProductionPlanDto {
   processPlans: Record<string, ProcessDateRange>;
 }
 
-export class UpdateProductionPlanDto extends PartialType(CreateProductionPlanDto) {}
+export class UpdateProjectPlanDto extends PartialType(CreateProjectPlanDto) {}

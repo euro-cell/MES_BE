@@ -16,7 +16,7 @@ export class BinderService {
     private readonly equipmentService: EquipmentService,
   ) {}
 
-  async createBinderWorklog(productionId: number, dto: CreateBinderWorklogDto): Promise<WorklogBinder> {
+  async createBinderWorklog(projectId: number, dto: CreateBinderWorklogDto): Promise<WorklogBinder> {
     // pdMixerName을 pdMixerId로 변환
     let pdMixerId: number | null = null;
     if (dto.pdMixerName) {
@@ -26,7 +26,7 @@ export class BinderService {
     const { pdMixerName, ...createData } = dto;
     const worklog = this.worklogBinderRepository.create({
       ...createData,
-      project: { id: productionId },
+      project: { id: projectId },
       pdMixerId,
     });
     const savedWorklog = await this.worklogBinderRepository.save(worklog);
@@ -45,9 +45,9 @@ export class BinderService {
     return savedWorklog;
   }
 
-  async getWorklogs(productionId: number): Promise<BinderWorklogListResponseDto[]> {
+  async getWorklogs(projectId: number): Promise<BinderWorklogListResponseDto[]> {
     const worklogs = await this.worklogBinderRepository.find({
-      where: { project: { id: productionId } },
+      where: { project: { id: projectId } },
       order: { manufactureDate: 'ASC', createdAt: 'ASC' },
     });
     const dateRoundMap = new Map<string, number>();
@@ -93,7 +93,7 @@ export class BinderService {
     const { project, pdMixerId, plant, ...rest } = worklog;
     return {
       ...rest,
-      productionId: project?.name || '',
+      projectId: project?.name || '',
       pdMixerName,
       plant: plantName,
     };
@@ -159,11 +159,11 @@ export class BinderService {
    * - 해당 production의 LOT이 있는 작업일지만 조회
    * - 고형분(solidContent)은 solidContent1~3의 평균값
    */
-  async getBinderLots(productionId: number): Promise<{ lotNumber: string; solidContent: number }[]> {
+  async getBinderLots(projectId: number): Promise<{ lotNumber: string; solidContent: number }[]> {
     const worklogs = await this.worklogBinderRepository
       .createQueryBuilder('worklog')
       .select(['worklog.lot', 'worklog.solidContent1', 'worklog.solidContent2', 'worklog.solidContent3'])
-      .where('worklog.production_id = :productionId', { productionId })
+      .where('worklog.production_id = :projectId', { projectId })
       .andWhere('worklog.lot IS NOT NULL')
       .andWhere("worklog.lot != ''")
       .orderBy('worklog.createdAt', 'DESC')

@@ -484,7 +484,7 @@ export class WorklogService {
    */
   private getFieldValue(data: WorklogEntity, fieldName: string): any {
     // production 관계에서 값 가져오기
-    if ((fieldName === 'productionName' || fieldName === 'productionId') && data['production']) {
+    if ((fieldName === 'productionName' || fieldName === 'projectId') && data['production']) {
       return data['production'].name;
     }
 

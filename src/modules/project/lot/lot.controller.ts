@@ -14,7 +14,7 @@ import { LotExportService } from './lot-export.service';
 import type { Response } from 'express';
 
 @ApiTags('Lot 관리')
-@Controller(':productionId/lot')
+@Controller(':projectId/lot')
 export class LotController {
   constructor(
     private readonly lotService: LotService,
@@ -32,67 +32,67 @@ export class LotController {
   @Post('sync')
   @ApiOperation({ summary: '데이터 갱신' })
   @ApiQuery({ name: 'process', required: true, description: '공정명 (mixing, coating, calendering, notching, stacking 등)' })
-  async sync(@Param('productionId') productionId: number, @Query('process') process: string) {
-    return this.lotService.sync(productionId, process);
+  async sync(@Param('projectId') projectId: number, @Query('process') process: string) {
+    return this.lotService.sync(projectId, process);
   }
 
   @Get('sync')
-  async getSync(@Param('productionId') productionId: number, @Query('process') process: string) {
-    return await this.lotService.getLastSync(productionId, process);
+  async getSync(@Param('projectId') projectId: number, @Query('process') process: string) {
+    return await this.lotService.getLastSync(projectId, process);
   }
 
   @Get('mixing')
-  async getMixingLots(@Param('productionId') productionId: number) {
-    return this.mixingService.getMixingLots(productionId);
+  async getMixingLots(@Param('projectId') projectId: number) {
+    return this.mixingService.getMixingLots(projectId);
   }
 
   @Get('coating')
-  async getCoatingLots(@Param('productionId') productionId: number) {
-    return this.coatingService.getCoatingLots(productionId);
+  async getCoatingLots(@Param('projectId') projectId: number) {
+    return this.coatingService.getCoatingLots(projectId);
   }
 
   @Get('calendering')
-  async getPressLots(@Param('productionId') productionId: number) {
-    return this.pressService.getPressLots(productionId);
+  async getPressLots(@Param('projectId') projectId: number) {
+    return this.pressService.getPressLots(projectId);
   }
 
   @Get('notching')
-  async getNotchingLots(@Param('productionId') productionId: number) {
-    return this.notchingService.getNotchingLots(productionId);
+  async getNotchingLots(@Param('projectId') projectId: number) {
+    return this.notchingService.getNotchingLots(projectId);
   }
 
   @Get('stacking')
-  async getStackingLots(@Param('productionId') productionId: number) {
-    return this.stackingService.getStackingLots(productionId);
+  async getStackingLots(@Param('projectId') projectId: number) {
+    return this.stackingService.getStackingLots(projectId);
   }
 
   @Get('welding')
-  async getWeldingLots(@Param('productionId') productionId: number) {
-    return this.weldingService.getWeldingLots(productionId);
+  async getWeldingLots(@Param('projectId') projectId: number) {
+    return this.weldingService.getWeldingLots(projectId);
   }
 
   @Get('sealing')
-  async getSealingLots(@Param('productionId') productionId: number) {
-    return this.sealingService.getSealingLots(productionId);
+  async getSealingLots(@Param('projectId') projectId: number) {
+    return this.sealingService.getSealingLots(projectId);
   }
 
   @Get('formation')
-  async getFormation(@Param('productionId') productionId: number) {
-    return this.formationService.getFormationLots(productionId);
+  async getFormation(@Param('projectId') projectId: number) {
+    return this.formationService.getFormationLots(projectId);
   }
 
   @Post('rawdata')
   @ApiOperation({ summary: 'Formation Raw Data 등록' })
   @ApiBody({ type: RegisterRawDataDto })
-  async registerRawData(@Param('productionId') productionId: number, @Body() dto: RegisterRawDataDto) {
-    return this.formationService.registerRawData(productionId, dto);
+  async registerRawData(@Param('projectId') projectId: number, @Body() dto: RegisterRawDataDto) {
+    return this.formationService.registerRawData(projectId, dto);
   }
 
   @Get('export')
   @ApiOperation({ summary: 'Lot 관리 Excel 다운로드' })
   @ApiProduces('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-  async exportLots(@Param('productionId') productionId: number, @Res() res: Response) {
-    const file = await this.lotExportService.exportLots(productionId);
+  async exportLots(@Param('projectId') projectId: number, @Res() res: Response) {
+    const file = await this.lotExportService.exportLots(projectId);
     const filename = `Lot_관리.xlsx`;
 
     res.set({

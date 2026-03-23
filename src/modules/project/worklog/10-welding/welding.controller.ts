@@ -4,29 +4,29 @@ import { ApiTags, ApiOkResponse } from '@nestjs/swagger';
 import { CreateWeldingWorklogDto, WeldingWorklogListResponseDto, UpdateWeldingWorklogDto } from 'src/common/dtos/worklog/10-welding.dto';
 
 @ApiTags('Production Worklog - Welding')
-@Controller(':productionId/worklog')
+@Controller(':projectId/worklog')
 export class WeldingController {
   constructor(private readonly weldingService: WeldingService) {}
 
   @Post('welding')
-  async createWeldingWorklog(@Param('productionId', ParseIntPipe) productionId: number, @Body() dto: CreateWeldingWorklogDto) {
-    return await this.weldingService.createWeldingWorklog(productionId, dto);
+  async createWeldingWorklog(@Param('projectId', ParseIntPipe) projectId: number, @Body() dto: CreateWeldingWorklogDto) {
+    return await this.weldingService.createWeldingWorklog(projectId, dto);
   }
 
   @Get('welding')
   @ApiOkResponse({ description: '작업일지-웰딩 목록', type: [WeldingWorklogListResponseDto] })
-  async getWorklogs(@Param('productionId', ParseIntPipe) productionId: number): Promise<WeldingWorklogListResponseDto[]> {
-    return await this.weldingService.getWorklogs(productionId);
+  async getWorklogs(@Param('projectId', ParseIntPipe) projectId: number): Promise<WeldingWorklogListResponseDto[]> {
+    return await this.weldingService.getWorklogs(projectId);
   }
 
   @Get(':worklogId/welding')
-  async getWorklogById(@Param('productionId', ParseIntPipe) productionId: number, @Param('worklogId') worklogId: string) {
+  async getWorklogById(@Param('projectId', ParseIntPipe) projectId: number, @Param('worklogId') worklogId: string) {
     return await this.weldingService.findWorklogById(worklogId);
   }
 
   @Patch(':worklogId/welding')
   async updateWeldingWorklog(
-    @Param('productionId', ParseIntPipe) productionId: number,
+    @Param('projectId', ParseIntPipe) projectId: number,
     @Param('worklogId') worklogId: string,
     @Body() updateWeldingWorklogDto: UpdateWeldingWorklogDto,
   ) {
@@ -34,7 +34,7 @@ export class WeldingController {
   }
 
   @Delete(':worklogId/welding')
-  async deleteWeldingWorklog(@Param('productionId', ParseIntPipe) productionId: number, @Param('worklogId') worklogId: string) {
+  async deleteWeldingWorklog(@Param('projectId', ParseIntPipe) projectId: number, @Param('worklogId') worklogId: string) {
     return await this.weldingService.deleteWeldingWorklog(worklogId);
   }
 }

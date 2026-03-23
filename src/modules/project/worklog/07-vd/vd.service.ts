@@ -13,17 +13,17 @@ export class VdService {
     private readonly equipmentService: EquipmentService,
   ) {}
 
-  async createVdWorklog(productionId: number, dto: CreateVdWorklogDto): Promise<WorklogVd> {
+  async createVdWorklog(projectId: number, dto: CreateVdWorklogDto): Promise<WorklogVd> {
     const worklog = this.worklogVdRepository.create({
       ...dto,
-      project: { id: productionId },
+      project: { id: projectId },
     });
     return await this.worklogVdRepository.save(worklog);
   }
 
-  async getWorklogs(productionId: number): Promise<VdWorklogListResponseDto[]> {
+  async getWorklogs(projectId: number): Promise<VdWorklogListResponseDto[]> {
     const worklogs = await this.worklogVdRepository.find({
-      where: { project: { id: productionId } },
+      where: { project: { id: projectId } },
       order: { manufactureDate: 'ASC', createdAt: 'ASC' },
     });
     const dateRoundMap = new Map<string, number>();
@@ -63,7 +63,7 @@ export class VdService {
     const { project, plant, ...rest } = worklog;
     return {
       ...rest,
-      productionId: project?.name || '',
+      projectId: project?.name || '',
       plant: plantName,
     };
   }

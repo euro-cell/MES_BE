@@ -4,29 +4,29 @@ import { ApiTags, ApiOkResponse } from '@nestjs/swagger';
 import { CreateVdWorklogDto, VdWorklogListResponseDto, UpdateVdWorklogDto } from 'src/common/dtos/worklog/07-vd.dto';
 
 @ApiTags('Production Worklog - VD')
-@Controller(':productionId/worklog')
+@Controller(':projectId/worklog')
 export class VdController {
   constructor(private readonly vdService: VdService) {}
 
   @Post('vd')
-  async createVdWorklog(@Param('productionId', ParseIntPipe) productionId: number, @Body() dto: CreateVdWorklogDto) {
-    return await this.vdService.createVdWorklog(productionId, dto);
+  async createVdWorklog(@Param('projectId', ParseIntPipe) projectId: number, @Body() dto: CreateVdWorklogDto) {
+    return await this.vdService.createVdWorklog(projectId, dto);
   }
 
   @Get('vd')
   @ApiOkResponse({ description: '작업일지-VD 목록', type: [VdWorklogListResponseDto] })
-  async getWorklogs(@Param('productionId', ParseIntPipe) productionId: number): Promise<VdWorklogListResponseDto[]> {
-    return await this.vdService.getWorklogs(productionId);
+  async getWorklogs(@Param('projectId', ParseIntPipe) projectId: number): Promise<VdWorklogListResponseDto[]> {
+    return await this.vdService.getWorklogs(projectId);
   }
 
   @Get(':worklogId/vd')
-  async getWorklogById(@Param('productionId', ParseIntPipe) productionId: number, @Param('worklogId') worklogId: string) {
+  async getWorklogById(@Param('projectId', ParseIntPipe) projectId: number, @Param('worklogId') worklogId: string) {
     return await this.vdService.findWorklogById(worklogId);
   }
 
   @Patch(':worklogId/vd')
   async updateVdWorklog(
-    @Param('productionId', ParseIntPipe) productionId: number,
+    @Param('projectId', ParseIntPipe) projectId: number,
     @Param('worklogId') worklogId: string,
     @Body() updateVdWorklogDto: UpdateVdWorklogDto,
   ) {
@@ -34,7 +34,7 @@ export class VdController {
   }
 
   @Delete(':worklogId/vd')
-  async deleteVdWorklog(@Param('productionId', ParseIntPipe) productionId: number, @Param('worklogId') worklogId: string) {
+  async deleteVdWorklog(@Param('projectId', ParseIntPipe) projectId: number, @Param('worklogId') worklogId: string) {
     return await this.vdService.deleteVdWorklog(worklogId);
   }
 }

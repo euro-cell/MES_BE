@@ -19,11 +19,11 @@ export class NotchingService {
     private readonly worklogNotchingRepo: Repository<WorklogNotching>,
   ) {}
 
-  async sync(productionId: number) {
-    const lastSync = await this.getLastSync(productionId);
+  async sync(projectId: number) {
+    const lastSync = await this.getLastSync(projectId);
 
     const notchingWorklogs = await this.worklogNotchingRepo.find({
-      where: lastSync ? { project: { id: productionId }, createdAt: MoreThan(lastSync.syncedAt) } : { project: { id: productionId } },
+      where: lastSync ? { project: { id: projectId }, createdAt: MoreThan(lastSync.syncedAt) } : { project: { id: projectId } },
     });
 
     for (const notching of notchingWorklogs) {
@@ -39,7 +39,7 @@ export class NotchingService {
         const exists = await this.lotNotchingRepo.findOne({
           where: {
             lot: notchingLot,
-            project: { id: productionId },
+            project: { id: projectId },
             worklogNotching: { id: notching.id },
           },
         });
@@ -47,13 +47,13 @@ export class NotchingService {
         if (!exists) {
           const lotPress = pressLot
             ? await this.lotPressRepo.findOne({
-                where: { lot: pressLot, project: { id: productionId } },
+                where: { lot: pressLot, project: { id: projectId } },
               })
             : null;
 
           const lotNotching = this.lotNotchingRepo.create({
             lot: notchingLot,
-            project: { id: productionId },
+            project: { id: projectId },
             processDate: notching.manufactureDate,
             worklogNotching: notching,
             lotPress: lotPress ?? undefined,
@@ -68,23 +68,23 @@ export class NotchingService {
       await this.lotSyncRepo.save(lastSync);
     } else {
       await this.lotSyncRepo.save({
-        project: { id: productionId },
+        project: { id: projectId },
         process: 'notching',
         syncedAt: new Date(),
       });
     }
   }
 
-  async getLastSync(productionId: number) {
+  async getLastSync(projectId: number) {
     return this.lotSyncRepo.findOne({
-      where: { project: { id: productionId }, process: 'notching' },
+      where: { project: { id: projectId }, process: 'notching' },
       order: { syncedAt: 'DESC' },
     });
   }
 
-  async getNotchingLots(productionId: number) {
+  async getNotchingLots(projectId: number) {
     const lots = await this.lotNotchingRepo.find({
-      where: { project: { id: productionId } },
+      where: { project: { id: projectId } },
       relations: ['worklogNotching'],
       order: { processDate: 'DESC' },
     });

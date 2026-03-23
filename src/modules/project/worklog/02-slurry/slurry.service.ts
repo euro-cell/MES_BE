@@ -16,10 +16,10 @@ export class SlurryService {
     private readonly equipmentService: EquipmentService,
   ) {}
 
-  async createSlurryWorklog(productionId: number, createSlurryWorklogDto: CreateSlurryWorklogDto): Promise<WorklogSlurry> {
+  async createSlurryWorklog(projectId: number, createSlurryWorklogDto: CreateSlurryWorklogDto): Promise<WorklogSlurry> {
     const worklog = this.worklogSlurryRepository.create({
       ...createSlurryWorklogDto,
-      project: { id: productionId },
+      project: { id: projectId },
     });
     const savedWorklog = await this.worklogSlurryRepository.save(worklog);
 
@@ -37,9 +37,9 @@ export class SlurryService {
     return savedWorklog;
   }
 
-  async getWorklogs(productionId: number): Promise<SlurryWorklogListResponseDto[]> {
+  async getWorklogs(projectId: number): Promise<SlurryWorklogListResponseDto[]> {
     const worklogs = await this.worklogSlurryRepository.find({
-      where: { project: { id: productionId } },
+      where: { project: { id: projectId } },
       order: { manufactureDate: 'ASC', createdAt: 'ASC' },
     });
     const dateRoundMap = new Map<string, number>();
@@ -79,7 +79,7 @@ export class SlurryService {
     const { project, plant, ...rest } = worklog;
     return {
       ...rest,
-      productionId: project?.name || '',
+      projectId: project?.name || '',
       plant: plantName,
     };
   }
@@ -126,9 +126,9 @@ export class SlurryService {
     await this.worklogSlurryRepository.remove(worklog);
   }
 
-  async getLots(productionId: number) {
+  async getLots(projectId: number) {
     const worklogs = await this.worklogSlurryRepository.find({
-      where: { project: { id: productionId } },
+      where: { project: { id: projectId } },
       select: ['lot', 'solidContent', 'viscosityAfterStabilization'],
       order: { createdAt: 'ASC' },
     });
@@ -147,9 +147,9 @@ export class SlurryService {
    * - LOT이 존재하는 Slurry 작업일지만 조회
    * - material1~6 중 Name이 '바인더'인 행의 PlannedInput 값 반환
    */
-  async getMixingInfoForBinder(productionId: number) {
+  async getMixingInfoForBinder(projectId: number) {
     const worklogs = await this.worklogSlurryRepository.find({
-      where: { project: { id: productionId } },
+      where: { project: { id: projectId } },
       order: { manufactureDate: 'DESC', createdAt: 'DESC' },
     });
 

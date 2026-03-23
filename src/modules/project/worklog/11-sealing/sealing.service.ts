@@ -13,17 +13,17 @@ export class SealingService {
     private readonly equipmentService: EquipmentService,
   ) {}
 
-  async createSealingWorklog(productionId: number, dto: CreateSealingWorklogDto): Promise<WorklogSealing> {
+  async createSealingWorklog(projectId: number, dto: CreateSealingWorklogDto): Promise<WorklogSealing> {
     const worklog = this.worklogSealingRepository.create({
       ...dto,
-      project: { id: productionId },
+      project: { id: projectId },
     });
     return await this.worklogSealingRepository.save(worklog);
   }
 
-  async getWorklogs(productionId: number): Promise<SealingWorklogListResponseDto[]> {
+  async getWorklogs(projectId: number): Promise<SealingWorklogListResponseDto[]> {
     const worklogs = await this.worklogSealingRepository.find({
-      where: { project: { id: productionId } },
+      where: { project: { id: projectId } },
       order: { manufactureDate: 'ASC', createdAt: 'ASC' },
     });
     const dateRoundMap = new Map<string, number>();
@@ -63,7 +63,7 @@ export class SealingService {
     const { project, plant, ...rest } = worklog;
     return {
       ...rest,
-      productionId: project?.name || '',
+      projectId: project?.name || '',
       plant: plantName,
     };
   }

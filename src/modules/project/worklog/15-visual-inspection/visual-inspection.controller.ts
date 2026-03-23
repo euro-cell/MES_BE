@@ -8,32 +8,32 @@ import {
 } from 'src/common/dtos/worklog/15-visual-inspection.dto';
 
 @ApiTags('Production Worklog - Visual Inspection')
-@Controller(':productionId/worklog')
+@Controller(':projectId/worklog')
 export class VisualInspectionController {
   constructor(private readonly visualInspectionService: VisualInspectionService) {}
 
   @Post('inspection')
   async createVisualInspectionWorklog(
-    @Param('productionId', ParseIntPipe) productionId: number,
+    @Param('projectId', ParseIntPipe) projectId: number,
     @Body() dto: CreateVisualInspectionWorklogDto,
   ) {
-    return await this.visualInspectionService.createVisualInspectionWorklog(productionId, dto);
+    return await this.visualInspectionService.createVisualInspectionWorklog(projectId, dto);
   }
 
   @Get('inspection')
   @ApiOkResponse({ description: '작업일지-외관검사 목록', type: [VisualInspectionWorklogListResponseDto] })
-  async getWorklogs(@Param('productionId', ParseIntPipe) productionId: number): Promise<VisualInspectionWorklogListResponseDto[]> {
-    return await this.visualInspectionService.getWorklogs(productionId);
+  async getWorklogs(@Param('projectId', ParseIntPipe) projectId: number): Promise<VisualInspectionWorklogListResponseDto[]> {
+    return await this.visualInspectionService.getWorklogs(projectId);
   }
 
   @Get(':worklogId/inspection')
-  async getWorklogById(@Param('productionId', ParseIntPipe) productionId: number, @Param('worklogId') worklogId: string) {
+  async getWorklogById(@Param('projectId', ParseIntPipe) projectId: number, @Param('worklogId') worklogId: string) {
     return await this.visualInspectionService.findWorklogById(worklogId);
   }
 
   @Patch(':worklogId/inspection')
   async updateVisualInspectionWorklog(
-    @Param('productionId', ParseIntPipe) productionId: number,
+    @Param('projectId', ParseIntPipe) projectId: number,
     @Param('worklogId') worklogId: string,
     @Body() updateVisualInspectionWorklogDto: UpdateVisualInspectionWorklogDto,
   ) {
@@ -41,7 +41,7 @@ export class VisualInspectionController {
   }
 
   @Delete(':worklogId/inspection')
-  async deleteVisualInspectionWorklog(@Param('productionId', ParseIntPipe) productionId: number, @Param('worklogId') worklogId: string) {
+  async deleteVisualInspectionWorklog(@Param('projectId', ParseIntPipe) projectId: number, @Param('worklogId') worklogId: string) {
     return await this.visualInspectionService.deleteVisualInspectionWorklog(worklogId);
   }
 }

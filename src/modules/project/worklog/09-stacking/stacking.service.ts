@@ -20,10 +20,10 @@ export class StackingService {
     private readonly equipmentService: EquipmentService,
   ) {}
 
-  async createStackingWorklog(productionId: number, dto: CreateStackingWorklogDto): Promise<WorklogStacking> {
+  async createStackingWorklog(projectId: number, dto: CreateStackingWorklogDto): Promise<WorklogStacking> {
     const worklog = this.worklogStackingRepository.create({
       ...dto,
-      project: { id: productionId },
+      project: { id: projectId },
     });
     const savedWorklog = await this.worklogStackingRepository.save(worklog);
 
@@ -35,9 +35,9 @@ export class StackingService {
     return savedWorklog;
   }
 
-  async getWorklogs(productionId: number): Promise<StackingWorklogListResponseDto[]> {
+  async getWorklogs(projectId: number): Promise<StackingWorklogListResponseDto[]> {
     const worklogs = await this.worklogStackingRepository.find({
-      where: { project: { id: productionId } },
+      where: { project: { id: projectId } },
       order: { manufactureDate: 'ASC', createdAt: 'ASC' },
     });
     const dateRoundMap = new Map<string, number>();
@@ -77,7 +77,7 @@ export class StackingService {
     const { project, plant, ...rest } = worklog;
     return {
       ...rest,
-      productionId: project?.name || '',
+      projectId: project?.name || '',
       plant: plantName,
     };
   }

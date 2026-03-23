@@ -4,29 +4,29 @@ import { ApiTags, ApiOkResponse } from '@nestjs/swagger';
 import { CreateFormingWorklogDto, FormingWorklogListResponseDto, UpdateFormingWorklogDto } from 'src/common/dtos/worklog/08-forming.dto';
 
 @ApiTags('Production Worklog - Forming')
-@Controller(':productionId/worklog')
+@Controller(':projectId/worklog')
 export class FormingController {
   constructor(private readonly formingService: FormingService) {}
 
   @Post('forming')
-  async createFormingWorklog(@Param('productionId', ParseIntPipe) productionId: number, @Body() dto: CreateFormingWorklogDto) {
-    return await this.formingService.createFormingWorklog(productionId, dto);
+  async createFormingWorklog(@Param('projectId', ParseIntPipe) projectId: number, @Body() dto: CreateFormingWorklogDto) {
+    return await this.formingService.createFormingWorklog(projectId, dto);
   }
 
   @Get('forming')
   @ApiOkResponse({ description: '작업일지-포밍 목록', type: [FormingWorklogListResponseDto] })
-  async getWorklogs(@Param('productionId', ParseIntPipe) productionId: number): Promise<FormingWorklogListResponseDto[]> {
-    return await this.formingService.getWorklogs(productionId);
+  async getWorklogs(@Param('projectId', ParseIntPipe) projectId: number): Promise<FormingWorklogListResponseDto[]> {
+    return await this.formingService.getWorklogs(projectId);
   }
 
   @Get(':worklogId/forming')
-  async getWorklogById(@Param('productionId', ParseIntPipe) productionId: number, @Param('worklogId') worklogId: string) {
+  async getWorklogById(@Param('projectId', ParseIntPipe) projectId: number, @Param('worklogId') worklogId: string) {
     return await this.formingService.findWorklogById(worklogId);
   }
 
   @Patch(':worklogId/forming')
   async updateFormingWorklog(
-    @Param('productionId', ParseIntPipe) productionId: number,
+    @Param('projectId', ParseIntPipe) projectId: number,
     @Param('worklogId') worklogId: string,
     @Body() updateFormingWorklogDto: UpdateFormingWorklogDto,
   ) {
@@ -34,7 +34,7 @@ export class FormingController {
   }
 
   @Delete(':worklogId/forming')
-  async deleteFormingWorklog(@Param('productionId', ParseIntPipe) productionId: number, @Param('worklogId') worklogId: string) {
+  async deleteFormingWorklog(@Param('projectId', ParseIntPipe) projectId: number, @Param('worklogId') worklogId: string) {
     return await this.formingService.deleteFormingWorklog(worklogId);
   }
 }

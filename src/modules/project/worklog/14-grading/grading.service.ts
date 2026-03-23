@@ -13,17 +13,17 @@ export class GradingService {
     private readonly equipmentService: EquipmentService,
   ) {}
 
-  async createGradingWorklog(productionId: number, dto: CreateGradingWorklogDto): Promise<WorklogGrading> {
+  async createGradingWorklog(projectId: number, dto: CreateGradingWorklogDto): Promise<WorklogGrading> {
     const worklog = this.worklogGradingRepository.create({
       ...dto,
-      project: { id: productionId },
+      project: { id: projectId },
     });
     return await this.worklogGradingRepository.save(worklog);
   }
 
-  async getWorklogs(productionId: number): Promise<GradingWorklogListResponseDto[]> {
+  async getWorklogs(projectId: number): Promise<GradingWorklogListResponseDto[]> {
     const worklogs = await this.worklogGradingRepository.find({
-      where: { project: { id: productionId } },
+      where: { project: { id: projectId } },
       order: { manufactureDate: 'ASC', createdAt: 'ASC' },
     });
     const dateRoundMap = new Map<string, number>();
@@ -63,7 +63,7 @@ export class GradingService {
     const { project, plant, ...rest } = worklog;
     return {
       ...rest,
-      productionId: project?.name || '',
+      projectId: project?.name || '',
       plant: plantName,
     };
   }

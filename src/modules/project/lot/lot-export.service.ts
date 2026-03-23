@@ -27,7 +27,7 @@ export class LotExportService {
     private readonly formationLotService: FormationLotService,
   ) {}
 
-  async exportLots(productionId: number): Promise<StreamableFile> {
+  async exportLots(projectId: number): Promise<StreamableFile> {
     // 템플릿 파일 로드
     const templateFilePath = path.join(this.templatePath, 'manage.xlsx');
 
@@ -39,14 +39,14 @@ export class LotExportService {
     await workbook.xlsx.readFile(templateFilePath);
 
     // 각 시트에 데이터 채우기
-    await this.fillMixingSheet(workbook, productionId);
-    await this.fillCoatingSheet(workbook, productionId);
-    await this.fillCalenderingSheet(workbook, productionId);
-    await this.fillNotchingSheet(workbook, productionId);
-    await this.fillStackingSheet(workbook, productionId);
-    await this.fillWeldingSheet(workbook, productionId);
-    await this.fillSealingSheet(workbook, productionId);
-    await this.fillFormationSheet(workbook, productionId);
+    await this.fillMixingSheet(workbook, projectId);
+    await this.fillCoatingSheet(workbook, projectId);
+    await this.fillCalenderingSheet(workbook, projectId);
+    await this.fillNotchingSheet(workbook, projectId);
+    await this.fillStackingSheet(workbook, projectId);
+    await this.fillWeldingSheet(workbook, projectId);
+    await this.fillSealingSheet(workbook, projectId);
+    await this.fillFormationSheet(workbook, projectId);
 
     const buffer = await workbook.xlsx.writeBuffer();
 
@@ -71,7 +71,7 @@ export class LotExportService {
     return Buffer.from(await zip.generateAsync({ type: 'nodebuffer' }));
   }
 
-  private async fillMixingSheet(workbook: ExcelJS.Workbook, productionId: number): Promise<void> {
+  private async fillMixingSheet(workbook: ExcelJS.Workbook, projectId: number): Promise<void> {
     // Mixing 시트 찾기 (이름 또는 첫 번째 시트)
     const worksheet = workbook.getWorksheet('Mixing') || workbook.worksheets[0];
 
@@ -80,7 +80,7 @@ export class LotExportService {
     }
 
     // 데이터 조회
-    const mixingLots = await this.mixingService.getMixingLots(productionId);
+    const mixingLots = await this.mixingService.getMixingLots(projectId);
 
     // 6행부터 데이터 입력
     let rowIndex = 6;
@@ -142,14 +142,14 @@ export class LotExportService {
     }
   }
 
-  private async fillCoatingSheet(workbook: ExcelJS.Workbook, productionId: number): Promise<void> {
+  private async fillCoatingSheet(workbook: ExcelJS.Workbook, projectId: number): Promise<void> {
     const worksheet = workbook.getWorksheet('Coating');
 
     if (!worksheet) {
       return; // Coating 시트가 없으면 건너뜀
     }
 
-    const coatingLots = await this.coatingService.getCoatingLots(productionId);
+    const coatingLots = await this.coatingService.getCoatingLots(projectId);
 
     // 6행부터 데이터 입력 (한 Lot당 2행 사용: Start/End)
     let rowIndex = 6;
@@ -300,14 +300,14 @@ export class LotExportService {
     }
   }
 
-  private async fillCalenderingSheet(workbook: ExcelJS.Workbook, productionId: number): Promise<void> {
+  private async fillCalenderingSheet(workbook: ExcelJS.Workbook, projectId: number): Promise<void> {
     const worksheet = workbook.getWorksheet('Calendering');
 
     if (!worksheet) {
       return; // Calendering 시트가 없으면 건너뜀
     }
 
-    const pressLots = await this.pressService.getPressLots(productionId);
+    const pressLots = await this.pressService.getPressLots(projectId);
 
     // 6행부터 데이터 입력 (한 Lot당 2행 사용: Start/End)
     let rowIndex = 6;
@@ -385,14 +385,14 @@ export class LotExportService {
     }
   }
 
-  private async fillNotchingSheet(workbook: ExcelJS.Workbook, productionId: number): Promise<void> {
+  private async fillNotchingSheet(workbook: ExcelJS.Workbook, projectId: number): Promise<void> {
     const worksheet = workbook.getWorksheet('Notching');
 
     if (!worksheet) {
       return; // Notching 시트가 없으면 건너뜀
     }
 
-    const notchingLots = await this.notchingService.getNotchingLots(productionId);
+    const notchingLots = await this.notchingService.getNotchingLots(projectId);
 
     // 6행부터 데이터 입력 (한 Lot당 1행 사용)
     let rowIndex = 6;
@@ -438,14 +438,14 @@ export class LotExportService {
     }
   }
 
-  private async fillStackingSheet(workbook: ExcelJS.Workbook, productionId: number): Promise<void> {
+  private async fillStackingSheet(workbook: ExcelJS.Workbook, projectId: number): Promise<void> {
     const worksheet = workbook.getWorksheet('Stacking');
 
     if (!worksheet) {
       return; // Stacking 시트가 없으면 건너뜀
     }
 
-    const stackingLots = await this.stackingService.getStackingLots(productionId);
+    const stackingLots = await this.stackingService.getStackingLots(projectId);
 
     // 6행부터 데이터 입력 (한 Lot당 2행 사용)
     let rowIndex = 6;
@@ -537,14 +537,14 @@ export class LotExportService {
     }
   }
 
-  private async fillWeldingSheet(workbook: ExcelJS.Workbook, productionId: number): Promise<void> {
+  private async fillWeldingSheet(workbook: ExcelJS.Workbook, projectId: number): Promise<void> {
     const worksheet = workbook.getWorksheet('Welding');
 
     if (!worksheet) {
       return; // Welding 시트가 없으면 건너뜀
     }
 
-    const weldingLots = await this.weldingService.getWeldingLots(productionId);
+    const weldingLots = await this.weldingService.getWeldingLots(projectId);
 
     // 6행부터 데이터 입력 (한 Lot당 1행 사용)
     let rowIndex = 6;
@@ -602,14 +602,14 @@ export class LotExportService {
     }
   }
 
-  private async fillSealingSheet(workbook: ExcelJS.Workbook, productionId: number): Promise<void> {
+  private async fillSealingSheet(workbook: ExcelJS.Workbook, projectId: number): Promise<void> {
     const worksheet = workbook.getWorksheet('Sealing_Filling');
 
     if (!worksheet) {
       return; // Sealing_Filling 시트가 없으면 건너뜀
     }
 
-    const sealingLots = await this.sealingLotService.getSealingLots(productionId);
+    const sealingLots = await this.sealingLotService.getSealingLots(projectId);
 
     // 6행부터 데이터 입력 (한 Lot당 1행 사용)
     let rowIndex = 6;
@@ -713,14 +713,14 @@ export class LotExportService {
     }
   }
 
-  private async fillFormationSheet(workbook: ExcelJS.Workbook, productionId: number): Promise<void> {
+  private async fillFormationSheet(workbook: ExcelJS.Workbook, projectId: number): Promise<void> {
     const worksheet = workbook.getWorksheet('Formation');
 
     if (!worksheet) {
       return; // Formation 시트가 없으면 건너뜀
     }
 
-    const formationLots = await this.formationLotService.getFormationLots(productionId);
+    const formationLots = await this.formationLotService.getFormationLots(projectId);
 
     // Boolean → P/NP 변환 함수
     const boolToPNP = (value: boolean | null | undefined): string | null => {

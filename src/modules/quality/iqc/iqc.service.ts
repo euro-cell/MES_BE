@@ -23,9 +23,9 @@ export class IqcService {
     private readonly dataSource: DataSource,
   ) {}
 
-  async findAll(productionId: number): Promise<IQC[]> {
+  async findAll(projectId: number): Promise<IQC[]> {
     return this.iqcRepository.find({
-      where: { project: { id: productionId } },
+      where: { project: { id: projectId } },
       relations: ['results', 'coaRefs', 'images', 'files'],
       order: { createdAt: 'ASC' },
     });
@@ -42,11 +42,11 @@ export class IqcService {
     return iqc;
   }
 
-  async create(productionId: number, dto: CreateIQCDto): Promise<IQC> {
+  async create(projectId: number, dto: CreateIQCDto): Promise<IQC> {
     return this.dataSource.transaction(async (manager) => {
       // 1. IQC 기본 정보 저장
       const iqc = manager.create(IQC, {
-        project: { id: productionId },
+        project: { id: projectId },
         category: dto.category,
         type: dto.type,
         name: dto.name,

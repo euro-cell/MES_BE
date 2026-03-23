@@ -22,18 +22,18 @@ export class SealingLotService {
     private readonly worklogFillingRepo: Repository<WorklogFilling>,
   ) {}
 
-  async sync(productionId: number) {
-    const lastSync = await this.getLastSync(productionId);
+  async sync(projectId: number) {
+    const lastSync = await this.getLastSync(projectId);
 
     // Get welding lots that need sealing lot entries (sorted by lot)
     const weldingLots = await this.lotWeldingRepo.find({
-      where: { project: { id: productionId } },
+      where: { project: { id: projectId } },
       order: { lot: 'ASC' },
     });
 
     // Get sealing worklogs
     const sealingWorklogs = await this.worklogSealingRepo.find({
-      where: { project: { id: productionId } },
+      where: { project: { id: projectId } },
     });
 
     // Parse defects from remarks
@@ -145,7 +145,7 @@ export class SealingLotService {
       const exists = await this.lotSealingRepo.findOne({
         where: {
           lot: lotNumber,
-          project: { id: productionId },
+          project: { id: projectId },
         },
       });
 
@@ -160,7 +160,7 @@ export class SealingLotService {
         const lotSealing = this.lotSealingRepo.create({
           lot: lotNumber,
           weldingLot: lotNumber,
-          project: { id: productionId },
+          project: { id: projectId },
           processDate: weldingLot.processDate,
           worklogSealing: isDefectiveFromPrevious ? undefined : matchingSealing || undefined,
           pouchLot: pouchLotForThisJr || undefined,
@@ -184,24 +184,24 @@ export class SealingLotService {
     }
 
     // Match filling worklogs to good lots
-    await this.matchFillingWorklogs(productionId);
+    await this.matchFillingWorklogs(projectId);
 
     if (lastSync) {
       lastSync.syncedAt = new Date();
       await this.lotSyncRepo.save(lastSync);
     } else {
       await this.lotSyncRepo.save({
-        project: { id: productionId },
+        project: { id: projectId },
         process: 'sealing',
         syncedAt: new Date(),
       });
     }
   }
 
-  private async matchFillingWorklogs(productionId: number) {
+  private async matchFillingWorklogs(projectId: number) {
     // Get filling worklogs ordered by date
     const fillingWorklogs = await this.worklogFillingRepo.find({
-      where: { project: { id: productionId } },
+      where: { project: { id: projectId } },
       order: { manufactureDate: 'ASC' },
     });
 
@@ -210,7 +210,7 @@ export class SealingLotService {
     // Get good lots (not defective from any process) ordered by lot
     const goodLots = await this.lotSealingRepo.find({
       where: {
-        project: { id: productionId },
+        project: { id: projectId },
         isDefectiveFromStacking: false,
         isDefectiveFromWelding: false,
         isDefectiveFromSealing: false,
@@ -241,16 +241,16 @@ export class SealingLotService {
     }
   }
 
-  async getLastSync(productionId: number) {
+  async getLastSync(projectId: number) {
     return this.lotSyncRepo.findOne({
-      where: { project: { id: productionId }, process: 'sealing' },
+      where: { project: { id: projectId }, process: 'sealing' },
       order: { syncedAt: 'DESC' },
     });
   }
 
-  async getSealingLots(productionId: number) {
+  async getSealingLots(projectId: number) {
     const lots = await this.lotSealingRepo.find({
-      where: { project: { id: productionId } },
+      where: { project: { id: projectId } },
       relations: ['worklogSealing', 'worklogFilling'],
       order: { lot: 'ASC' },
     });

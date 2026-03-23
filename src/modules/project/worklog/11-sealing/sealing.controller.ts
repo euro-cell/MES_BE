@@ -4,29 +4,29 @@ import { ApiTags, ApiOkResponse } from '@nestjs/swagger';
 import { CreateSealingWorklogDto, SealingWorklogListResponseDto, UpdateSealingWorklogDto } from 'src/common/dtos/worklog/11-sealing.dto';
 
 @ApiTags('Production Worklog - Sealing')
-@Controller(':productionId/worklog')
+@Controller(':projectId/worklog')
 export class SealingController {
   constructor(private readonly sealingService: SealingService) {}
 
   @Post('sealing')
-  async createSealingWorklog(@Param('productionId', ParseIntPipe) productionId: number, @Body() dto: CreateSealingWorklogDto) {
-    return await this.sealingService.createSealingWorklog(productionId, dto);
+  async createSealingWorklog(@Param('projectId', ParseIntPipe) projectId: number, @Body() dto: CreateSealingWorklogDto) {
+    return await this.sealingService.createSealingWorklog(projectId, dto);
   }
 
   @Get('sealing')
   @ApiOkResponse({ description: '작업일지-실링 목록', type: [SealingWorklogListResponseDto] })
-  async getWorklogs(@Param('productionId', ParseIntPipe) productionId: number): Promise<SealingWorklogListResponseDto[]> {
-    return await this.sealingService.getWorklogs(productionId);
+  async getWorklogs(@Param('projectId', ParseIntPipe) projectId: number): Promise<SealingWorklogListResponseDto[]> {
+    return await this.sealingService.getWorklogs(projectId);
   }
 
   @Get(':worklogId/sealing')
-  async getWorklogById(@Param('productionId', ParseIntPipe) productionId: number, @Param('worklogId') worklogId: string) {
+  async getWorklogById(@Param('projectId', ParseIntPipe) projectId: number, @Param('worklogId') worklogId: string) {
     return await this.sealingService.findWorklogById(worklogId);
   }
 
   @Patch(':worklogId/sealing')
   async updateSealingWorklog(
-    @Param('productionId', ParseIntPipe) productionId: number,
+    @Param('projectId', ParseIntPipe) projectId: number,
     @Param('worklogId') worklogId: string,
     @Body() updateSealingWorklogDto: UpdateSealingWorklogDto,
   ) {
@@ -34,7 +34,7 @@ export class SealingController {
   }
 
   @Delete(':worklogId/sealing')
-  async deleteSealingWorklog(@Param('productionId', ParseIntPipe) productionId: number, @Param('worklogId') worklogId: string) {
+  async deleteSealingWorklog(@Param('projectId', ParseIntPipe) projectId: number, @Param('worklogId') worklogId: string) {
     return await this.sealingService.deleteSealingWorklog(worklogId);
   }
 }

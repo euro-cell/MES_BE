@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Project } from 'src/common/entities/project.entity';
 import { Repository } from 'typeorm';
 import { StatusService } from '../project/status/status.service';
-import { ProductionProgressDto } from 'src/common/dtos/production-progress.dto';
+import { ProjectProgressDto } from 'src/common/dtos/project-progress.dto';
 
 export interface DashboardSummaryItem {
   id: number;
@@ -16,7 +16,7 @@ export interface DashboardSummaryItem {
   isPlan: boolean;
   startDate: string | null;
   endDate: string | null;
-  progress: ProductionProgressDto;
+  progress: ProjectProgressDto;
 }
 
 @Injectable()
@@ -39,7 +39,7 @@ export class DashboardService {
 
     const progressPromises = projects.map((project) =>
       this.statusService.getProgress(project.id).catch(
-        (): ProductionProgressDto => ({
+        (): ProjectProgressDto => ({
           electrode: 0,
           assembly: 0,
           formation: 0,

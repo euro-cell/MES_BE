@@ -16,10 +16,10 @@ export class CoatingService {
     private readonly equipmentService: EquipmentService,
   ) {}
 
-  async createCoatingWorklog(productionId: number, dto: CreateCoatingWorklogDto): Promise<WorklogCoating> {
+  async createCoatingWorklog(projectId: number, dto: CreateCoatingWorklogDto): Promise<WorklogCoating> {
     const worklog = this.worklogCoatingRepository.create({
       ...dto,
-      project: { id: productionId },
+      project: { id: projectId },
     });
     const savedWorklog = await this.worklogCoatingRepository.save(worklog);
 
@@ -37,9 +37,9 @@ export class CoatingService {
     return savedWorklog;
   }
 
-  async getWorklogs(productionId: number): Promise<CoatingWorklogListResponseDto[]> {
+  async getWorklogs(projectId: number): Promise<CoatingWorklogListResponseDto[]> {
     const worklogs = await this.worklogCoatingRepository.find({
-      where: { project: { id: productionId } },
+      where: { project: { id: projectId } },
       order: { manufactureDate: 'ASC', createdAt: 'ASC' },
     });
     const dateRoundMap = new Map<string, number>();
@@ -79,7 +79,7 @@ export class CoatingService {
     const { project, plant, ...rest } = worklog;
     return {
       ...rest,
-      productionId: project?.name || '',
+      projectId: project?.name || '',
       plant: plantName,
     };
   }

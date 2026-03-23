@@ -19,28 +19,28 @@ export class MixingService {
     private readonly worklogSlurryRepo: Repository<WorklogSlurry>,
   ) {}
 
-  async sync(productionId: number) {
-    const lastSync = await this.getLastSync(productionId);
+  async sync(projectId: number) {
+    const lastSync = await this.getLastSync(projectId);
 
     const slurryWorklogs = await this.worklogSlurryRepo.find({
-      where: lastSync ? { project: { id: productionId }, createdAt: MoreThan(lastSync.syncedAt) } : { project: { id: productionId } },
+      where: lastSync ? { project: { id: projectId }, createdAt: MoreThan(lastSync.syncedAt) } : { project: { id: projectId } },
     });
 
     for (const slurry of slurryWorklogs) {
       if (!slurry.lot) continue;
 
       const exists = await this.lotMixingRepo.findOne({
-        where: { lot: slurry.lot, project: { id: productionId } },
+        where: { lot: slurry.lot, project: { id: projectId } },
       });
 
       if (!exists) {
         const binder = await this.worklogBinderRepo.findOne({
-          where: { lot: slurry.lot, project: { id: productionId } },
+          where: { lot: slurry.lot, project: { id: projectId } },
         });
 
         const lotMixing = this.lotMixingRepo.create({
           lot: slurry.lot,
-          project: { id: productionId },
+          project: { id: projectId },
           processDate: slurry.manufactureDate,
           worklogSlurry: slurry,
           worklogBinder: binder ?? undefined,
@@ -54,23 +54,23 @@ export class MixingService {
       await this.lotSyncRepo.save(lastSync);
     } else {
       await this.lotSyncRepo.save({
-        project: { id: productionId },
+        project: { id: projectId },
         process: 'mixing',
         syncedAt: new Date(),
       });
     }
   }
 
-  async getLastSync(productionId: number) {
+  async getLastSync(projectId: number) {
     return this.lotSyncRepo.findOne({
-      where: { project: { id: productionId }, process: 'mixing' },
+      where: { project: { id: projectId }, process: 'mixing' },
       order: { syncedAt: 'DESC' },
     });
   }
 
-  async getMixingLots(productionId: number) {
+  async getMixingLots(projectId: number) {
     const lots = await this.lotMixingRepo.find({
-      where: { project: { id: productionId } },
+      where: { project: { id: projectId } },
       relations: ['worklogBinder', 'worklogSlurry'],
       order: { processDate: 'DESC' },
     });

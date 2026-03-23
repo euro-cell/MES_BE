@@ -16,10 +16,10 @@ export class FillingService {
     private readonly equipmentService: EquipmentService,
   ) {}
 
-  async createFillingWorklog(productionId: number, dto: CreateFillingWorklogDto): Promise<WorklogFilling> {
+  async createFillingWorklog(projectId: number, dto: CreateFillingWorklogDto): Promise<WorklogFilling> {
     const worklog = this.worklogFillingRepository.create({
       ...dto,
-      project: { id: productionId },
+      project: { id: projectId },
     });
     const savedWorklog = await this.worklogFillingRepository.save(worklog);
 
@@ -31,9 +31,9 @@ export class FillingService {
     return savedWorklog;
   }
 
-  async getWorklogs(productionId: number): Promise<FillingWorklogListResponseDto[]> {
+  async getWorklogs(projectId: number): Promise<FillingWorklogListResponseDto[]> {
     const worklogs = await this.worklogFillingRepository.find({
-      where: { project: { id: productionId } },
+      where: { project: { id: projectId } },
       order: { manufactureDate: 'ASC', createdAt: 'ASC' },
     });
     const dateRoundMap = new Map<string, number>();
@@ -73,7 +73,7 @@ export class FillingService {
     const { project, plant, ...rest } = worklog;
     return {
       ...rest,
-      productionId: project?.name || '',
+      projectId: project?.name || '',
       plant: plantName,
     };
   }

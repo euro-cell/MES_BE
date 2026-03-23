@@ -21,9 +21,9 @@ import {
   GradingProcessService,
   VisualInspectionProcessService,
 } from './processes';
-import { UpdateTargetByKeyDto } from 'src/common/dtos/production-target.dto';
+import { UpdateTargetByKeyDto } from 'src/common/dtos/project-target.dto';
 import { ProjectTarget } from 'src/common/entities/project-target.entity';
-import { ProductionProgressDto } from 'src/common/dtos/production-progress.dto';
+import { ProjectProgressDto } from 'src/common/dtos/project-progress.dto';
 
 @Injectable()
 export class StatusService {
@@ -48,9 +48,9 @@ export class StatusService {
     private readonly visualInspectionProcessService: VisualInspectionProcessService,
   ) {}
 
-  async getStatusData(productionId: number) {
+  async getStatusData(projectId: number) {
     const projectPlan = await this.projectPlanRepository.findOne({
-      where: { project: { id: productionId } },
+      where: { project: { id: projectId } },
       relations: ['project'],
     });
 
@@ -65,13 +65,13 @@ export class StatusService {
     };
   }
 
-  async getElectrodeStatus(productionId: number, month: string, type: 'cathode' | 'anode') {
+  async getElectrodeStatus(projectId: number, month: string, type: 'cathode' | 'anode') {
     const [mixing, coating, press, slitting, notching] = await Promise.all([
-      this.mixingProcessService.getMonthlyData(productionId, month, type),
-      this.coatingProcessService.getMonthlyData(productionId, month, type),
-      this.pressProcessService.getMonthlyData(productionId, month, type),
-      this.slittingProcessService.getMonthlyData(productionId, month, type),
-      this.notchingProcessService.getMonthlyData(productionId, month, type),
+      this.mixingProcessService.getMonthlyData(projectId, month, type),
+      this.coatingProcessService.getMonthlyData(projectId, month, type),
+      this.pressProcessService.getMonthlyData(projectId, month, type),
+      this.slittingProcessService.getMonthlyData(projectId, month, type),
+      this.notchingProcessService.getMonthlyData(projectId, month, type),
     ]);
 
     return {
@@ -89,14 +89,14 @@ export class StatusService {
     };
   }
 
-  async getAssemblyStatus(productionId: number, month: string) {
+  async getAssemblyStatus(projectId: number, month: string) {
     const [vd, forming, stacking, welding, sealing, filling] = await Promise.all([
-      this.vdProcessService.getMonthlyData(productionId, month),
-      this.formingProcessService.getMonthlyData(productionId, month),
-      this.stackingProcessService.getMonthlyData(productionId, month),
-      this.weldingProcessService.getMonthlyData(productionId, month),
-      this.sealingProcessService.getMonthlyData(productionId, month),
-      this.fillingProcessService.getMonthlyData(productionId, month),
+      this.vdProcessService.getMonthlyData(projectId, month),
+      this.formingProcessService.getMonthlyData(projectId, month),
+      this.stackingProcessService.getMonthlyData(projectId, month),
+      this.weldingProcessService.getMonthlyData(projectId, month),
+      this.sealingProcessService.getMonthlyData(projectId, month),
+      this.fillingProcessService.getMonthlyData(projectId, month),
     ]);
 
     return {
@@ -114,11 +114,11 @@ export class StatusService {
     };
   }
 
-  async getFormationStatus(productionId: number, month: string) {
+  async getFormationStatus(projectId: number, month: string) {
     const [formation, grading, visualInspection] = await Promise.all([
-      this.formationProcessService.getMonthlyData(productionId, month),
-      this.gradingProcessService.getMonthlyData(productionId, month),
-      this.visualInspectionProcessService.getMonthlyData(productionId, month),
+      this.formationProcessService.getMonthlyData(projectId, month),
+      this.gradingProcessService.getMonthlyData(projectId, month),
+      this.visualInspectionProcessService.getMonthlyData(projectId, month),
     ]);
 
     return {
@@ -135,15 +135,15 @@ export class StatusService {
     };
   }
 
-  async updateTargetStatus(productionId: number, dto: UpdateTargetByKeyDto) {
+  async updateTargetStatus(projectId: number, dto: UpdateTargetByKeyDto) {
     const { processKey, targetQuantity } = dto;
 
     let target = await this.projectTargetRepository.findOne({
-      where: { project: { id: productionId } },
+      where: { project: { id: projectId } },
     });
 
     if (!target) {
-      target = this.projectTargetRepository.create({ project: { id: productionId } });
+      target = this.projectTargetRepository.create({ project: { id: projectId } });
     }
 
     if (!(processKey in target)) {
@@ -154,14 +154,14 @@ export class StatusService {
     return await this.projectTargetRepository.save(target);
   }
 
-  async getProgress(productionId: number): Promise<ProductionProgressDto> {
+  async getProgress(projectId: number): Promise<ProjectProgressDto> {
     const currentDate = new Date();
     const month = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`;
 
     const [electrodeData, assemblyData, formationData] = await Promise.all([
-      this.calculateElectrodeProgress(productionId, month),
-      this.calculateAssemblyProgress(productionId, month),
-      this.calculateFormationProgress(productionId, month),
+      this.calculateElectrodeProgress(projectId, month),
+      this.calculateAssemblyProgress(projectId, month),
+      this.calculateFormationProgress(projectId, month),
     ]);
 
     const overall = Math.round(((electrodeData + assemblyData + formationData) / 3) * 100) / 100;
@@ -169,11 +169,11 @@ export class StatusService {
     return { electrode: electrodeData, assembly: assemblyData, formation: formationData, overall };
   }
 
-  private async calculateElectrodeProgress(productionId: number, month: string): Promise<number> {
+  private async calculateElectrodeProgress(projectId: number, month: string): Promise<number> {
     try {
       const [cathodeData, anodeData] = await Promise.all([
-        this.getElectrodeStatus(productionId, month, 'cathode'),
-        this.getElectrodeStatus(productionId, month, 'anode'),
+        this.getElectrodeStatus(projectId, month, 'cathode'),
+        this.getElectrodeStatus(projectId, month, 'anode'),
       ]);
 
       const progressValues: number[] = [];
@@ -227,9 +227,9 @@ export class StatusService {
     }
   }
 
-  private async calculateAssemblyProgress(productionId: number, month: string): Promise<number> {
+  private async calculateAssemblyProgress(projectId: number, month: string): Promise<number> {
     try {
-      const assemblyData = await this.getAssemblyStatus(productionId, month);
+      const assemblyData = await this.getAssemblyStatus(projectId, month);
       const progressValues: number[] = [];
 
       // VD - cathode와 anode 진행률
@@ -276,9 +276,9 @@ export class StatusService {
     }
   }
 
-  private async calculateFormationProgress(productionId: number, month: string): Promise<number> {
+  private async calculateFormationProgress(projectId: number, month: string): Promise<number> {
     try {
-      const formationData = await this.getFormationStatus(productionId, month);
+      const formationData = await this.getFormationStatus(projectId, month);
       const progressValues: number[] = [];
 
       // Formation - preFormation, degas, mainFormation
@@ -315,10 +315,10 @@ export class StatusService {
 
   private readonly templatePath = join(process.cwd(), 'data', 'templates', 'status');
 
-  async exportElectrodeStatus(productionId: number): Promise<{ file: StreamableFile; productionName: string }> {
+  async exportElectrodeStatus(projectId: number): Promise<{ file: StreamableFile; productionName: string }> {
     // 1. 프로젝트 정보 조회
     const productionPlan = await this.projectPlanRepository.findOne({
-      where: { project: { id: productionId } },
+      where: { project: { id: projectId } },
       relations: ['project'],
     });
 
@@ -354,8 +354,8 @@ export class StatusService {
 
       // 월별 데이터 조회
       const [cathodeData, anodeData] = await Promise.all([
-        this.getElectrodeStatus(productionId, month, 'cathode'),
-        this.getElectrodeStatus(productionId, month, 'anode'),
+        this.getElectrodeStatus(projectId, month, 'cathode'),
+        this.getElectrodeStatus(projectId, month, 'anode'),
       ]);
 
       // ExcelJS로 데이터 입력
@@ -391,9 +391,9 @@ export class StatusService {
     };
   }
 
-  async exportAssemblyStatus(productionId: number): Promise<{ file: StreamableFile; productionName: string }> {
+  async exportAssemblyStatus(projectId: number): Promise<{ file: StreamableFile; productionName: string }> {
     const productionPlan = await this.projectPlanRepository.findOne({
-      where: { project: { id: productionId } },
+      where: { project: { id: projectId } },
       relations: ['project'],
     });
 
@@ -423,7 +423,7 @@ export class StatusService {
       const sheet = workbook.worksheets[0];
       if (!sheet) continue;
 
-      const assemblyData = await this.getAssemblyStatus(productionId, month);
+      const assemblyData = await this.getAssemblyStatus(projectId, month);
 
       this.fillAssemblySheetWithExcelJS(sheet, assemblyData);
 
@@ -453,9 +453,9 @@ export class StatusService {
     };
   }
 
-  async exportFormationStatus(productionId: number): Promise<{ file: StreamableFile; productionName: string }> {
+  async exportFormationStatus(projectId: number): Promise<{ file: StreamableFile; productionName: string }> {
     const productionPlan = await this.projectPlanRepository.findOne({
-      where: { project: { id: productionId } },
+      where: { project: { id: projectId } },
       relations: ['project'],
     });
 
@@ -485,7 +485,7 @@ export class StatusService {
       const sheet = workbook.worksheets[0];
       if (!sheet) continue;
 
-      const formationData = await this.getFormationStatus(productionId, month);
+      const formationData = await this.getFormationStatus(projectId, month);
 
       this.fillFormationSheetWithExcelJS(sheet, formationData);
 

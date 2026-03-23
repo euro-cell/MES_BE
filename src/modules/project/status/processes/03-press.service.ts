@@ -19,13 +19,13 @@ export class PressProcessService {
     private readonly projectTargetRepository: Repository<ProjectTarget>,
   ) {}
 
-  async getMonthlyData(productionId: number, month: string, type: 'cathode' | 'anode') {
+  async getMonthlyData(projectId: number, month: string, type: 'cathode' | 'anode') {
     const [productionPlan, productionTarget] = await Promise.all([
       this.projectPlanRepository.findOne({
-        where: { project: { id: productionId } },
+        where: { project: { id: projectId } },
       }),
       this.projectTargetRepository.findOne({
-        where: { project: { id: productionId } },
+        where: { project: { id: projectId } },
       }),
     ]);
 
@@ -38,14 +38,14 @@ export class PressProcessService {
     const [pressLogs, coatingLogs] = await Promise.all([
       this.pressRepository.find({
         where: {
-          project: { id: productionId },
+          project: { id: projectId },
           manufactureDate: Between(projectStartDate, endDate),
         },
         order: { manufactureDate: 'ASC' },
       }),
       this.coatingRepository.find({
         where: {
-          project: { id: productionId },
+          project: { id: projectId },
           manufactureDate: Between(projectStartDate, endDate),
         },
         order: { manufactureDate: 'ASC' },

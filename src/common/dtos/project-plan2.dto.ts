@@ -61,7 +61,7 @@ class processPlans {
   'Cell Formation_Grading': ProcessDateRange;
 }
 
-class productionPlanDto {
+class ProjectPlanDto {
   @ApiProperty()
   startDate: string;
 
@@ -75,4 +75,4 @@ class productionPlanDto {
   processPlans: processPlans;
 }
 
-export class CreateProductionPlan2Dto extends PartialType(productionPlanDto) {}
+export class CreateProjectPlan2Dto extends PartialType(ProjectPlanDto) {}

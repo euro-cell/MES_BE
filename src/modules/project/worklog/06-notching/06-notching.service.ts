@@ -13,17 +13,17 @@ export class NotchingService {
     private readonly equipmentService: EquipmentService,
   ) {}
 
-  async createNotchingWorklog(productionId: number, dto: CreateNotchingWorklogDto): Promise<WorklogNotching> {
+  async createNotchingWorklog(projectId: number, dto: CreateNotchingWorklogDto): Promise<WorklogNotching> {
     const worklog = this.worklogNotchingRepository.create({
       ...dto,
-      project: { id: productionId },
+      project: { id: projectId },
     });
     return await this.worklogNotchingRepository.save(worklog);
   }
 
-  async getWorklogs(productionId: number): Promise<NotchingWorklogListResponseDto[]> {
+  async getWorklogs(projectId: number): Promise<NotchingWorklogListResponseDto[]> {
     const worklogs = await this.worklogNotchingRepository.find({
-      where: { project: { id: productionId } },
+      where: { project: { id: projectId } },
       order: { manufactureDate: 'ASC', createdAt: 'ASC' },
     });
     const dateRoundMap = new Map<string, number>();
@@ -63,7 +63,7 @@ export class NotchingService {
     const { project, plant, ...rest } = worklog;
     return {
       ...rest,
-      productionId: project?.name || '',
+      projectId: project?.name || '',
       plant: plantName,
     };
   }
@@ -88,9 +88,9 @@ export class NotchingService {
     await this.worklogNotchingRepository.remove(worklog);
   }
 
-  async getLots(productionId: number): Promise<{ cathodeLots: string[]; anodeLots: string[] }> {
+  async getLots(projectId: number): Promise<{ cathodeLots: string[]; anodeLots: string[] }> {
     const worklogs = await this.worklogNotchingRepository.find({
-      where: { project: { id: productionId } },
+      where: { project: { id: projectId } },
       select: ['notchingLot1', 'notchingLot2', 'notchingLot3', 'notchingLot4', 'notchingLot5'],
     });
 

@@ -33,4 +33,4 @@ import { LotModule } from './lot/lot.module';
   providers: [ProjectService],
   exports: [ProjectService],
 })
-export class ProductionModule {}
+export class ProjectModule {}

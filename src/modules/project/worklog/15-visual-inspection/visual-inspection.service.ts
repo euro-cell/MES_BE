@@ -17,17 +17,17 @@ export class VisualInspectionService {
     private readonly equipmentService: EquipmentService,
   ) {}
 
-  async createVisualInspectionWorklog(productionId: number, dto: CreateVisualInspectionWorklogDto): Promise<WorklogVisualInspection> {
+  async createVisualInspectionWorklog(projectId: number, dto: CreateVisualInspectionWorklogDto): Promise<WorklogVisualInspection> {
     const worklog = this.worklogVisualInspectionRepository.create({
       ...dto,
-      project: { id: productionId },
+      project: { id: projectId },
     });
     return await this.worklogVisualInspectionRepository.save(worklog);
   }
 
-  async getWorklogs(productionId: number): Promise<VisualInspectionWorklogListResponseDto[]> {
+  async getWorklogs(projectId: number): Promise<VisualInspectionWorklogListResponseDto[]> {
     const worklogs = await this.worklogVisualInspectionRepository.find({
-      where: { project: { id: productionId } },
+      where: { project: { id: projectId } },
       order: { manufactureDate: 'ASC', createdAt: 'ASC' },
     });
     const dateRoundMap = new Map<string, number>();
@@ -67,7 +67,7 @@ export class VisualInspectionService {
     const { project, plant, ...rest } = worklog;
     return {
       ...rest,
-      productionId: project?.name || '',
+      projectId: project?.name || '',
       plant: plantName,
     };
   }

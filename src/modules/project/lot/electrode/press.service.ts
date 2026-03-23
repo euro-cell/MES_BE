@@ -19,11 +19,11 @@ export class PressService {
     private readonly worklogPressRepo: Repository<WorklogPress>,
   ) {}
 
-  async sync(productionId: number) {
-    const lastSync = await this.getLastSync(productionId);
+  async sync(projectId: number) {
+    const lastSync = await this.getLastSync(projectId);
 
     const pressWorklogs = await this.worklogPressRepo.find({
-      where: lastSync ? { project: { id: productionId }, createdAt: MoreThan(lastSync.syncedAt) } : { project: { id: productionId } },
+      where: lastSync ? { project: { id: projectId }, createdAt: MoreThan(lastSync.syncedAt) } : { project: { id: projectId } },
     });
 
     for (const press of pressWorklogs) {
@@ -37,19 +37,19 @@ export class PressService {
 
       for (const { pressLot, coatingLot } of lots) {
         const exists = await this.lotPressRepo.findOne({
-          where: { lot: pressLot, project: { id: productionId } },
+          where: { lot: pressLot, project: { id: projectId } },
         });
 
         if (!exists) {
           const lotCoating = coatingLot
             ? await this.lotCoatingRepo.findOne({
-                where: { lot: coatingLot, project: { id: productionId } },
+                where: { lot: coatingLot, project: { id: projectId } },
               })
             : null;
 
           const lotPress = this.lotPressRepo.create({
             lot: pressLot,
-            project: { id: productionId },
+            project: { id: projectId },
             processDate: press.manufactureDate,
             worklogPress: press,
             lotCoating: lotCoating ?? undefined,
@@ -64,23 +64,23 @@ export class PressService {
       await this.lotSyncRepo.save(lastSync);
     } else {
       await this.lotSyncRepo.save({
-        project: { id: productionId },
+        project: { id: projectId },
         process: 'calendering',
         syncedAt: new Date(),
       });
     }
   }
 
-  async getLastSync(productionId: number) {
+  async getLastSync(projectId: number) {
     return this.lotSyncRepo.findOne({
-      where: { project: { id: productionId }, process: 'calendering' },
+      where: { project: { id: projectId }, process: 'calendering' },
       order: { syncedAt: 'DESC' },
     });
   }
 
-  async getPressLots(productionId: number) {
+  async getPressLots(projectId: number) {
     const lots = await this.lotPressRepo.find({
-      where: { project: { id: productionId } },
+      where: { project: { id: projectId } },
       relations: ['worklogPress', 'lotCoating', 'lotCoating.worklogCoating'],
       order: { processDate: 'DESC' },
     });

@@ -55,47 +55,47 @@ export class LotService {
     private readonly formationService: FormationLotService,
   ) {}
 
-  async sync(productionId: number, process: string) {
+  async sync(projectId: number, process: string) {
     switch (process) {
       case 'mixing':
-        return this.mixingService.sync(productionId);
+        return this.mixingService.sync(projectId);
       case 'coating':
-        return this.coatingService.sync(productionId);
+        return this.coatingService.sync(projectId);
       case 'calendering':
-        return this.pressService.sync(productionId);
+        return this.pressService.sync(projectId);
       case 'notching':
-        return this.notchingService.sync(productionId);
+        return this.notchingService.sync(projectId);
       case 'stacking':
-        return this.stackingService.sync(productionId);
+        return this.stackingService.sync(projectId);
       case 'welding':
-        return this.weldingService.sync(productionId);
+        return this.weldingService.sync(projectId);
       case 'sealing':
-        return this.sealingService.sync(productionId);
+        return this.sealingService.sync(projectId);
       case 'formation':
-        return this.formationService.sync(productionId);
+        return this.formationService.sync(projectId);
       default:
         throw new BadRequestException(`지원하지 않는 공정입니다: ${process}`);
     }
   }
 
-  async getLastSync(productionId: number, process: string) {
+  async getLastSync(projectId: number, process: string) {
     switch (process) {
       case 'mixing':
-        return this.mixingService.getLastSync(productionId);
+        return this.mixingService.getLastSync(projectId);
       case 'coating':
-        return this.coatingService.getLastSync(productionId);
+        return this.coatingService.getLastSync(projectId);
       case 'calendering':
-        return this.pressService.getLastSync(productionId);
+        return this.pressService.getLastSync(projectId);
       case 'notching':
-        return this.notchingService.getLastSync(productionId);
+        return this.notchingService.getLastSync(projectId);
       case 'stacking':
-        return this.stackingService.getLastSync(productionId);
+        return this.stackingService.getLastSync(projectId);
       case 'welding':
-        return this.weldingService.getLastSync(productionId);
+        return this.weldingService.getLastSync(projectId);
       case 'sealing':
-        return this.sealingService.getLastSync(productionId);
+        return this.sealingService.getLastSync(projectId);
       case 'formation':
-        return this.formationService.getLastSync(productionId);
+        return this.formationService.getLastSync(projectId);
       default:
         throw new BadRequestException(`지원하지 않는 공정입니다: ${process}`);
     }

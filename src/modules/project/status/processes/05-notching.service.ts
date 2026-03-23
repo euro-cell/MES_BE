@@ -19,13 +19,13 @@ export class NotchingProcessService {
     private readonly projectTargetRepository: Repository<ProjectTarget>,
   ) {}
 
-  async getMonthlyData(productionId: number, month: string, type: 'cathode' | 'anode') {
+  async getMonthlyData(projectId: number, month: string, type: 'cathode' | 'anode') {
     const [productionPlan, productionTarget] = await Promise.all([
       this.projectPlanRepository.findOne({
-        where: { project: { id: productionId } },
+        where: { project: { id: projectId } },
       }),
       this.projectTargetRepository.findOne({
-        where: { project: { id: productionId } },
+        where: { project: { id: projectId } },
       }),
     ]);
 
@@ -36,22 +36,22 @@ export class NotchingProcessService {
     const targetChar = type === 'cathode' ? 'C' : 'A';
 
     // TODO: 슬리팅 공정이 있는 경우 슬리팅에서 생산량 가져오기
-    // const hasSlitting = await this.checkSlittingProcess(productionId);
+    // const hasSlitting = await this.checkSlittingProcess(projectId);
     // if (hasSlitting) {
-    //   return this.processWithSlitting(productionId, month, type, ...);
+    //   return this.processWithSlitting(projectId, month, type, ...);
     // }
 
     const [notchingLogs, pressLogs] = await Promise.all([
       this.notchingRepository.find({
         where: {
-          project: { id: productionId },
+          project: { id: projectId },
           manufactureDate: Between(projectStartDate, endDate),
         },
         order: { manufactureDate: 'ASC' },
       }),
       this.pressRepository.find({
         where: {
-          project: { id: productionId },
+          project: { id: projectId },
           manufactureDate: Between(projectStartDate, endDate),
         },
         order: { manufactureDate: 'ASC' },

@@ -19,13 +19,13 @@ export class WeldingService {
     private readonly worklogWeldingRepo: Repository<WorklogWelding>,
   ) {}
 
-  async sync(productionId: number) {
-    const lastSync = await this.getLastSync(productionId);
+  async sync(projectId: number) {
+    const lastSync = await this.getLastSync(projectId);
 
     const weldingWorklogs = await this.worklogWeldingRepo.find({
       where: lastSync
-        ? { project: { id: productionId }, createdAt: MoreThan(lastSync.syncedAt) }
-        : { project: { id: productionId } },
+        ? { project: { id: projectId }, createdAt: MoreThan(lastSync.syncedAt) }
+        : { project: { id: projectId } },
     });
 
     for (const welding of weldingWorklogs) {
@@ -116,7 +116,7 @@ export class WeldingService {
 
         // Find stacking lot to check if it was defective (may not exist)
         const stackingLotEntry = await this.lotStackingRepo.findOne({
-          where: { lot: weldingLotNumber, project: { id: productionId } },
+          where: { lot: weldingLotNumber, project: { id: projectId } },
         });
 
         // Check if this JR has welding defects
@@ -129,7 +129,7 @@ export class WeldingService {
         const exists = await this.lotWeldingRepo.findOne({
           where: {
             lot: weldingLotNumber,
-            project: { id: productionId },
+            project: { id: projectId },
             worklogWelding: { id: welding.id },
           },
         });
@@ -138,7 +138,7 @@ export class WeldingService {
           const lotWelding = this.lotWeldingRepo.create({
             lot: weldingLotNumber,
             stackingLot: weldingLotNumber,
-            project: { id: productionId },
+            project: { id: projectId },
             processDate: welding.manufactureDate,
             worklogWelding: welding,
             isDefectiveFromStacking: stackingLotEntry?.isDefective || false,
@@ -158,23 +158,23 @@ export class WeldingService {
       await this.lotSyncRepo.save(lastSync);
     } else {
       await this.lotSyncRepo.save({
-        project: { id: productionId },
+        project: { id: projectId },
         process: 'welding',
         syncedAt: new Date(),
       });
     }
   }
 
-  async getLastSync(productionId: number) {
+  async getLastSync(projectId: number) {
     return this.lotSyncRepo.findOne({
-      where: { project: { id: productionId }, process: 'welding' },
+      where: { project: { id: projectId }, process: 'welding' },
       order: { syncedAt: 'DESC' },
     });
   }
 
-  async getWeldingLots(productionId: number) {
+  async getWeldingLots(projectId: number) {
     const lots = await this.lotWeldingRepo.find({
-      where: { project: { id: productionId } },
+      where: { project: { id: projectId } },
       relations: ['worklogWelding'],
       order: { processDate: 'DESC' },
     });

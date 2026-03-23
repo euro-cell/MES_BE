@@ -4,29 +4,29 @@ import { ApiTags, ApiOkResponse } from '@nestjs/swagger';
 import { CreateFillingWorklogDto, FillingWorklogListResponseDto, UpdateFillingWorklogDto } from 'src/common/dtos/worklog/12-filling.dto';
 
 @ApiTags('Production Worklog - Filling')
-@Controller(':productionId/worklog')
+@Controller(':projectId/worklog')
 export class FillingController {
   constructor(private readonly fillingService: FillingService) {}
 
   @Post('filling')
-  async createFillingWorklog(@Param('productionId', ParseIntPipe) productionId: number, @Body() dto: CreateFillingWorklogDto) {
-    return await this.fillingService.createFillingWorklog(productionId, dto);
+  async createFillingWorklog(@Param('projectId', ParseIntPipe) projectId: number, @Body() dto: CreateFillingWorklogDto) {
+    return await this.fillingService.createFillingWorklog(projectId, dto);
   }
 
   @Get('filling')
   @ApiOkResponse({ description: '작업일지-필링 목록', type: [FillingWorklogListResponseDto] })
-  async getWorklogs(@Param('productionId', ParseIntPipe) productionId: number): Promise<FillingWorklogListResponseDto[]> {
-    return await this.fillingService.getWorklogs(productionId);
+  async getWorklogs(@Param('projectId', ParseIntPipe) projectId: number): Promise<FillingWorklogListResponseDto[]> {
+    return await this.fillingService.getWorklogs(projectId);
   }
 
   @Get(':worklogId/filling')
-  async getWorklogById(@Param('productionId', ParseIntPipe) productionId: number, @Param('worklogId') worklogId: string) {
+  async getWorklogById(@Param('projectId', ParseIntPipe) projectId: number, @Param('worklogId') worklogId: string) {
     return await this.fillingService.findWorklogById(worklogId);
   }
 
   @Patch(':worklogId/filling')
   async updateFillingWorklog(
-    @Param('productionId', ParseIntPipe) productionId: number,
+    @Param('projectId', ParseIntPipe) projectId: number,
     @Param('worklogId') worklogId: string,
     @Body() updateFillingWorklogDto: UpdateFillingWorklogDto,
   ) {
@@ -34,7 +34,7 @@ export class FillingController {
   }
 
   @Delete(':worklogId/filling')
-  async deleteFillingWorklog(@Param('productionId', ParseIntPipe) productionId: number, @Param('worklogId') worklogId: string) {
+  async deleteFillingWorklog(@Param('projectId', ParseIntPipe) projectId: number, @Param('worklogId') worklogId: string) {
     return await this.fillingService.deleteFillingWorklog(worklogId);
   }
 }
