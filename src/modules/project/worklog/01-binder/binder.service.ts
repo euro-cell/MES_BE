@@ -71,7 +71,7 @@ export class BinderService {
   async findWorklogById(worklogId: string) {
     const worklog = await this.worklogBinderRepository.findOne({
       where: { id: +worklogId },
-      relations: ['production'],
+      relations: ['project'],
     });
 
     if (!worklog) {

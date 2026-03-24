@@ -47,7 +47,7 @@ export class SealingService {
   async findWorklogById(worklogId: string) {
     const worklog = await this.worklogSealingRepository.findOne({
       where: { id: +worklogId },
-      relations: ['production'],
+      relations: ['project'],
     });
 
     if (!worklog) {

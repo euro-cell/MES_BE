@@ -2,7 +2,11 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { WorklogNotching } from 'src/common/entities/worklogs/worklog-06-notching.entity';
-import { CreateNotchingWorklogDto, NotchingWorklogListResponseDto, UpdateNotchingWorklogDto } from 'src/common/dtos/worklog/06-notching.dto';
+import {
+  CreateNotchingWorklogDto,
+  NotchingWorklogListResponseDto,
+  UpdateNotchingWorklogDto,
+} from 'src/common/dtos/worklog/06-notching.dto';
 import { EquipmentService } from 'src/modules/equipment/equipment.service';
 
 @Injectable()
@@ -47,7 +51,7 @@ export class NotchingService {
   async findWorklogById(worklogId: string) {
     const worklog = await this.worklogNotchingRepository.findOne({
       where: { id: +worklogId },
-      relations: ['production'],
+      relations: ['project'],
     });
 
     if (!worklog) {

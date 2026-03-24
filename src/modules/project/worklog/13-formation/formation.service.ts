@@ -2,7 +2,11 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { WorklogFormation } from 'src/common/entities/worklogs/worklog-13-formation.entity';
-import { CreateFormationWorklogDto, FormationWorklogListResponseDto, UpdateFormationWorklogDto } from 'src/common/dtos/worklog/13-formation.dto';
+import {
+  CreateFormationWorklogDto,
+  FormationWorklogListResponseDto,
+  UpdateFormationWorklogDto,
+} from 'src/common/dtos/worklog/13-formation.dto';
 import { EquipmentService } from 'src/modules/equipment/equipment.service';
 
 @Injectable()
@@ -47,7 +51,7 @@ export class FormationService {
   async findWorklogById(worklogId: string) {
     const worklog = await this.worklogFormationRepository.findOne({
       where: { id: +worklogId },
-      relations: ['production'],
+      relations: ['project'],
     });
 
     if (!worklog) {

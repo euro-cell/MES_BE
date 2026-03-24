@@ -61,7 +61,7 @@ export class StackingService {
   async findWorklogById(worklogId: string) {
     const worklog = await this.worklogStackingRepository.findOne({
       where: { id: +worklogId },
-      relations: ['production'],
+      relations: ['project'],
     });
 
     if (!worklog) {

@@ -47,7 +47,7 @@ export class GradingService {
   async findWorklogById(worklogId: string) {
     const worklog = await this.worklogGradingRepository.findOne({
       where: { id: +worklogId },
-      relations: ['production'],
+      relations: ['project'],
     });
 
     if (!worklog) {

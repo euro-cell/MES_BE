@@ -47,7 +47,7 @@ export class VdService {
   async findWorklogById(worklogId: string) {
     const worklog = await this.worklogVdRepository.findOne({
       where: { id: +worklogId },
-      relations: ['production'],
+      relations: ['project'],
     });
 
     if (!worklog) {

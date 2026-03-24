@@ -63,7 +63,7 @@ export class CoatingService {
   async findWorklogById(worklogId: string) {
     const worklog = await this.worklogCoatingRepository.findOne({
       where: { id: +worklogId },
-      relations: ['production'],
+      relations: ['project'],
     });
 
     if (!worklog) {

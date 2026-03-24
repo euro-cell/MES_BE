@@ -63,7 +63,7 @@ export class SlurryService {
   async findWorklogById(worklogId: string) {
     const worklog = await this.worklogSlurryRepository.findOne({
       where: { id: +worklogId },
-      relations: ['production'],
+      relations: ['project'],
     });
 
     if (!worklog) {

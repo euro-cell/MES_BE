@@ -57,7 +57,7 @@ export class FormingService {
   async findWorklogById(worklogId: string) {
     const worklog = await this.worklogFormingRepository.findOne({
       where: { id: +worklogId },
-      relations: ['production'],
+      relations: ['project'],
     });
 
     if (!worklog) {

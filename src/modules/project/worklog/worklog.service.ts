@@ -119,7 +119,7 @@ export class WorklogService {
     // 2. 작업일지 데이터 조회 (프로젝트 ID로 필터링)
     const worklogs = await repository.find({
       where: { id: In(worklogIds), production: { id: projectId } },
-      relations: ['production'],
+      relations: ['project'],
       order: { manufactureDate: 'ASC', id: 'ASC' },
     });
 

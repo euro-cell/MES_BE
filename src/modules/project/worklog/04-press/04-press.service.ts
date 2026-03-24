@@ -47,7 +47,7 @@ export class PressService {
   async findWorklogById(worklogId: string) {
     const worklog = await this.worklogPressRepository.findOne({
       where: { id: +worklogId },
-      relations: ['production'],
+      relations: ['project'],
     });
 
     if (!worklog) {

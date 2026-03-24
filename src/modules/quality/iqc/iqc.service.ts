@@ -33,7 +33,7 @@ export class IqcService {
   async findOne(id: number): Promise<IQC> {
     const iqc = await this.iqcRepository.findOne({
       where: { id },
-      relations: ['production', 'results', 'coaRefs', 'images', 'files'],
+      relations: ['project', 'results', 'coaRefs', 'images', 'files'],
     });
 
     if (!iqc) throw new NotFoundException(`IQC with ID ${id} not found`);
@@ -110,7 +110,7 @@ export class IqcService {
 
       return manager.findOneOrFail(IQC, {
         where: { id: savedIqc.id },
-        relations: ['production', 'results', 'coaRefs', 'images', 'files'],
+        relations: ['project', 'results', 'coaRefs', 'images', 'files'],
       });
     });
   }
@@ -198,7 +198,7 @@ export class IqcService {
 
       return manager.findOneOrFail(IQC, {
         where: { id },
-        relations: ['production', 'results', 'coaRefs', 'images', 'files'],
+        relations: ['project', 'results', 'coaRefs', 'images', 'files'],
       });
     });
   }
