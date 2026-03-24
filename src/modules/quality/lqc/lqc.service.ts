@@ -37,7 +37,7 @@ export class LqcService {
   ) {}
 
   async getSpec(projectId: number, processType?: LqcProcessType, itemType?: LqcItemType): Promise<LqcSpec[]> {
-    const query = this.lqcSpecRepository.createQueryBuilder('spec').where('spec.production_id = :projectId', { projectId });
+    const query = this.lqcSpecRepository.createQueryBuilder('spec').where('spec.project_id = :projectId', { projectId });
 
     if (processType) {
       query.andWhere('spec.processType = :processType', { processType });
@@ -86,7 +86,7 @@ export class LqcService {
         'binder.solidContent3',
         'binder.viscosity',
       ])
-      .where('binder.production_id = :projectId', { projectId });
+      .where('binder.project_id = :projectId', { projectId });
 
     if (electrode) {
       // LOT 5번째 인덱스(index 4)로 양극(C)/음극(A) 구분
@@ -111,7 +111,7 @@ export class LqcService {
         'slurry.grindGageFineParticle2',
         'slurry.viscosityAfterStabilization',
       ])
-      .where('slurry.production_id = :projectId', { projectId });
+      .where('slurry.project_id = :projectId', { projectId });
 
     if (electrode) {
       query.andWhere('SUBSTRING(slurry.lot, 5, 1) = :electrode', { electrode });

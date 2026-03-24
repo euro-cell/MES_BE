@@ -163,7 +163,7 @@ export class BinderService {
     const worklogs = await this.worklogBinderRepository
       .createQueryBuilder('worklog')
       .select(['worklog.lot', 'worklog.solidContent1', 'worklog.solidContent2', 'worklog.solidContent3'])
-      .where('worklog.production_id = :projectId', { projectId })
+      .where('worklog.project_id = :projectId', { projectId })
       .andWhere('worklog.lot IS NOT NULL')
       .andWhere("worklog.lot != ''")
       .orderBy('worklog.createdAt', 'DESC')
