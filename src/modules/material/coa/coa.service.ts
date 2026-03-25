@@ -13,11 +13,18 @@ export class CoaService {
     private readonly rustfsService: RustfsService,
   ) {}
 
-  async findByMaterialId(materialId: number): Promise<MaterialCoa[]> {
-    return this.coaRepository.find({
+  async findByMaterialId(materialId: number) {
+    const coas = await this.coaRepository.find({
       where: { material: { id: materialId } },
       order: { createdAt: 'DESC' },
     });
+
+    return Promise.all(
+      coas.map(async (coa) => ({
+        ...coa,
+        fileUrl: coa.filePath ? await this.rustfsService.getPresignedUrl(coa.filePath) : null,
+      })),
+    );
   }
 
   async upload(dto: CreateCoaDto, file: Express.Multer.File): Promise<MaterialCoa> {

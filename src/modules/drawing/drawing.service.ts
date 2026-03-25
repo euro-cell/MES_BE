@@ -70,19 +70,24 @@ export class DrawingService {
       drawingNumber: drawing.drawingNumber,
       description: drawing.description,
       currentVersion: drawing.currentVersion,
-      versions: drawing.versions
-        .sort((a, b) => b.version - a.version)
-        .map((v) => ({
-          id: v.id,
-          version: v.version,
-          drawingFileName: v.drawingFileName ?? null,
-          drawingFilePath: v.drawingFilePath ?? null,
-          pdfFileNames: v.pdfFileNames ?? [],
-          pdfFilePaths: v.pdfFilePaths ?? [],
-          imageFilePaths: v.imageFilePaths ?? [],
-          registrationDate: new Date(v.registrationDate).toISOString().split('T')[0],
-          changeNote: v.changeNote ?? null,
-        })),
+      versions: await Promise.all(
+        drawing.versions
+          .sort((a, b) => b.version - a.version)
+          .map(async (v) => ({
+            id: v.id,
+            version: v.version,
+            drawingFileName: v.drawingFileName ?? null,
+            drawingFilePath: v.drawingFilePath ?? null,
+            drawingFileUrl: v.drawingFilePath ? await this.rustfsService.getPresignedUrl(v.drawingFilePath) : null,
+            pdfFileNames: v.pdfFileNames ?? [],
+            pdfFilePaths: v.pdfFilePaths ?? [],
+            pdfFileUrls: v.pdfFilePaths ? await Promise.all(v.pdfFilePaths.map((k) => this.rustfsService.getPresignedUrl(k))) : [],
+            imageFilePaths: v.imageFilePaths ?? [],
+            imageFileUrls: v.imageFilePaths ? await Promise.all(v.imageFilePaths.map((k) => this.rustfsService.getPresignedUrl(k))) : [],
+            registrationDate: new Date(v.registrationDate).toISOString().split('T')[0],
+            changeNote: v.changeNote ?? null,
+          })),
+      ),
     };
   }
 

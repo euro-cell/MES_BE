@@ -22,15 +22,17 @@ export class IqcService {
     private readonly rustfsService: RustfsService,
   ) {}
 
-  async findAll(projectId: number): Promise<IQC[]> {
-    return this.iqcRepository.find({
+  async findAll(projectId: number) {
+    const iqcs = await this.iqcRepository.find({
       where: { project: { id: projectId } },
       relations: ['results', 'coaRefs', 'images', 'files'],
       order: { createdAt: 'ASC' },
     });
+
+    return Promise.all(iqcs.map((iqc) => this.attachPresignedUrls(iqc)));
   }
 
-  async findOne(id: number): Promise<IQC> {
+  async findOne(id: number) {
     const iqc = await this.iqcRepository.findOne({
       where: { id },
       relations: ['project', 'results', 'coaRefs', 'images', 'files'],
@@ -38,7 +40,25 @@ export class IqcService {
 
     if (!iqc) throw new NotFoundException(`IQC with ID ${id} not found`);
 
-    return iqc;
+    return this.attachPresignedUrls(iqc);
+  }
+
+  private async attachPresignedUrls(iqc: IQC) {
+    const images = await Promise.all(
+      (iqc.images ?? []).map(async (img) => ({
+        ...img,
+        fileUrl: img.filePath ? await this.rustfsService.getPresignedUrl(img.filePath) : null,
+      })),
+    );
+
+    const files = await Promise.all(
+      (iqc.files ?? []).map(async (f) => ({
+        ...f,
+        fileUrl: f.filePath ? await this.rustfsService.getPresignedUrl(f.filePath) : null,
+      })),
+    );
+
+    return { ...iqc, images, files };
   }
 
   async create(projectId: number, dto: CreateIQCDto): Promise<IQC> {
