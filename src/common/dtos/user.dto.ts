@@ -31,3 +31,15 @@ export class LoginDto extends PickType(UserDto, ['employeeNumber', 'password'] a
 export class RegisterDto extends OmitType(UserDto, ['role', 'isActive'] as const) {}
 
 export class UpdateUserDto extends PartialType(UserDto) {}
+
+export class ChangePasswordDto {
+  @ApiProperty({ example: '1234', description: '현재 비밀번호' })
+  @IsNotEmpty()
+  @IsString()
+  currentPassword: string;
+
+  @ApiProperty({ example: 'newPassword123', description: '새 비밀번호' })
+  @IsNotEmpty()
+  @IsString()
+  newPassword: string;
+}

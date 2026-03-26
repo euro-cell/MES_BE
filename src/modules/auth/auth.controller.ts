@@ -1,8 +1,10 @@
-import { Controller, Post, Get, UseGuards, Req, Body, Res } from '@nestjs/common';
+import { Controller, Post, Get, Patch, UseGuards, Req, Body, Res } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { ApiBody } from '@nestjs/swagger';
-import { LoginDto, RegisterDto } from 'src/common/dtos/user.dto';
+import { ChangePasswordDto, LoginDto, RegisterDto } from 'src/common/dtos/user.dto';
+import { SessionAuthGuard } from 'src/common/guards/session-auth.guard';
+import { GetUserId } from 'src/common/decorators/user.decorator';
 import { memoryStore } from 'src/common/configs/session.config';
 import { promisify } from 'util';
 import type { Request, Response } from 'express';
@@ -31,6 +33,13 @@ export class AuthController {
       return { authenticated: true, user: req.user };
     }
     return { authenticated: false };
+  }
+
+  @Patch('me/password')
+  @UseGuards(SessionAuthGuard)
+  @ApiBody({ type: ChangePasswordDto })
+  async changePassword(@GetUserId() userId: number, @Body() dto: ChangePasswordDto) {
+    return this.authService.changePassword(userId, dto);
   }
 
   @Post('logout')

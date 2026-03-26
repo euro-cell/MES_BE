@@ -2,7 +2,7 @@ import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/co
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../../common/entities/user.entity';
-import { RegisterDto } from 'src/common/dtos/user.dto';
+import { ChangePasswordDto, RegisterDto } from 'src/common/dtos/user.dto';
 import { Request, Response } from 'express';
 
 @Injectable()
@@ -40,6 +40,13 @@ export class AuthService {
         resolve({ message: '로그인 성공', user });
       });
     });
+  }
+
+  async changePassword(userId: number, dto: ChangePasswordDto) {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user || user.password !== dto.currentPassword) throw new UnauthorizedException('현재 비밀번호가 올바르지 않습니다.');
+    await this.userRepository.update(userId, { password: dto.newPassword });
+    return { message: '비밀번호가 변경되었습니다.' };
   }
 
   async logout(req: Request, res: Response) {
