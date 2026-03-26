@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { OqcService } from './oqc.service';
 import { SaveOqcSpecDto } from 'src/common/dtos/oqc-spec.dto';
@@ -16,8 +16,11 @@ export class OqcController {
 
   @Get(':projectId/spec')
   @ApiOperation({ summary: 'OQC 규격 조회' })
-  async getSpec(@Param('projectId') projectId: number) {
-    return this.oqcService.getSpec(projectId);
+  async getSpec(
+    @Param('projectId') projectId: number,
+    @Query('process') process?: string,
+  ) {
+    return this.oqcService.getSpec(projectId, process);
   }
 
   @Post(':projectId/spec')

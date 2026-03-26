@@ -28,9 +28,12 @@ export class OqcService {
     }));
   }
 
-  async getSpec(projectId: number): Promise<OqcSpec[]> {
+  async getSpec(projectId: number, process?: string): Promise<OqcSpec[]> {
     return this.oqcSpecRepository.find({
-      where: { project: { id: projectId } },
+      where: {
+        project: { id: projectId },
+        ...(process ? { processType: process as any } : {}),
+      },
     });
   }
 
