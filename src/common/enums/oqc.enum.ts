@@ -1,7 +1,13 @@
 export enum OqcProcessType {
   GRADING = 'GRADING',
+  APPEARANCE = 'APPEARANCE',
+  DIMENSION = 'DIMENSION',
+  WEIGHT = 'WEIGHT',
 }
 
 export enum OqcItemType {
   GRADING = 'GRADING',
+  APPEARANCE = 'APPEARANCE',
+  DIMENSION = 'DIMENSION',
+  WEIGHT = 'WEIGHT',
 }
