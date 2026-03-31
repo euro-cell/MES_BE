@@ -13,7 +13,16 @@ export function setupSwagger(app: INestApplication): void {
       description: 'express-session',
     })
     .build();
-  const swaggerOptions: SwaggerCustomOptions = { swaggerOptions: { withCredentials: true, persistAuthorization: true } };
+
+  const swaggerOptions: SwaggerCustomOptions = {
+    swaggerOptions: { withCredentials: true, persistAuthorization: true },
+    customJsStr: `
+      window.addEventListener('DOMContentLoaded', () => {
+        document.documentElement.classList.add('dark-mode');
+      });
+    `,
+  };
+
   const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('docs', app, swaggerDocument, swaggerOptions);
 }
