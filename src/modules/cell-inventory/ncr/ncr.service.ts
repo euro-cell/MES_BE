@@ -8,7 +8,6 @@ import {
   NcrStatisticsResponseDto,
   NcrStatisticsDto,
   ProjectDto,
-  ProjectCountDto,
   NcrDetailResponseDto,
   NcrDetailDto,
   UpdateNcrDetailRequestDto,
@@ -26,14 +25,33 @@ export class NcrService {
   ) {}
 
   async getStatistics(): Promise<NcrStatisticsResponseDto> {
-    // Step 1: 모든 프로젝트 조회 (구형 프로젝트 먼저)
-    const projects = await this.getAllProjects();
+    // Step 1: 모든 프로젝트 조회 + 모든 NCR 항목 조회 + 전체 카운트를 병렬로 한 번에 가져옴
+    const [projects, ncrItems, allCounts] = await Promise.all([
+      this.getAllProjects(),
+      this.cellNcrRepository.find(),
+      // ncrGrade × (projectName, projectNo) 조합별 카운트를 단일 GROUP BY 쿼리로 조회
+      this.cellInventoryRepository
+        .createQueryBuilder('ci')
+        .select('ci.ncrGrade', 'ncrGrade')
+        .addSelect('ci.projectName', 'projectName')
+        .addSelect('ci.projectNo', 'projectNo')
+        .addSelect('COUNT(*)', 'count')
+        .where('ci.ncrGrade IS NOT NULL')
+        .groupBy('ci.ncrGrade')
+        .addGroupBy('ci.projectName')
+        .addGroupBy('ci.projectNo')
+        .getRawMany<{ ncrGrade: string; projectName: string; projectNo: string | null; count: string }>(),
+    ]);
 
-    // Step 2: 카테고리 순서 정의 (Formation, Inspection, 기타)
+    // Step 2: 카운트 결과를 Map으로 인덱싱 (ncrGrade|projectNo|projectName → count)
+    const countMap = new Map<string, number>();
+    for (const row of allCounts) {
+      const key = `${row.ncrGrade}|${row.projectNo || 'null'}|${row.projectName}`;
+      countMap.set(key, parseInt(row.count, 10));
+    }
+
+    // Step 3: 카테고리 순서 정의 및 NCR 항목 정렬
     const categoryOrder = { Formation: 0, Inspection: 1, Other: 2 };
-
-    // Step 3: 모든 NCR 항목 조회 및 정렬
-    const ncrItems = await this.cellNcrRepository.find();
     const sortedNcrItems = ncrItems.sort((a, b) => {
       const catA = categoryOrder[a.category] ?? 3;
       const catB = categoryOrder[b.category] ?? 3;
@@ -41,24 +59,21 @@ export class NcrService {
       return a.id - b.id;
     });
 
-    // Step 4: 각 NCR 항목에 대해 프로젝트별 카운트 계산
-    const data: NcrStatisticsDto[] = [];
-    for (const ncrItem of sortedNcrItems) {
-      const counts = await this.getCountsForNcr(ncrItem.code, projects);
-      data.push({
-        id: ncrItem.id,
-        category: ncrItem.category,
-        ncrType: ncrItem.ncrType,
-        title: ncrItem.title,
-        code: ncrItem.code,
-        counts,
-      });
-    }
+    // Step 4: 메모리 내에서 프로젝트별 카운트 매핑
+    const data: NcrStatisticsDto[] = sortedNcrItems.map((ncrItem) => ({
+      id: ncrItem.id,
+      category: ncrItem.category,
+      ncrType: ncrItem.ncrType,
+      title: ncrItem.title,
+      code: ncrItem.code,
+      counts: projects.map((project) => ({
+        projectNo: project.projectNo,
+        projectName: project.projectName,
+        count: countMap.get(`${ncrItem.code}|${project.projectNo || 'null'}|${project.projectName}`) ?? 0,
+      })),
+    }));
 
-    return {
-      data,
-      projects,
-    };
+    return { data, projects };
   }
 
   async getDetail(projectName: string, projectNo?: string): Promise<NcrDetailResponseDto> {
@@ -268,32 +283,4 @@ export class NcrService {
     });
   }
 
-  private async getCountsForNcr(ncrCode: string, projects: ProjectDto[]): Promise<ProjectCountDto[]> {
-    const countMap = new Map<string, number>();
-
-    // 각 프로젝트별로 카운트 조회
-    for (const project of projects) {
-      const query = this.cellInventoryRepository
-        .createQueryBuilder('ci')
-        .where('ci.ncrGrade = :ncrCode', { ncrCode })
-        .andWhere('ci.projectName = :projectName', { projectName: project.projectName });
-
-      if (project.projectNo) {
-        query.andWhere('ci.projectNo = :projectNo', { projectNo: project.projectNo });
-      } else {
-        query.andWhere('ci.projectNo IS NULL');
-      }
-
-      const count = await query.getCount();
-      const key = `${project.projectNo || 'null'}|${project.projectName}`;
-      countMap.set(key, count);
-    }
-
-    // 프로젝트 순서에 맞춰 count 배열 구성
-    return projects.map((project) => ({
-      projectNo: project.projectNo,
-      projectName: project.projectName,
-      count: countMap.get(`${project.projectNo || 'null'}|${project.projectName}`) || 0,
-    }));
-  }
 }
