@@ -12,6 +12,6 @@ export const AppDataSource = new DataSource({
   password: process.env.DB_PASS,
   database: process.env.DB_NAME,
   entities: [__dirname + '/common/entities/**/*{.ts,.js}'],
-  migrations: [__dirname + '/common/migrations/*{.ts,.js}'],
+  migrations: [__dirname + '/migrations/*{.ts,.js}'],
   namingStrategy: new SnakeNamingStrategy(),
 });
