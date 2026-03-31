@@ -103,6 +103,7 @@ export class ProjectService {
     const projects = await this.projectRepository.find({
       select: { id: true, name: true },
       relations: ['projectSpecifications', 'projectMaterials'],
+      order: { id: 'DESC' },
     });
 
     return projects.map((p) => ({
