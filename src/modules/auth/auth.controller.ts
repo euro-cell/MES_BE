@@ -5,8 +5,8 @@ import { ApiBody } from '@nestjs/swagger';
 import { ChangePasswordDto, LoginDto, RegisterDto } from 'src/common/dtos/user.dto';
 import { SessionAuthGuard } from 'src/common/guards/session-auth.guard';
 import { GetUserId } from 'src/common/decorators/user.decorator';
-import { memoryStore } from 'src/common/configs/session.config';
-import { promisify } from 'util';
+// import { memoryStore } from 'src/common/configs/session.config';
+// import { promisify } from 'util';
 import type { Request, Response } from 'express';
 
 @Controller('auth')
@@ -47,12 +47,11 @@ export class AuthController {
     return await this.authService.logout(req, res);
   }
 
-  //Todo: 세션 확인용, 추후 삭제 예정
-  @Get('sessions')
-  async getAllSessions() {
-    const allSessions = promisify(memoryStore.all).bind(memoryStore);
-    const sessions = await allSessions();
-    console.log('🧠 현재 세션 목록:', sessions);
-    return sessions;
-  }
+  // @Get('sessions')
+  // async getAllSessions() {
+  //   const allSessions = promisify(memoryStore.all).bind(memoryStore);
+  //   const sessions = await allSessions();
+  //   console.log('🧠 현재 세션 목록:', sessions);
+  //   return sessions;
+  // }
 }
