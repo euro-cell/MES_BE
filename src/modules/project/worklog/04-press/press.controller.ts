@@ -1,5 +1,5 @@
 import { Controller, Post, Body, Param, Get, Patch, Delete, ParseIntPipe } from '@nestjs/common';
-import { PressService } from './04-press.service';
+import { PressService } from './press.service';
 import { ApiTags, ApiOkResponse } from '@nestjs/swagger';
 import { CreatePressWorklogDto, PressWorklogListResponseDto, UpdatePressWorklogDto } from 'src/common/dtos/worklog/04-press.dto';
 

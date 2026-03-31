@@ -1,5 +1,5 @@
 import { Controller, Post, Body, Param, Get, Patch, Delete, ParseIntPipe } from '@nestjs/common';
-import { NotchingService } from './06-notching.service';
+import { NotchingService } from './notching.service';
 import { ApiTags, ApiOkResponse } from '@nestjs/swagger';
 import { CreateNotchingWorklogDto, NotchingWorklogListResponseDto, UpdateNotchingWorklogDto } from 'src/common/dtos/worklog/06-notching.dto';
 
