@@ -86,3 +86,22 @@ src/
 - ESLint: `@typescript-eslint/no-explicit-any` is off (use of `any` is permitted)
 - `noImplicitAny: false` in tsconfig — implicit `any` is allowed
 - Error messages and Swagger descriptions are written in Korean
+
+## Agent Efficiency Guidelines
+
+**Core Principles:**
+- Analyze before acting; review existing files first
+- Maintain conciseness without sacrificing thoroughness
+- Prefer targeted edits to complete rewrites
+- Avoid redundant file access
+- Validate work through testing
+- Eliminate unnecessary politeness in output
+- Keep implementations straightforward
+
+**Workflow Optimization:**
+- Comprehend requirements fully before writing code
+- Read each file once only
+- Complete coding tasks in a single focused pass
+- Test methodically without repetitive cycles
+- Stay within a 50 tool call budget
+- Never fabricate file locations when uncertain
