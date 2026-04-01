@@ -4,7 +4,7 @@ import { ApiConsumes, ApiBody, ApiOperation, ApiQuery, ApiTags } from '@nestjs/s
 import type { Response } from 'express';
 import { multerConfig } from 'src/common/configs/multer.config';
 import { ManualService } from './manual.service';
-import { CreateManualDto, UploadManualDto } from 'src/common/dtos/equipment-manual.dto';
+import { CreateManualDto, UploadManualDto } from 'src/common/dtos/equipment/equipment-manual.dto';
 
 @ApiTags('Equipment - Manual')
 @Controller()

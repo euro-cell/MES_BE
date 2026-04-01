@@ -2,7 +2,7 @@ import { Controller, Get, Post, Patch, Delete, Body, Query, Param, ParseIntPipe,
 import type { Response } from 'express';
 import { MaterialService } from './material.service';
 import { ApiOperation, ApiQuery } from '@nestjs/swagger';
-import { CreateMaterialDto, UpdateMaterialDto, ImportMaterialDto, ImportMaterialResultDto } from 'src/common/dtos/material.dto';
+import { CreateMaterialDto, UpdateMaterialDto, ImportMaterialDto, ImportMaterialResultDto } from 'src/common/dtos/material/material.dto';
 import { MaterialProcess } from 'src/common/enums/material.enum';
 
 @Controller('material')

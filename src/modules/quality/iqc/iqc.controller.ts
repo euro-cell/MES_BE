@@ -2,7 +2,7 @@ import { Controller, Get, Post, Put, Patch, Delete, Body, Param, UseInterceptors
 import { FileFieldsInterceptor, FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiOperation, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { IqcService } from './iqc.service';
-import { CreateIQCDto, UpdateIQCDto, UpdateImageLabelDto, UploadIQCFileDto, UploadIQCImagesDto } from 'src/common/dtos/iqc.dto';
+import { CreateIQCDto, UpdateIQCDto, UpdateImageLabelDto, UploadIQCFileDto, UploadIQCImagesDto } from 'src/common/dtos/quality/iqc.dto';
 import { multerConfig } from 'src/common/configs/multer.config';
 
 @ApiTags('Quality - IQC')

@@ -1,7 +1,7 @@
 import { Type } from 'class-transformer';
 import { IsArray, IsEnum, IsNumber, IsString, ValidateNested } from 'class-validator';
 import { ApiProperty, PartialType } from '@nestjs/swagger';
-import { MaterialCategory, MaterialClassification } from '../enums/material.enum';
+import { MaterialCategory, MaterialClassification } from '../../enums/material.enum';
 
 export class MaterialItemDto {
   @ApiProperty({

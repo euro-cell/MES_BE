@@ -2,7 +2,7 @@ import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/co
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../../common/entities/shared/user.entity';
-import { ChangePasswordDto, RegisterDto } from 'src/common/dtos/user.dto';
+import { ChangePasswordDto, RegisterDto } from 'src/common/dtos/shared/user.dto';
 import { Request, Response } from 'express';
 
 @Injectable()

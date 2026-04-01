@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateProjectMaterialDto, UpdateProjectMaterialDto } from 'src/common/dtos/project-material.dto';
+import { CreateProjectMaterialDto, UpdateProjectMaterialDto } from 'src/common/dtos/project/project-material.dto';
 import { Material } from 'src/common/entities/material/material.entity';
 import { ProjectMaterial } from 'src/common/entities/project/project-material.entity';
 import { Project } from 'src/common/entities/project/project.entity';

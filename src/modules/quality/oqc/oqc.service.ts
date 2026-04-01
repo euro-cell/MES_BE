@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { LotFormation } from 'src/common/entities/lot/lot-08-formation.entity';
 import { OqcSpec } from 'src/common/entities/specification/oqc-spec.entity';
-import { SaveOqcSpecDto } from 'src/common/dtos/oqc-spec.dto';
+import { SaveOqcSpecDto } from 'src/common/dtos/quality/oqc-spec.dto';
 
 @Injectable()
 export class OqcService {

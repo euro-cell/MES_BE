@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional, OmitType, PartialType } from '@nestjs/swagger';
 import { IsNotEmpty, IsString, IsEnum, IsOptional, IsNumber } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
-import { DrawingCategory } from '../enums/drawing.enum';
+import { DrawingCategory } from '../../enums/drawing.enum';
 
 export class DrawingDto {
   @ApiProperty({ description: '도면 ID', example: 1 })

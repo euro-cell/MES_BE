@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Patch, Query, Res } from '@nestjs/common';
 import { StatusService } from './status.service';
 import { ApiQuery, ApiProduces } from '@nestjs/swagger';
-import { UpdateTargetByKeyDto } from 'src/common/dtos/project-target.dto';
+import { UpdateTargetByKeyDto } from 'src/common/dtos/project/project-target.dto';
 import type { Response } from 'express';
 
 @Controller(':projectId/status')

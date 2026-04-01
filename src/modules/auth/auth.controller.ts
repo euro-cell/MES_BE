@@ -2,7 +2,7 @@ import { Controller, Post, Get, Patch, UseGuards, Req, Body, Res } from '@nestjs
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { ApiBody } from '@nestjs/swagger';
-import { ChangePasswordDto, LoginDto, RegisterDto } from 'src/common/dtos/user.dto';
+import { ChangePasswordDto, LoginDto, RegisterDto } from 'src/common/dtos/shared/user.dto';
 import { SessionAuthGuard } from 'src/common/guards/session-auth.guard';
 import { GetUserId } from 'src/common/decorators/user.decorator';
 // import { memoryStore } from 'src/common/configs/session.config';

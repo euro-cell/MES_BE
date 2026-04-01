@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional, OmitType, PartialType } from '@nestjs/swagger';
 import { IsNotEmpty, IsString, IsEnum, IsDateString, IsOptional } from 'class-validator';
-import { CellGrade } from '../enums/cell-inventory.enum';
+import { CellGrade } from '../../enums/cell-inventory.enum';
 
 export class CellInventoryDto {
   @ApiProperty({ description: '셀 재고 ID', example: 1 })

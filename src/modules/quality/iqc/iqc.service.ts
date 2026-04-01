@@ -6,7 +6,7 @@ import { IQCResult } from 'src/common/entities/quality/iqc-result.entity';
 import { IQCCoaRef } from 'src/common/entities/quality/iqc-coa-ref.entity';
 import { IQCImage } from 'src/common/entities/quality/iqc-image.entity';
 import { IQCFile } from 'src/common/entities/quality/iqc-file.entity';
-import { CreateIQCDto, UpdateIQCDto } from 'src/common/dtos/iqc.dto';
+import { CreateIQCDto, UpdateIQCDto } from 'src/common/dtos/quality/iqc.dto';
 import { RustfsService } from 'src/common/services/rustfs.service';
 
 @Injectable()

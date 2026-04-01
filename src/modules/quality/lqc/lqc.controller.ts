@@ -2,7 +2,7 @@ import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { LqcService } from './lqc.service';
 import { LqcProcessType, LqcItemType } from 'src/common/enums/lqc.enum';
-import { CreateLqcSpecDto } from 'src/common/dtos/lqc-spec.dto';
+import { CreateLqcSpecDto } from 'src/common/dtos/quality/lqc-spec.dto';
 
 @ApiTags('Quality - LQC')
 @Controller()

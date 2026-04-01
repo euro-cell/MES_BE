@@ -9,7 +9,7 @@ import {
   DeleteDateColumn,
 } from 'typeorm';
 import { Project } from '../project/project.entity';
-import { CreateBatteryDesignDto } from '../../dtos/specification.dto';
+import { CreateBatteryDesignDto } from '../../dtos/specification/specification.dto';
 
 @Entity('specifications')
 export class Specification {

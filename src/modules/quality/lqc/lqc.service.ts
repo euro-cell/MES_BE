@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { LqcSpec } from 'src/common/entities/specification/lqc-spec.entity';
 import { LqcProcessType, LqcItemType } from 'src/common/enums/lqc.enum';
-import { CreateLqcSpecDto } from 'src/common/dtos/lqc-spec.dto';
+import { CreateLqcSpecDto } from 'src/common/dtos/quality/lqc-spec.dto';
 import { WorklogBinder } from 'src/common/entities/worklog/worklog-01-binder.entity';
 import { WorklogSlurry } from 'src/common/entities/worklog/worklog-02-slurry.entity';
 import { WorklogCoating } from 'src/common/entities/worklog/worklog-03-coating.entity';

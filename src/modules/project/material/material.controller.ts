@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
 import { ProductMaterialService } from './material.service';
-import { CreateProjectMaterialDto, UpdateProjectMaterialDto } from 'src/common/dtos/project-material.dto';
+import { CreateProjectMaterialDto, UpdateProjectMaterialDto } from 'src/common/dtos/project/project-material.dto';
 
 @Controller(':projectId/material')
 export class ProductMaterialController {

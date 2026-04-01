@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Project } from 'src/common/entities/project/project.entity';
 import { Repository } from 'typeorm';
 import { StatusService } from '../project/status/status.service';
-import { ProjectProgressDto } from 'src/common/dtos/project-progress.dto';
+import { ProjectProgressDto } from 'src/common/dtos/project/project-progress.dto';
 
 export interface DashboardSummaryItem {
   id: number;

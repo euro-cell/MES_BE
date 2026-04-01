@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
-import { RegisterDto, UpdateUserDto } from 'src/common/dtos/user.dto';
+import { RegisterDto, UpdateUserDto } from 'src/common/dtos/shared/user.dto';
 import { SessionAuthGuard } from 'src/common/guards/session-auth.guard';
 import { PermissionGuard } from 'src/common/guards/permission.guard';
 import { RequirePermission } from 'src/common/decorators/permission.decorator';

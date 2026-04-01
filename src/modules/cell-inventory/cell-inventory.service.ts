@@ -9,7 +9,7 @@ import {
   ProjectStatisticsDto,
   GradeStatisticsDto,
   StorageUsageItemDto,
-} from 'src/common/dtos/cell-inventory.dto';
+} from 'src/common/dtos/cell/cell-inventory.dto';
 import { ExcelService } from 'src/common/services/excel.service';
 import { ExcelUtil } from 'src/common/utils/excel.util';
 import { NcrService } from './ncr/ncr.service';

@@ -11,7 +11,7 @@ import {
   NcrDetailResponseDto,
   NcrDetailDto,
   UpdateNcrDetailRequestDto,
-} from 'src/common/dtos/ncr-statistics.dto';
+} from 'src/common/dtos/ncr/ncr-statistics.dto';
 
 @Injectable()
 export class NcrService {

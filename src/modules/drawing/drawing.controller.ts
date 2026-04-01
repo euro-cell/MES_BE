@@ -8,7 +8,7 @@ import {
   UpdateDrawingDto,
   UpdateDrawingVersionDto,
   DrawingSearchDto,
-} from 'src/common/dtos/drawing.dto';
+} from 'src/common/dtos/drawing/drawing.dto';
 import { multerConfig } from 'src/common/configs/multer.config';
 
 @Controller('drawing')

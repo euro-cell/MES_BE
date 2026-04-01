@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query,
 import type { Response } from 'express';
 import { ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { EquipmentService } from './equipment.service';
-import { categoryMap, CreateEquipmentDto, EquipmentSearchDto, LineSearchDto, UpdateEquipmentDto } from 'src/common/dtos/equipment.dto';
+import { categoryMap, CreateEquipmentDto, EquipmentSearchDto, LineSearchDto, UpdateEquipmentDto } from 'src/common/dtos/equipment/equipment.dto';
 import { EquipmentProcess } from 'src/common/enums/equipment.enum';
 
 @Controller('equipment')

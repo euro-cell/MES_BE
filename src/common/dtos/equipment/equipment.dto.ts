@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 import { IsNotEmpty, IsString, IsEnum, IsOptional, IsDateString, IsIn } from 'class-validator';
-import { EquipmentCategory, EquipmentGrade, EquipmentProcess } from '../enums/equipment.enum';
+import { EquipmentCategory, EquipmentGrade, EquipmentProcess } from '../../enums/equipment.enum';
 
 // API용 영어 카테고리 → DB용 한글 카테고리 매핑
 export const categoryMap: Record<string, EquipmentCategory> = {

@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsEnum, IsNumber } from 'class-validator';
 import { Type } from 'class-transformer';
-import { MaterialHistoryType, MaterialProcess } from '../enums/material.enum';
+import { MaterialHistoryType, MaterialProcess } from '../../enums/material.enum';
 
 export class CreateMaterialHistoryDto {
   @ApiProperty({ description: '자재 ID', example: 1 })

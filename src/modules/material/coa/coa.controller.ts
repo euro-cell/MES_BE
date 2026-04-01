@@ -4,7 +4,7 @@ import { ApiConsumes, ApiBody, ApiOperation, ApiQuery, ApiTags } from '@nestjs/s
 import type { Response } from 'express';
 import { multerConfig } from 'src/common/configs/multer.config';
 import { CoaService } from './coa.service';
-import { CreateCoaDto, UploadCoaDto } from 'src/common/dtos/coa.dto';
+import { CreateCoaDto, UploadCoaDto } from 'src/common/dtos/specification/coa.dto';
 
 @ApiTags('Material - CoA')
 @Controller()

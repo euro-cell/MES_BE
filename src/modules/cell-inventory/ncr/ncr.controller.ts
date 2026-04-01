@@ -1,7 +1,7 @@
 import { Controller, Get, Patch, Query, Body } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 import { NcrService } from './ncr.service';
-import { NcrStatisticsResponseDto, NcrDetailResponseDto, UpdateNcrDetailRequestDto } from 'src/common/dtos/ncr-statistics.dto';
+import { NcrStatisticsResponseDto, NcrDetailResponseDto, UpdateNcrDetailRequestDto } from 'src/common/dtos/ncr/ncr-statistics.dto';
 
 @ApiTags('Cell NCR')
 @Controller()

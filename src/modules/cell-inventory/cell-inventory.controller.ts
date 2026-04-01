@@ -7,7 +7,7 @@ import {
   UpdateCellInventoryDto,
   ProjectStatisticsDto,
   CellInventoryResponseDto,
-} from 'src/common/dtos/cell-inventory.dto';
+} from 'src/common/dtos/cell/cell-inventory.dto';
 
 @ApiTags('Cell Inventory')
 @Controller('cell-inventory')

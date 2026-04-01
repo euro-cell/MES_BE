@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Res, S
 import type { Response } from 'express';
 import { ApiOperation } from '@nestjs/swagger';
 import { MaintenanceService } from './maintenance.service';
-import { CreateMaintenanceDto, UpdateMaintenanceDto } from 'src/common/dtos/maintenance.dto';
+import { CreateMaintenanceDto, UpdateMaintenanceDto } from 'src/common/dtos/equipment/maintenance.dto';
 
 @Controller()
 export class MaintenanceController {

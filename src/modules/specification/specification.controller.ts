@@ -1,7 +1,7 @@
 import { Controller } from '@nestjs/common';
 // import { Body, Delete, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
 // import { SpecificationService } from './specification.service';
-// import { CreateBatteryDesignDto } from 'src/common/dtos/specification.dto';
+// import { CreateBatteryDesignDto } from 'src/common/dtos/specification/specification.dto';
 
 @Controller('specification')
 export class SpecificationController {

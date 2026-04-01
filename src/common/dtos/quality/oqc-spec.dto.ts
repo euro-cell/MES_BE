@@ -1,7 +1,7 @@
 import { IsEnum, IsNotEmpty, IsObject } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { OqcProcessType, OqcItemType } from '../enums/oqc.enum';
-import type { OqcSpecs } from '../entities/specification/oqc-spec.entity';
+import { OqcProcessType, OqcItemType } from '../../enums/oqc.enum';
+import type { OqcSpecs } from '../../entities/specification/oqc-spec.entity';
 
 export class SaveOqcSpecDto {
   @ApiProperty({ enum: OqcProcessType, example: 'GRADING' })

@@ -12,7 +12,7 @@ import {
   UpdateDrawingDto,
   UpdateDrawingVersionDto,
   DrawingSearchDto,
-} from 'src/common/dtos/drawing.dto';
+} from 'src/common/dtos/drawing/drawing.dto';
 import { RustfsService } from 'src/common/services/rustfs.service';
 import { convertPdfToImages } from 'src/common/utils/pdf-converter.util';
 

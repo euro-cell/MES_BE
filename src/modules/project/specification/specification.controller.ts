@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
 import { ProductSpecificationService } from './specification.service';
-import { CreateSpecificationDto, UpdateSpecificationDto } from 'src/common/dtos/specification.dto';
+import { CreateSpecificationDto, UpdateSpecificationDto } from 'src/common/dtos/specification/specification.dto';
 
 @Controller(':projectId/specification')
 export class ProductSpecificationController {

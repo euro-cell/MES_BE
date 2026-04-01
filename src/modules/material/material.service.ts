@@ -5,7 +5,7 @@ import { MaterialHistory } from 'src/common/entities/material/material-history.e
 import { Project } from 'src/common/entities/project/project.entity';
 import { MaterialProcess, MaterialHistoryType } from 'src/common/enums/material.enum';
 import { Repository } from 'typeorm';
-import { CreateMaterialDto, UpdateMaterialDto, ImportMaterialItemDto, ImportMaterialResultDto } from 'src/common/dtos/material.dto';
+import { CreateMaterialDto, UpdateMaterialDto, ImportMaterialItemDto, ImportMaterialResultDto } from 'src/common/dtos/material/material.dto';
 import { MaterialOrigin, MaterialPurpose } from 'src/common/enums/material.enum';
 import { ExcelService } from 'src/common/services/excel.service';
 import { ExcelUtil } from 'src/common/utils/excel.util';

@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { OqcService } from './oqc.service';
-import { SaveOqcSpecDto } from 'src/common/dtos/oqc-spec.dto';
+import { SaveOqcSpecDto } from 'src/common/dtos/quality/oqc-spec.dto';
 
 @ApiTags('Quality - OQC')
 @Controller()

@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
 import { PlanService } from './plan.service';
-import { CreateProjectPlanDto, UpdateProjectPlanDto } from 'src/common/dtos/project-plan.dto';
+import { CreateProjectPlanDto, UpdateProjectPlanDto } from 'src/common/dtos/project/project-plan.dto';
 
 @Controller(':projectId/plan')
 export class PlanController {

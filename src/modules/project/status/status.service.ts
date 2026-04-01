@@ -21,9 +21,9 @@ import {
   GradingProcessService,
   VisualInspectionProcessService,
 } from './processes';
-import { UpdateTargetByKeyDto } from 'src/common/dtos/project-target.dto';
+import { UpdateTargetByKeyDto } from 'src/common/dtos/project/project-target.dto';
 import { ProjectTarget } from 'src/common/entities/project/project-target.entity';
-import { ProjectProgressDto } from 'src/common/dtos/project-progress.dto';
+import { ProjectProgressDto } from 'src/common/dtos/project/project-progress.dto';
 
 @Injectable()
 export class StatusService {
