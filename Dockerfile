@@ -21,4 +21,6 @@ RUN npm ci --omit=dev
 
 COPY --from=builder /app/dist ./dist
 
-CMD ["node", "dist/main"]
+ENV NODE_ENV=production
+
+CMD ["node", "dist/src/main"]

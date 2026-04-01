@@ -2,6 +2,7 @@ import { INestApplication } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule, SwaggerCustomOptions } from '@nestjs/swagger';
 
 export function setupSwagger(app: INestApplication): void {
+  if (process.env.NODE_ENV === 'production') return;
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Swagger')
     .setDescription('유로셀 MES API 문서')
