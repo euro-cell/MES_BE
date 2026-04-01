@@ -10,8 +10,8 @@ import { join } from 'path';
 import { existsSync } from 'fs';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { convertPdfToImages } from '../src/common/utils/pdf-converter.util';
-import { DrawingVersion } from '../src/common/entities/drawing-version.entity';
-import { Drawing } from '../src/common/entities/drawing.entity';
+import { DrawingVersion } from '../src/common/entities/drawing/drawing-version.entity';
+import { Drawing } from '../src/common/entities/drawing/drawing.entity';
 import * as dotenv from 'dotenv';
 
 dotenv.config();

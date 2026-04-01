@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThan } from 'typeorm';
-import { LotStacking } from '../../../../common/entities/lots/lot-05-stacking.entity';
-import { LotSync } from '../../../../common/entities/lots/lot-sync.entity';
-import { WorklogStacking } from '../../../../common/entities/worklogs/worklog-09-stacking.entity';
+import { LotStacking } from '../../../../common/entities/lot/lot-05-stacking.entity';
+import { LotSync } from '../../../../common/entities/lot/lot-sync.entity';
+import { WorklogStacking } from '../../../../common/entities/worklog/worklog-09-stacking.entity';
 
 @Injectable()
 export class StackingService {

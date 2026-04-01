@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { CellNcr } from 'src/common/entities/cell-ncr.entity';
-import { CellNcrDetail } from 'src/common/entities/cell-ncr-detail.entity';
-import { CellInventory } from 'src/common/entities/cell-inventory.entity';
+import { CellNcr } from 'src/common/entities/cell/cell-ncr.entity';
+import { CellNcrDetail } from 'src/common/entities/cell/cell-ncr-detail.entity';
+import { CellInventory } from 'src/common/entities/cell/cell-inventory.entity';
 import { NcrService } from './ncr.service';
 import { NcrController } from './ncr.controller';
 

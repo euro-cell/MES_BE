@@ -1,7 +1,7 @@
 import { Injectable, ConflictException, NotFoundException, StreamableFile } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CellInventory } from 'src/common/entities/cell-inventory.entity';
+import { CellInventory } from 'src/common/entities/cell/cell-inventory.entity';
 import { CellGrade } from 'src/common/enums/cell-inventory.enum';
 import {
   CreateCellInventoryDto,

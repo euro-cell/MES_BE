@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { WorklogNotching } from 'src/common/entities/worklogs/worklog-06-notching.entity';
+import { WorklogNotching } from 'src/common/entities/worklog/worklog-06-notching.entity';
 import {
   CreateNotchingWorklogDto,
   NotchingWorklogListResponseDto,

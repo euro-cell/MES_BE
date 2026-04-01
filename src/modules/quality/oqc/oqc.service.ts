@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { LotFormation } from 'src/common/entities/lots/lot-08-formation.entity';
-import { OqcSpec } from 'src/common/entities/oqc-spec.entity';
+import { LotFormation } from 'src/common/entities/lot/lot-08-formation.entity';
+import { OqcSpec } from 'src/common/entities/specification/oqc-spec.entity';
 import { SaveOqcSpecDto } from 'src/common/dtos/oqc-spec.dto';
 
 @Injectable()

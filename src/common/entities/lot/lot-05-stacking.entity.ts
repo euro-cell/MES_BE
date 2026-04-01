@@ -1,6 +1,6 @@
 import { Entity, ManyToOne, JoinColumn, Column } from 'typeorm';
 import { LotBase } from './lot-00-base.entity';
-import { WorklogStacking } from '../worklogs/worklog-09-stacking.entity';
+import { WorklogStacking } from '../worklog/worklog-09-stacking.entity';
 
 @Entity('lot_stackings')
 export class LotStacking extends LotBase {

@@ -2,10 +2,10 @@ import { CanActivate, ExecutionContext, Injectable, ForbiddenException } from '@
 import { Reflector } from '@nestjs/core';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Menu } from '../entities/menu.entity';
-import { MenuPermissionByRole } from '../entities/menu-permission-role.entity';
-import { MenuPermissionByUser } from '../entities/menu-permission-user.entity';
-import { User } from '../entities/user.entity';
+import { Menu } from '../entities/shared/menu.entity';
+import { MenuPermissionByRole } from '../entities/shared/menu-permission-role.entity';
+import { MenuPermissionByUser } from '../entities/shared/menu-permission-user.entity';
+import { User } from '../entities/shared/user.entity';
 import { UserRole } from '../enums/user.enum';
 import { PERMISSION_KEY } from '../decorators/permission.decorator';
 

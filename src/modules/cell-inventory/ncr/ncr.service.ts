@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CellNcr } from 'src/common/entities/cell-ncr.entity';
-import { CellNcrDetail } from 'src/common/entities/cell-ncr-detail.entity';
-import { CellInventory } from 'src/common/entities/cell-inventory.entity';
+import { CellNcr } from 'src/common/entities/cell/cell-ncr.entity';
+import { CellNcrDetail } from 'src/common/entities/cell/cell-ncr-detail.entity';
+import { CellInventory } from 'src/common/entities/cell/cell-inventory.entity';
 import {
   NcrStatisticsResponseDto,
   NcrStatisticsDto,

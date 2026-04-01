@@ -2,11 +2,11 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { IqcService } from './iqc.service';
 import { IqcController } from './iqc.controller';
-import { IQC } from 'src/common/entities/iqc.entity';
-import { IQCResult } from 'src/common/entities/iqc-result.entity';
-import { IQCCoaRef } from 'src/common/entities/iqc-coa-ref.entity';
-import { IQCImage } from 'src/common/entities/iqc-image.entity';
-import { IQCFile } from 'src/common/entities/iqc-file.entity';
+import { IQC } from 'src/common/entities/quality/iqc.entity';
+import { IQCResult } from 'src/common/entities/quality/iqc-result.entity';
+import { IQCCoaRef } from 'src/common/entities/quality/iqc-coa-ref.entity';
+import { IQCImage } from 'src/common/entities/quality/iqc-image.entity';
+import { IQCFile } from 'src/common/entities/quality/iqc-file.entity';
 
 @Module({
   imports: [

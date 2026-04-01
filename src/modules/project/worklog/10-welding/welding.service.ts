@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { WorklogWelding } from 'src/common/entities/worklogs/worklog-10-welding.entity';
+import { WorklogWelding } from 'src/common/entities/worklog/worklog-10-welding.entity';
 import { CreateWeldingWorklogDto, WeldingWorklogListResponseDto, UpdateWeldingWorklogDto } from 'src/common/dtos/worklog/10-welding.dto';
 import { MaterialService } from 'src/modules/material/material.service';
 import { EquipmentService } from 'src/modules/equipment/equipment.service';

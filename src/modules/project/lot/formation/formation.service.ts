@@ -1,11 +1,11 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { LotFormation } from '../../../../common/entities/lots/lot-08-formation.entity';
-import { LotSealing } from '../../../../common/entities/lots/lot-07-sealing.entity';
-import { LotSync } from '../../../../common/entities/lots/lot-sync.entity';
-import { WorklogFormation } from '../../../../common/entities/worklogs/worklog-13-formation.entity';
-import { WorklogGrading } from '../../../../common/entities/worklogs/worklog-14-grading.entity';
+import { LotFormation } from '../../../../common/entities/lot/lot-08-formation.entity';
+import { LotSealing } from '../../../../common/entities/lot/lot-07-sealing.entity';
+import { LotSync } from '../../../../common/entities/lot/lot-sync.entity';
+import { WorklogFormation } from '../../../../common/entities/worklog/worklog-13-formation.entity';
+import { WorklogGrading } from '../../../../common/entities/worklog/worklog-14-grading.entity';
 import { RegisterRawDataDto } from '../../../../common/dtos/lot/register-rawdata.dto';
 
 @Injectable()

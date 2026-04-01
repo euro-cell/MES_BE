@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ProjectService } from './project.service';
 import { ProjectController } from './project.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Project } from '../../common/entities/project.entity';
+import { Project } from '../../common/entities/project/project.entity';
 import { PlanModule } from './plan/plan.module';
 import { RouterModule } from '@nestjs/core';
 import { ProductMaterialModule } from './material/material.module';

@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThan } from 'typeorm';
-import { LotWelding } from '../../../../common/entities/lots/lot-06-welding.entity';
-import { LotStacking } from '../../../../common/entities/lots/lot-05-stacking.entity';
-import { LotSync } from '../../../../common/entities/lots/lot-sync.entity';
-import { WorklogWelding } from '../../../../common/entities/worklogs/worklog-10-welding.entity';
+import { LotWelding } from '../../../../common/entities/lot/lot-06-welding.entity';
+import { LotStacking } from '../../../../common/entities/lot/lot-05-stacking.entity';
+import { LotSync } from '../../../../common/entities/lot/lot-sync.entity';
+import { WorklogWelding } from '../../../../common/entities/worklog/worklog-10-welding.entity';
 
 @Injectable()
 export class WeldingService {

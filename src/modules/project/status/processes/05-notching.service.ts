@@ -1,10 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
-import { WorklogNotching } from 'src/common/entities/worklogs/worklog-06-notching.entity';
-import { WorklogPress } from 'src/common/entities/worklogs/worklog-04-press.entity';
-import { ProjectPlan } from 'src/common/entities/project-plan.entity';
-import { ProjectTarget } from 'src/common/entities/project-target.entity';
+import { WorklogNotching } from 'src/common/entities/worklog/worklog-06-notching.entity';
+import { WorklogPress } from 'src/common/entities/worklog/worklog-04-press.entity';
+import { ProjectPlan } from 'src/common/entities/project/project-plan.entity';
+import { ProjectTarget } from 'src/common/entities/project/project-target.entity';
 
 @Injectable()
 export class NotchingProcessService {

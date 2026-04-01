@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, Unique } from 'typeorm';
 import { Menu } from './menu.entity';
-import { UserRole } from '../enums/user.enum';
+import { UserRole } from '../../enums/user.enum';
 
 @Entity('menu_permissions_by_role')
 @Unique(['menu', 'role'])

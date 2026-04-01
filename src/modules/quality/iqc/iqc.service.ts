@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
-import { IQC } from 'src/common/entities/iqc.entity';
-import { IQCResult } from 'src/common/entities/iqc-result.entity';
-import { IQCCoaRef } from 'src/common/entities/iqc-coa-ref.entity';
-import { IQCImage } from 'src/common/entities/iqc-image.entity';
-import { IQCFile } from 'src/common/entities/iqc-file.entity';
+import { IQC } from 'src/common/entities/quality/iqc.entity';
+import { IQCResult } from 'src/common/entities/quality/iqc-result.entity';
+import { IQCCoaRef } from 'src/common/entities/quality/iqc-coa-ref.entity';
+import { IQCImage } from 'src/common/entities/quality/iqc-image.entity';
+import { IQCFile } from 'src/common/entities/quality/iqc-file.entity';
 import { CreateIQCDto, UpdateIQCDto } from 'src/common/dtos/iqc.dto';
 import { RustfsService } from 'src/common/services/rustfs.service';
 

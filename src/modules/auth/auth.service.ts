@@ -1,7 +1,7 @@
 import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from '../../common/entities/user.entity';
+import { User } from '../../common/entities/shared/user.entity';
 import { ChangePasswordDto, RegisterDto } from 'src/common/dtos/user.dto';
 import { Request, Response } from 'express';
 

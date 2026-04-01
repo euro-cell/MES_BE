@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, Unique } from 'typeorm';
-import { OqcProcessType, OqcItemType } from '../enums/oqc.enum';
-import { Project } from './project.entity';
+import { OqcProcessType, OqcItemType } from '../../enums/oqc.enum';
+import { Project } from '../project/project.entity';
 
 export interface SpecValue {
   target?: number;

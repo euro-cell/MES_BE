@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThan } from 'typeorm';
-import { LotPress } from '../../../../common/entities/lots/lot-03-press.entity';
-import { LotCoating } from '../../../../common/entities/lots/lot-02-coating.entity';
-import { LotSync } from '../../../../common/entities/lots/lot-sync.entity';
-import { WorklogPress } from '../../../../common/entities/worklogs/worklog-04-press.entity';
+import { LotPress } from '../../../../common/entities/lot/lot-03-press.entity';
+import { LotCoating } from '../../../../common/entities/lot/lot-02-coating.entity';
+import { LotSync } from '../../../../common/entities/lot/lot-sync.entity';
+import { WorklogPress } from '../../../../common/entities/worklog/worklog-04-press.entity';
 
 @Injectable()
 export class PressService {

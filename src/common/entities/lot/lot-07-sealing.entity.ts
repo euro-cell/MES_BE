@@ -1,7 +1,7 @@
 import { Entity, ManyToOne, JoinColumn, Column } from 'typeorm';
 import { LotBase } from './lot-00-base.entity';
-import { WorklogSealing } from '../worklogs/worklog-11-sealing.entity';
-import { WorklogFilling } from '../worklogs/worklog-12-filling.entity';
+import { WorklogSealing } from '../worklog/worklog-11-sealing.entity';
+import { WorklogFilling } from '../worklog/worklog-12-filling.entity';
 
 @Entity('lot_sealings')
 export class LotSealing extends LotBase {

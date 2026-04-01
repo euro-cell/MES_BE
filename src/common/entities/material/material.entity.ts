@@ -1,5 +1,5 @@
 import { Column, CreateDateColumn, DeleteDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
-import { MaterialOrigin, MaterialProcess, MaterialPurpose } from '../enums/material.enum';
+import { MaterialOrigin, MaterialProcess, MaterialPurpose } from '../../enums/material.enum';
 import { Exclude } from 'class-transformer';
 
 @Entity('materials')

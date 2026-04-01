@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { WorklogPress } from 'src/common/entities/worklogs/worklog-04-press.entity';
+import { WorklogPress } from 'src/common/entities/worklog/worklog-04-press.entity';
 import { CreatePressWorklogDto, PressWorklogListResponseDto, UpdatePressWorklogDto } from 'src/common/dtos/worklog/04-press.dto';
 import { EquipmentService } from 'src/modules/equipment/equipment.service';
 

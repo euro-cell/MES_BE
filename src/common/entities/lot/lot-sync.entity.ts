@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
-import { Project } from '../project.entity';
+import { Project } from '../project/project.entity';
 
 @Entity('lot_syncs')
 export class LotSync {

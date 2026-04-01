@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Menu } from 'src/common/entities/menu.entity';
-import { User } from 'src/common/entities/user.entity';
-import { MenuPermissionByUser } from 'src/common/entities/menu-permission-user.entity';
-import { MenuPermissionByRole } from 'src/common/entities/menu-permission-role.entity';
+import { Menu } from 'src/common/entities/shared/menu.entity';
+import { User } from 'src/common/entities/shared/user.entity';
+import { MenuPermissionByUser } from 'src/common/entities/shared/menu-permission-user.entity';
+import { MenuPermissionByRole } from 'src/common/entities/shared/menu-permission-role.entity';
 import { UserRole } from 'src/common/enums/user.enum';
 
 @Injectable()

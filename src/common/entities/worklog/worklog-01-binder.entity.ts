@@ -1,6 +1,6 @@
 import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { WorklogBase } from './worklog-00-base.entity';
-import { Equipment } from '../equipment.entity';
+import { Equipment } from '../equipment/equipment.entity';
 
 @Entity('worklog_binders')
 export class WorklogBinder extends WorklogBase {

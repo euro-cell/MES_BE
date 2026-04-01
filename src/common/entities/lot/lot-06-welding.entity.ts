@@ -1,6 +1,6 @@
 import { Entity, ManyToOne, JoinColumn, Column } from 'typeorm';
 import { LotBase } from './lot-00-base.entity';
-import { WorklogWelding } from '../worklogs/worklog-10-welding.entity';
+import { WorklogWelding } from '../worklog/worklog-10-welding.entity';
 
 @Entity('lot_weldings')
 export class LotWelding extends LotBase {

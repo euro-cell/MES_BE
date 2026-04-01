@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { WorklogForming } from 'src/common/entities/worklogs/worklog-08-forming.entity';
+import { WorklogForming } from 'src/common/entities/worklog/worklog-08-forming.entity';
 import { CreateFormingWorklogDto, FormingWorklogListResponseDto, UpdateFormingWorklogDto } from 'src/common/dtos/worklog/08-forming.dto';
 import { MaterialService } from 'src/modules/material/material.service';
 import { EquipmentService } from 'src/modules/equipment/equipment.service';

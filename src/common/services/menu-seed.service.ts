@@ -1,7 +1,7 @@
 import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Menu } from '../entities/menu.entity';
+import { Menu } from '../entities/shared/menu.entity';
 
 @Injectable()
 export class MenuSeedService implements OnApplicationBootstrap {

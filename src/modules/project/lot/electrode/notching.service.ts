@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThan } from 'typeorm';
-import { LotNotching } from '../../../../common/entities/lots/lot-04-notching.entity';
-import { LotPress } from '../../../../common/entities/lots/lot-03-press.entity';
-import { LotSync } from '../../../../common/entities/lots/lot-sync.entity';
-import { WorklogNotching } from '../../../../common/entities/worklogs/worklog-06-notching.entity';
+import { LotNotching } from '../../../../common/entities/lot/lot-04-notching.entity';
+import { LotPress } from '../../../../common/entities/lot/lot-03-press.entity';
+import { LotSync } from '../../../../common/entities/lot/lot-sync.entity';
+import { WorklogNotching } from '../../../../common/entities/worklog/worklog-06-notching.entity';
 
 @Injectable()
 export class NotchingService {

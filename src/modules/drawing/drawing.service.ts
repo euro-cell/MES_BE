@@ -4,8 +4,8 @@ import { Repository, IsNull } from 'typeorm';
 import { mkdirSync, writeFileSync, readdirSync, readFileSync, rmSync, existsSync } from 'fs';
 import { join, extname } from 'path';
 import { tmpdir } from 'os';
-import { Drawing } from 'src/common/entities/drawing.entity';
-import { DrawingVersion } from 'src/common/entities/drawing-version.entity';
+import { Drawing } from 'src/common/entities/drawing/drawing.entity';
+import { DrawingVersion } from 'src/common/entities/drawing/drawing-version.entity';
 import {
   CreateDrawingDto,
   CreateDrawingVersionDto,

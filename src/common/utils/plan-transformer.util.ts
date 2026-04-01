@@ -1,4 +1,4 @@
-import { ProjectPlan } from '../entities/project-plan.entity';
+import { ProjectPlan } from '../entities/project/project-plan.entity';
 
 export const PROJECT_PLAN_MAPPING: Record<string, keyof ProjectPlan> = {
   'Electrode_Slurry Mixing_Cathode': 'mixingCathode',

@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { WorklogVisualInspection } from 'src/common/entities/worklogs/worklog-15-visual-inspection.entity';
+import { WorklogVisualInspection } from 'src/common/entities/worklog/worklog-15-visual-inspection.entity';
 import {
   CreateVisualInspectionWorklogDto,
   VisualInspectionWorklogListResponseDto,

@@ -1,5 +1,5 @@
 import { PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
-import { Project } from '../project.entity';
+import { Project } from '../project/project.entity';
 
 export abstract class LotBase {
   @PrimaryGeneratedColumn()

@@ -8,8 +8,8 @@ import {
   JoinColumn,
   DeleteDateColumn,
 } from 'typeorm';
-import { Project } from './project.entity';
-import { CreateBatteryDesignDto } from '../dtos/specification.dto';
+import { Project } from '../project/project.entity';
+import { CreateBatteryDesignDto } from '../../dtos/specification.dto';
 
 @Entity('specifications')
 export class Specification {

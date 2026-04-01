@@ -1,5 +1,5 @@
 import { Exclude } from 'class-transformer';
-import { UserRole } from '../enums/user.enum';
+import { UserRole } from '../../enums/user.enum';
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn } from 'typeorm';
 
 @Entity('users')

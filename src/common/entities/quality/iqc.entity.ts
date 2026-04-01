@@ -8,7 +8,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Project } from './project.entity';
+import { Project } from '../project/project.entity';
 import { IQCResult } from './iqc-result.entity';
 import { IQCCoaRef } from './iqc-coa-ref.entity';
 import { IQCImage } from './iqc-image.entity';

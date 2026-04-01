@@ -1,8 +1,8 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateSpecificationDto, UpdateSpecificationDto } from 'src/common/dtos/specification.dto';
-import { ProjectSpecification } from 'src/common/entities/project-specifications.entity';
-import { Project } from 'src/common/entities/project.entity';
+import { ProjectSpecification } from 'src/common/entities/project/project-specifications.entity';
+import { Project } from 'src/common/entities/project/project.entity';
 import { EntityNotFoundError, QueryFailedError, Repository } from 'typeorm';
 
 @Injectable()

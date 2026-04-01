@@ -3,9 +3,9 @@ import { RouterModule } from '@nestjs/core';
 import { MaterialService } from './material.service';
 import { MaterialController } from './material.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Material } from 'src/common/entities/material.entity';
-import { MaterialHistory } from 'src/common/entities/material-history.entity';
-import { Project } from 'src/common/entities/project.entity';
+import { Material } from 'src/common/entities/material/material.entity';
+import { MaterialHistory } from 'src/common/entities/material/material-history.entity';
+import { Project } from 'src/common/entities/project/project.entity';
 import { CoaModule } from './coa/coa.module';
 
 @Module({

@@ -1,5 +1,5 @@
 import { Column, CreateDateColumn, DeleteDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
-import { CellGrade } from '../enums/cell-inventory.enum';
+import { CellGrade } from '../../enums/cell-inventory.enum';
 import { Exclude } from 'class-transformer';
 
 @Entity('cell_inventories')

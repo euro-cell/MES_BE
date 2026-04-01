@@ -1,8 +1,8 @@
 import { Entity, ManyToOne, JoinColumn, Column } from 'typeorm';
 import { LotBase } from './lot-00-base.entity';
 import { LotSealing } from './lot-07-sealing.entity';
-import { WorklogFormation } from '../worklogs/worklog-13-formation.entity';
-import { WorklogGrading } from '../worklogs/worklog-14-grading.entity';
+import { WorklogFormation } from '../worklog/worklog-13-formation.entity';
+import { WorklogGrading } from '../worklog/worklog-14-grading.entity';
 
 @Entity('lot_formations')
 export class LotFormation extends LotBase {

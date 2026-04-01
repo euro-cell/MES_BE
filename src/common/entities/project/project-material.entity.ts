@@ -1,5 +1,5 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { MaterialCategory, MaterialClassification } from '../enums/material.enum';
+import { MaterialCategory, MaterialClassification } from '../../enums/material.enum';
 import { Project } from './project.entity';
 
 @Entity('project_materials')

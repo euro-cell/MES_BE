@@ -1,6 +1,6 @@
 import { Column, CreateDateColumn, DeleteDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { Exclude } from 'class-transformer';
-import { DrawingCategory } from '../enums/drawing.enum';
+import { DrawingCategory } from '../../enums/drawing.enum';
 import { DrawingVersion } from './drawing-version.entity';
 
 @Entity('drawings')

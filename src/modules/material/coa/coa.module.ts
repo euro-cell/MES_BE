@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { MaterialCoa } from 'src/common/entities/material-coa.entity';
+import { MaterialCoa } from 'src/common/entities/material/material-coa.entity';
 import { CoaService } from './coa.service';
 import { CoaController } from './coa.controller';
 

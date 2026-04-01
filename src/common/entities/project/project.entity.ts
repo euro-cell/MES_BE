@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, OneToOne, OneToMany } from 'typeorm';
 import { ProjectPlan } from './project-plan.entity';
 import { ProjectTarget } from './project-target.entity';
-import { Specification } from './specification.entity';
+import { Specification } from '../specification/specification.entity';
 import { ProjectMaterial } from './project-material.entity';
 import { ProjectSpecification } from './project-specifications.entity';
 

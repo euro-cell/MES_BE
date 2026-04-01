@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { WorklogSlurry } from 'src/common/entities/worklogs/worklog-02-slurry.entity';
+import { WorklogSlurry } from 'src/common/entities/worklog/worklog-02-slurry.entity';
 import { CreateSlurryWorklogDto, SlurryWorklogListResponseDto, UpdateSlurryWorklogDto } from 'src/common/dtos/worklog/02-slurry.dto';
 import { MaterialService } from 'src/modules/material/material.service';
 import { EquipmentService } from 'src/modules/equipment/equipment.service';

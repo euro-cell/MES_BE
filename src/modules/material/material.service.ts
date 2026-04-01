@@ -1,8 +1,8 @@
 import { Injectable, StreamableFile } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Material } from 'src/common/entities/material.entity';
-import { MaterialHistory } from 'src/common/entities/material-history.entity';
-import { Project } from 'src/common/entities/project.entity';
+import { Material } from 'src/common/entities/material/material.entity';
+import { MaterialHistory } from 'src/common/entities/material/material-history.entity';
+import { Project } from 'src/common/entities/project/project.entity';
 import { MaterialProcess, MaterialHistoryType } from 'src/common/enums/material.enum';
 import { Repository } from 'typeorm';
 import { CreateMaterialDto, UpdateMaterialDto, ImportMaterialItemDto, ImportMaterialResultDto } from 'src/common/dtos/material.dto';

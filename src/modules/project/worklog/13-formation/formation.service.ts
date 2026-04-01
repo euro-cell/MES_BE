@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { WorklogFormation } from 'src/common/entities/worklogs/worklog-13-formation.entity';
+import { WorklogFormation } from 'src/common/entities/worklog/worklog-13-formation.entity';
 import {
   CreateFormationWorklogDto,
   FormationWorklogListResponseDto,

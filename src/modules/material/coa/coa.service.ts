@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, StreamableFile } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { MaterialCoa } from 'src/common/entities/material-coa.entity';
+import { MaterialCoa } from 'src/common/entities/material/material-coa.entity';
 import { CreateCoaDto } from 'src/common/dtos/coa.dto';
 import { RustfsService } from 'src/common/services/rustfs.service';
 

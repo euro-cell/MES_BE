@@ -6,7 +6,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Exclude } from 'class-transformer';
-import { EquipmentCategory, EquipmentGrade, EquipmentProcess } from '../enums/equipment.enum';
+import { EquipmentCategory, EquipmentGrade, EquipmentProcess } from '../../enums/equipment.enum';
 
 @Entity('equipments')
 export class Equipment {

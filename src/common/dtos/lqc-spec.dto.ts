@@ -1,7 +1,7 @@
 import { IsEnum, IsNotEmpty, IsObject } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { LqcProcessType, LqcItemType } from '../enums/lqc.enum';
-import type { LqcSpecs } from '../entities/lqc-spec.entity';
+import type { LqcSpecs } from '../entities/specification/lqc-spec.entity';
 
 export class CreateLqcSpecDto {
   @ApiProperty({ enum: LqcProcessType, example: 'MIXING_CATHODE' })

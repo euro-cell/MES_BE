@@ -1,6 +1,6 @@
 import { PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
-import { Project } from '../project.entity';
-import { Equipment } from '../equipment.entity';
+import { Project } from '../project/project.entity';
+import { Equipment } from '../equipment/equipment.entity';
 
 export abstract class WorklogBase {
   @PrimaryGeneratedColumn()

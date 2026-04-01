@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ProjectPlan } from '../../../common/entities/project-plan.entity';
-import { Project } from '../../../common/entities/project.entity';
+import { ProjectPlan } from '../../../common/entities/project/project-plan.entity';
+import { Project } from '../../../common/entities/project/project.entity';
 import { Repository } from 'typeorm';
 import { CreateProjectPlanDto, UpdateProjectPlanDto } from 'src/common/dtos/project-plan.dto';
 import { PROJECT_PLAN_MAPPING } from 'src/common/utils/plan-transformer.util';

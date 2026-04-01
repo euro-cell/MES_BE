@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { StackingService } from './stacking.service';
 import { StackingController } from './stacking.controller';
-import { WorklogStacking } from 'src/common/entities/worklogs/worklog-09-stacking.entity';
+import { WorklogStacking } from 'src/common/entities/worklog/worklog-09-stacking.entity';
 import { MaterialModule } from 'src/modules/material/material.module';
 import { EquipmentModule } from 'src/modules/equipment/equipment.module';
 

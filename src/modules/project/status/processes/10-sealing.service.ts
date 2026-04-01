@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
-import { WorklogSealing } from 'src/common/entities/worklogs/worklog-11-sealing.entity';
-import { ProjectPlan } from 'src/common/entities/project-plan.entity';
-import { ProjectTarget } from 'src/common/entities/project-target.entity';
+import { WorklogSealing } from 'src/common/entities/worklog/worklog-11-sealing.entity';
+import { ProjectPlan } from 'src/common/entities/project/project-plan.entity';
+import { ProjectTarget } from 'src/common/entities/project/project-target.entity';
 
 @Injectable()
 export class SealingProcessService {

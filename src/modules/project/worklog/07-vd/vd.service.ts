@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { WorklogVd } from 'src/common/entities/worklogs/worklog-07-vd.entity';
+import { WorklogVd } from 'src/common/entities/worklog/worklog-07-vd.entity';
 import { CreateVdWorklogDto, VdWorklogListResponseDto, UpdateVdWorklogDto } from 'src/common/dtos/worklog/07-vd.dto';
 import { EquipmentService } from 'src/modules/equipment/equipment.service';
 

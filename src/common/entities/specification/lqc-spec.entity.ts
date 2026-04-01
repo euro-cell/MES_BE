@@ -6,8 +6,8 @@ import {
   PrimaryGeneratedColumn,
   Unique,
 } from 'typeorm';
-import { LqcProcessType, LqcItemType } from '../enums/lqc.enum';
-import { Project } from './project.entity';
+import { LqcProcessType, LqcItemType } from '../../enums/lqc.enum';
+import { Project } from '../project/project.entity';
 
 export interface SpecValue {
   target?: number;

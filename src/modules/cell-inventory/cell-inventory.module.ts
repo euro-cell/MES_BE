@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RouterModule } from '@nestjs/core';
-import { CellInventory } from 'src/common/entities/cell-inventory.entity';
+import { CellInventory } from 'src/common/entities/cell/cell-inventory.entity';
 import { CellInventoryService } from './cell-inventory.service';
 import { CellInventoryController } from './cell-inventory.controller';
 import { NcrModule } from './ncr/ncr.module';

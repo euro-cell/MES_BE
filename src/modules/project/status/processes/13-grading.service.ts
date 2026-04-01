@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
-import { WorklogGrading } from 'src/common/entities/worklogs/worklog-14-grading.entity';
-import { ProjectPlan } from 'src/common/entities/project-plan.entity';
-import { ProjectTarget } from 'src/common/entities/project-target.entity';
+import { WorklogGrading } from 'src/common/entities/worklog/worklog-14-grading.entity';
+import { ProjectPlan } from 'src/common/entities/project/project-plan.entity';
+import { ProjectTarget } from 'src/common/entities/project/project-target.entity';
 
 @Injectable()
 export class GradingProcessService {

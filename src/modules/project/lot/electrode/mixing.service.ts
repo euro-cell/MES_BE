@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThan } from 'typeorm';
-import { LotMixing } from '../../../../common/entities/lots/lot-01-mixing.entity';
-import { LotSync } from '../../../../common/entities/lots/lot-sync.entity';
-import { WorklogBinder } from '../../../../common/entities/worklogs/worklog-01-binder.entity';
-import { WorklogSlurry } from '../../../../common/entities/worklogs/worklog-02-slurry.entity';
+import { LotMixing } from '../../../../common/entities/lot/lot-01-mixing.entity';
+import { LotSync } from '../../../../common/entities/lot/lot-sync.entity';
+import { WorklogBinder } from '../../../../common/entities/worklog/worklog-01-binder.entity';
+import { WorklogSlurry } from '../../../../common/entities/worklog/worklog-02-slurry.entity';
 
 @Injectable()
 export class MixingService {

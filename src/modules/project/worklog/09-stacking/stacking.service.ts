@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { WorklogStacking } from 'src/common/entities/worklogs/worklog-09-stacking.entity';
+import { WorklogStacking } from 'src/common/entities/worklog/worklog-09-stacking.entity';
 import {
   CreateStackingWorklogDto,
   StackingWorklogListResponseDto,

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { StreamableFile } from '@nestjs/common';
-import { Maintenance } from 'src/common/entities/maintenance.entity';
+import { Maintenance } from 'src/common/entities/equipment/maintenance.entity';
 import { CreateMaintenanceDto, UpdateMaintenanceDto } from 'src/common/dtos/maintenance.dto';
 import { ExcelService } from 'src/common/services/excel.service';
 import { ExcelUtil } from 'src/common/utils/excel.util';

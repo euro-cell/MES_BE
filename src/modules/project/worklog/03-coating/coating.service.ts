@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { WorklogCoating } from 'src/common/entities/worklogs/worklog-03-coating.entity';
+import { WorklogCoating } from 'src/common/entities/worklog/worklog-03-coating.entity';
 import { CreateCoatingWorklogDto, CoatingWorklogListResponseDto, UpdateCoatingWorklogDto } from 'src/common/dtos/worklog/03-coating.dto';
 import { MaterialService } from 'src/modules/material/material.service';
 import { EquipmentService } from 'src/modules/equipment/equipment.service';

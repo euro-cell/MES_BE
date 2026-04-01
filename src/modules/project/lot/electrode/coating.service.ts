@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThan } from 'typeorm';
-import { LotCoating } from '../../../../common/entities/lots/lot-02-coating.entity';
-import { LotSync } from '../../../../common/entities/lots/lot-sync.entity';
-import { WorklogCoating } from '../../../../common/entities/worklogs/worklog-03-coating.entity';
-import { WorklogSlurry } from '../../../../common/entities/worklogs/worklog-02-slurry.entity';
-import { Material } from '../../../../common/entities/material.entity';
+import { LotCoating } from '../../../../common/entities/lot/lot-02-coating.entity';
+import { LotSync } from '../../../../common/entities/lot/lot-sync.entity';
+import { WorklogCoating } from '../../../../common/entities/worklog/worklog-03-coating.entity';
+import { WorklogSlurry } from '../../../../common/entities/worklog/worklog-02-slurry.entity';
+import { Material } from '../../../../common/entities/material/material.entity';
 
 @Injectable()
 export class CoatingService {
