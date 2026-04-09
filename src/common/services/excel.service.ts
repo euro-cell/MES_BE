@@ -24,7 +24,7 @@ export interface ExcelGenerateOptions<T> {
 
 @Injectable()
 export class ExcelService {
-  private readonly templatePath = join(__dirname, '..', '..', 'assets');
+  private readonly templatePath = join(__dirname, '..', '..', '..', 'assets');
 
   /**
    * 템플릿 기반 엑셀 파일 생성

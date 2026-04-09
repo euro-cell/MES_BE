@@ -58,7 +58,7 @@ type WorklogEntity =
 
 @Injectable()
 export class WorklogService {
-  private readonly templatePath = join(__dirname, '..', '..', '..', 'assets', 'worklog');
+  private readonly templatePath = join(__dirname, '..', '..', '..', '..', 'assets', 'worklog');
 
   constructor(
     @InjectRepository(WorklogBinder)
