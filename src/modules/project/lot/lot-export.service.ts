@@ -14,7 +14,7 @@ import { FormationLotService } from './formation/formation.service';
 
 @Injectable()
 export class LotExportService {
-  private readonly templatePath = path.join(process.cwd(), 'data', 'templates', 'lot');
+  private readonly templatePath = path.join(__dirname, '..', '..', '..', 'assets', 'lot');
 
   constructor(
     private readonly mixingService: MixingService,

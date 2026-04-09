@@ -3,6 +3,7 @@ import { StreamableFile } from '@nestjs/common';
 import * as ExcelJS from 'exceljs';
 import * as path from 'path';
 import * as fs from 'fs';
+import { join } from 'path';
 import { ExcelUtil } from '../utils/excel.util';
 
 /**
@@ -23,7 +24,7 @@ export interface ExcelGenerateOptions<T> {
 
 @Injectable()
 export class ExcelService {
-  private readonly templatePath = path.join(process.cwd(), 'data', 'templates');
+  private readonly templatePath = join(__dirname, '..', '..', 'assets');
 
   /**
    * 템플릿 기반 엑셀 파일 생성
