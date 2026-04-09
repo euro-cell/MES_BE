@@ -58,7 +58,10 @@ type WorklogEntity =
 
 @Injectable()
 export class WorklogService {
-  private readonly templatePath = join(__dirname, '..', '..', '..', '..', 'assets', 'worklog');
+  private readonly templatePath =
+    process.env.NODE_ENV === 'production'
+      ? join(__dirname, '..', '..', '..', '..', 'assets', 'worklog')
+      : join(process.cwd(), 'src', 'assets', 'worklog');
 
   constructor(
     @InjectRepository(WorklogBinder)

@@ -313,7 +313,10 @@ export class StatusService {
     }
   }
 
-  private readonly templatePath = join(__dirname, '..', '..', '..', '..', 'assets', 'status');
+  private readonly templatePath =
+    process.env.NODE_ENV === 'production'
+      ? join(__dirname, '..', '..', '..', '..', 'assets', 'status')
+      : join(process.cwd(), 'src', 'assets', 'status');
 
   async exportElectrodeStatus(projectId: number): Promise<{ file: StreamableFile; productionName: string }> {
     // 1. 프로젝트 정보 조회
