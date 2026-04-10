@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../../common/entities/shared/user.entity';
@@ -20,7 +20,7 @@ export class AuthService {
 
   async validateUser(employeeNumber: string, password: string) {
     const user = await this.userRepository.findOne({ where: { employeeNumber } });
-    if (!user) throw new UnauthorizedException('존재하지 않는 사번입니다.');
+    if (!user) throw new NotFoundException('존재하지 않는 사번입니다.');
 
     // 패스워드 임시 구현
     if (user.password !== password) return null;
