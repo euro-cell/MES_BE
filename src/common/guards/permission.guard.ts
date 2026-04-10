@@ -1,4 +1,4 @@
-import { CanActivate, ExecutionContext, Injectable, ForbiddenException } from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable, ForbiddenException, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -22,18 +22,21 @@ export class PermissionGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    const { method } = request;
+    const { method, path } = request;
 
-    if (method === 'GET') return true;
+    // 공개 엔드포인트 (로그인, 회원가입, 상태 확인, 로그아웃)
+    const publicPaths = ['/auth/login', '/auth/register', '/auth/status', '/auth/logout'];
+    if (publicPaths.some((p) => path.startsWith(p))) return true;
 
     const requiredPerm = this.reflector.getAllAndOverride<{ menu: string; action: 'create' | 'update' | 'delete' }>(PERMISSION_KEY, [
       context.getHandler(),
       context.getClass(),
     ]);
-    if (!requiredPerm) return true;
 
     const user: User = request.user;
-    if (!user) throw new ForbiddenException('로그인이 필요합니다.');
+    if (!user) throw new UnauthorizedException('세션이 만료되었습니다.');
+
+    if (!requiredPerm) return true;
 
     if (user.role === UserRole.ADMIN) return true;
 
