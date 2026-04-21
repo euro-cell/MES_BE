@@ -22,6 +22,7 @@ import { EquipmentModule } from 'src/modules/equipment/equipment.module';
 import { CommonModule } from 'src/common/common.module';
 import { DashboardModule } from 'src/modules/dashboard/dashboard.module';
 import { RequestLoggerMiddleware } from 'src/common/middleware/request-logger.middleware';
+import { SessionRefreshMiddleware } from 'src/common/middleware/session-refresh.middleware';
 
 @Module({
   imports: [
@@ -58,6 +59,6 @@ import { RequestLoggerMiddleware } from 'src/common/middleware/request-logger.mi
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(RequestLoggerMiddleware).forRoutes('*');
+    consumer.apply(RequestLoggerMiddleware, SessionRefreshMiddleware).forRoutes('*');
   }
 }
