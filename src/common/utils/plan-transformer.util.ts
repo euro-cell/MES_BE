@@ -76,8 +76,12 @@ export class PlanTransformerUtil {
 
     const filtered = result.map((monthData) => {
       const validWeeks = monthData.weeks.filter((w) => {
-        const weekStart = new Date(start.getFullYear(), monthData.month - 1, w.range[0]);
-        const weekEnd = new Date(start.getFullYear(), monthData.month - 1, w.range[w.range.length - 1]);
+        let year = start.getFullYear();
+        if (monthData.month < start.getMonth() + 1 && end.getFullYear() > year) {
+          year = end.getFullYear();
+        }
+        const weekStart = new Date(year, monthData.month - 1, w.range[0]);
+        const weekEnd = new Date(year, monthData.month - 1, w.range[w.range.length - 1]);
         return weekEnd >= start && weekStart <= end;
       });
       return { month: monthData.month, weeks: validWeeks };
