@@ -17,7 +17,6 @@ export class LotSearchController {
 
     const processResult = await this.lotService.searchProcessLots(lot);
     const materialResult = await this.lotService.searchRawMaterialLots(processResult);
-    console.log('🚀 ~ materialResult:', materialResult);
 
     return {
       projectId: processResult.projectId,
