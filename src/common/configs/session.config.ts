@@ -7,6 +7,7 @@ export const createSessionConfig = (configService: ConfigService): session.Sessi
   store: memoryStore,
   secret: configService.get<string>('SESSION_SECRET') || 'eurocell_secret_key',
   resave: true,
+  rolling: true,
   saveUninitialized: false,
   cookie: {
     httpOnly: true,

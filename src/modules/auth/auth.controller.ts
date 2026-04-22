@@ -30,7 +30,9 @@ export class AuthController {
   @Get('status')
   async status(@Req() req: Request) {
     if (req.isAuthenticated && req.isAuthenticated()) {
-      return { authenticated: true, user: req.user };
+      const expiresAt = req.session?.cookie?.expires ? new Date(req.session.cookie.expires).toISOString() : null;
+      const expiresIn = req.session?.cookie?.originalMaxAge ? Math.floor(req.session.cookie.originalMaxAge / 1000) : null;
+      return { authenticated: true, user: req.user, expiresAt, expiresIn };
     }
     return { authenticated: false };
   }

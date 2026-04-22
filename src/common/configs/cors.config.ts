@@ -6,5 +6,5 @@ export const createCorsConfig = (configService: ConfigService): CorsOptions => (
   origin: true,
   methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
   credentials: true,
-  exposedHeaders: ['set-cookie'],
+  exposedHeaders: ['set-cookie', 'X-Session-Expires'],
 });
