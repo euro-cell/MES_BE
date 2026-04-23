@@ -28,7 +28,7 @@ export class PermissionGuard implements CanActivate {
     const publicPaths = ['/auth/login', '/auth/register', '/auth/status', '/auth/logout'];
     if (publicPaths.some((p) => path.startsWith(p))) return true;
 
-    const requiredPerm = this.reflector.getAllAndOverride<{ menu: string; action: 'create' | 'update' | 'delete' }>(PERMISSION_KEY, [
+    const requiredPerm = this.reflector.getAllAndOverride<{ menu: string | string[]; action: 'create' | 'update' | 'delete' }>(PERMISSION_KEY, [
       context.getHandler(),
       context.getClass(),
     ]);
@@ -40,20 +40,29 @@ export class PermissionGuard implements CanActivate {
 
     if (user.role === UserRole.ADMIN) return true;
 
-    const menu = await this.menuRepo.findOne({ where: { name: requiredPerm.menu } });
-    if (!menu) throw new ForbiddenException('잘못된 메뉴 이름입니다.');
+    const menus = Array.isArray(requiredPerm.menu) ? requiredPerm.menu : [requiredPerm.menu];
+    const canAccess = await Promise.all(
+      menus.map(async (menuName) => {
+        const menu = await this.menuRepo.findOne({ where: { name: menuName } });
+        if (!menu) throw new ForbiddenException('잘못된 메뉴 이름입니다.');
 
-    const userPerm = await this.userPermRepo.findOne({
-      where: { user: { id: user.id }, menu: { id: menu.id } },
-      relations: ['menu', 'user'],
-    });
-    if (userPerm && userPerm[`can${capitalize(requiredPerm.action)}`]) return true;
+        const userPerm = await this.userPermRepo.findOne({
+          where: { user: { id: user.id }, menu: { id: menu.id } },
+          relations: ['menu', 'user'],
+        });
+        if (userPerm && userPerm[`can${capitalize(requiredPerm.action)}`]) return true;
 
-    const rolePerm = await this.rolePermRepo.findOne({
-      where: { role: user.role, menu: { id: menu.id } },
-      relations: ['menu'],
-    });
-    if (rolePerm && rolePerm[`can${capitalize(requiredPerm.action)}`]) return true;
+        const rolePerm = await this.rolePermRepo.findOne({
+          where: { role: user.role, menu: { id: menu.id } },
+          relations: ['menu'],
+        });
+        if (rolePerm && rolePerm[`can${capitalize(requiredPerm.action)}`]) return true;
+
+        return false;
+      }),
+    );
+
+    if (canAccess.some((result) => result === true)) return true;
 
     throw new ForbiddenException('이 작업에 대한 권한이 없습니다.');
   }
