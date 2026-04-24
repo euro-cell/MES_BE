@@ -1,11 +1,16 @@
-import { Controller, Get, Post, Patch, Delete, Body, Query, Param, ParseIntPipe, Res, StreamableFile } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Query, Param, ParseIntPipe, Res, StreamableFile, UseGuards } from '@nestjs/common';
 import type { Response } from 'express';
 import { MaterialService } from './material.service';
 import { ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { CreateMaterialDto, UpdateMaterialDto, ImportMaterialDto, ImportMaterialResultDto } from 'src/common/dtos/material/material.dto';
 import { MaterialProcess } from 'src/common/enums/material.enum';
+import { SessionAuthGuard } from 'src/common/guards/session-auth.guard';
+import { PermissionGuard } from 'src/common/guards/permission.guard';
+import { RequirePermission } from 'src/common/decorators/permission.decorator';
+import { MenuName, PermissionAction } from 'src/common/enums/menu.enum';
 
 @Controller('material')
+@UseGuards(SessionAuthGuard, PermissionGuard)
 export class MaterialController {
   constructor(private readonly materialService: MaterialService) {}
 
@@ -37,6 +42,7 @@ export class MaterialController {
   }
 
   @Post('electrode/import')
+  @RequirePermission(MenuName.MATERIAL_MANAGEMENT, PermissionAction.CREATE)
   @ApiOperation({ summary: '전극 자재 일괄 등록/수정 (Excel 업로드)' })
   async importElectrodeMaterial(@Body() dto: ImportMaterialDto): Promise<ImportMaterialResultDto> {
     return this.materialService.importElectrodeMaterials(dto.materials);
@@ -64,6 +70,7 @@ export class MaterialController {
   }
 
   @Post('assembly/import')
+  @RequirePermission(MenuName.MATERIAL_MANAGEMENT, PermissionAction.CREATE)
   @ApiOperation({ summary: '조립 자재 일괄 등록/수정 (Excel 업로드)' })
   async importAssemblyMaterial(@Body() dto: ImportMaterialDto): Promise<ImportMaterialResultDto> {
     return this.materialService.importAssemblyMaterials(dto.materials);
@@ -88,16 +95,19 @@ export class MaterialController {
   }
 
   @Post('electrode')
+  @RequirePermission(MenuName.MATERIAL_MANAGEMENT, PermissionAction.CREATE)
   async createElectrodeMaterial(@Body() dto: CreateMaterialDto) {
     return this.materialService.createElectrodeMaterial(dto);
   }
 
   @Patch('electrode/:id')
+  @RequirePermission(MenuName.MATERIAL_MANAGEMENT, PermissionAction.UPDATE)
   async updateElectrodeMaterial(@Param('id', ParseIntPipe) id: number, @Body() updateMaterialDto: UpdateMaterialDto) {
     return this.materialService.updateElectrodeMaterial(id, updateMaterialDto);
   }
 
   @Delete('electrode/:id')
+  @RequirePermission(MenuName.MATERIAL_MANAGEMENT, PermissionAction.DELETE)
   @ApiQuery({ name: 'hardDelete', required: false, description: 'hardDelete 여부 (true/false)', example: false })
   async deleteElectrodeMaterial(@Param('id', ParseIntPipe) id: number, @Query('hardDelete') hardDelete?: string) {
     const isHardDelete = hardDelete === 'true';
@@ -105,16 +115,19 @@ export class MaterialController {
   }
 
   @Post('assembly')
+  @RequirePermission(MenuName.MATERIAL_MANAGEMENT, PermissionAction.CREATE)
   async createAssemblyMaterial(@Body() dto: CreateMaterialDto) {
     return this.materialService.createAssemblyMaterial(dto);
   }
 
   @Patch('assembly/:id')
+  @RequirePermission(MenuName.MATERIAL_MANAGEMENT, PermissionAction.UPDATE)
   async updateAssemblyMaterial(@Param('id', ParseIntPipe) id: number, @Body() updateMaterialDto: UpdateMaterialDto) {
     return this.materialService.updateAssemblyMaterial(id, updateMaterialDto);
   }
 
   @Delete('assembly/:id')
+  @RequirePermission(MenuName.MATERIAL_MANAGEMENT, PermissionAction.DELETE)
   @ApiQuery({ name: 'hardDelete', required: false, description: 'hardDelete 여부 (true/false)', example: false })
   async deleteAssemblyMaterial(@Param('id', ParseIntPipe) id: number, @Query('hardDelete') hardDelete?: string) {
     const isHardDelete = hardDelete === 'true';

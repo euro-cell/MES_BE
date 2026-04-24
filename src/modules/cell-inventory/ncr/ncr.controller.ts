@@ -1,10 +1,15 @@
-import { Controller, Get, Patch, Query, Body } from '@nestjs/common';
+import { Controller, Get, Patch, Query, Body, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 import { NcrService } from './ncr.service';
 import { NcrStatisticsResponseDto, NcrDetailResponseDto, UpdateNcrDetailRequestDto } from 'src/common/dtos/ncr/ncr-statistics.dto';
+import { SessionAuthGuard } from 'src/common/guards/session-auth.guard';
+import { PermissionGuard } from 'src/common/guards/permission.guard';
+import { RequirePermission } from 'src/common/decorators/permission.decorator';
+import { MenuName, PermissionAction } from 'src/common/enums/menu.enum';
 
 @ApiTags('Cell NCR')
 @Controller()
+@UseGuards(SessionAuthGuard, PermissionGuard)
 export class NcrController {
   constructor(private readonly ncrService: NcrService) {}
 
@@ -25,6 +30,7 @@ export class NcrController {
   }
 
   @Patch('detail')
+  @RequirePermission(MenuName.CELL_NCR, PermissionAction.UPDATE)
   @ApiOperation({ summary: 'NCR 세부 현황 저장 (프로젝트별)' })
   @ApiQuery({ name: 'projectNo', required: false, description: '프로젝트 번호 (optional)' })
   @ApiResponse({ description: '저장 성공', schema: { example: { message: '저장되었습니다.' } } })

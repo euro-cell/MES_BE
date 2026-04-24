@@ -1,10 +1,15 @@
-import { Controller, Get, Post, Param, Body, Res, StreamableFile } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Res, StreamableFile, UseGuards } from '@nestjs/common';
 import type { Response } from 'express';
 import { ProcessTemplateFile, WorklogService } from './worklog.service';
 import { ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiParam, ApiBody } from '@nestjs/swagger';
 import { ExportWorklogRequestDto } from 'src/common/dtos/worklog/export-worklog.dto';
+import { SessionAuthGuard } from 'src/common/guards/session-auth.guard';
+import { PermissionGuard } from 'src/common/guards/permission.guard';
+import { RequirePermission } from 'src/common/decorators/permission.decorator';
+import { MenuName, PermissionAction } from 'src/common/enums/menu.enum';
 
 @Controller()
+@UseGuards(SessionAuthGuard, PermissionGuard)
 export class WorklogController {
   constructor(private readonly worklogService: WorklogService) {}
 
@@ -18,6 +23,7 @@ export class WorklogController {
   }
 
   @Post(':process/export')
+  @RequirePermission(MenuName.WORKLOG, PermissionAction.CREATE)
   @ApiOperation({ summary: '다중 작업일지 Excel 내보내기' })
   @ApiParam({ name: 'process', enum: Object.keys(ProcessTemplateFile), description: '공정명' })
   @ApiBody({ type: ExportWorklogRequestDto })

@@ -1,11 +1,16 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, Res, StreamableFile } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, Res, StreamableFile, UseGuards } from '@nestjs/common';
 import type { Response } from 'express';
 import { ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { EquipmentService } from './equipment.service';
 import { categoryMap, CreateEquipmentDto, EquipmentSearchDto, LineSearchDto, UpdateEquipmentDto } from 'src/common/dtos/equipment/equipment.dto';
 import { EquipmentProcess } from 'src/common/enums/equipment.enum';
+import { SessionAuthGuard } from 'src/common/guards/session-auth.guard';
+import { PermissionGuard } from 'src/common/guards/permission.guard';
+import { RequirePermission } from 'src/common/decorators/permission.decorator';
+import { MenuName, PermissionAction } from 'src/common/enums/menu.enum';
 
 @Controller('equipment')
+@UseGuards(SessionAuthGuard, PermissionGuard)
 export class EquipmentController {
   constructor(private readonly equipmentService: EquipmentService) {}
 
@@ -33,16 +38,19 @@ export class EquipmentController {
   }
 
   @Post()
+  @RequirePermission(MenuName.EQUIPMENT_LIST, PermissionAction.CREATE)
   async create(@Body() createEquipmentDto: CreateEquipmentDto) {
     return this.equipmentService.create(createEquipmentDto);
   }
 
   @Patch(':id')
+  @RequirePermission(MenuName.EQUIPMENT_LIST, PermissionAction.UPDATE)
   async update(@Param('id', ParseIntPipe) id: number, @Body() updateEquipmentDto: UpdateEquipmentDto) {
     return this.equipmentService.update(id, updateEquipmentDto);
   }
 
   @Delete(':id')
+  @RequirePermission(MenuName.EQUIPMENT_LIST, PermissionAction.DELETE)
   async remove(@Param('id', ParseIntPipe) id: number) {
     return this.equipmentService.remove(id);
   }

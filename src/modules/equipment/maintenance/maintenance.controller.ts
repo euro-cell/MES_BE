@@ -1,10 +1,15 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Res, StreamableFile } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Res, StreamableFile, UseGuards } from '@nestjs/common';
 import type { Response } from 'express';
 import { ApiOperation } from '@nestjs/swagger';
 import { MaintenanceService } from './maintenance.service';
 import { CreateMaintenanceDto, UpdateMaintenanceDto } from 'src/common/dtos/equipment/maintenance.dto';
+import { SessionAuthGuard } from 'src/common/guards/session-auth.guard';
+import { PermissionGuard } from 'src/common/guards/permission.guard';
+import { RequirePermission } from 'src/common/decorators/permission.decorator';
+import { MenuName, PermissionAction } from 'src/common/enums/menu.enum';
 
 @Controller()
+@UseGuards(SessionAuthGuard, PermissionGuard)
 export class MaintenanceController {
   constructor(private readonly maintenanceService: MaintenanceService) {}
 
@@ -14,16 +19,19 @@ export class MaintenanceController {
   }
 
   @Post()
+  @RequirePermission(MenuName.EQUIPMENT_MAINTENANCE, PermissionAction.CREATE)
   async create(@Body() createMaintenanceDto: CreateMaintenanceDto) {
     return this.maintenanceService.create(createMaintenanceDto);
   }
 
   @Patch(':id')
+  @RequirePermission(MenuName.EQUIPMENT_MAINTENANCE, PermissionAction.UPDATE)
   async update(@Param('id', ParseIntPipe) id: number, @Body() updateMaintenanceDto: UpdateMaintenanceDto) {
     return this.maintenanceService.update(id, updateMaintenanceDto);
   }
 
   @Delete(':id')
+  @RequirePermission(MenuName.EQUIPMENT_MAINTENANCE, PermissionAction.DELETE)
   async remove(@Param('id', ParseIntPipe) id: number) {
     return this.maintenanceService.remove(id);
   }

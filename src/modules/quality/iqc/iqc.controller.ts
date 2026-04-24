@@ -1,12 +1,17 @@
-import { Controller, Get, Post, Put, Patch, Delete, Body, Param, UseInterceptors, UploadedFiles, UploadedFile } from '@nestjs/common';
+import { Controller, Get, Post, Put, Patch, Delete, Body, Param, UseInterceptors, UploadedFiles, UploadedFile, UseGuards } from '@nestjs/common';
 import { FileFieldsInterceptor, FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiOperation, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { IqcService } from './iqc.service';
 import { CreateIQCDto, UpdateIQCDto, UpdateImageLabelDto, UploadIQCFileDto, UploadIQCImagesDto } from 'src/common/dtos/quality/iqc.dto';
 import { multerConfig } from 'src/common/configs/multer.config';
+import { SessionAuthGuard } from 'src/common/guards/session-auth.guard';
+import { PermissionGuard } from 'src/common/guards/permission.guard';
+import { RequirePermission } from 'src/common/decorators/permission.decorator';
+import { MenuName, PermissionAction } from 'src/common/enums/menu.enum';
 
 @ApiTags('Quality - IQC')
 @Controller()
+@UseGuards(SessionAuthGuard, PermissionGuard)
 export class IqcController {
   constructor(private readonly iqcService: IqcService) {}
 
@@ -23,6 +28,7 @@ export class IqcController {
   }
 
   @Post(':projectId')
+  @RequirePermission(MenuName.IQC, PermissionAction.CREATE)
   @ApiOperation({
     summary: 'IQC 검사 이력 생성',
     description: 'results 중 isPassed=false 항목이 있으면 최종 합불(isPassed)이 자동으로 false로 설정됩니다.',
@@ -32,6 +38,7 @@ export class IqcController {
   }
 
   @Put('detail/:id')
+  @RequirePermission(MenuName.IQC, PermissionAction.UPDATE)
   @ApiOperation({
     summary: 'IQC 검사 이력 수정',
     description: 'results / coaRefs / images를 전달하면 기존 데이터를 전체 교체합니다.',
@@ -41,12 +48,14 @@ export class IqcController {
   }
 
   @Delete('detail/:id')
+  @RequirePermission(MenuName.IQC, PermissionAction.DELETE)
   @ApiOperation({ summary: 'IQC 검사 이력 삭제' })
   async remove(@Param('id') id: number) {
     return this.iqcService.remove(id);
   }
 
   @Post('detail/:id/images')
+  @RequirePermission(MenuName.IQC, PermissionAction.CREATE)
   @ApiOperation({
     summary: 'IQC 이미지 업로드',
     description: 'multipart/form-data로 이미지 파일을 업로드합니다. imageType 필드와 files를 함께 전송하세요.',
@@ -63,18 +72,21 @@ export class IqcController {
   }
 
   @Patch('images/:imageId/label')
+  @RequirePermission(MenuName.IQC, PermissionAction.UPDATE)
   @ApiOperation({ summary: 'IQC 이미지 레이블 수정' })
   async updateImageLabel(@Param('imageId') imageId: number, @Body() dto: UpdateImageLabelDto) {
     return this.iqcService.updateImageLabel(imageId, dto.imageLabel);
   }
 
   @Delete('images/:imageId')
+  @RequirePermission(MenuName.IQC, PermissionAction.DELETE)
   @ApiOperation({ summary: 'IQC 이미지 삭제' })
   async removeImage(@Param('imageId') imageId: number) {
     return this.iqcService.removeImage(imageId);
   }
 
   @Post('detail/:id/files')
+  @RequirePermission(MenuName.IQC, PermissionAction.CREATE)
   @ApiOperation({
     summary: 'IQC 파일 업로드',
     description: 'multipart/form-data로 파일(PDF 등)을 업로드합니다. fileType 필드와 file을 함께 전송하세요.',
@@ -91,6 +103,7 @@ export class IqcController {
   }
 
   @Delete('files/:fileId')
+  @RequirePermission(MenuName.IQC, PermissionAction.DELETE)
   @ApiOperation({ summary: 'IQC 파일 삭제' })
   async removeFile(@Param('fileId') fileId: number) {
     return this.iqcService.removeFile(fileId);

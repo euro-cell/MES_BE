@@ -1,11 +1,16 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { LqcService } from './lqc.service';
 import { LqcProcessType, LqcItemType } from 'src/common/enums/lqc.enum';
 import { CreateLqcSpecDto } from 'src/common/dtos/quality/lqc-spec.dto';
+import { SessionAuthGuard } from 'src/common/guards/session-auth.guard';
+import { PermissionGuard } from 'src/common/guards/permission.guard';
+import { RequirePermission } from 'src/common/decorators/permission.decorator';
+import { MenuName, PermissionAction } from 'src/common/enums/menu.enum';
 
 @ApiTags('Quality - LQC')
 @Controller()
+@UseGuards(SessionAuthGuard, PermissionGuard)
 export class LqcController {
   constructor(private readonly lqcService: LqcService) {}
 
@@ -20,6 +25,7 @@ export class LqcController {
   }
 
   @Post(':projectId/spec')
+  @RequirePermission(MenuName.LQC, PermissionAction.CREATE)
   @ApiOperation({ summary: 'LQC 규격 저장 (신규 생성 또는 업데이트)' })
   async upsertSpec(@Param('projectId') projectId: number, @Body() dto: CreateLqcSpecDto) {
     return this.lqcService.upsertSpec(projectId, dto);

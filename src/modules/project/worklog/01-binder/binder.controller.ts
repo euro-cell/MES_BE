@@ -1,14 +1,20 @@
-import { Controller, Post, Body, Param, Get, Patch, Delete, ParseIntPipe } from '@nestjs/common';
+import { Controller, Post, Body, Param, Get, Patch, Delete, ParseIntPipe, UseGuards } from '@nestjs/common';
 import { BinderService } from './binder.service';
 import { ApiTags, ApiOkResponse } from '@nestjs/swagger';
 import { CreateBinderWorklogDto, BinderWorklogListResponseDto, UpdateBinderWorklogDto } from 'src/common/dtos/worklog/01-binder.dto';
+import { SessionAuthGuard } from 'src/common/guards/session-auth.guard';
+import { PermissionGuard } from 'src/common/guards/permission.guard';
+import { RequirePermission } from 'src/common/decorators/permission.decorator';
+import { MenuName, PermissionAction } from 'src/common/enums/menu.enum';
 
 @ApiTags('Production Worklog - Binder')
 @Controller(':projectId/worklog')
+@UseGuards(SessionAuthGuard, PermissionGuard)
 export class BinderController {
   constructor(private readonly binderService: BinderService) {}
 
   @Post('binder')
+  @RequirePermission(MenuName.WORKLOG, PermissionAction.CREATE)
   async createBinderWorklog(@Param('projectId', ParseIntPipe) projectId: number, @Body() dto: CreateBinderWorklogDto) {
     return await this.binderService.createBinderWorklog(projectId, dto);
   }
@@ -31,6 +37,7 @@ export class BinderController {
   }
 
   @Patch(':worklogId/binder')
+  @RequirePermission(MenuName.WORKLOG, PermissionAction.UPDATE)
   async updateBinderWorklog(
     @Param('projectId', ParseIntPipe) projectId: number,
     @Param('worklogId') worklogId: string,
@@ -40,6 +47,7 @@ export class BinderController {
   }
 
   @Delete(':worklogId/binder')
+  @RequirePermission(MenuName.WORKLOG, PermissionAction.DELETE)
   async deleteBinderWorklog(@Param('projectId', ParseIntPipe) projectId: number, @Param('worklogId') worklogId: string) {
     return await this.binderService.deleteBinderWorklog(worklogId);
   }

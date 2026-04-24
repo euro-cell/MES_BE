@@ -1,4 +1,4 @@
-import { Controller, Post, Param, Query, Get, Body, Res, StreamableFile } from '@nestjs/common';
+import { Controller, Post, Param, Query, Get, Body, Res, StreamableFile, UseGuards } from '@nestjs/common';
 import { LotService } from './lot.service';
 import { ApiTags, ApiOperation, ApiQuery, ApiBody, ApiProduces } from '@nestjs/swagger';
 import { RegisterRawDataDto } from '../../../common/dtos/lot/register-rawdata.dto';
@@ -12,9 +12,14 @@ import { SealingLotService } from './assembly/sealing.service';
 import { FormationLotService } from './formation/formation.service';
 import { LotExportService } from './lot-export.service';
 import type { Response } from 'express';
+import { SessionAuthGuard } from 'src/common/guards/session-auth.guard';
+import { PermissionGuard } from 'src/common/guards/permission.guard';
+import { RequirePermission } from 'src/common/decorators/permission.decorator';
+import { MenuName, PermissionAction } from 'src/common/enums/menu.enum';
 
 @ApiTags('Lot 관리')
 @Controller(':projectId/lot')
+@UseGuards(SessionAuthGuard, PermissionGuard)
 export class LotController {
   constructor(
     private readonly lotService: LotService,
@@ -30,6 +35,7 @@ export class LotController {
   ) {}
 
   @Post('sync')
+  @RequirePermission(MenuName.LOT_MANAGEMENT, PermissionAction.CREATE)
   @ApiOperation({ summary: '데이터 갱신' })
   @ApiQuery({ name: 'process', required: true, description: '공정명 (mixing, coating, calendering, notching, stacking 등)' })
   async sync(@Param('projectId') projectId: number, @Query('process') process: string) {
@@ -82,6 +88,7 @@ export class LotController {
   }
 
   @Post('rawdata')
+  @RequirePermission(MenuName.LOT_MANAGEMENT, PermissionAction.CREATE)
   @ApiOperation({ summary: 'Formation Raw Data 등록' })
   @ApiBody({ type: RegisterRawDataDto })
   async registerRawData(@Param('projectId') projectId: number, @Body() dto: RegisterRawDataDto) {

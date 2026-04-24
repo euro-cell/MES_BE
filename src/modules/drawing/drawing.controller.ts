@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Delete, Param, Query, Body, UseInterceptors, UploadedFiles } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Param, Query, Body, UseInterceptors, UploadedFiles, UseGuards } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { ApiOperation, ApiConflictResponse, ApiConsumes, ApiBody, ApiNotFoundResponse } from '@nestjs/swagger';
 import { DrawingService } from './drawing.service';
@@ -10,8 +10,13 @@ import {
   DrawingSearchDto,
 } from 'src/common/dtos/drawing/drawing.dto';
 import { multerConfig } from 'src/common/configs/multer.config';
+import { SessionAuthGuard } from 'src/common/guards/session-auth.guard';
+import { PermissionGuard } from 'src/common/guards/permission.guard';
+import { RequirePermission } from 'src/common/decorators/permission.decorator';
+import { MenuName, PermissionAction } from 'src/common/enums/menu.enum';
 
 @Controller('drawing')
+@UseGuards(SessionAuthGuard, PermissionGuard)
 export class DrawingController {
   constructor(private readonly drawingService: DrawingService) {}
 
@@ -29,6 +34,7 @@ export class DrawingController {
   }
 
   @Post()
+  @RequirePermission(MenuName.DRAWING_ALL, PermissionAction.CREATE)
   @ApiOperation({ summary: '새 도면 등록' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({ type: CreateDrawingDto })
@@ -50,6 +56,7 @@ export class DrawingController {
   }
 
   @Post(':id/version')
+  @RequirePermission(MenuName.DRAWING_ALL, PermissionAction.CREATE)
   @ApiOperation({ summary: '도면 버전 추가' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({ type: CreateDrawingVersionDto })
@@ -72,6 +79,7 @@ export class DrawingController {
   }
 
   @Patch(':id')
+  @RequirePermission(MenuName.DRAWING_ALL, PermissionAction.UPDATE)
   @ApiOperation({ summary: '도면 수정' })
   @ApiNotFoundResponse({ description: '도면을 찾을 수 없습니다.' })
   async update(@Param('id') id: number, @Body() dto: UpdateDrawingDto) {
@@ -79,6 +87,7 @@ export class DrawingController {
   }
 
   @Delete(':id')
+  @RequirePermission(MenuName.DRAWING_ALL, PermissionAction.DELETE)
   @ApiOperation({ summary: '도면 삭제' })
   @ApiNotFoundResponse({ description: '도면을 찾을 수 없습니다.' })
   async remove(@Param('id') id: number) {
@@ -86,6 +95,7 @@ export class DrawingController {
   }
 
   @Patch(':drawingId/version/:versionId')
+  @RequirePermission(MenuName.DRAWING_ALL, PermissionAction.UPDATE)
   @ApiOperation({ summary: '도면 버전 수정' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({ type: UpdateDrawingVersionDto })
@@ -109,6 +119,7 @@ export class DrawingController {
   }
 
   @Delete(':drawingId/version/:versionId')
+  @RequirePermission(MenuName.DRAWING_ALL, PermissionAction.DELETE)
   @ApiOperation({ summary: '도면 버전 삭제' })
   @ApiNotFoundResponse({ description: '도면 또는 버전을 찾을 수 없습니다.' })
   async removeVersion(@Param('drawingId') drawingId: number, @Param('versionId') versionId: number) {

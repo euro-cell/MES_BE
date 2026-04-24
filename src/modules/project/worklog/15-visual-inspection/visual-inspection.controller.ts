@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Param, Get, Patch, Delete, ParseIntPipe } from '@nestjs/common';
+import { Controller, Post, Body, Param, Get, Patch, Delete, ParseIntPipe, UseGuards } from '@nestjs/common';
 import { VisualInspectionService } from './visual-inspection.service';
 import { ApiTags, ApiOkResponse } from '@nestjs/swagger';
 import {
@@ -6,13 +6,19 @@ import {
   VisualInspectionWorklogListResponseDto,
   UpdateVisualInspectionWorklogDto,
 } from 'src/common/dtos/worklog/15-visual-inspection.dto';
+import { SessionAuthGuard } from 'src/common/guards/session-auth.guard';
+import { PermissionGuard } from 'src/common/guards/permission.guard';
+import { RequirePermission } from 'src/common/decorators/permission.decorator';
+import { MenuName, PermissionAction } from 'src/common/enums/menu.enum';
 
 @ApiTags('Production Worklog - Visual Inspection')
 @Controller(':projectId/worklog')
+@UseGuards(SessionAuthGuard, PermissionGuard)
 export class VisualInspectionController {
   constructor(private readonly visualInspectionService: VisualInspectionService) {}
 
   @Post('inspection')
+  @RequirePermission(MenuName.WORKLOG, PermissionAction.CREATE)
   async createVisualInspectionWorklog(
     @Param('projectId', ParseIntPipe) projectId: number,
     @Body() dto: CreateVisualInspectionWorklogDto,
@@ -32,6 +38,7 @@ export class VisualInspectionController {
   }
 
   @Patch(':worklogId/inspection')
+  @RequirePermission(MenuName.WORKLOG, PermissionAction.UPDATE)
   async updateVisualInspectionWorklog(
     @Param('projectId', ParseIntPipe) projectId: number,
     @Param('worklogId') worklogId: string,
@@ -41,6 +48,7 @@ export class VisualInspectionController {
   }
 
   @Delete(':worklogId/inspection')
+  @RequirePermission(MenuName.WORKLOG, PermissionAction.DELETE)
   async deleteVisualInspectionWorklog(@Param('projectId', ParseIntPipe) projectId: number, @Param('worklogId') worklogId: string) {
     return await this.visualInspectionService.deleteVisualInspectionWorklog(worklogId);
   }

@@ -1,14 +1,20 @@
-import { Controller, Post, Body, Param, Get, Patch, Delete, ParseIntPipe } from '@nestjs/common';
+import { Controller, Post, Body, Param, Get, Patch, Delete, ParseIntPipe, UseGuards } from '@nestjs/common';
 import { SlurryService } from './slurry.service';
 import { ApiTags, ApiOkResponse } from '@nestjs/swagger';
 import { CreateSlurryWorklogDto, SlurryWorklogListResponseDto, UpdateSlurryWorklogDto } from 'src/common/dtos/worklog/02-slurry.dto';
+import { SessionAuthGuard } from 'src/common/guards/session-auth.guard';
+import { PermissionGuard } from 'src/common/guards/permission.guard';
+import { RequirePermission } from 'src/common/decorators/permission.decorator';
+import { MenuName, PermissionAction } from 'src/common/enums/menu.enum';
 
 @ApiTags('Production Worklog - Slurry')
 @Controller(':projectId/worklog')
+@UseGuards(SessionAuthGuard, PermissionGuard)
 export class SlurryController {
   constructor(private readonly slurryService: SlurryService) {}
 
   @Post('slurry')
+  @RequirePermission(MenuName.WORKLOG, PermissionAction.CREATE)
   async createSlurryWorklog(
     @Param('projectId', ParseIntPipe) projectId: number,
     @Body() createSlurryWorklogDto: CreateSlurryWorklogDto,
@@ -40,6 +46,7 @@ export class SlurryController {
   }
 
   @Patch(':worklogId/slurry')
+  @RequirePermission(MenuName.WORKLOG, PermissionAction.UPDATE)
   async updateSlurryWorklog(
     @Param('projectId', ParseIntPipe) projectId: number,
     @Param('worklogId') worklogId: string,
@@ -49,6 +56,7 @@ export class SlurryController {
   }
 
   @Delete(':worklogId/slurry')
+  @RequirePermission(MenuName.WORKLOG, PermissionAction.DELETE)
   async deleteSlurryWorklog(@Param('projectId', ParseIntPipe) projectId: number, @Param('worklogId') worklogId: string) {
     return await this.slurryService.deleteSlurryWorklog(worklogId);
   }

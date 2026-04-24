@@ -1,4 +1,4 @@
-import { Controller, Post, Patch, Get, Body, Query, Res, StreamableFile } from '@nestjs/common';
+import { Controller, Post, Patch, Get, Body, Query, Res, StreamableFile, UseGuards } from '@nestjs/common';
 import type { Response } from 'express';
 import { ApiTags, ApiOperation, ApiConflictResponse, ApiResponse } from '@nestjs/swagger';
 import { CellInventoryService } from './cell-inventory.service';
@@ -8,13 +8,19 @@ import {
   ProjectStatisticsDto,
   CellInventoryResponseDto,
 } from 'src/common/dtos/cell/cell-inventory.dto';
+import { SessionAuthGuard } from 'src/common/guards/session-auth.guard';
+import { PermissionGuard } from 'src/common/guards/permission.guard';
+import { RequirePermission } from 'src/common/decorators/permission.decorator';
+import { MenuName, PermissionAction } from 'src/common/enums/menu.enum';
 
 @ApiTags('Cell Inventory')
 @Controller('cell-inventory')
+@UseGuards(SessionAuthGuard, PermissionGuard)
 export class CellInventoryController {
   constructor(private readonly cellInventoryService: CellInventoryService) {}
 
   @Post()
+  @RequirePermission(MenuName.CELL_MANAGEMENT, PermissionAction.CREATE)
   @ApiOperation({ summary: '셀 입고 등록' })
   @ApiConflictResponse({ description: '이미 입고된 셀입니다.' })
   async create(@Body() dto: CreateCellInventoryDto) {
@@ -22,6 +28,7 @@ export class CellInventoryController {
   }
 
   @Patch()
+  @RequirePermission(MenuName.CELL_MANAGEMENT, PermissionAction.UPDATE)
   @ApiOperation({ summary: '셀 출고' })
   @ApiConflictResponse({ description: '이미 출고된 셀입니다.' })
   async upsert(@Body() dto: UpdateCellInventoryDto) {
@@ -29,6 +36,7 @@ export class CellInventoryController {
   }
 
   @Patch('restock')
+  @RequirePermission(MenuName.CELL_MANAGEMENT, PermissionAction.CREATE)
   @ApiOperation({ summary: '셀 재입고' })
   @ApiConflictResponse({ description: '출고된 이력이 없는 셀입니다.' })
   async restock(@Body() dto: CreateCellInventoryDto) {

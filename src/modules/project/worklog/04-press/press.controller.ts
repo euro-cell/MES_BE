@@ -1,14 +1,20 @@
-import { Controller, Post, Body, Param, Get, Patch, Delete, ParseIntPipe } from '@nestjs/common';
+import { Controller, Post, Body, Param, Get, Patch, Delete, ParseIntPipe, UseGuards } from '@nestjs/common';
 import { PressService } from './press.service';
 import { ApiTags, ApiOkResponse } from '@nestjs/swagger';
 import { CreatePressWorklogDto, PressWorklogListResponseDto, UpdatePressWorklogDto } from 'src/common/dtos/worklog/04-press.dto';
+import { SessionAuthGuard } from 'src/common/guards/session-auth.guard';
+import { PermissionGuard } from 'src/common/guards/permission.guard';
+import { RequirePermission } from 'src/common/decorators/permission.decorator';
+import { MenuName, PermissionAction } from 'src/common/enums/menu.enum';
 
 @ApiTags('Production Worklog - Press')
 @Controller(':projectId/worklog')
+@UseGuards(SessionAuthGuard, PermissionGuard)
 export class PressController {
   constructor(private readonly pressService: PressService) {}
 
   @Post('press')
+  @RequirePermission(MenuName.WORKLOG, PermissionAction.CREATE)
   async createPressWorklog(@Param('projectId', ParseIntPipe) projectId: number, @Body() dto: CreatePressWorklogDto) {
     return await this.pressService.createPressWorklog(projectId, dto);
   }
@@ -25,6 +31,7 @@ export class PressController {
   }
 
   @Patch(':worklogId/press')
+  @RequirePermission(MenuName.WORKLOG, PermissionAction.UPDATE)
   async updatePressWorklog(
     @Param('projectId', ParseIntPipe) projectId: number,
     @Param('worklogId') worklogId: string,
@@ -34,6 +41,7 @@ export class PressController {
   }
 
   @Delete(':worklogId/press')
+  @RequirePermission(MenuName.WORKLOG, PermissionAction.DELETE)
   async deletePressWorklog(@Param('projectId', ParseIntPipe) projectId: number, @Param('worklogId') worklogId: string) {
     return await this.pressService.deletePressWorklog(worklogId);
   }

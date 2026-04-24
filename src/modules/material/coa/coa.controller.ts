@@ -1,13 +1,18 @@
-import { Controller, Get, Post, Delete, Param, Query, ParseIntPipe, UploadedFile, UseInterceptors, Body, Res, StreamableFile } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Param, Query, ParseIntPipe, UploadedFile, UseInterceptors, Body, Res, StreamableFile, UseGuards } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiConsumes, ApiBody, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
 import { multerConfig } from 'src/common/configs/multer.config';
 import { CoaService } from './coa.service';
 import { CreateCoaDto, UploadCoaDto } from 'src/common/dtos/specification/coa.dto';
+import { SessionAuthGuard } from 'src/common/guards/session-auth.guard';
+import { PermissionGuard } from 'src/common/guards/permission.guard';
+import { RequirePermission } from 'src/common/decorators/permission.decorator';
+import { MenuName, PermissionAction } from 'src/common/enums/menu.enum';
 
 @ApiTags('Material - CoA')
 @Controller()
+@UseGuards(SessionAuthGuard, PermissionGuard)
 export class CoaController {
   constructor(private readonly coaService: CoaService) {}
 
@@ -19,6 +24,7 @@ export class CoaController {
   }
 
   @Post()
+  @RequirePermission(MenuName.MATERIAL_MANAGEMENT, PermissionAction.CREATE)
   @ApiOperation({ summary: 'CoA 파일 업로드' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({ type: UploadCoaDto })
@@ -28,6 +34,7 @@ export class CoaController {
   }
 
   @Delete(':id')
+  @RequirePermission(MenuName.MATERIAL_MANAGEMENT, PermissionAction.DELETE)
   @ApiOperation({ summary: 'CoA 삭제' })
   async remove(@Param('id', ParseIntPipe) id: number) {
     return this.coaService.remove(id);

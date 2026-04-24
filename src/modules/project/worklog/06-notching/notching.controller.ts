@@ -1,14 +1,20 @@
-import { Controller, Post, Body, Param, Get, Patch, Delete, ParseIntPipe } from '@nestjs/common';
+import { Controller, Post, Body, Param, Get, Patch, Delete, ParseIntPipe, UseGuards } from '@nestjs/common';
 import { NotchingService } from './notching.service';
 import { ApiTags, ApiOkResponse } from '@nestjs/swagger';
 import { CreateNotchingWorklogDto, NotchingWorklogListResponseDto, UpdateNotchingWorklogDto } from 'src/common/dtos/worklog/06-notching.dto';
+import { SessionAuthGuard } from 'src/common/guards/session-auth.guard';
+import { PermissionGuard } from 'src/common/guards/permission.guard';
+import { RequirePermission } from 'src/common/decorators/permission.decorator';
+import { MenuName, PermissionAction } from 'src/common/enums/menu.enum';
 
 @ApiTags('Production Worklog - Notching')
 @Controller(':projectId/worklog')
+@UseGuards(SessionAuthGuard, PermissionGuard)
 export class NotchingController {
   constructor(private readonly notchingService: NotchingService) {}
 
   @Post('notching')
+  @RequirePermission(MenuName.WORKLOG, PermissionAction.CREATE)
   async createNotchingWorklog(@Param('projectId', ParseIntPipe) projectId: number, @Body() dto: CreateNotchingWorklogDto) {
     return await this.notchingService.createNotchingWorklog(projectId, dto);
   }
@@ -31,6 +37,7 @@ export class NotchingController {
   }
 
   @Patch(':worklogId/notching')
+  @RequirePermission(MenuName.WORKLOG, PermissionAction.UPDATE)
   async updateNotchingWorklog(
     @Param('projectId', ParseIntPipe) projectId: number,
     @Param('worklogId') worklogId: string,
@@ -40,6 +47,7 @@ export class NotchingController {
   }
 
   @Delete(':worklogId/notching')
+  @RequirePermission(MenuName.WORKLOG, PermissionAction.DELETE)
   async deleteNotchingWorklog(@Param('projectId', ParseIntPipe) projectId: number, @Param('worklogId') worklogId: string) {
     return await this.notchingService.deleteNotchingWorklog(worklogId);
   }

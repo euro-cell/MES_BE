@@ -1,13 +1,18 @@
-import { Controller, Get, Post, Delete, Param, Query, ParseIntPipe, UploadedFile, UseInterceptors, Body, Res, StreamableFile } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Param, Query, ParseIntPipe, UploadedFile, UseInterceptors, Body, Res, StreamableFile, UseGuards } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiConsumes, ApiBody, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
 import { multerConfig } from 'src/common/configs/multer.config';
 import { ManualService } from './manual.service';
 import { CreateManualDto, UploadManualDto } from 'src/common/dtos/equipment/equipment-manual.dto';
+import { SessionAuthGuard } from 'src/common/guards/session-auth.guard';
+import { PermissionGuard } from 'src/common/guards/permission.guard';
+import { RequirePermission } from 'src/common/decorators/permission.decorator';
+import { MenuName, PermissionAction } from 'src/common/enums/menu.enum';
 
 @ApiTags('Equipment - Manual')
 @Controller()
+@UseGuards(SessionAuthGuard, PermissionGuard)
 export class ManualController {
   constructor(private readonly manualService: ManualService) {}
 
@@ -19,6 +24,7 @@ export class ManualController {
   }
 
   @Post()
+  @RequirePermission(MenuName.EQUIPMENT_LIST, PermissionAction.CREATE)
   @ApiOperation({ summary: '매뉴얼 파일 업로드' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({ type: UploadManualDto })
@@ -28,6 +34,7 @@ export class ManualController {
   }
 
   @Delete(':id')
+  @RequirePermission(MenuName.EQUIPMENT_LIST, PermissionAction.DELETE)
   @ApiOperation({ summary: '매뉴얼 삭제' })
   async remove(@Param('id', ParseIntPipe) id: number) {
     return this.manualService.remove(id);
