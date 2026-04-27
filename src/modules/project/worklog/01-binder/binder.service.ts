@@ -136,6 +136,7 @@ export class BinderService {
         await this.materialService.updateMaterialUsageHistory(
           materialName,
           materialLot,
+          previousActualInput,
           newActualInput,
           MaterialProcess.ELECTRODE,
         );
@@ -151,6 +152,18 @@ export class BinderService {
     if (!worklog) {
       throw new NotFoundException('작업일지를 찾을 수 없습니다.');
     }
+
+    // 삭제 전 자재 사용량 재고 복구
+    for (let i = 1; i <= 2; i++) {
+      const materialName = worklog[`material${i}Name`];
+      const materialLot = worklog[`material${i}Lot`];
+      const actualInput = worklog[`material${i}ActualInput`] || 0;
+
+      if (materialName && actualInput > 0) {
+        await this.materialService.restoreMaterialUsage(materialName, materialLot, actualInput, MaterialProcess.ELECTRODE);
+      }
+    }
+
     await this.worklogBinderRepository.remove(worklog);
   }
 

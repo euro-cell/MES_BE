@@ -313,15 +313,14 @@ export class MaterialService {
     return material;
   }
 
-  // 자재 사용 이력 수정 (작업일지 업데이트 시 기존 이력 수정)
+  // 자재 사용 이력 수정 (작업일지 업데이트 시 이전 사용량을 복구하고 새 사용량을 차감)
   async updateMaterialUsageHistory(
     materialName: string,
     materialLot: string | undefined,
+    previousUsageAmount: number,
     newUsageAmount: number,
     process: MaterialProcess,
-    historyId?: number,
   ) {
-    // materialName과 materialLot으로 자재 찾기
     const material = await this.materialRepository.findOne({
       where: {
         name: materialName,
@@ -334,43 +333,59 @@ export class MaterialService {
     }
 
     const currentStock = material.stock || 0;
-    // 현재 재고에서 새로운 사용량을 직접 차감
-    const updatedStock = Math.max(0, currentStock - newUsageAmount);
-    await this.materialRepository.update(material.id, {
-      stock: updatedStock,
+    // 이전 사용량을 재고에 복구한 뒤 새 사용량을 차감
+    const updatedStock = Math.max(0, currentStock + previousUsageAmount - newUsageAmount);
+    await this.materialRepository.update(material.id, { stock: updatedStock });
+
+    // 가장 최근 USE 이력을 찾아 수정, 없으면 새로 생성
+    const existingHistory = await this.materialHistoryRepository.findOne({
+      where: { materialId: material.id, process, type: MaterialHistoryType.USE },
+      order: { updatedAt: 'DESC' },
     });
 
-    // 기존 이력이 있으면 수정, 없으면 새로 생성
-    if (historyId) {
-      await this.materialHistoryRepository.update(historyId, {
+    if (existingHistory) {
+      await this.materialHistoryRepository.update(existingHistory.id, {
         previousStock: currentStock,
         currentStock: updatedStock,
       });
     } else {
-      // 기존 USE 이력 찾아서 수정 (가장 최근에 수정된 해당 자재 이력)
-      const existingHistory = await this.materialHistoryRepository.findOne({
-        where: {
-          materialId: material.id,
-          process,
-          type: MaterialHistoryType.USE,
-        },
-        order: { updatedAt: 'DESC' },
+      await this.materialHistoryRepository.save({
+        materialId: material.id,
+        process,
+        type: MaterialHistoryType.USE,
+        previousStock: currentStock,
+        currentStock: updatedStock,
       });
+    }
 
-      if (existingHistory) {
-        await this.materialHistoryRepository.update(existingHistory.id, {
-          previousStock: currentStock,
-          currentStock: updatedStock,
-        });
-      } else {
-        await this.materialHistoryRepository.save({
-          materialId: material.id,
-          process,
-          type: MaterialHistoryType.USE,
-          previousStock: currentStock,
-          currentStock: updatedStock,
-        });
-      }
+    return material;
+  }
+
+  // 자재 사용 복구 (작업일지 삭제 시 재고 원복 및 USE 이력 삭제)
+  async restoreMaterialUsage(materialName: string, materialLot: string | undefined, usageAmount: number, process: MaterialProcess) {
+    const material = await this.materialRepository.findOne({
+      where: {
+        name: materialName,
+        ...(materialLot ? { lotNo: materialLot } : {}),
+      },
+    });
+
+    if (!material) {
+      return null;
+    }
+
+    const currentStock = material.stock || 0;
+    const restoredStock = currentStock + usageAmount;
+    await this.materialRepository.update(material.id, { stock: restoredStock });
+
+    // 가장 최근 USE 이력 삭제
+    const existingHistory = await this.materialHistoryRepository.findOne({
+      where: { materialId: material.id, process, type: MaterialHistoryType.USE },
+      order: { updatedAt: 'DESC' },
+    });
+
+    if (existingHistory) {
+      await this.materialHistoryRepository.remove(existingHistory);
     }
 
     return material;

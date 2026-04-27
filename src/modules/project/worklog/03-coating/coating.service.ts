@@ -104,6 +104,7 @@ export class CoatingService {
       await this.materialService.updateMaterialUsageHistory(
         updateCoatingWorklogDto.materialType,
         updateCoatingWorklogDto.materialLot,
+        previousUsageAmount,
         newUsageAmount,
         MaterialProcess.ELECTRODE,
       );
@@ -114,6 +115,7 @@ export class CoatingService {
       await this.materialService.updateMaterialUsageHistory(
         updateCoatingWorklogDto.materialType2,
         updateCoatingWorklogDto.materialLot2,
+        previousInputAmountActual,
         newInputAmountActual,
         MaterialProcess.ELECTRODE,
       );
@@ -128,6 +130,15 @@ export class CoatingService {
     if (!worklog) {
       throw new NotFoundException('작업일지를 찾을 수 없습니다.');
     }
+
+    // 삭제 전 자재 사용량 재고 복구
+    if (worklog.materialType && worklog.usageAmount && worklog.usageAmount > 0) {
+      await this.materialService.restoreMaterialUsage(worklog.materialType, worklog.materialLot, worklog.usageAmount, MaterialProcess.ELECTRODE);
+    }
+    if (worklog.materialType2 && worklog.inputAmountActual && worklog.inputAmountActual > 0) {
+      await this.materialService.restoreMaterialUsage(worklog.materialType2, worklog.materialLot2, worklog.inputAmountActual, MaterialProcess.ELECTRODE);
+    }
+
     await this.worklogCoatingRepository.remove(worklog);
   }
 }

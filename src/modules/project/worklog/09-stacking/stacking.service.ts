@@ -101,6 +101,7 @@ export class StackingService {
       await this.materialService.updateMaterialUsageHistory(
         updateStackingWorklogDto.separatorLot,
         undefined,
+        previousSeparatorUsage,
         newSeparatorUsage,
         MaterialProcess.ELECTRODE,
       );
@@ -115,6 +116,12 @@ export class StackingService {
     if (!worklog) {
       throw new NotFoundException('작업일지를 찾을 수 없습니다.');
     }
+
+    // 삭제 전 자재 사용량 재고 복구
+    if (worklog.separatorLot && worklog.separatorUsage && worklog.separatorUsage > 0) {
+      await this.materialService.restoreMaterialUsage(worklog.separatorLot, undefined, worklog.separatorUsage, MaterialProcess.ELECTRODE);
+    }
+
     await this.worklogStackingRepository.remove(worklog);
   }
 }

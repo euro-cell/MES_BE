@@ -97,6 +97,7 @@ export class FillingService {
       await this.materialService.updateMaterialUsageHistory(
         updateFillingWorklogDto.electrolyteLot,
         undefined,
+        previousElectrolyteUsage,
         newElectrolyteUsage,
         MaterialProcess.ELECTRODE,
       );
@@ -111,6 +112,12 @@ export class FillingService {
     if (!worklog) {
       throw new NotFoundException('작업일지를 찾을 수 없습니다.');
     }
+
+    // 삭제 전 자재 사용량 재고 복구
+    if (worklog.electrolyteLot && worklog.electrolyteUsage && worklog.electrolyteUsage > 0) {
+      await this.materialService.restoreMaterialUsage(worklog.electrolyteLot, undefined, worklog.electrolyteUsage, MaterialProcess.ELECTRODE);
+    }
+
     await this.worklogFillingRepository.remove(worklog);
   }
 }

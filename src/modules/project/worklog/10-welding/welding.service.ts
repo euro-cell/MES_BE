@@ -105,6 +105,7 @@ export class WeldingService {
       await this.materialService.updateMaterialUsageHistory(
         updateWeldingWorklogDto.leadTabLot,
         undefined,
+        previousLeadTabUsage,
         newLeadTabUsage,
         MaterialProcess.ELECTRODE,
       );
@@ -116,6 +117,7 @@ export class WeldingService {
       await this.materialService.updateMaterialUsageHistory(
         updateWeldingWorklogDto.piTapeLot,
         undefined,
+        previousPiTapeUsage,
         newPiTapeUsage,
         MaterialProcess.ELECTRODE,
       );
@@ -130,6 +132,15 @@ export class WeldingService {
     if (!worklog) {
       throw new NotFoundException('작업일지를 찾을 수 없습니다.');
     }
+
+    // 삭제 전 자재 사용량 재고 복구
+    if (worklog.leadTabLot && worklog.leadTabUsage && worklog.leadTabUsage > 0) {
+      await this.materialService.restoreMaterialUsage(worklog.leadTabLot, undefined, worklog.leadTabUsage, MaterialProcess.ELECTRODE);
+    }
+    if (worklog.piTapeLot && worklog.piTapeUsage && worklog.piTapeUsage > 0) {
+      await this.materialService.restoreMaterialUsage(worklog.piTapeLot, undefined, worklog.piTapeUsage, MaterialProcess.ELECTRODE);
+    }
+
     await this.worklogWeldingRepository.remove(worklog);
   }
 }

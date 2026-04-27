@@ -97,6 +97,7 @@ export class FormingService {
       await this.materialService.updateMaterialUsageHistory(
         updateFormingWorklogDto.pouchLot,
         undefined,
+        previousPouchUsage,
         newPouchUsage,
         MaterialProcess.ELECTRODE,
       );
@@ -111,6 +112,12 @@ export class FormingService {
     if (!worklog) {
       throw new NotFoundException('작업일지를 찾을 수 없습니다.');
     }
+
+    // 삭제 전 자재 사용량 재고 복구
+    if (worklog.pouchLot && worklog.pouchUsage && worklog.pouchUsage > 0) {
+      await this.materialService.restoreMaterialUsage(worklog.pouchLot, undefined, worklog.pouchUsage, MaterialProcess.ELECTRODE);
+    }
+
     await this.worklogFormingRepository.remove(worklog);
   }
 }
