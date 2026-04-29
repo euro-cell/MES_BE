@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { RegisterDto, UpdateUserDto } from 'src/common/dtos/shared/user.dto';
 import { User } from 'src/common/entities/shared/user.entity';
 import { Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -15,7 +16,8 @@ export class UserService {
     const exist = await this.UserRepository.findOne({ where: { employeeNumber: dto.employeeNumber } });
     if (exist) throw new ConflictException('이미 존재하는 사번입니다.');
 
-    const user = this.UserRepository.create({ ...dto, isActive: true });
+    const hashed = await bcrypt.hash(dto.password, 10);
+    const user = this.UserRepository.create({ ...dto, password: hashed, isActive: true });
     return await this.UserRepository.save(user);
   }
 
@@ -24,7 +26,11 @@ export class UserService {
   }
 
   async updateUser(id: number, dto: UpdateUserDto) {
-    await this.UserRepository.update(id, dto);
+    const data: UpdateUserDto = { ...dto };
+    if (data.password) {
+      data.password = await bcrypt.hash(data.password, 10);
+    }
+    await this.UserRepository.update(id, data);
     return await this.UserRepository.findOneBy({ id });
   }
 
