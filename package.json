@@ -26,6 +26,7 @@
     "seed:import:equipment": "ts-node -r tsconfig-paths/register scripts/import-equipment-seed.ts",
     "seed:export:maintenance": "ts-node -r tsconfig-paths/register scripts/export-maintenance-seed.ts",
     "seed:import:maintenance": "ts-node -r tsconfig-paths/register scripts/import-maintenance-seed.ts",
+    "reset:passwords": "ts-node -r tsconfig-paths/register scripts/reset-user-passwords.ts",
     "migrate:hash-passwords": "ts-node -r tsconfig-paths/register scripts/hash-existing-passwords.ts"
   },
   "dependencies": {
