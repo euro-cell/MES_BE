@@ -155,20 +155,17 @@ export class PlanTransformerUtil {
       }
 
       let span = 1;
-      let days: number[] = [];
-      let startIdx = i;
 
       while (i + span < cells.length && cells[i + span].active) {
-        const nextText = cells[i + span].text;
-        const currentNums = nextText ? nextText.split('~').map((n) => parseInt(n)) : [];
-        days = days.concat(currentNums);
         span++;
       }
 
-      const currentNums = cell.text ? cell.text.split('~').map((n) => parseInt(n)) : [];
-      days = days.concat(currentNums).sort((a, b) => a - b);
+      const firstNums = cell.text ? cell.text.split('~').map((n) => parseInt(n)) : [];
+      const lastNums = cells[i + span - 1].text ? cells[i + span - 1].text.split('~').map((n) => parseInt(n)) : [];
+      const firstDay = firstNums[0];
+      const lastDay = lastNums[lastNums.length - 1];
 
-      const mergedText = days.length === 1 ? `${days[0]}` : `${days[0]}~${days[days.length - 1]}`;
+      const mergedText = firstDay === lastDay ? `${firstDay}` : `${firstDay}~${lastDay}`;
 
       merged.push({
         ...cell,
