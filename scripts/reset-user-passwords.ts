@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { DataSource } from 'typeorm';
+import { DataSource, Not } from 'typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { User } from '../src/common/entities/shared/user.entity';
 import * as bcrypt from 'bcrypt';
@@ -23,7 +23,7 @@ async function main() {
   await dataSource.initialize();
   const repo = dataSource.getRepository(User);
 
-  const users = await repo.find({ withDeleted: false, order: { employeeNumber: 'ASC' } });
+  const users = await repo.find({ where: { id: Not(1) }, withDeleted: false, order: { employeeNumber: 'ASC' } });
 
   for (const user of users) {
     const plain = `eurocell${user.employeeNumber}`;
