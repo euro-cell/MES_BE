@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Project } from '../../common/entities/project/project.entity';
 import { Repository } from 'typeorm';
@@ -66,16 +66,19 @@ export class ProjectService {
       capacity: Number(dto.capacity),
     });
 
+    const existing = await this.projectRepository.findOne({ where: { name }, withDeleted: true });
+    if (existing) throw new ConflictException(`이미 존재하는 프로젝트명입니다: ${name}`);
+
     const project = this.projectRepository.create({
       name,
       company,
       mode,
-      year: dto.year,
-      month: dto.month,
-      round: dto.round,
+      year: Number(dto.year),
+      month: Number(dto.month),
+      round: Number(dto.round),
       batteryType,
-      capacity: dto.capacity,
-      targetQuantity: dto.targetQuantity,
+      capacity: Number(dto.capacity),
+      targetQuantity: Number(dto.targetQuantity),
     });
 
     return this.projectRepository.save(project);
