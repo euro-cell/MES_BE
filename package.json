@@ -27,6 +27,10 @@
     "seed:export:maintenance": "ts-node -r tsconfig-paths/register scripts/export-maintenance-seed.ts",
     "seed:import:maintenance": "ts-node -r tsconfig-paths/register scripts/import-maintenance-seed.ts",
     "reset:passwords": "ts-node -r tsconfig-paths/register scripts/reset-user-passwords.ts",
+    "seed:export:cell-inventory": "ts-node -r tsconfig-paths/register scripts/export-cell-inventory-seed.ts",
+    "seed:import:cell-inventory": "ts-node -r tsconfig-paths/register scripts/import-cell-inventory-seed.ts",
+    "seed:export:cell-ncr": "ts-node -r tsconfig-paths/register scripts/export-cell-ncr-seed.ts",
+    "seed:import:cell-ncr": "ts-node -r tsconfig-paths/register scripts/import-cell-ncr-seed.ts",
     "migrate:hash-passwords": "ts-node -r tsconfig-paths/register scripts/hash-existing-passwords.ts"
   },
   "dependencies": {
