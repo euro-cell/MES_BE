@@ -10,6 +10,7 @@ import { ProductSpecificationModule } from './specification/specification.module
 import { WorklogModule } from './worklog/worklog.module';
 import { StatusModule } from './status/status.module';
 import { LotModule } from './lot/lot.module';
+import { BomModule } from './bom/bom.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { LotModule } from './lot/lot.module';
       { path: 'worklog', module: WorklogModule },
       { path: 'project', module: StatusModule },
       { path: 'project', module: LotModule },
+      { path: 'project', module: BomModule },
     ]),
     PlanModule,
     ProductMaterialModule,
@@ -28,6 +30,7 @@ import { LotModule } from './lot/lot.module';
     WorklogModule,
     StatusModule,
     LotModule,
+    BomModule,
   ],
   controllers: [ProjectController],
   providers: [ProjectService],
