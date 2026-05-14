@@ -105,7 +105,7 @@ export class ProjectService {
   async getSpecificationSummary() {
     const projects = await this.projectRepository.find({
       select: { id: true, name: true },
-      relations: ['projectSpecifications', 'projectMaterials'],
+      relations: ['projectSpecifications', 'projectMaterials', 'projectBoms'],
       order: { id: 'DESC' },
     });
 
@@ -114,6 +114,7 @@ export class ProjectService {
       name: p.name,
       specStatus: !!p.projectSpecifications,
       materialStatus: (p.projectMaterials?.length ?? 0) > 0,
+      bomStatus: (p.projectBoms?.length ?? 0) > 0,
     }));
   }
 }

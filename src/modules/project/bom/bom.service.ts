@@ -3,8 +3,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { BomTemplate } from 'src/common/entities/bom/bom-template.entity';
 import { BomTemplateRow } from 'src/common/entities/bom/bom-template-row.entity';
+import { ProjectBom } from 'src/common/entities/bom/project-bom.entity';
 import { Material } from 'src/common/entities/material/material.entity';
-import { CreateBomTemplateDto } from 'src/common/dtos/bom/bom.dto';
+import { Project } from 'src/common/entities/project/project.entity';
+import { CreateBomTemplateDto, LinkBomTemplateDto } from 'src/common/dtos/bom/bom.dto';
 
 @Injectable()
 export class BomService {
@@ -13,8 +15,12 @@ export class BomService {
     private readonly bomTemplateRepo: Repository<BomTemplate>,
     @InjectRepository(BomTemplateRow)
     private readonly bomTemplateRowRepo: Repository<BomTemplateRow>,
+    @InjectRepository(ProjectBom)
+    private readonly projectBomRepo: Repository<ProjectBom>,
     @InjectRepository(Material)
     private readonly materialRepo: Repository<Material>,
+    @InjectRepository(Project)
+    private readonly projectRepo: Repository<Project>,
   ) {}
 
   async createTemplate(dto: CreateBomTemplateDto): Promise<{ id: number; name: string }> {
@@ -82,6 +88,43 @@ export class BomService {
       throw new NotFoundException('BOM 템플릿을 찾을 수 없습니다.');
     }
 
+    return this.formatTemplateWithRows(template);
+  }
+
+  async linkTemplate(projectId: number, dto: LinkBomTemplateDto): Promise<{ projectId: number; templateId: number }> {
+    const project = await this.projectRepo.findOne({ where: { id: projectId } });
+    if (!project) throw new NotFoundException('프로젝트를 찾을 수 없습니다.');
+
+    const template = await this.bomTemplateRepo.findOne({ where: { id: dto.templateId } });
+    if (!template) throw new NotFoundException('BOM 템플릿을 찾을 수 없습니다.');
+
+    const existing = await this.projectBomRepo.findOne({ where: { project: { id: projectId } } });
+
+    if (existing) {
+      existing.bomTemplate = template;
+      await this.projectBomRepo.save(existing);
+    } else {
+      const link = new ProjectBom();
+      link.project = project;
+      link.bomTemplate = template;
+      await this.projectBomRepo.save(link);
+    }
+
+    return { projectId, templateId: dto.templateId };
+  }
+
+  async findByProject(projectId: number) {
+    const link = await this.projectBomRepo.findOne({
+      where: { project: { id: projectId } },
+      relations: ['bomTemplate', 'bomTemplate.rows', 'bomTemplate.rows.material'],
+    });
+
+    if (!link) throw new NotFoundException('연결된 BOM 템플릿이 없습니다.');
+
+    return this.formatTemplateWithRows(link.bomTemplate);
+  }
+
+  private formatTemplateWithRows(template: BomTemplate) {
     return {
       id: template.id,
       name: template.name,

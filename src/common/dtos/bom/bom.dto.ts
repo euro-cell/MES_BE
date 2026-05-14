@@ -74,3 +74,9 @@ export class CreateBomTemplateDto {
   @Type(() => CreateBomTemplateRowDto)
   rows: CreateBomTemplateRowDto[];
 }
+
+export class LinkBomTemplateDto {
+  @ApiProperty({ description: '연결할 BOM 템플릿 ID' })
+  @IsNumber()
+  templateId: number;
+}
