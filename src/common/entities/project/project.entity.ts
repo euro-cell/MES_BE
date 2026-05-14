@@ -4,6 +4,7 @@ import { ProjectTarget } from './project-target.entity';
 import { Specification } from '../specification/specification.entity';
 import { ProjectMaterial } from './project-material.entity';
 import { ProjectSpecification } from './project-specifications.entity';
+import { ProjectBom } from '../bom/project-bom.entity';
 
 @Entity('projects')
 export class Project {
@@ -60,4 +61,7 @@ export class Project {
 
   @OneToMany(() => ProjectMaterial, (projMaterial: ProjectMaterial) => projMaterial.project)
   projectMaterials: ProjectMaterial[];
+
+  @OneToMany(() => ProjectBom, (projectBom) => projectBom.project)
+  projectBoms: ProjectBom[];
 }
