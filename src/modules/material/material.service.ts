@@ -508,7 +508,7 @@ export class MaterialService {
         if (existingMaterial) {
           // UPDATE: 기존 데이터와 비교하여 변경 여부 확인
           const previousStock = existingMaterial.stock || 0;
-          const currentStock = item.stock ?? 0;
+          const currentStock = Math.round(item.stock ?? 0);
 
           const hasChanges =
             existingMaterial.type !== (item.type ?? '') ||
@@ -564,7 +564,7 @@ export class MaterialService {
           newMaterial.unit = item.unit ?? '';
           newMaterial.price = item.price ?? 0;
           newMaterial.note = item.note ?? '';
-          newMaterial.stock = item.stock ?? 0;
+          newMaterial.stock = Math.round(item.stock ?? 0);
 
           const savedMaterial = await queryRunner.manager.save(Material, newMaterial);
 
