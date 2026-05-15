@@ -1,7 +1,7 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { BomService } from './bom.service';
-import { CreateBomTemplateDto, LinkBomTemplateDto } from 'src/common/dtos/bom/bom.dto';
+import { CreateBomTemplateDto, LinkBomTemplateDto, UpdateBomTemplateDto } from 'src/common/dtos/bom/bom.dto';
 import { SessionAuthGuard } from 'src/common/guards/session-auth.guard';
 import { PermissionGuard } from 'src/common/guards/permission.guard';
 import { RequirePermission } from 'src/common/decorators/permission.decorator';
@@ -30,6 +30,13 @@ export class BomController {
   @ApiOperation({ summary: 'BOM 템플릿 단건 조회 (행 포함)' })
   async findTemplateById(@Param('id', ParseIntPipe) id: number) {
     return this.bomService.findTemplateById(id);
+  }
+
+  @Patch('templates/:id')
+  @RequirePermission(MenuName.MATERIAL_MANAGEMENT, PermissionAction.UPDATE)
+  @ApiOperation({ summary: 'BOM 템플릿 수정 (rows 전체 교체)' })
+  async updateTemplate(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateBomTemplateDto) {
+    return this.bomService.updateTemplate(id, dto);
   }
 
   @Post(':projectId/link')

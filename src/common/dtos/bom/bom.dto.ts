@@ -75,6 +75,41 @@ export class CreateBomTemplateDto {
   rows: CreateBomTemplateRowDto[];
 }
 
+export class UpdateBomTemplateDto {
+  @ApiPropertyOptional({ description: 'BOM 템플릿 이름' })
+  @IsOptional()
+  @IsString()
+  name?: string;
+
+  @ApiPropertyOptional({ description: '설명' })
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @ApiPropertyOptional({ description: 'USD 환율' })
+  @IsOptional()
+  @IsNumber()
+  usdRate?: number;
+
+  @ApiPropertyOptional({ description: 'JPY 환율' })
+  @IsOptional()
+  @IsNumber()
+  jpyRate?: number;
+
+  @ApiPropertyOptional({ description: 'EUR 환율' })
+  @IsOptional()
+  @IsNumber()
+  eurRate?: number;
+
+  @ApiPropertyOptional({ type: [CreateBomTemplateRowDto], description: 'BOM 행 목록 (전체 교체)' })
+  @IsOptional()
+  @IsArray()
+  @ArrayMinSize(1)
+  @ValidateNested({ each: true })
+  @Type(() => CreateBomTemplateRowDto)
+  rows?: CreateBomTemplateRowDto[];
+}
+
 export class LinkBomTemplateDto {
   @ApiProperty({ description: '연결할 BOM 템플릿 ID' })
   @IsNumber()
