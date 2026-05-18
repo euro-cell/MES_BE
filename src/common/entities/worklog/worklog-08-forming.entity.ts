@@ -93,10 +93,10 @@ export class WorklogForming extends WorklogBase {
   cuttingChecklist: string;
 
   // 포밍
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'real', nullable: true })
   formingDepth: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'real', nullable: true })
   formingStopperHeight: number;
 
   @Column({ type: 'text', nullable: true })
