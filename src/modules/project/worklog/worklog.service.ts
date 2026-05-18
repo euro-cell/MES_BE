@@ -121,7 +121,7 @@ export class WorklogService {
 
     // 2. 작업일지 데이터 조회 (프로젝트 ID로 필터링)
     const worklogs = await repository.find({
-      where: { id: In(worklogIds), production: { id: projectId } },
+      where: { id: In(worklogIds), project: { id: projectId } },
       relations: ['project'],
       order: { manufactureDate: 'ASC', id: 'ASC' },
     });
@@ -131,7 +131,7 @@ export class WorklogService {
     }
 
     // 프로젝트명 추출 (첫 번째 작업일지의 production에서)
-    const productionName = worklogs[0]?.['production']?.name || '';
+    const productionName = worklogs[0]?.project?.name || '';
 
     // 3. 시트명 중복 처리를 위한 Map (YYMMDD -> count)
     const sheetNameCountMap = new Map<string, number>();
