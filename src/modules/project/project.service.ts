@@ -89,7 +89,39 @@ export class ProjectService {
     if (!project) {
       throw new NotFoundException(`ID ${id}번 프로젝트 항목을 찾을 수 없습니다.`);
     }
+
+    const nameFields = ['company', 'mode', 'year', 'month', 'round', 'batteryType', 'capacity'] as const;
+    const affectsName = nameFields.some((f) => dto[f] !== undefined);
+
     const updated = Object.assign(project, dto);
+
+    if (affectsName) {
+      const company = updated.company.toUpperCase();
+      const mode = updated.mode.toUpperCase() as 'OEM' | 'ODM';
+      const batteryType = updated.batteryType.toUpperCase();
+      const type = mode === 'OEM' ? 'E' : 'D';
+
+      const newName = this.generateProjectName({
+        company,
+        type,
+        year: Number(updated.year),
+        month: Number(updated.month),
+        round: Number(updated.round),
+        batteryType,
+        capacity: Number(updated.capacity),
+      });
+
+      if (newName !== project.name) {
+        const existing = await this.projectRepository.findOne({ where: { name: newName }, withDeleted: true });
+        if (existing) throw new ConflictException(`이미 존재하는 프로젝트명입니다: ${newName}`);
+      }
+
+      updated.name = newName;
+      updated.company = company;
+      updated.mode = mode;
+      updated.batteryType = batteryType;
+    }
+
     return await this.projectRepository.save(updated);
   }
 
