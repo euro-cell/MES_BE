@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { BomService } from './bom.service';
 import { CreateBomTemplateDto, LinkBomTemplateDto, UpdateBomTemplateDto } from 'src/common/dtos/bom/bom.dto';
@@ -50,5 +50,21 @@ export class BomController {
   @ApiOperation({ summary: '프로젝트별 연결된 BOM 조회' })
   async findByProject(@Param('projectId', ParseIntPipe) projectId: number) {
     return this.bomService.findByProject(projectId);
+  }
+
+  @Delete('templates/:id')
+  @RequirePermission(MenuName.MATERIAL_MANAGEMENT, PermissionAction.DELETE)
+  @HttpCode(204)
+  @ApiOperation({ summary: 'BOM 템플릿 삭제 (soft delete)' })
+  async deleteTemplate(@Param('id', ParseIntPipe) id: number) {
+    return this.bomService.deleteTemplate(id);
+  }
+
+  @Delete(':projectId/link')
+  @RequirePermission(MenuName.MATERIAL_MANAGEMENT, PermissionAction.DELETE)
+  @HttpCode(204)
+  @ApiOperation({ summary: '프로젝트-BOM 연결 해제' })
+  async unlinkTemplate(@Param('projectId', ParseIntPipe) projectId: number) {
+    return this.bomService.unlinkTemplate(projectId);
   }
 }

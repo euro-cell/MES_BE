@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { BomTemplate } from './bom-template.entity';
 import { Material } from '../material/material.entity';
 
@@ -40,6 +40,9 @@ export class BomTemplateRow {
 
   @Column({ type: 'decimal', precision: 14, scale: 6 })
   netQty: number;
+
+  @DeleteDateColumn()
+  deletedAt?: Date;
 
   @ManyToOne(() => BomTemplate, (template) => template.rows, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'bom_template_id' })

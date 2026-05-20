@@ -166,6 +166,22 @@ export class BomService {
     return this.formatTemplateWithRows(link.bomTemplate);
   }
 
+  async deleteTemplate(id: number): Promise<void> {
+    const template = await this.bomTemplateRepo.findOne({ where: { id }, relations: ['rows'] });
+    if (!template) throw new NotFoundException('BOM 템플릿을 찾을 수 없습니다.');
+
+    await this.projectBomRepo.delete({ bomTemplate: { id } });
+    await this.bomTemplateRowRepo.softRemove(template.rows);
+    await this.bomTemplateRepo.softRemove(template);
+  }
+
+  async unlinkTemplate(projectId: number): Promise<void> {
+    const link = await this.projectBomRepo.findOne({ where: { project: { id: projectId } } });
+    if (!link) throw new NotFoundException('연결된 BOM 템플릿이 없습니다.');
+
+    await this.projectBomRepo.remove(link);
+  }
+
   private formatTemplateWithRows(template: BomTemplate) {
     return {
       id: template.id,
