@@ -141,37 +141,37 @@ export class WorklogSlurry extends WorklogBase {
   viscosity4Value: number;
 
   // 생산 정보 - 고형분 (접시, 슬러리, 건조, 고형분%)
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 3, nullable: true })
   solidContent1Dish: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 3, nullable: true })
   solidContent1Slurry: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 3, nullable: true })
   solidContent1Dry: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   solidContent1Percentage: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 3, nullable: true })
   solidContent2Dish: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 3, nullable: true })
   solidContent2Slurry: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 3, nullable: true })
   solidContent2Dry: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   solidContent2Percentage: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 3, nullable: true })
   solidContent3Dish: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 3, nullable: true })
   solidContent3Slurry: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 3, nullable: true })
   solidContent3Dry: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
@@ -214,10 +214,10 @@ export class WorklogSlurry extends WorklogBase {
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   pdMixer1Temp1: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'smallint', nullable: true })
   pdMixer1RpmLow1: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'smallint', nullable: true })
   pdMixer1RpmHigh1: number;
 
   @Column({ type: 'time', nullable: true })
@@ -238,10 +238,10 @@ export class WorklogSlurry extends WorklogBase {
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   pdMixer1Temp2: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'smallint', nullable: true })
   pdMixer1RpmLow2: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'smallint', nullable: true })
   pdMixer1RpmHigh2: number;
 
   @Column({ type: 'time', nullable: true })
@@ -262,10 +262,10 @@ export class WorklogSlurry extends WorklogBase {
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   pdMixer1Temp3: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'smallint', nullable: true })
   pdMixer1RpmLow3: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'smallint', nullable: true })
   pdMixer1RpmHigh3: number;
 
   @Column({ type: 'time', nullable: true })
@@ -286,10 +286,10 @@ export class WorklogSlurry extends WorklogBase {
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   pdMixer1Temp4: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'smallint', nullable: true })
   pdMixer1RpmLow4: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'smallint', nullable: true })
   pdMixer1RpmHigh4: number;
 
   @Column({ type: 'time', nullable: true })
@@ -310,10 +310,10 @@ export class WorklogSlurry extends WorklogBase {
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   pdMixer1Temp5: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'smallint', nullable: true })
   pdMixer1RpmLow5: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'smallint', nullable: true })
   pdMixer1RpmHigh5: number;
 
   @Column({ type: 'time', nullable: true })
@@ -334,10 +334,10 @@ export class WorklogSlurry extends WorklogBase {
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   pdMixer1Temp6: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'smallint', nullable: true })
   pdMixer1RpmLow6: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'smallint', nullable: true })
   pdMixer1RpmHigh6: number;
 
   @Column({ type: 'time', nullable: true })
@@ -358,10 +358,10 @@ export class WorklogSlurry extends WorklogBase {
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   pdMixer1Temp7: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'smallint', nullable: true })
   pdMixer1RpmLow7: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'smallint', nullable: true })
   pdMixer1RpmHigh7: number;
 
   @Column({ type: 'time', nullable: true })
@@ -383,10 +383,10 @@ export class WorklogSlurry extends WorklogBase {
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   viscometer1Temp: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'smallint', nullable: true })
   viscometer1RpmLow: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'smallint', nullable: true })
   viscometer1RpmHigh: number;
 
   @Column({ type: 'time', nullable: true })
@@ -411,10 +411,10 @@ export class WorklogSlurry extends WorklogBase {
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   pdMixer2Temp1: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'smallint', nullable: true })
   pdMixer2RpmLow1: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'smallint', nullable: true })
   pdMixer2RpmHigh1: number;
 
   @Column({ type: 'time', nullable: true })
@@ -435,10 +435,10 @@ export class WorklogSlurry extends WorklogBase {
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   pdMixer2Temp2: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'smallint', nullable: true })
   pdMixer2RpmLow2: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'smallint', nullable: true })
   pdMixer2RpmHigh2: number;
 
   @Column({ type: 'time', nullable: true })
@@ -459,10 +459,10 @@ export class WorklogSlurry extends WorklogBase {
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   pdMixer2Temp3: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'smallint', nullable: true })
   pdMixer2RpmLow3: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'smallint', nullable: true })
   pdMixer2RpmHigh3: number;
 
   @Column({ type: 'time', nullable: true })
@@ -483,10 +483,10 @@ export class WorklogSlurry extends WorklogBase {
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   pdMixer2Temp4: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'smallint', nullable: true })
   pdMixer2RpmLow4: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'smallint', nullable: true })
   pdMixer2RpmHigh4: number;
 
   @Column({ type: 'time', nullable: true })
@@ -507,10 +507,10 @@ export class WorklogSlurry extends WorklogBase {
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   pdMixer2Temp5: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'smallint', nullable: true })
   pdMixer2RpmLow5: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'smallint', nullable: true })
   pdMixer2RpmHigh5: number;
 
   @Column({ type: 'time', nullable: true })
@@ -532,10 +532,10 @@ export class WorklogSlurry extends WorklogBase {
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   viscometer2Temp: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'smallint', nullable: true })
   viscometer2RpmLow: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'smallint', nullable: true })
   viscometer2RpmHigh: number;
 
   @Column({ type: 'time', nullable: true })
@@ -560,10 +560,10 @@ export class WorklogSlurry extends WorklogBase {
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   pdMixer3Temp1: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'smallint', nullable: true })
   pdMixer3RpmLow1: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'smallint', nullable: true })
   pdMixer3RpmHigh1: number;
 
   @Column({ type: 'time', nullable: true })
@@ -585,10 +585,10 @@ export class WorklogSlurry extends WorklogBase {
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   viscometer3Temp: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'smallint', nullable: true })
   viscometer3RpmLow: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'smallint', nullable: true })
   viscometer3RpmHigh: number;
 
   @Column({ type: 'time', nullable: true })
@@ -613,10 +613,10 @@ export class WorklogSlurry extends WorklogBase {
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   pdMixer4Temp1: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'smallint', nullable: true })
   pdMixer4RpmLow1: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ type: 'smallint', nullable: true })
   pdMixer4RpmHigh1: number;
 
   @Column({ type: 'time', nullable: true })
