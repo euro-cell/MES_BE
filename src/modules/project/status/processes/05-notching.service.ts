@@ -151,13 +151,15 @@ export class NotchingProcessService {
       }
     }
 
-    for (const [pressLot, pressQty] of pressLotQuantityMap) {
+    for (const [pressLot] of pressLotQuantityMap) {
       if (!processedPressLots.has(pressLot)) {
         const lastDayInfo = pressLotLastDay.get(pressLot);
 
         if (lastDayInfo && lastDayInfo.isCurrentMonth) {
           const dayData = dailyMap.get(lastDayInfo.day) || { good: 0, defect: 0, notchingLengthM: 0, pressInputM: 0 };
-          dayData.pressInputM += pressQty;
+          // press M값이 실제 노칭 길이보다 클 경우 노칭 실제 길이를 투입량으로 사용 (수율 100% 처리)
+          const actualLength = notchingLengthMap.get(pressLot) || 0;
+          dayData.pressInputM += actualLength;
           dailyMap.set(lastDayInfo.day, dayData);
         }
       }
@@ -183,7 +185,8 @@ export class NotchingProcessService {
     for (let day = 1; day <= daysInMonth; day++) {
       const dayData = dailyMap.get(day) || { good: 0, defect: 0, notchingLengthM: 0, pressInputM: 0 };
       const dayNg = dayData.defect > 0 ? dayData.defect : null;
-      const dayYield = dayData.pressInputM > 0 ? Math.round((dayData.notchingLengthM / dayData.pressInputM) * 100 * 100) / 100 : null;
+      const total = dayData.good + dayData.defect;
+      const dayYield = total > 0 ? Math.round((dayData.good / total) * 100 * 100) / 100 : null;
       data.push({ day, output: dayData.good, ng: dayNg, yield: dayYield });
       totalOutput += dayData.good;
       totalDefect += dayData.defect;
@@ -194,7 +197,8 @@ export class NotchingProcessService {
     const targetField = type === 'cathode' ? 'notchingCathode' : 'notchingAnode';
     const targetQuantity = productionTarget?.[targetField] || null;
     const progress = targetQuantity ? Math.round((cumulativeOutput / targetQuantity) * 100 * 100) / 100 : null;
-    const totalYield = totalPressInputM > 0 ? Math.round((totalNotchingLengthM / totalPressInputM) * 100 * 100) / 100 : null;
+    const totalGoodPlusDefect = totalOutput + totalDefect;
+    const totalYield = totalGoodPlusDefect > 0 ? Math.round((totalOutput / totalGoodPlusDefect) * 100 * 100) / 100 : null;
 
     return {
       data,
