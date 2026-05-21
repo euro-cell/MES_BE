@@ -7,6 +7,14 @@ import { MaterialService } from 'src/modules/material/material.service';
 import { EquipmentService } from 'src/modules/equipment/equipment.service';
 import { MaterialProcess } from 'src/common/enums/material.enum';
 
+function getElectrodeType(lot: string | null | undefined): '양극' | '음극' | null {
+  if (!lot || lot.length < 5) return null;
+  const ch = lot[4].toUpperCase();
+  if (ch === 'C') return '양극';
+  if (ch === 'A') return '음극';
+  return null;
+}
+
 @Injectable()
 export class BinderService {
   constructor(
@@ -63,6 +71,7 @@ export class BinderService {
         workDate: worklog.manufactureDate.toString(),
         round: round,
         writer: worklog.writer || '',
+        electrodeType: getElectrodeType(worklog.lot),
       };
     });
     return worklogsWithRound.reverse();

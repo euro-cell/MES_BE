@@ -5,6 +5,25 @@ import { WorklogVd } from 'src/common/entities/worklog/worklog-07-vd.entity';
 import { CreateVdWorklogDto, VdWorklogListResponseDto, UpdateVdWorklogDto } from 'src/common/dtos/worklog/07-vd.dto';
 import { EquipmentService } from 'src/modules/equipment/equipment.service';
 
+function getVdElectrodeType(worklog: WorklogVd): '양극' | '음극' | '양극/음극' | null {
+  const lots = [
+    worklog.upperLot1, worklog.upperLot2, worklog.upperLot3, worklog.upperLot4, worklog.upperLot5,
+    worklog.lowerLot1, worklog.lowerLot2, worklog.lowerLot3, worklog.lowerLot4, worklog.lowerLot5,
+  ];
+  let hasCathode = false;
+  let hasAnode = false;
+  for (const lot of lots) {
+    if (!lot || lot.length < 5) continue;
+    const ch = lot[4].toUpperCase();
+    if (ch === 'C') hasCathode = true;
+    if (ch === 'A') hasAnode = true;
+  }
+  if (hasCathode && hasAnode) return '양극/음극';
+  if (hasCathode) return '양극';
+  if (hasAnode) return '음극';
+  return null;
+}
+
 @Injectable()
 export class VdService {
   constructor(
@@ -39,6 +58,7 @@ export class VdService {
         workDate: worklog.manufactureDate.toString(),
         round: round,
         writer: worklog.writer || '',
+        electrodeType: getVdElectrodeType(worklog),
       };
     });
     return worklogsWithRound.reverse();
