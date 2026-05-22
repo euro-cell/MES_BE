@@ -3,6 +3,7 @@ import { RouterModule } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { WorklogService } from './worklog.service';
 import { WorklogController } from './worklog.controller';
+import { MaterialModule } from 'src/modules/material/material.module';
 import { BinderModule, SlurryModule, CoatingModule, PressModule, NotchingModule, VdModule, FormingModule, StackingModule, WeldingModule, SealingModule, FillingModule, FormationModule, GradingModule, VisualInspectionModule } from './index';
 
 // Worklog Entities
@@ -55,6 +56,7 @@ import { WorklogVisualInspection } from 'src/common/entities/worklog/worklog-15-
       { path: 'project', module: GradingModule },
       { path: 'project', module: VisualInspectionModule },
     ]),
+    MaterialModule,
     BinderModule,
     SlurryModule,
     CoatingModule,

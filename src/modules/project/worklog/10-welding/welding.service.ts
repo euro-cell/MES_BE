@@ -26,12 +26,12 @@ export class WeldingService {
     // 자재 사용 이력 기록 (leadTab, piTape)
     // leadTab: leadTabLot, leadTabUsage
     if (dto.leadTabLot && dto.leadTabUsage && dto.leadTabUsage > 0) {
-      await this.materialService.recordMaterialUsage(dto.leadTabLot, undefined, dto.leadTabUsage, MaterialProcess.ELECTRODE);
+      await this.materialService.recordMaterialUsage(dto.leadTabLot, undefined, dto.leadTabUsage, MaterialProcess.ASSEMBLY);
     }
 
     // piTape: piTapeLot, piTapeUsage
     if (dto.piTapeLot && dto.piTapeUsage && dto.piTapeUsage > 0) {
-      await this.materialService.recordMaterialUsage(dto.piTapeLot, undefined, dto.piTapeUsage, MaterialProcess.ELECTRODE);
+      await this.materialService.recordMaterialUsage(dto.piTapeLot, undefined, dto.piTapeUsage, MaterialProcess.ASSEMBLY);
     }
 
     return savedWorklog;
@@ -107,7 +107,7 @@ export class WeldingService {
         undefined,
         previousLeadTabUsage,
         newLeadTabUsage,
-        MaterialProcess.ELECTRODE,
+        MaterialProcess.ASSEMBLY,
       );
     }
 
@@ -119,7 +119,7 @@ export class WeldingService {
         undefined,
         previousPiTapeUsage,
         newPiTapeUsage,
-        MaterialProcess.ELECTRODE,
+        MaterialProcess.ASSEMBLY,
       );
     }
 
@@ -135,10 +135,10 @@ export class WeldingService {
 
     // 삭제 전 자재 사용량 재고 복구
     if (worklog.leadTabLot && worklog.leadTabUsage && worklog.leadTabUsage > 0) {
-      await this.materialService.restoreMaterialUsage(worklog.leadTabLot, undefined, worklog.leadTabUsage, MaterialProcess.ELECTRODE);
+      await this.materialService.restoreMaterialUsage(worklog.leadTabLot, undefined, worklog.leadTabUsage, MaterialProcess.ASSEMBLY);
     }
     if (worklog.piTapeLot && worklog.piTapeUsage && worklog.piTapeUsage > 0) {
-      await this.materialService.restoreMaterialUsage(worklog.piTapeLot, undefined, worklog.piTapeUsage, MaterialProcess.ELECTRODE);
+      await this.materialService.restoreMaterialUsage(worklog.piTapeLot, undefined, worklog.piTapeUsage, MaterialProcess.ASSEMBLY);
     }
 
     await this.worklogWeldingRepository.remove(worklog);

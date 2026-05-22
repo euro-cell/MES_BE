@@ -25,7 +25,7 @@ export class FillingService {
 
     // 자재 사용 이력 기록 (electrolyte)
     if (dto.electrolyteLot && dto.electrolyteUsage && dto.electrolyteUsage > 0) {
-      await this.materialService.recordMaterialUsage(dto.electrolyteLot, undefined, dto.electrolyteUsage, MaterialProcess.ELECTRODE);
+      await this.materialService.recordMaterialUsage(dto.electrolyteLot, undefined, dto.electrolyteUsage, MaterialProcess.ASSEMBLY);
     }
 
     return savedWorklog;
@@ -99,7 +99,7 @@ export class FillingService {
         undefined,
         previousElectrolyteUsage,
         newElectrolyteUsage,
-        MaterialProcess.ELECTRODE,
+        MaterialProcess.ASSEMBLY,
       );
     }
 
@@ -115,7 +115,7 @@ export class FillingService {
 
     // 삭제 전 자재 사용량 재고 복구
     if (worklog.electrolyteLot && worklog.electrolyteUsage && worklog.electrolyteUsage > 0) {
-      await this.materialService.restoreMaterialUsage(worklog.electrolyteLot, undefined, worklog.electrolyteUsage, MaterialProcess.ELECTRODE);
+      await this.materialService.restoreMaterialUsage(worklog.electrolyteLot, undefined, worklog.electrolyteUsage, MaterialProcess.ASSEMBLY);
     }
 
     await this.worklogFillingRepository.remove(worklog);

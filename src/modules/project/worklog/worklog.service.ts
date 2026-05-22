@@ -1,6 +1,8 @@
 import { Injectable, NotFoundException, StreamableFile } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
+import { MaterialService } from 'src/modules/material/material.service';
+import { MaterialProcess } from 'src/common/enums/material.enum';
 import { join } from 'path';
 import * as ExcelJS from 'exceljs';
 import * as JSZip from 'jszip';
@@ -56,6 +58,19 @@ type WorklogEntity =
   | WorklogGrading
   | WorklogVisualInspection;
 
+export interface MaterialUsageItem {
+  lotOrName: string;
+  amount: number;
+  label: string;
+}
+
+export interface BackfillResult {
+  process: string;
+  worklogId: number;
+  applied: MaterialUsageItem[];
+  skipped: MaterialUsageItem[];
+}
+
 @Injectable()
 export class WorklogService {
   private readonly templatePath =
@@ -64,6 +79,7 @@ export class WorklogService {
       : join(process.cwd(), 'src', 'assets', 'worklog');
 
   constructor(
+    private readonly materialService: MaterialService,
     @InjectRepository(WorklogBinder)
     private readonly binderRepository: Repository<WorklogBinder>,
     @InjectRepository(WorklogSlurry)
@@ -551,6 +567,120 @@ export class WorklogService {
     } else {
       return `${baseName}_${newCount}`;
     }
+  }
+
+  /**
+   * 기존 작업일지의 자재 소요를 소급 처리한다.
+   * dryRun=true 이면 실제 재고 변경 없이 처리 대상 목록만 반환한다.
+   */
+  async backfillMaterialUsage(dryRun: boolean): Promise<BackfillResult[]> {
+    const results: BackfillResult[] = [];
+
+    // 바인더: material1~2 (Name + Lot + ActualInput)
+    const binders = await this.binderRepository.find();
+    for (const w of binders) {
+      const items: MaterialUsageItem[] = [];
+      for (let i = 1; i <= 2; i++) {
+        const lot = w[`material${i}Lot`];
+        const amount = w[`material${i}ActualInput`];
+        if (lot && amount && amount > 0) {
+          items.push({ lotOrName: lot, amount, label: `material${i}Lot` });
+        }
+      }
+      results.push(await this.applyBackfill('binder', w.id, items, dryRun, MaterialProcess.ELECTRODE));
+    }
+
+    // 믹싱(슬러리): material1~8 (Name + Lot + ActualInput)
+    const slurries = await this.slurryRepository.find();
+    for (const w of slurries) {
+      const items: MaterialUsageItem[] = [];
+      for (let i = 1; i <= 8; i++) {
+        const lot = w[`material${i}Lot`];
+        const amount = w[`material${i}ActualInput`];
+        if (lot && amount && amount > 0) {
+          items.push({ lotOrName: lot, amount, label: `material${i}Lot` });
+        }
+      }
+      results.push(await this.applyBackfill('slurry', w.id, items, dryRun, MaterialProcess.ELECTRODE));
+    }
+
+    // 코팅: materialLot/usageAmount, materialLot2/inputAmountActual
+    const coatings = await this.coatingRepository.find();
+    for (const w of coatings) {
+      const items: MaterialUsageItem[] = [];
+      if (w.materialLot && w.usageAmount && w.usageAmount > 0) {
+        items.push({ lotOrName: w.materialLot, amount: w.usageAmount, label: 'materialLot' });
+      }
+      if (w.materialLot2 && w.inputAmountActual && w.inputAmountActual > 0) {
+        items.push({ lotOrName: w.materialLot2, amount: w.inputAmountActual, label: 'materialLot2' });
+      }
+      results.push(await this.applyBackfill('coating', w.id, items, dryRun, MaterialProcess.ELECTRODE));
+    }
+
+    // 포밍: pouchLot / pouchUsage
+    const formings = await this.formingRepository.find();
+    for (const w of formings) {
+      const items: MaterialUsageItem[] = [];
+      if (w.pouchLot && w.pouchUsage && w.pouchUsage > 0) {
+        items.push({ lotOrName: w.pouchLot, amount: w.pouchUsage, label: 'pouchLot' });
+      }
+      results.push(await this.applyBackfill('forming', w.id, items, dryRun, MaterialProcess.ASSEMBLY));
+    }
+
+    // 스태킹: separatorLot / separatorUsage
+    const stackings = await this.stackingRepository.find();
+    for (const w of stackings) {
+      const items: MaterialUsageItem[] = [];
+      if (w.separatorLot && w.separatorUsage && w.separatorUsage > 0) {
+        items.push({ lotOrName: w.separatorLot, amount: w.separatorUsage, label: 'separatorLot' });
+      }
+      results.push(await this.applyBackfill('stacking', w.id, items, dryRun, MaterialProcess.ASSEMBLY));
+    }
+
+    // 웰딩: leadTabLot / leadTabUsage, piTapeLot / piTapeUsage
+    const weldings = await this.weldingRepository.find();
+    for (const w of weldings) {
+      const items: MaterialUsageItem[] = [];
+      if (w.leadTabLot && w.leadTabUsage && w.leadTabUsage > 0) {
+        items.push({ lotOrName: w.leadTabLot, amount: w.leadTabUsage, label: 'leadTabLot' });
+      }
+      if (w.piTapeLot && w.piTapeUsage && w.piTapeUsage > 0) {
+        items.push({ lotOrName: w.piTapeLot, amount: w.piTapeUsage, label: 'piTapeLot' });
+      }
+      results.push(await this.applyBackfill('welding', w.id, items, dryRun, MaterialProcess.ASSEMBLY));
+    }
+
+    // 필링: electrolyteLot / electrolyteUsage
+    const fillings = await this.fillingRepository.find();
+    for (const w of fillings) {
+      const items: MaterialUsageItem[] = [];
+      if (w.electrolyteLot && w.electrolyteUsage && w.electrolyteUsage > 0) {
+        items.push({ lotOrName: w.electrolyteLot, amount: w.electrolyteUsage, label: 'electrolyteLot' });
+      }
+      results.push(await this.applyBackfill('filling', w.id, items, dryRun, MaterialProcess.ASSEMBLY));
+    }
+
+    return results;
+  }
+
+  private async applyBackfill(process: string, worklogId: number, items: MaterialUsageItem[], dryRun: boolean, materialProcess: MaterialProcess): Promise<BackfillResult> {
+    const applied: MaterialUsageItem[] = [];
+    const skipped: MaterialUsageItem[] = [];
+
+    for (const item of items) {
+      if (dryRun) {
+        applied.push(item);
+        continue;
+      }
+      const result = await this.materialService.recordMaterialUsage(item.lotOrName, undefined, item.amount, materialProcess);
+      if (result) {
+        applied.push(item);
+      } else {
+        skipped.push(item);
+      }
+    }
+
+    return { process, worklogId, applied, skipped };
   }
 
   /**

@@ -25,7 +25,7 @@ export class FormingService {
 
     // 자재 사용 이력 기록 (pouch)
     if (dto.pouchLot && dto.pouchUsage && dto.pouchUsage > 0) {
-      await this.materialService.recordMaterialUsage(dto.pouchLot, undefined, dto.pouchUsage, MaterialProcess.ELECTRODE);
+      await this.materialService.recordMaterialUsage(dto.pouchLot, undefined, dto.pouchUsage, MaterialProcess.ASSEMBLY);
     }
 
     return savedWorklog;
@@ -99,7 +99,7 @@ export class FormingService {
         undefined,
         previousPouchUsage,
         newPouchUsage,
-        MaterialProcess.ELECTRODE,
+        MaterialProcess.ASSEMBLY,
       );
     }
 
@@ -115,7 +115,7 @@ export class FormingService {
 
     // 삭제 전 자재 사용량 재고 복구
     if (worklog.pouchLot && worklog.pouchUsage && worklog.pouchUsage > 0) {
-      await this.materialService.restoreMaterialUsage(worklog.pouchLot, undefined, worklog.pouchUsage, MaterialProcess.ELECTRODE);
+      await this.materialService.restoreMaterialUsage(worklog.pouchLot, undefined, worklog.pouchUsage, MaterialProcess.ASSEMBLY);
     }
 
     await this.worklogFormingRepository.remove(worklog);

@@ -29,7 +29,7 @@ export class StackingService {
 
     // 자재 사용 이력 기록 (separator)
     if (dto.separatorLot && dto.separatorUsage && dto.separatorUsage > 0) {
-      await this.materialService.recordMaterialUsage(dto.separatorLot, undefined, dto.separatorUsage, MaterialProcess.ELECTRODE);
+      await this.materialService.recordMaterialUsage(dto.separatorLot, undefined, dto.separatorUsage, MaterialProcess.ASSEMBLY);
     }
 
     return savedWorklog;
@@ -103,7 +103,7 @@ export class StackingService {
         undefined,
         previousSeparatorUsage,
         newSeparatorUsage,
-        MaterialProcess.ELECTRODE,
+        MaterialProcess.ASSEMBLY,
       );
     }
 
@@ -119,7 +119,7 @@ export class StackingService {
 
     // 삭제 전 자재 사용량 재고 복구
     if (worklog.separatorLot && worklog.separatorUsage && worklog.separatorUsage > 0) {
-      await this.materialService.restoreMaterialUsage(worklog.separatorLot, undefined, worklog.separatorUsage, MaterialProcess.ELECTRODE);
+      await this.materialService.restoreMaterialUsage(worklog.separatorLot, undefined, worklog.separatorUsage, MaterialProcess.ASSEMBLY);
     }
 
     await this.worklogStackingRepository.remove(worklog);

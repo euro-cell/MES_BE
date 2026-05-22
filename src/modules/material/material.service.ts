@@ -281,13 +281,11 @@ export class MaterialService {
 
   // 자재 사용 이력 기록 (작업일지에서 사용할 때)
   async recordMaterialUsage(materialName: string, materialLot: string | undefined, usageAmount: number, process: MaterialProcess) {
-    // materialName과 materialLot으로 자재 찾기
-    const material = await this.materialRepository.findOne({
-      where: {
-        name: materialName,
-        ...(materialLot ? { lotNo: materialLot } : {}),
-      },
-    });
+    // lotNo 우선 조회, 없으면 name으로 fallback
+    let material = materialLot
+      ? await this.materialRepository.findOne({ where: { lotNo: materialLot } })
+      : await this.materialRepository.findOne({ where: { lotNo: materialName } }) ||
+        await this.materialRepository.findOne({ where: { name: materialName } });
 
     if (!material) {
       return null; // 자재를 찾지 못함
@@ -321,12 +319,10 @@ export class MaterialService {
     newUsageAmount: number,
     process: MaterialProcess,
   ) {
-    const material = await this.materialRepository.findOne({
-      where: {
-        name: materialName,
-        ...(materialLot ? { lotNo: materialLot } : {}),
-      },
-    });
+    let material = materialLot
+      ? await this.materialRepository.findOne({ where: { lotNo: materialLot } })
+      : await this.materialRepository.findOne({ where: { lotNo: materialName } }) ||
+        await this.materialRepository.findOne({ where: { name: materialName } });
 
     if (!material) {
       return null;
@@ -363,12 +359,10 @@ export class MaterialService {
 
   // 자재 사용 복구 (작업일지 삭제 시 재고 원복 및 USE 이력 삭제)
   async restoreMaterialUsage(materialName: string, materialLot: string | undefined, usageAmount: number, process: MaterialProcess) {
-    const material = await this.materialRepository.findOne({
-      where: {
-        name: materialName,
-        ...(materialLot ? { lotNo: materialLot } : {}),
-      },
-    });
+    let material = materialLot
+      ? await this.materialRepository.findOne({ where: { lotNo: materialLot } })
+      : await this.materialRepository.findOne({ where: { lotNo: materialName } }) ||
+        await this.materialRepository.findOne({ where: { name: materialName } });
 
     if (!material) {
       return null;

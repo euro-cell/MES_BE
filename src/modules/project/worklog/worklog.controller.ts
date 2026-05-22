@@ -1,7 +1,7 @@
-import { Controller, Get, Post, Param, Body, Res, StreamableFile, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Res, StreamableFile, UseGuards, Query } from '@nestjs/common';
 import type { Response } from 'express';
 import { ProcessTemplateFile, WorklogService } from './worklog.service';
-import { ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiParam, ApiBody } from '@nestjs/swagger';
+import { ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiParam, ApiBody, ApiQuery } from '@nestjs/swagger';
 import { ExportWorklogRequestDto } from 'src/common/dtos/worklog/export-worklog.dto';
 import { SessionAuthGuard } from 'src/common/guards/session-auth.guard';
 import { PermissionGuard } from 'src/common/guards/permission.guard';
@@ -12,6 +12,14 @@ import { MenuName, PermissionAction } from 'src/common/enums/menu.enum';
 @UseGuards(SessionAuthGuard, PermissionGuard)
 export class WorklogController {
   constructor(private readonly worklogService: WorklogService) {}
+
+  @Post('admin/backfill-material-usage')
+  @RequirePermission(MenuName.WORKLOG, PermissionAction.CREATE)
+  @ApiOperation({ summary: '[관리자] 기존 작업일지 자재 소요 소급 처리 (포밍/스태킹/웰딩/필링)' })
+  @ApiQuery({ name: 'dryRun', required: false, type: Boolean, description: 'true이면 재고 변경 없이 대상 목록만 반환' })
+  async backfillMaterialUsage(@Query('dryRun') dryRun?: string) {
+    return this.worklogService.backfillMaterialUsage(dryRun === 'true');
+  }
 
   @Get(':process')
   @ApiOperation({ summary: '공정별 작업일지 템플릿 파일 다운로드' })
