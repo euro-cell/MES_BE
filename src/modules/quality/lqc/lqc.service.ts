@@ -150,9 +150,12 @@ export class LqcService {
         coatingWidth: number | null;
         uncoatedArea: number | null;
         mismatch: number | null;
-        thicknessTop: number | null;
-        thicknessMiddle: number | null;
-        thicknessBottom: number | null;
+        thicknessFrontTop: number | null;
+        thicknessFrontMiddle: number | null;
+        thicknessFrontBottom: number | null;
+        thicknessRearTop: number | null;
+        thicknessRearMiddle: number | null;
+        thicknessRearBottom: number | null;
       }
     >();
 
@@ -188,9 +191,12 @@ export class LqcService {
           coatingWidth: toNumber(coating[`coatingWidth${i}`]),
           uncoatedArea: toNumber(coating[`uncoatedWidth${i}`]),
           mismatch: toNumber(coating[`misalignment${i}`]),
-          thicknessTop: toNumber(coating[`thicknessFront${i}M`]),
-          thicknessMiddle: toNumber(coating[`thicknessFront${i}C`]),
-          thicknessBottom: toNumber(coating[`thicknessFront${i}D`]),
+          thicknessFrontTop: toNumber(coating[`thicknessFront${i}M`]),
+          thicknessFrontMiddle: toNumber(coating[`thicknessFront${i}C`]),
+          thicknessFrontBottom: toNumber(coating[`thicknessFront${i}D`]),
+          thicknessRearTop: toNumber(coating[`thicknessRear${i}M`]),
+          thicknessRearMiddle: toNumber(coating[`thicknessRear${i}C`]),
+          thicknessRearBottom: toNumber(coating[`thicknessRear${i}D`]),
         });
       }
     }
@@ -202,12 +208,14 @@ export class LqcService {
     for (const [, doubleSideData] of lotDataMap) {
       if (!doubleSideData.isDoubleSide) continue; // 양면만 처리
 
-      const key = doubleSideData.sNumber;
+      const key = `${doubleSideData.id}-${doubleSideData.sNumber}`;
       if (processedKeys.has(key)) continue;
       processedKeys.add(key);
 
-      // 같은 S번호의 단면 찾기
-      const singleSideData = Array.from(lotDataMap.values()).find((d) => !d.isDoubleSide && d.sNumber === doubleSideData.sNumber);
+      // 같은 작업일지 + 같은 S번호의 단면 찾기
+      const singleSideData = Array.from(lotDataMap.values()).find(
+        (d) => !d.isDoubleSide && d.id === doubleSideData.id && d.sNumber === doubleSideData.sNumber,
+      );
 
       // 전단 행
       result.push({
@@ -223,9 +231,9 @@ export class LqcService {
         coatingWidth: doubleSideData.coatingWidth,
         uncoatedArea: doubleSideData.uncoatedArea,
         mismatch: doubleSideData.mismatch,
-        thicknessTop: doubleSideData.thicknessTop,
-        thicknessMiddle: doubleSideData.thicknessMiddle,
-        thicknessBottom: doubleSideData.thicknessBottom,
+        thicknessTop: doubleSideData.thicknessFrontTop,
+        thicknessMiddle: doubleSideData.thicknessFrontMiddle,
+        thicknessBottom: doubleSideData.thicknessFrontBottom,
       });
 
       // 후단 행
@@ -242,11 +250,17 @@ export class LqcService {
         coatingWidth: doubleSideData.coatingWidth,
         uncoatedArea: doubleSideData.uncoatedArea,
         mismatch: doubleSideData.mismatch,
-        thicknessTop: doubleSideData.thicknessTop,
-        thicknessMiddle: doubleSideData.thicknessMiddle,
-        thicknessBottom: doubleSideData.thicknessBottom,
+        thicknessTop: doubleSideData.thicknessRearTop,
+        thicknessMiddle: doubleSideData.thicknessRearMiddle,
+        thicknessBottom: doubleSideData.thicknessRearBottom,
       });
     }
+
+    result.sort((a, b) => {
+      const lotCmp = a.lot.localeCompare(b.lot);
+      if (lotCmp !== 0) return lotCmp;
+      return a.division === '전' ? -1 : 1;
+    });
 
     return result;
   }
