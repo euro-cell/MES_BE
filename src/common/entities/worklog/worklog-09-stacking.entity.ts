@@ -156,10 +156,10 @@ export class WorklogStacking extends WorklogBase {
   @Column({ type: 'smallint', nullable: true })
   jellyRollWeight: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   jellyRollThickness: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   separatorTopBottomDimension: number;
 
   @Column({ type: 'smallint', nullable: true })
