@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsOptional, IsNumber } from 'class-validator';
+import { IsString, IsOptional, IsNumber, Matches } from 'class-validator';
 import { PartialType } from '@nestjs/swagger';
 import { BaseWorklogDto, BaseWorklogListResponseDto } from './00-base-worklog.dto';
 
@@ -144,9 +144,9 @@ export class CreateStackingWorklogDto extends BaseWorklogDto {
   @IsString()
   jrNumber1SeparatorLot?: string;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ example: '09:30~12:00' })
   @IsOptional()
-  @IsString()
+  @Matches(/^\d{2}:\d{2}~\d{2}:\d{2}$/, { message: '시간 형식은 HH:mm~HH:mm 이어야 합니다.' })
   jrNumber1WorkTime?: string;
 
   @ApiPropertyOptional()
@@ -180,9 +180,9 @@ export class CreateStackingWorklogDto extends BaseWorklogDto {
   @IsString()
   jrNumber2SeparatorLot?: string;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ example: '09:30~12:00' })
   @IsOptional()
-  @IsString()
+  @Matches(/^\d{2}:\d{2}~\d{2}:\d{2}$/, { message: '시간 형식은 HH:mm~HH:mm 이어야 합니다.' })
   jrNumber2WorkTime?: string;
 
   @ApiPropertyOptional()
@@ -216,9 +216,9 @@ export class CreateStackingWorklogDto extends BaseWorklogDto {
   @IsString()
   jrNumber3SeparatorLot?: string;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ example: '09:30~12:00' })
   @IsOptional()
-  @IsString()
+  @Matches(/^\d{2}:\d{2}~\d{2}:\d{2}$/, { message: '시간 형식은 HH:mm~HH:mm 이어야 합니다.' })
   jrNumber3WorkTime?: string;
 
   @ApiPropertyOptional()
@@ -252,15 +252,159 @@ export class CreateStackingWorklogDto extends BaseWorklogDto {
   @IsString()
   jrNumber4SeparatorLot?: string;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ example: '09:30~12:00' })
   @IsOptional()
-  @IsString()
+  @Matches(/^\d{2}:\d{2}~\d{2}:\d{2}$/, { message: '시간 형식은 HH:mm~HH:mm 이어야 합니다.' })
   jrNumber4WorkTime?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsNumber()
   jrNumber4ElectrodeDefect?: number;
+
+  // JR Number 5
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  jrNumber5?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  jrNumber5Range?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  jrNumber5CathodeLot?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  jrNumber5AnodeLot?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  jrNumber5SeparatorLot?: string;
+
+  @ApiPropertyOptional({ example: '09:30~12:00' })
+  @IsOptional()
+  @Matches(/^\d{2}:\d{2}~\d{2}:\d{2}$/, { message: '시간 형식은 HH:mm~HH:mm 이어야 합니다.' })
+  jrNumber5WorkTime?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  jrNumber5ElectrodeDefect?: number;
+
+  // JR Number 6
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  jrNumber6?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  jrNumber6Range?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  jrNumber6CathodeLot?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  jrNumber6AnodeLot?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  jrNumber6SeparatorLot?: string;
+
+  @ApiPropertyOptional({ example: '09:30~12:00' })
+  @IsOptional()
+  @Matches(/^\d{2}:\d{2}~\d{2}:\d{2}$/, { message: '시간 형식은 HH:mm~HH:mm 이어야 합니다.' })
+  jrNumber6WorkTime?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  jrNumber6ElectrodeDefect?: number;
+
+  // JR Number 7
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  jrNumber7?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  jrNumber7Range?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  jrNumber7CathodeLot?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  jrNumber7AnodeLot?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  jrNumber7SeparatorLot?: string;
+
+  @ApiPropertyOptional({ example: '09:30~12:00' })
+  @IsOptional()
+  @Matches(/^\d{2}:\d{2}~\d{2}:\d{2}$/, { message: '시간 형식은 HH:mm~HH:mm 이어야 합니다.' })
+  jrNumber7WorkTime?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  jrNumber7ElectrodeDefect?: number;
+
+  // JR Number 8
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  jrNumber8?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  jrNumber8Range?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  jrNumber8CathodeLot?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  jrNumber8AnodeLot?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  jrNumber8SeparatorLot?: string;
+
+  @ApiPropertyOptional({ example: '09:30~12:00' })
+  @IsOptional()
+  @Matches(/^\d{2}:\d{2}~\d{2}:\d{2}$/, { message: '시간 형식은 HH:mm~HH:mm 이어야 합니다.' })
+  jrNumber8WorkTime?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  jrNumber8ElectrodeDefect?: number;
 
   // ===== C. 공정 조건 =====
 

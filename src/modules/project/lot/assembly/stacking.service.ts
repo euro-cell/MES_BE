@@ -31,6 +31,10 @@ export class StackingService {
         { jrRange: stacking.jr2Range, cathodeLot: stacking.jr2CathodeLot, anodeLot: stacking.jr2AnodeLot, separatorLot: stacking.jr2SeparatorLot },
         { jrRange: stacking.jr3Range, cathodeLot: stacking.jr3CathodeLot, anodeLot: stacking.jr3AnodeLot, separatorLot: stacking.jr3SeparatorLot },
         { jrRange: stacking.jr4Range, cathodeLot: stacking.jr4CathodeLot, anodeLot: stacking.jr4AnodeLot, separatorLot: stacking.jr4SeparatorLot },
+        { jrRange: stacking.jr5Range, cathodeLot: stacking.jr5CathodeLot, anodeLot: stacking.jr5AnodeLot, separatorLot: stacking.jr5SeparatorLot },
+        { jrRange: stacking.jr6Range, cathodeLot: stacking.jr6CathodeLot, anodeLot: stacking.jr6AnodeLot, separatorLot: stacking.jr6SeparatorLot },
+        { jrRange: stacking.jr7Range, cathodeLot: stacking.jr7CathodeLot, anodeLot: stacking.jr7AnodeLot, separatorLot: stacking.jr7SeparatorLot },
+        { jrRange: stacking.jr8Range, cathodeLot: stacking.jr8CathodeLot, anodeLot: stacking.jr8AnodeLot, separatorLot: stacking.jr8SeparatorLot },
       ].filter((item) => item.jrRange);
 
       const generateLot = (date: Date | string, jrNum: number): string => {
@@ -173,7 +177,16 @@ export class StackingService {
       }
 
       const jrIndex = stacking
-        ? [stacking.jr1Range, stacking.jr2Range, stacking.jr3Range, stacking.jr4Range].findIndex((r) => r === lotEntry.jrRange) + 1
+        ? [
+            stacking.jr1Range,
+            stacking.jr2Range,
+            stacking.jr3Range,
+            stacking.jr4Range,
+            stacking.jr5Range,
+            stacking.jr6Range,
+            stacking.jr7Range,
+            stacking.jr8Range,
+          ].findIndex((r) => r === lotEntry.jrRange) + 1
         : 0;
 
       let cathodeLotValues: string[] = [];

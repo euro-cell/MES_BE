@@ -88,7 +88,7 @@ export class WorklogStacking extends WorklogBase {
   @Column({ type: 'varchar', length: 20, nullable: true })
   jr1SeparatorLot: string;
 
-  @Column({ type: 'varchar', length: 50, nullable: true })
+  @Column({ type: 'varchar', length: 11, nullable: true })
   jr1WorkTime: string;
 
   @Column({ type: 'smallint', nullable: true })
@@ -107,7 +107,7 @@ export class WorklogStacking extends WorklogBase {
   @Column({ type: 'varchar', length: 20, nullable: true })
   jr2SeparatorLot: string;
 
-  @Column({ type: 'time', nullable: true })
+  @Column({ type: 'varchar', length: 11, nullable: true })
   jr2WorkTime: string;
 
   @Column({ type: 'smallint', nullable: true })
@@ -126,7 +126,7 @@ export class WorklogStacking extends WorklogBase {
   @Column({ type: 'varchar', length: 20, nullable: true })
   jr3SeparatorLot: string;
 
-  @Column({ type: 'time', nullable: true })
+  @Column({ type: 'varchar', length: 11, nullable: true })
   jr3WorkTime: string;
 
   @Column({ type: 'smallint', nullable: true })
@@ -145,11 +145,87 @@ export class WorklogStacking extends WorklogBase {
   @Column({ type: 'varchar', length: 20, nullable: true })
   jr4SeparatorLot: string;
 
-  @Column({ type: 'time', nullable: true })
+  @Column({ type: 'varchar', length: 11, nullable: true })
   jr4WorkTime: string;
 
   @Column({ type: 'smallint', nullable: true })
   jr4ElectrodeDefect: number;
+
+  // JR 번호 5
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  jr5Range: string;
+
+  @Column({ type: 'varchar', length: 20, nullable: true })
+  jr5CathodeLot: string;
+
+  @Column({ type: 'varchar', length: 20, nullable: true })
+  jr5AnodeLot: string;
+
+  @Column({ type: 'varchar', length: 20, nullable: true })
+  jr5SeparatorLot: string;
+
+  @Column({ type: 'varchar', length: 11, nullable: true })
+  jr5WorkTime: string;
+
+  @Column({ type: 'smallint', nullable: true })
+  jr5ElectrodeDefect: number;
+
+  // JR 번호 6
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  jr6Range: string;
+
+  @Column({ type: 'varchar', length: 20, nullable: true })
+  jr6CathodeLot: string;
+
+  @Column({ type: 'varchar', length: 20, nullable: true })
+  jr6AnodeLot: string;
+
+  @Column({ type: 'varchar', length: 20, nullable: true })
+  jr6SeparatorLot: string;
+
+  @Column({ type: 'varchar', length: 11, nullable: true })
+  jr6WorkTime: string;
+
+  @Column({ type: 'smallint', nullable: true })
+  jr6ElectrodeDefect: number;
+
+  // JR 번호 7
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  jr7Range: string;
+
+  @Column({ type: 'varchar', length: 20, nullable: true })
+  jr7CathodeLot: string;
+
+  @Column({ type: 'varchar', length: 20, nullable: true })
+  jr7AnodeLot: string;
+
+  @Column({ type: 'varchar', length: 20, nullable: true })
+  jr7SeparatorLot: string;
+
+  @Column({ type: 'varchar', length: 11, nullable: true })
+  jr7WorkTime: string;
+
+  @Column({ type: 'smallint', nullable: true })
+  jr7ElectrodeDefect: number;
+
+  // JR 번호 8
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  jr8Range: string;
+
+  @Column({ type: 'varchar', length: 20, nullable: true })
+  jr8CathodeLot: string;
+
+  @Column({ type: 'varchar', length: 20, nullable: true })
+  jr8AnodeLot: string;
+
+  @Column({ type: 'varchar', length: 20, nullable: true })
+  jr8SeparatorLot: string;
+
+  @Column({ type: 'varchar', length: 11, nullable: true })
+  jr8WorkTime: string;
+
+  @Column({ type: 'smallint', nullable: true })
+  jr8ElectrodeDefect: number;
 
   // ===== C. 공정 조건 (Process Conditions) =====
 

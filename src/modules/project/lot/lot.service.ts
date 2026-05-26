@@ -164,6 +164,30 @@ export class LotService {
             anodeLot: worklog.jr4AnodeLot,
             separatorLot: worklog.jr4SeparatorLot,
           };
+        } else if (worklog.jr5Range === jrRange) {
+          matchedJr = {
+            cathodeLot: worklog.jr5CathodeLot,
+            anodeLot: worklog.jr5AnodeLot,
+            separatorLot: worklog.jr5SeparatorLot,
+          };
+        } else if (worklog.jr6Range === jrRange) {
+          matchedJr = {
+            cathodeLot: worklog.jr6CathodeLot,
+            anodeLot: worklog.jr6AnodeLot,
+            separatorLot: worklog.jr6SeparatorLot,
+          };
+        } else if (worklog.jr7Range === jrRange) {
+          matchedJr = {
+            cathodeLot: worklog.jr7CathodeLot,
+            anodeLot: worklog.jr7AnodeLot,
+            separatorLot: worklog.jr7SeparatorLot,
+          };
+        } else if (worklog.jr8Range === jrRange) {
+          matchedJr = {
+            cathodeLot: worklog.jr8CathodeLot,
+            anodeLot: worklog.jr8AnodeLot,
+            separatorLot: worklog.jr8SeparatorLot,
+          };
         }
       }
     }
@@ -410,6 +434,10 @@ export class LotService {
         else if (worklog.jr2Range === jrRange) separatorLot = worklog.jr2SeparatorLot;
         else if (worklog.jr3Range === jrRange) separatorLot = worklog.jr3SeparatorLot;
         else if (worklog.jr4Range === jrRange) separatorLot = worklog.jr4SeparatorLot;
+        else if (worklog.jr5Range === jrRange) separatorLot = worklog.jr5SeparatorLot;
+        else if (worklog.jr6Range === jrRange) separatorLot = worklog.jr6SeparatorLot;
+        else if (worklog.jr7Range === jrRange) separatorLot = worklog.jr7SeparatorLot;
+        else if (worklog.jr8Range === jrRange) separatorLot = worklog.jr8SeparatorLot;
 
         if (separatorLot) {
           const info = await getMaterialInfo(separatorLot);
