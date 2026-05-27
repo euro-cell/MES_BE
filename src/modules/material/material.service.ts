@@ -279,6 +279,10 @@ export class MaterialService {
     };
   }
 
+  async findMaterialByLot(lotNo: string) {
+    return this.materialRepository.findOne({ where: { lotNo } });
+  }
+
   // 자재 사용 이력 기록 (작업일지에서 사용할 때)
   async recordMaterialUsage(materialName: string, materialLot: string | undefined, usageAmount: number, process: MaterialProcess) {
     // lotNo 우선 조회, 없으면 name으로 fallback
@@ -355,6 +359,27 @@ export class MaterialService {
     }
 
     return material;
+  }
+
+  // 최근 USE 이력 기반으로 실제 차감량을 역산해서 복구 (lot별 사용량 미저장 시 사용)
+  async restoreMaterialUsageByHistory(lotNo: string, process: MaterialProcess): Promise<number> {
+    const material = await this.materialRepository.findOne({ where: { lotNo } });
+    if (!material) return 0;
+
+    const existingHistory = await this.materialHistoryRepository.findOne({
+      where: { materialId: material.id, process, type: MaterialHistoryType.USE },
+      order: { updatedAt: 'DESC' },
+    });
+    if (!existingHistory) return 0;
+
+    const actualUsage = existingHistory.previousStock - existingHistory.currentStock;
+    if (actualUsage <= 0) return 0;
+
+    const restoredStock = (material.stock || 0) + actualUsage;
+    await this.materialRepository.update(material.id, { stock: restoredStock });
+    await this.materialHistoryRepository.remove(existingHistory);
+
+    return actualUsage;
   }
 
   // 자재 사용 복구 (작업일지 삭제 시 재고 원복 및 USE 이력 삭제)

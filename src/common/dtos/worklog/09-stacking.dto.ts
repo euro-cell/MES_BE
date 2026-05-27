@@ -152,7 +152,12 @@ export class CreateStackingWorklogDto extends BaseWorklogDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsNumber()
-  jrNumber1ElectrodeDefect?: number;
+  jrNumber1CathodeDefect?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  jrNumber1AnodeDefect?: number;
 
   // JR Number 2
   @ApiPropertyOptional()
@@ -188,7 +193,12 @@ export class CreateStackingWorklogDto extends BaseWorklogDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsNumber()
-  jrNumber2ElectrodeDefect?: number;
+  jrNumber2CathodeDefect?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  jrNumber2AnodeDefect?: number;
 
   // JR Number 3
   @ApiPropertyOptional()
@@ -224,7 +234,12 @@ export class CreateStackingWorklogDto extends BaseWorklogDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsNumber()
-  jrNumber3ElectrodeDefect?: number;
+  jrNumber3CathodeDefect?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  jrNumber3AnodeDefect?: number;
 
   // JR Number 4
   @ApiPropertyOptional()
@@ -260,7 +275,12 @@ export class CreateStackingWorklogDto extends BaseWorklogDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsNumber()
-  jrNumber4ElectrodeDefect?: number;
+  jrNumber4CathodeDefect?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  jrNumber4AnodeDefect?: number;
 
   // JR Number 5
   @ApiPropertyOptional()
@@ -296,7 +316,12 @@ export class CreateStackingWorklogDto extends BaseWorklogDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsNumber()
-  jrNumber5ElectrodeDefect?: number;
+  jrNumber5CathodeDefect?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  jrNumber5AnodeDefect?: number;
 
   // JR Number 6
   @ApiPropertyOptional()
@@ -332,7 +357,12 @@ export class CreateStackingWorklogDto extends BaseWorklogDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsNumber()
-  jrNumber6ElectrodeDefect?: number;
+  jrNumber6CathodeDefect?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  jrNumber6AnodeDefect?: number;
 
   // JR Number 7
   @ApiPropertyOptional()
@@ -368,7 +398,12 @@ export class CreateStackingWorklogDto extends BaseWorklogDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsNumber()
-  jrNumber7ElectrodeDefect?: number;
+  jrNumber7CathodeDefect?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  jrNumber7AnodeDefect?: number;
 
   // JR Number 8
   @ApiPropertyOptional()
@@ -404,7 +439,12 @@ export class CreateStackingWorklogDto extends BaseWorklogDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsNumber()
-  jrNumber8ElectrodeDefect?: number;
+  jrNumber8CathodeDefect?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  jrNumber8AnodeDefect?: number;
 
   // ===== C. 공정 조건 =====
 

@@ -634,13 +634,23 @@ export class WorklogService {
       }
     }
 
-    // 스태킹: separatorLot / separatorUsage
+    // 스태킹: separatorLot / separatorUsage (lot가 2개인 경우 lot1 재고 먼저 소진 후 lot2 차감)
     if (include('stacking')) {
       const stackings = await this.stackingRepository.find();
       for (const w of stackings.filter((w) => includeId(w.id))) {
         const items: MaterialUsageItem[] = [];
         if (w.separatorLot && w.separatorUsage && w.separatorUsage > 0) {
-          items.push({ lotOrName: w.separatorLot, amount: w.separatorUsage, label: 'separatorLot' });
+          const lots = w.separatorLot.split(',').map(l => l.trim()).filter(Boolean);
+          if (lots.length === 1) {
+            items.push({ lotOrName: lots[0], amount: w.separatorUsage, label: 'separatorLot' });
+          } else if (lots.length >= 2) {
+            const lot1Material = await this.materialService.findMaterialByLot(lots[0]);
+            const lot1Stock = lot1Material?.stock ?? 0;
+            const lot1Usage = Math.min(lot1Stock, w.separatorUsage);
+            const lot2Usage = w.separatorUsage - lot1Usage;
+            if (lot1Usage > 0) items.push({ lotOrName: lots[0], amount: lot1Usage, label: 'separatorLot1' });
+            if (lot2Usage > 0) items.push({ lotOrName: lots[1], amount: lot2Usage, label: 'separatorLot2' });
+          }
         }
         results.push(await this.applyBackfill('stacking', w.id, items, dryRun, MaterialProcess.ASSEMBLY));
       }

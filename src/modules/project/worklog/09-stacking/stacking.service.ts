@@ -27,12 +27,55 @@ export class StackingService {
     });
     const savedWorklog = await this.worklogStackingRepository.save(worklog);
 
-    // 자재 사용 이력 기록 (separator)
     if (dto.separatorLot && dto.separatorUsage && dto.separatorUsage > 0) {
-      await this.materialService.recordMaterialUsage(dto.separatorLot, undefined, dto.separatorUsage, MaterialProcess.ASSEMBLY);
+      await this.applySeparatorUsage(dto.separatorLot, dto.separatorUsage);
     }
 
     return savedWorklog;
+  }
+
+  private parseSeparatorLots(separatorLot: string): string[] {
+    return separatorLot.split(',').map(l => l.trim()).filter(Boolean);
+  }
+
+  // lot1 재고 먼저 소진, 나머지를 lot2에서 차감
+  private async applySeparatorUsage(separatorLot: string, totalUsage: number): Promise<void> {
+    const lots = this.parseSeparatorLots(separatorLot);
+    if (lots.length === 0) return;
+
+    if (lots.length === 1) {
+      await this.materialService.recordMaterialUsage(lots[0], undefined, totalUsage, MaterialProcess.ASSEMBLY);
+      return;
+    }
+
+    const lot1Material = await this.materialService.findMaterialByLot(lots[0]);
+    const lot1Stock = lot1Material?.stock ?? 0;
+    const lot1Usage = Math.min(lot1Stock, totalUsage);
+    const lot2Usage = totalUsage - lot1Usage;
+
+    if (lot1Usage > 0) {
+      await this.materialService.recordMaterialUsage(lots[0], undefined, lot1Usage, MaterialProcess.ASSEMBLY);
+    }
+    if (lot2Usage > 0) {
+      await this.materialService.recordMaterialUsage(lots[1], undefined, lot2Usage, MaterialProcess.ASSEMBLY);
+    }
+  }
+
+  // lot2 이력 기반으로 먼저 복구, 나머지를 lot1에서 복구 (차감 역순)
+  private async restoreSeparatorUsage(separatorLot: string, totalUsage: number): Promise<void> {
+    const lots = this.parseSeparatorLots(separatorLot);
+    if (lots.length === 0) return;
+
+    if (lots.length === 1) {
+      await this.materialService.restoreMaterialUsage(lots[0], undefined, totalUsage, MaterialProcess.ASSEMBLY);
+      return;
+    }
+
+    const lot2Restored = await this.materialService.restoreMaterialUsageByHistory(lots[1], MaterialProcess.ASSEMBLY);
+    const lot1Usage = totalUsage - lot2Restored;
+    if (lot1Usage > 0) {
+      await this.materialService.restoreMaterialUsage(lots[0], undefined, lot1Usage, MaterialProcess.ASSEMBLY);
+    }
   }
 
   async getWorklogs(projectId: number): Promise<StackingWorklogListResponseDto[]> {
@@ -89,22 +132,25 @@ export class StackingService {
       throw new NotFoundException('작업일지를 찾을 수 없습니다.');
     }
 
-    // 변경 전 separatorUsage 저장
+    // 변경 전 값 저장
+    const previousSeparatorLot = worklog.separatorLot;
     const previousSeparatorUsage = worklog.separatorUsage || 0;
 
     Object.assign(worklog, updateStackingWorklogDto);
     const savedWorklog = await this.worklogStackingRepository.save(worklog);
 
-    // 자재 사용 이력 수정 - 사용량이 변경된 경우
-    const newSeparatorUsage = updateStackingWorklogDto.separatorUsage || 0;
-    if (updateStackingWorklogDto.separatorLot && newSeparatorUsage !== previousSeparatorUsage) {
-      await this.materialService.updateMaterialUsageHistory(
-        updateStackingWorklogDto.separatorLot,
-        undefined,
-        previousSeparatorUsage,
-        newSeparatorUsage,
-        MaterialProcess.ASSEMBLY,
-      );
+    // 자재 사용 이력 수정 - lot 또는 사용량이 변경된 경우 이전 이력 복구 후 재차감
+    const newSeparatorLot = updateStackingWorklogDto.separatorLot;
+    const newSeparatorUsage = updateStackingWorklogDto.separatorUsage ?? previousSeparatorUsage;
+
+    const lotChanged = newSeparatorLot !== undefined && newSeparatorLot !== previousSeparatorLot;
+    const usageChanged = updateStackingWorklogDto.separatorUsage !== undefined && newSeparatorUsage !== previousSeparatorUsage;
+
+    if ((lotChanged || usageChanged) && previousSeparatorLot && previousSeparatorUsage > 0) {
+      await this.restoreSeparatorUsage(previousSeparatorLot, previousSeparatorUsage);
+    }
+    if ((lotChanged || usageChanged) && newSeparatorLot && newSeparatorUsage > 0) {
+      await this.applySeparatorUsage(newSeparatorLot, newSeparatorUsage);
     }
 
     return savedWorklog;
@@ -119,7 +165,7 @@ export class StackingService {
 
     // 삭제 전 자재 사용량 재고 복구
     if (worklog.separatorLot && worklog.separatorUsage && worklog.separatorUsage > 0) {
-      await this.materialService.restoreMaterialUsage(worklog.separatorLot, undefined, worklog.separatorUsage, MaterialProcess.ASSEMBLY);
+      await this.restoreSeparatorUsage(worklog.separatorLot, worklog.separatorUsage);
     }
 
     await this.worklogStackingRepository.remove(worklog);
