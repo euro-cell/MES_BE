@@ -93,7 +93,7 @@ jobs:
 
             # 헬스체크 대기 (최대 75초, 5초 간격, 실패 시 롤백)
             for i in {1..15}; do
-              if docker exec "$NEW" wget -q --spider http://localhost:8080/health 2>/dev/null; then
+              if docker exec "$NEW" nc -z 127.0.0.1 8080 2>/dev/null; then
                 echo "Container is healthy after $((i*5))s"
                 break
               fi
