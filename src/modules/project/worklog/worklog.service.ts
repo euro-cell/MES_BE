@@ -75,7 +75,7 @@ export interface BackfillResult {
 export class WorklogService {
   private readonly templatePath =
     process.env.NODE_ENV === 'production'
-      ? join(__dirname, '..', '..', '..', '..', 'assets', 'worklog')
+      ? join(__dirname, '..', '..', '..', 'assets', 'worklog')
       : join(process.cwd(), 'src', 'assets', 'worklog');
 
   constructor(

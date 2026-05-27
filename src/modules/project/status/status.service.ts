@@ -315,7 +315,7 @@ export class StatusService {
 
   private readonly templatePath =
     process.env.NODE_ENV === 'production'
-      ? join(__dirname, '..', '..', '..', '..', 'assets', 'status')
+      ? join(__dirname, '..', '..', '..', 'assets', 'status')
       : join(process.cwd(), 'src', 'assets', 'status');
 
   async exportElectrodeStatus(projectId: number): Promise<{ file: StreamableFile; productionName: string }> {

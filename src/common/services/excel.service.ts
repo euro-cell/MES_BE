@@ -26,7 +26,7 @@ export interface ExcelGenerateOptions<T> {
 export class ExcelService {
   private readonly templatePath =
     process.env.NODE_ENV === 'production'
-      ? join(__dirname, '..', '..', '..', 'assets')
+      ? join(__dirname, '..', '..', 'assets')
       : join(process.cwd(), 'src', 'assets');
 
   /**

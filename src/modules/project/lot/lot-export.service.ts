@@ -16,7 +16,7 @@ import { FormationLotService } from './formation/formation.service';
 export class LotExportService {
   private readonly templatePath =
     process.env.NODE_ENV === 'production'
-      ? path.join(__dirname, '..', '..', '..', '..', 'assets', 'lot')
+      ? path.join(__dirname, '..', '..', '..', 'assets', 'lot')
       : path.join(process.cwd(), 'src', 'assets', 'lot');
 
   constructor(
