@@ -17,8 +17,18 @@ export class WorklogController {
   @RequirePermission(MenuName.WORKLOG, PermissionAction.CREATE)
   @ApiOperation({ summary: '[관리자] 기존 작업일지 자재 소요 소급 처리 (포밍/스태킹/웰딩/필링)' })
   @ApiQuery({ name: 'dryRun', required: false, type: Boolean, description: 'true이면 재고 변경 없이 대상 목록만 반환' })
-  async backfillMaterialUsage(@Query('dryRun') dryRun?: string) {
-    return this.worklogService.backfillMaterialUsage(dryRun === 'true');
+  @ApiQuery({ name: 'processes', required: false, isArray: true, type: String, description: '처리할 공정 목록 (미입력 시 전체). 예: binder,slurry,coating,forming,stacking,welding,filling' })
+  @ApiQuery({ name: 'worklogIds', required: false, isArray: true, type: Number, description: '처리할 작업일지 ID 목록 (미입력 시 전체). 예: 1,2,3' })
+  async backfillMaterialUsage(
+    @Query('dryRun') dryRun?: string,
+    @Query('processes') processes?: string | string[],
+    @Query('worklogIds') worklogIds?: string | string[],
+  ) {
+    const processList = processes ? (Array.isArray(processes) ? processes : processes.split(',').map((p) => p.trim())) : undefined;
+    const worklogIdList = worklogIds
+      ? (Array.isArray(worklogIds) ? worklogIds : worklogIds.split(',').map((id) => id.trim())).map(Number).filter((id) => !isNaN(id))
+      : undefined;
+    return this.worklogService.backfillMaterialUsage(dryRun === 'true', processList, worklogIdList);
   }
 
   @Get(':process')

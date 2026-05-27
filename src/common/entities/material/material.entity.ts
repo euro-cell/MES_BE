@@ -43,7 +43,7 @@ export class Material {
   @Column({ type: 'text', nullable: true })
   note: string;
 
-  @Column({ type: 'int', default: 0, nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0, nullable: true })
   stock: number;
 
   @Exclude()

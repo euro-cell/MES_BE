@@ -573,91 +573,104 @@ export class WorklogService {
    * 기존 작업일지의 자재 소요를 소급 처리한다.
    * dryRun=true 이면 실제 재고 변경 없이 처리 대상 목록만 반환한다.
    */
-  async backfillMaterialUsage(dryRun: boolean): Promise<BackfillResult[]> {
+  async backfillMaterialUsage(dryRun: boolean, processes?: string[], worklogIds?: number[]): Promise<BackfillResult[]> {
     const results: BackfillResult[] = [];
+    const include = (name: string) => !processes || processes.length === 0 || processes.includes(name);
+    const includeId = (id: number) => !worklogIds || worklogIds.length === 0 || worklogIds.includes(id);
 
     // 바인더: material1~2 (Name + Lot + ActualInput)
-    const binders = await this.binderRepository.find();
-    for (const w of binders) {
-      const items: MaterialUsageItem[] = [];
-      for (let i = 1; i <= 2; i++) {
-        const lot = w[`material${i}Lot`];
-        const amount = w[`material${i}ActualInput`];
-        if (lot && amount && amount > 0) {
-          items.push({ lotOrName: lot, amount, label: `material${i}Lot` });
+    if (include('binder')) {
+      const binders = await this.binderRepository.find();
+      for (const w of binders.filter((w) => includeId(w.id))) {
+        const items: MaterialUsageItem[] = [];
+        for (let i = 1; i <= 2; i++) {
+          const lot = w[`material${i}Lot`];
+          const amount = w[`material${i}ActualInput`];
+          if (lot && amount && amount > 0) {
+            items.push({ lotOrName: lot, amount, label: `material${i}Lot` });
+          }
         }
+        results.push(await this.applyBackfill('binder', w.id, items, dryRun, MaterialProcess.ELECTRODE));
       }
-      results.push(await this.applyBackfill('binder', w.id, items, dryRun, MaterialProcess.ELECTRODE));
     }
 
     // 믹싱(슬러리): material1~8 (Name + Lot + ActualInput)
-    const slurries = await this.slurryRepository.find();
-    for (const w of slurries) {
-      const items: MaterialUsageItem[] = [];
-      for (let i = 1; i <= 8; i++) {
-        const lot = w[`material${i}Lot`];
-        const amount = w[`material${i}ActualInput`];
-        if (lot && amount && amount > 0) {
-          items.push({ lotOrName: lot, amount, label: `material${i}Lot` });
+    if (include('slurry')) {
+      const slurries = await this.slurryRepository.find();
+      for (const w of slurries.filter((w) => includeId(w.id))) {
+        const items: MaterialUsageItem[] = [];
+        for (let i = 1; i <= 8; i++) {
+          const lot = w[`material${i}Lot`];
+          const amount = w[`material${i}ActualInput`];
+          if (lot && amount && amount > 0) {
+            items.push({ lotOrName: lot, amount, label: `material${i}Lot` });
+          }
         }
+        results.push(await this.applyBackfill('slurry', w.id, items, dryRun, MaterialProcess.ELECTRODE));
       }
-      results.push(await this.applyBackfill('slurry', w.id, items, dryRun, MaterialProcess.ELECTRODE));
     }
 
     // 코팅: materialLot/usageAmount, materialLot2/inputAmountActual
-    const coatings = await this.coatingRepository.find();
-    for (const w of coatings) {
-      const items: MaterialUsageItem[] = [];
-      if (w.materialLot && w.usageAmount && w.usageAmount > 0) {
-        items.push({ lotOrName: w.materialLot, amount: w.usageAmount, label: 'materialLot' });
+    if (include('coating')) {
+      const coatings = await this.coatingRepository.find();
+      for (const w of coatings.filter((w) => includeId(w.id))) {
+        const items: MaterialUsageItem[] = [];
+        if (w.materialLot && w.usageAmount && w.usageAmount > 0) {
+          items.push({ lotOrName: w.materialLot, amount: w.usageAmount, label: 'materialLot' });
+        }
+        results.push(await this.applyBackfill('coating', w.id, items, dryRun, MaterialProcess.ELECTRODE));
       }
-      if (w.materialLot2 && w.inputAmountActual && w.inputAmountActual > 0) {
-        items.push({ lotOrName: w.materialLot2, amount: w.inputAmountActual, label: 'materialLot2' });
-      }
-      results.push(await this.applyBackfill('coating', w.id, items, dryRun, MaterialProcess.ELECTRODE));
     }
 
     // 포밍: pouchLot / pouchUsage
-    const formings = await this.formingRepository.find();
-    for (const w of formings) {
-      const items: MaterialUsageItem[] = [];
-      if (w.pouchLot && w.pouchUsage && w.pouchUsage > 0) {
-        items.push({ lotOrName: w.pouchLot, amount: w.pouchUsage, label: 'pouchLot' });
+    if (include('forming')) {
+      const formings = await this.formingRepository.find();
+      for (const w of formings.filter((w) => includeId(w.id))) {
+        const items: MaterialUsageItem[] = [];
+        if (w.pouchLot && w.pouchUsage && w.pouchUsage > 0) {
+          items.push({ lotOrName: w.pouchLot, amount: w.pouchUsage, label: 'pouchLot' });
+        }
+        results.push(await this.applyBackfill('forming', w.id, items, dryRun, MaterialProcess.ASSEMBLY));
       }
-      results.push(await this.applyBackfill('forming', w.id, items, dryRun, MaterialProcess.ASSEMBLY));
     }
 
     // 스태킹: separatorLot / separatorUsage
-    const stackings = await this.stackingRepository.find();
-    for (const w of stackings) {
-      const items: MaterialUsageItem[] = [];
-      if (w.separatorLot && w.separatorUsage && w.separatorUsage > 0) {
-        items.push({ lotOrName: w.separatorLot, amount: w.separatorUsage, label: 'separatorLot' });
+    if (include('stacking')) {
+      const stackings = await this.stackingRepository.find();
+      for (const w of stackings.filter((w) => includeId(w.id))) {
+        const items: MaterialUsageItem[] = [];
+        if (w.separatorLot && w.separatorUsage && w.separatorUsage > 0) {
+          items.push({ lotOrName: w.separatorLot, amount: w.separatorUsage, label: 'separatorLot' });
+        }
+        results.push(await this.applyBackfill('stacking', w.id, items, dryRun, MaterialProcess.ASSEMBLY));
       }
-      results.push(await this.applyBackfill('stacking', w.id, items, dryRun, MaterialProcess.ASSEMBLY));
     }
 
     // 웰딩: leadTabLot / leadTabUsage, piTapeLot / piTapeUsage
-    const weldings = await this.weldingRepository.find();
-    for (const w of weldings) {
-      const items: MaterialUsageItem[] = [];
-      if (w.leadTabLot && w.leadTabUsage && w.leadTabUsage > 0) {
-        items.push({ lotOrName: w.leadTabLot, amount: w.leadTabUsage, label: 'leadTabLot' });
+    if (include('welding')) {
+      const weldings = await this.weldingRepository.find();
+      for (const w of weldings.filter((w) => includeId(w.id))) {
+        const items: MaterialUsageItem[] = [];
+        if (w.leadTabLot && w.leadTabUsage && w.leadTabUsage > 0) {
+          items.push({ lotOrName: w.leadTabLot, amount: w.leadTabUsage, label: 'leadTabLot' });
+        }
+        if (w.piTapeLot && w.piTapeUsage && w.piTapeUsage > 0) {
+          items.push({ lotOrName: w.piTapeLot, amount: w.piTapeUsage, label: 'piTapeLot' });
+        }
+        results.push(await this.applyBackfill('welding', w.id, items, dryRun, MaterialProcess.ASSEMBLY));
       }
-      if (w.piTapeLot && w.piTapeUsage && w.piTapeUsage > 0) {
-        items.push({ lotOrName: w.piTapeLot, amount: w.piTapeUsage, label: 'piTapeLot' });
-      }
-      results.push(await this.applyBackfill('welding', w.id, items, dryRun, MaterialProcess.ASSEMBLY));
     }
 
     // 필링: electrolyteLot / electrolyteUsage
-    const fillings = await this.fillingRepository.find();
-    for (const w of fillings) {
-      const items: MaterialUsageItem[] = [];
-      if (w.electrolyteLot && w.electrolyteUsage && w.electrolyteUsage > 0) {
-        items.push({ lotOrName: w.electrolyteLot, amount: w.electrolyteUsage, label: 'electrolyteLot' });
+    if (include('filling')) {
+      const fillings = await this.fillingRepository.find();
+      for (const w of fillings.filter((w) => includeId(w.id))) {
+        const items: MaterialUsageItem[] = [];
+        if (w.electrolyteLot && w.electrolyteUsage && w.electrolyteUsage > 0) {
+          items.push({ lotOrName: w.electrolyteLot, amount: w.electrolyteUsage, label: 'electrolyteLot' });
+        }
+        results.push(await this.applyBackfill('filling', w.id, items, dryRun, MaterialProcess.ASSEMBLY));
       }
-      results.push(await this.applyBackfill('filling', w.id, items, dryRun, MaterialProcess.ASSEMBLY));
     }
 
     return results;
