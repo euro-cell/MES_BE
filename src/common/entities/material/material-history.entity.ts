@@ -20,10 +20,10 @@ export class MaterialHistory {
   @Column({ type: 'enum', enum: MaterialHistoryType })
   type: MaterialHistoryType;
 
-  @Column({ type: 'int' })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   previousStock: number;
 
-  @Column({ type: 'int' })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   currentStock: number;
 
   @CreateDateColumn()
