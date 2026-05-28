@@ -88,7 +88,7 @@ export class WorklogSealing extends WorklogBase {
   @Column({ type: 'varchar', nullable: true })
   topPressure: string;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 6, scale: 2, nullable: true })
   topSealingTime: number;
 
   @Column({ type: 'text', nullable: true })
@@ -101,7 +101,7 @@ export class WorklogSealing extends WorklogBase {
   @Column({ type: 'varchar', nullable: true })
   sidePressure: string;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 6, scale: 2, nullable: true })
   sideSealingTime: number;
 
   @Column({ type: 'text', nullable: true })
@@ -114,7 +114,7 @@ export class WorklogSealing extends WorklogBase {
   @Column({ type: 'varchar', nullable: true })
   bottomPressure: string;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 6, scale: 2, nullable: true })
   bottomSealingTime: number;
 
   @Column({ type: 'text', nullable: true })
@@ -124,7 +124,7 @@ export class WorklogSealing extends WorklogBase {
   @Column({ type: 'smallint', nullable: true })
   hipotVoltage: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 6, scale: 2, nullable: true })
   hipotTime: number;
 
   // ===== D. 비고 (Remarks) =====

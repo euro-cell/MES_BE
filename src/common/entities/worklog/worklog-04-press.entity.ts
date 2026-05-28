@@ -289,10 +289,10 @@ export class WorklogPress extends WorklogBase {
   pressureCondition: number;
 
   // Roll Gap
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 6, scale: 2, nullable: true })
   rollGapLeft: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 6, scale: 2, nullable: true })
   rollGapRight: number;
 
   // Roll 온도
