@@ -15,7 +15,7 @@ export class WorklogFilling extends WorklogBase {
   @Column({ type: 'varchar', length: 100, nullable: true })
   electrolyteSpec: string;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 6, scale: 2, nullable: true })
   electrolyteUsage: number;
 
   // ===== B. 생산 정보 (Production Info) =====

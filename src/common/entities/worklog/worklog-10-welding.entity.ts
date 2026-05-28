@@ -125,13 +125,13 @@ export class WorklogWelding extends WorklogBase {
   @Column({ type: 'smallint', nullable: true })
   preWeldingAmplitude: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 6, scale: 2, nullable: true })
   preWeldingStopper: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 6, scale: 2, nullable: true })
   preWeldingPressure: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 6, scale: 2, nullable: true })
   preWeldingHoldTime: number;
 
   // 메인웰딩
@@ -141,20 +141,20 @@ export class WorklogWelding extends WorklogBase {
   @Column({ type: 'smallint', nullable: true })
   mainWeldingAmplitude: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 6, scale: 2, nullable: true })
   mainWeldingStopper: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 6, scale: 2, nullable: true })
   mainWeldingPressure: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 6, scale: 2, nullable: true })
   mainWeldingHoldTime: number;
 
   // 하이팟
   @Column({ type: 'smallint', nullable: true })
   hipotVoltage: number;
 
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 6, scale: 2, nullable: true })
   hipotTime: number;
 
   // 테이핑
