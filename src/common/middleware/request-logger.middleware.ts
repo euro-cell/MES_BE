@@ -16,7 +16,9 @@ export class RequestLoggerMiddleware implements NestMiddleware {
       const responseTime = Date.now() - startTime;
       const { statusCode } = res;
 
-      const logMessage = `[${clientIp}] ${method} ${originalUrl} ${statusCode} ${responseTime}ms`;
+      const userName = (req as any).user?.name;
+      const clientInfo = userName ? `${clientIp} - ${userName}` : clientIp;
+      const logMessage = `[${clientInfo}] ${method} ${originalUrl} ${statusCode} ${responseTime}ms`;
 
       // 상태 코드에 따라 로그 레벨 구분
       if (statusCode >= 500) {
