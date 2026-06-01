@@ -312,8 +312,8 @@ export class SealingLotService {
       };
 
       // Parse checklist to get thickness values
-      // Format: "11 - 281/717/705/267\n24 - 281/758/719/272\n38 - 285/719/713/269"
-      // 11 means JR 11-23, 24 means JR 24-37, 38 means JR 38 to end
+      // Format with JR range: "11 - 281/717/705/267\n24 - 281/758/719/272"
+      // Format without JR range (single row): "281/717/705/267"
       const parseChecklistThickness = (
         checklist: string | null,
         jrNumber: number | null,
@@ -321,49 +321,57 @@ export class SealingLotService {
         if (!checklist || jrNumber === null) return [];
         const lines = checklist.split('\n').filter((l) => l.trim());
         const ranges: { start: number; values: number[] }[] = [];
+        const plainValues: number[][] = [];
 
-        // Parse all lines to get start numbers and values
         for (const line of lines) {
-          const match = line.match(/(\d+)\s*-\s*(.+)/);
-          if (match) {
-            const start = Number(match[1]);
-            const values = match[2].split('/').map((v) => Number(v.trim())).filter((v) => !isNaN(v));
+          const rangeMatch = line.match(/^(\d+)\s*-\s*(.+)/);
+          if (rangeMatch) {
+            const start = Number(rangeMatch[1]);
+            const values = rangeMatch[2].split('/').map((v) => Number(v.trim())).filter((v) => !isNaN(v));
             ranges.push({ start, values });
+          } else {
+            // 번호 없이 값만 있는 경우
+            const values = line.split('/').map((v) => Number(v.trim())).filter((v) => !isNaN(v));
+            if (values.length > 0) plainValues.push(values);
           }
         }
 
-        if (ranges.length === 0) return [];
-
-        // Sort by start number
-        ranges.sort((a, b) => a.start - b.start);
-
-        // Find the correct range for this JR number
-        for (let i = ranges.length - 1; i >= 0; i--) {
-          if (jrNumber >= ranges[i].start) {
-            return ranges[i].values;
+        // 번호 있는 형식: JR 번호로 해당 구간 찾기
+        if (ranges.length > 0) {
+          ranges.sort((a, b) => a.start - b.start);
+          for (let i = ranges.length - 1; i >= 0; i--) {
+            if (jrNumber >= ranges[i].start) {
+              return ranges[i].values;
+            }
           }
+          return ranges[0].values;
         }
 
-        return ranges[0].values; // fallback to first range
+        // 번호 없는 형식: 첫 번째 행 값 사용
+        return plainValues[0] ?? [];
       };
 
       // Get thickness values from checklists
       const topThicknessValues = parseChecklistThickness(sealing?.topChecklist, currentJrNumber);
       const sideThicknessValues = parseChecklistThickness(sealing?.sideChecklist, currentJrNumber);
 
-      // Top: [0]=pouch1, [1]=tab1, [2]=tab2, [3]=pouch2 → pouchThickness=min(0,3), tabThickness=min(1,2)
+      // Top: [0]=pouch1, [1]=tab1, [2]=pouch_center, [3]=tab2, [4]=pouch2 → pouchThickness=min(0,2,4), tabThickness=min(1,3)
       const topPouchThicknessValue =
-        topThicknessValues.length >= 4
-          ? Math.min(topThicknessValues[0], topThicknessValues[3])
-          : topThicknessValues.length > 0
-            ? topThicknessValues[0]
-            : null;
+        topThicknessValues.length >= 5
+          ? Math.min(topThicknessValues[0], topThicknessValues[2], topThicknessValues[4])
+          : topThicknessValues.length >= 4
+            ? Math.min(topThicknessValues[0], topThicknessValues[3])
+            : topThicknessValues.length > 0
+              ? topThicknessValues[0]
+              : null;
       const topTabThicknessValue =
-        topThicknessValues.length >= 4
-          ? Math.min(topThicknessValues[1], topThicknessValues[2])
-          : topThicknessValues.length >= 2
-            ? topThicknessValues[1]
-            : null;
+        topThicknessValues.length >= 5
+          ? Math.min(topThicknessValues[1], topThicknessValues[3])
+          : topThicknessValues.length >= 4
+            ? Math.min(topThicknessValues[1], topThicknessValues[2])
+            : topThicknessValues.length >= 2
+              ? topThicknessValues[1]
+              : null;
 
       // Side: min of all values
       const sidePouchThicknessValue =

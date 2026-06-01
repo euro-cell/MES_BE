@@ -437,18 +437,23 @@ export class LqcService {
       order: { manufactureDate: 'ASC' },
     });
 
-    // "번호 - v1/v2/v3/..." 형식 파싱 → { no, values }[]
+    // "번호 - v1/v2/v3/..." 또는 번호 없이 "v1/v2/v3/..." 형식 파싱 → { no, values }[]
     const parseChecklist = (checklist: string): { no: number | null; values: (number | null)[] }[] => {
       if (!checklist) return [];
       return checklist
         .split('\n')
         .map((line) => line.trim())
-        .filter((line) => line.includes('-'))
+        .filter((line) => line.length > 0)
         .map((line) => {
-          const [noPart, valuesPart] = line.split('-');
-          const no = noPart.trim() !== '' ? Number(noPart.trim()) : null;
-          const values = (valuesPart?.trim() ?? '').split('/').map((v) => (v.trim() !== '' ? Number(v.trim()) : null)) as (number | null)[];
-          return { no, values };
+          const rangeMatch = line.match(/^(\d+)\s*-\s*(.+)/);
+          if (rangeMatch) {
+            const no = Number(rangeMatch[1]);
+            const values = rangeMatch[2].split('/').map((v) => (v.trim() !== '' ? Number(v.trim()) : null)) as (number | null)[];
+            return { no, values };
+          }
+          // 번호 없이 값만 있는 경우
+          const values = line.split('/').map((v) => (v.trim() !== '' ? Number(v.trim()) : null)) as (number | null)[];
+          return { no: null, values };
         });
     };
 
@@ -456,8 +461,13 @@ export class LqcService {
       const topRows = parseChecklist(sealing.topChecklist);
       const sideRows = parseChecklist(sealing.sideChecklist);
 
-      // Top: 3행 각각에서 index 1, 2 (2번째, 3번째 값) 추출
-      const topThickness = topRows.flatMap((row) => [row.values[1] ?? null, row.values[2] ?? null]);
+      // Top: 5개 구조 [0]=pouch1, [1]=tab1, [2]=pouch_center, [3]=tab2, [4]=pouch2
+      // 4개 구조(구버전) [0]=pouch1, [1]=tab1, [2]=tab2, [3]=pouch2 하위호환 유지
+      const topThickness = topRows.flatMap((row) =>
+        row.values.length >= 5
+          ? [row.values[1] ?? null, row.values[3] ?? null] // tab1, tab2
+          : [row.values[1] ?? null, row.values[2] ?? null],
+      );
 
       // Side: 1행(index 0) 전체 3개 + 3행(index 2) 전체 3개
       const sideThickness = [...(sideRows[0]?.values ?? [null, null, null]), ...(sideRows[2]?.values ?? [null, null, null])];
