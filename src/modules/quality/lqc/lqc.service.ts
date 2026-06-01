@@ -420,7 +420,7 @@ export class LqcService {
     return formations.map((f) => ({
       id: f.id,
       workDate: f.manufactureDate,
-      lot: f.lotRange ?? null,
+      lot: f.cellNumberRange ?? null,
       thicknesses: [
         f.sealingThickness1,
         f.sealingThickness2,

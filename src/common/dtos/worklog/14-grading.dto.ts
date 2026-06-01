@@ -39,12 +39,6 @@ export class CreateGradingWorklogDto extends BaseWorklogDto {
   @IsNumber()
   ocv2DefectRate?: number;
 
-  // Lot1 (OCV2와 Grading 사이)
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  lot1Range?: string;
-
   // Grading
   @ApiPropertyOptional()
   @IsOptional()
@@ -172,12 +166,6 @@ export class CreateGradingWorklogDto extends BaseWorklogDto {
   @IsOptional()
   @IsNumber()
   ocv3DefectRate?: number;
-
-  // Lot2 (OCV3 다음)
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  lot2Range?: string;
 
   // ===== C. 공정 조건 =====
 

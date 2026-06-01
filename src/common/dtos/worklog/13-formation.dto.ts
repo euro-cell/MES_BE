@@ -379,12 +379,6 @@ export class CreateFormationWorklogDto extends BaseWorklogDto {
   @IsNumber()
   ocv1Quantity?: number;
 
-  // Lot
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  lotRange?: string;
-
   // ===== C. 공정 조건 =====
 
   // 프리포메이션

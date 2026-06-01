@@ -254,10 +254,6 @@ export class WorklogFormation extends WorklogBase {
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   ocv1DefectRate: number;
 
-  // Lot
-  @Column({ type: 'varchar', length: 50, nullable: true })
-  lotRange: string;
-
   // ===== C. 공정 조건 (Process Conditions) =====
 
   // 프리포메이션

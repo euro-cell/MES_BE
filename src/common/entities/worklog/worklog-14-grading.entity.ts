@@ -26,10 +26,6 @@ export class WorklogGrading extends WorklogBase {
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   ocv2DefectRate: number;
 
-  // Lot (OCV2와 Grading 사이)
-  @Column({ type: 'varchar', length: 50, nullable: true })
-  lot1Range: string;
-
   // Grading
   @Column({ type: 'smallint', nullable: true })
   gradingInputQuantity: number;
@@ -111,10 +107,6 @@ export class WorklogGrading extends WorklogBase {
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   ocv3DefectRate: number;
-
-  // Lot (OCV3 다음)
-  @Column({ type: 'varchar', length: 50, nullable: true })
-  lot2Range: string;
 
   // ===== C. 공정 조건 (Process Conditions) =====
 
