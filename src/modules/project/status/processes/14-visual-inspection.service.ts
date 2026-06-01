@@ -59,7 +59,9 @@ export class VisualInspectionProcessService {
           scratch: number;
           dent: number;
           leakCorrosion: number;
-          cellSize: number;
+          cellSizeWidth: number;
+          cellSizeLength: number;
+          cellSizeThickness: number;
         };
       }
     >();
@@ -83,7 +85,9 @@ export class VisualInspectionProcessService {
             scratch: 0,
             dent: 0,
             leakCorrosion: 0,
-            cellSize: 0,
+            cellSizeWidth: 0,
+            cellSizeLength: 0,
+            cellSizeThickness: 0,
           },
         };
 
@@ -93,7 +97,9 @@ export class VisualInspectionProcessService {
         current.ncr.scratch += Number(log.scratchDiscardQuantity) || 0;
         current.ncr.dent += Number(log.dentDiscardQuantity) || 0;
         current.ncr.leakCorrosion += Number(log.leakCorrosionDiscardQuantity) || 0;
-        current.ncr.cellSize += Number(log.cellSizeDiscardQuantity) || 0;
+        current.ncr.cellSizeWidth += Number(log.cellSizeWidthDiscardQuantity) || 0;
+        current.ncr.cellSizeLength += Number(log.cellSizeLengthDiscardQuantity) || 0;
+        current.ncr.cellSizeThickness += Number(log.cellSizeThicknessDiscardQuantity) || 0;
 
         dailyMap.set(day, current);
       }
@@ -113,7 +119,9 @@ export class VisualInspectionProcessService {
           scratch: number;
           dent: number;
           leakCorrosion: number;
-          cellSize: number;
+          cellSizeWidth: number;
+          cellSizeLength: number;
+          cellSizeThickness: number;
         };
       }
     >,
@@ -133,7 +141,9 @@ export class VisualInspectionProcessService {
         scratch: number;
         dent: number;
         leakCorrosion: number;
-        cellSize: number;
+        cellSizeWidth: number;
+        cellSizeLength: number;
+        cellSizeThickness: number;
       } | null;
       yield: number | null;
     }> = [];
@@ -145,7 +155,9 @@ export class VisualInspectionProcessService {
       scratch: 0,
       dent: 0,
       leakCorrosion: 0,
-      cellSize: 0,
+      cellSizeWidth: 0,
+      cellSizeLength: 0,
+      cellSizeThickness: 0,
     };
 
     for (let day = 1; day <= daysInMonth; day++) {
@@ -158,7 +170,9 @@ export class VisualInspectionProcessService {
           dayData.ncr.scratch +
           dayData.ncr.dent +
           dayData.ncr.leakCorrosion +
-          dayData.ncr.cellSize;
+          dayData.ncr.cellSizeWidth +
+          dayData.ncr.cellSizeLength +
+          dayData.ncr.cellSizeThickness;
         const ng = dayData.output > 0 ? ngTotal : null;
         const dayYield =
           dayData.output > 0 ? Math.round(((dayData.output - ngTotal) / dayData.output) * 100 * 100) / 100 : null;
@@ -177,7 +191,9 @@ export class VisualInspectionProcessService {
         totalNcr.scratch += dayData.ncr.scratch;
         totalNcr.dent += dayData.ncr.dent;
         totalNcr.leakCorrosion += dayData.ncr.leakCorrosion;
-        totalNcr.cellSize += dayData.ncr.cellSize;
+        totalNcr.cellSizeWidth += dayData.ncr.cellSizeWidth;
+        totalNcr.cellSizeLength += dayData.ncr.cellSizeLength;
+        totalNcr.cellSizeThickness += dayData.ncr.cellSizeThickness;
       } else {
         data.push({ day, output: 0, ng: null, ncr: null, yield: null });
       }
@@ -189,7 +205,9 @@ export class VisualInspectionProcessService {
       totalNcr.scratch +
       totalNcr.dent +
       totalNcr.leakCorrosion +
-      totalNcr.cellSize;
+      totalNcr.cellSizeWidth +
+      totalNcr.cellSizeLength +
+      totalNcr.cellSizeThickness;
     const totalNg = totalOutput > 0 ? totalNgSum : null;
 
     const targetQuantity = productionTarget?.visualInspection || null;

@@ -73,16 +73,38 @@ export class CreateVisualInspectionWorklogDto extends BaseWorklogDto {
   @IsString()
   leakCorrosionDefectRemark?: string;
 
-  // 전지 크기
+  // 전지 크기 > 폭
   @ApiPropertyOptional()
   @IsOptional()
   @IsNumber()
-  cellSizeDiscardQuantity?: number;
+  cellSizeWidthDiscardQuantity?: number;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  cellSizeDefectRemark?: string;
+  cellSizeWidthDefectRemark?: string;
+
+  // 전지 크기 > 길이
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  cellSizeLengthDiscardQuantity?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  cellSizeLengthDefectRemark?: string;
+
+  // 전지 크기 > 두께
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  cellSizeThicknessDiscardQuantity?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  cellSizeThicknessDefectRemark?: string;
 }
 
 export class UpdateVisualInspectionWorklogDto extends PartialType(CreateVisualInspectionWorklogDto) {}
