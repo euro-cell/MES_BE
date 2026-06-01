@@ -128,8 +128,8 @@ export class WorklogGrading extends WorklogBase {
   @Column({ type: 'decimal', precision: 6, scale: 2, nullable: true })
   gradingUpperVoltage: number;
 
-  @Column({ type: 'decimal', precision: 6, scale: 2, nullable: true })
-  gradingAppliedCurrent: number;
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  gradingAppliedCurrent: string;
 
   @Column({ type: 'smallint', nullable: true })
   gradingTemperature: number;

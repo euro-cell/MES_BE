@@ -199,8 +199,8 @@ export class CreateGradingWorklogDto extends BaseWorklogDto {
 
   @ApiPropertyOptional()
   @IsOptional()
-  @IsNumber()
-  gradingAppliedCurrent?: number;
+  @IsString()
+  gradingAppliedCurrent?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
