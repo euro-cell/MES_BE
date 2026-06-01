@@ -48,21 +48,21 @@ export class WorklogVisualInspection extends WorklogBase {
   leakCorrosionDefectRemark: string;
 
   // 전지 크기 > 폭
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   cellSizeWidthDiscardQuantity: number;
 
   @Column({ type: 'text', nullable: true })
   cellSizeWidthDefectRemark: string;
 
   // 전지 크기 > 길이
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   cellSizeLengthDiscardQuantity: number;
 
   @Column({ type: 'text', nullable: true })
   cellSizeLengthDefectRemark: string;
 
   // 전지 크기 > 두께
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   cellSizeThicknessDiscardQuantity: number;
 
   @Column({ type: 'text', nullable: true })
