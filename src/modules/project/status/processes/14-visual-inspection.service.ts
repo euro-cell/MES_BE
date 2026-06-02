@@ -62,6 +62,7 @@ export class VisualInspectionProcessService {
           cellSizeWidth: number;
           cellSizeLength: number;
           cellSizeThickness: number;
+          cellWeight: number;
         };
       }
     >();
@@ -88,6 +89,7 @@ export class VisualInspectionProcessService {
             cellSizeWidth: 0,
             cellSizeLength: 0,
             cellSizeThickness: 0,
+            cellWeight: 0,
           },
         };
 
@@ -100,6 +102,7 @@ export class VisualInspectionProcessService {
         current.ncr.cellSizeWidth += Number(log.cellSizeWidthDiscardQuantity) || 0;
         current.ncr.cellSizeLength += Number(log.cellSizeLengthDiscardQuantity) || 0;
         current.ncr.cellSizeThickness += Number(log.cellSizeThicknessDiscardQuantity) || 0;
+        current.ncr.cellWeight += Number(log.cellWeightDiscardQuantity) || 0;
 
         dailyMap.set(day, current);
       }
@@ -122,6 +125,7 @@ export class VisualInspectionProcessService {
           cellSizeWidth: number;
           cellSizeLength: number;
           cellSizeThickness: number;
+          cellWeight: number;
         };
       }
     >,
@@ -144,6 +148,7 @@ export class VisualInspectionProcessService {
         cellSizeWidth: number;
         cellSizeLength: number;
         cellSizeThickness: number;
+        cellWeight: number;
       } | null;
       yield: number | null;
     }> = [];
@@ -158,6 +163,7 @@ export class VisualInspectionProcessService {
       cellSizeWidth: 0,
       cellSizeLength: 0,
       cellSizeThickness: 0,
+      cellWeight: 0,
     };
 
     for (let day = 1; day <= daysInMonth; day++) {
@@ -172,7 +178,8 @@ export class VisualInspectionProcessService {
           dayData.ncr.leakCorrosion +
           dayData.ncr.cellSizeWidth +
           dayData.ncr.cellSizeLength +
-          dayData.ncr.cellSizeThickness;
+          dayData.ncr.cellSizeThickness +
+          dayData.ncr.cellWeight;
         const ng = dayData.output > 0 ? ngTotal : null;
         const dayYield =
           dayData.output > 0 ? Math.round(((dayData.output - ngTotal) / dayData.output) * 100 * 100) / 100 : null;
@@ -194,6 +201,7 @@ export class VisualInspectionProcessService {
         totalNcr.cellSizeWidth += dayData.ncr.cellSizeWidth;
         totalNcr.cellSizeLength += dayData.ncr.cellSizeLength;
         totalNcr.cellSizeThickness += dayData.ncr.cellSizeThickness;
+        totalNcr.cellWeight += dayData.ncr.cellWeight;
       } else {
         data.push({ day, output: 0, ng: null, ncr: null, yield: null });
       }
@@ -207,7 +215,8 @@ export class VisualInspectionProcessService {
       totalNcr.leakCorrosion +
       totalNcr.cellSizeWidth +
       totalNcr.cellSizeLength +
-      totalNcr.cellSizeThickness;
+      totalNcr.cellSizeThickness +
+      totalNcr.cellWeight;
     const totalNg = totalOutput > 0 ? totalNgSum : null;
 
     const targetQuantity = productionTarget?.visualInspection || null;

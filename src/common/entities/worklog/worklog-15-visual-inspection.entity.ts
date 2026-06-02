@@ -67,4 +67,11 @@ export class WorklogVisualInspection extends WorklogBase {
 
   @Column({ type: 'text', nullable: true })
   cellSizeThicknessDefectRemark: string;
+
+  // 무게
+  @Column({ type: 'smallint', nullable: true })
+  cellWeightDiscardQuantity: number;
+
+  @Column({ type: 'text', nullable: true })
+  cellWeightDefectRemark: string;
 }

@@ -105,6 +105,17 @@ export class CreateVisualInspectionWorklogDto extends BaseWorklogDto {
   @IsOptional()
   @IsString()
   cellSizeThicknessDefectRemark?: string;
+
+  // 무게
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  cellWeightDiscardQuantity?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  cellWeightDefectRemark?: string;
 }
 
 export class UpdateVisualInspectionWorklogDto extends PartialType(CreateVisualInspectionWorklogDto) {}
