@@ -56,16 +56,16 @@ export class StackingProcessService {
       return value.split(',').filter((v) => v.trim()).length;
     };
 
-    const hiPotMatch = remark.match(/Hi-pot\s*:\s*([^\n]*)/i);
+    const hiPotMatch = remark.match(/Hi-pot *: *([^\n\r]*)/i);
     if (hiPotMatch) result.hiPot = countCellNumbers(hiPotMatch[1]);
 
-    const weightMatch = remark.match(/무게\s*:\s*([^\n]*)/);
+    const weightMatch = remark.match(/무게 *: *([^\n\r]*)/);
     if (weightMatch) result.weight = countCellNumbers(weightMatch[1]);
 
-    const thicknessMatch = remark.match(/두께\s*:\s*([^\n]*)/);
+    const thicknessMatch = remark.match(/두께 *: *([^\n\r]*)/);
     if (thicknessMatch) result.thickness = countCellNumbers(thicknessMatch[1]);
 
-    const alignMatch = remark.match(/Alignment\s*:\s*([^\n]*)/i);
+    const alignMatch = remark.match(/Alignment *: *([^\n\r]*)/i);
     if (alignMatch) result.alignment = countCellNumbers(alignMatch[1]);
 
     return result;
