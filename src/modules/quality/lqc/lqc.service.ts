@@ -316,6 +316,12 @@ export class LqcService {
       }
     }
 
+    result.sort((a, b) => {
+      const lotCmp = a.lot.localeCompare(b.lot);
+      if (lotCmp !== 0) return lotCmp;
+      return a.division === '전' ? -1 : 1;
+    });
+
     return result;
   }
 
