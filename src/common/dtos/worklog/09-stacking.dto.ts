@@ -149,16 +149,6 @@ export class CreateStackingWorklogDto extends BaseWorklogDto {
   @Matches(/^\d{2}:\d{2}~\d{2}:\d{2}$/, { message: '시간 형식은 HH:mm~HH:mm 이어야 합니다.' })
   jrNumber1WorkTime?: string;
 
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  jrNumber1CathodeDefect?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  jrNumber1AnodeDefect?: number;
-
   // JR Number 2
   @ApiPropertyOptional()
   @IsOptional()
@@ -189,16 +179,6 @@ export class CreateStackingWorklogDto extends BaseWorklogDto {
   @IsOptional()
   @Matches(/^\d{2}:\d{2}~\d{2}:\d{2}$/, { message: '시간 형식은 HH:mm~HH:mm 이어야 합니다.' })
   jrNumber2WorkTime?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  jrNumber2CathodeDefect?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  jrNumber2AnodeDefect?: number;
 
   // JR Number 3
   @ApiPropertyOptional()
@@ -231,16 +211,6 @@ export class CreateStackingWorklogDto extends BaseWorklogDto {
   @Matches(/^\d{2}:\d{2}~\d{2}:\d{2}$/, { message: '시간 형식은 HH:mm~HH:mm 이어야 합니다.' })
   jrNumber3WorkTime?: string;
 
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  jrNumber3CathodeDefect?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  jrNumber3AnodeDefect?: number;
-
   // JR Number 4
   @ApiPropertyOptional()
   @IsOptional()
@@ -271,16 +241,6 @@ export class CreateStackingWorklogDto extends BaseWorklogDto {
   @IsOptional()
   @Matches(/^\d{2}:\d{2}~\d{2}:\d{2}$/, { message: '시간 형식은 HH:mm~HH:mm 이어야 합니다.' })
   jrNumber4WorkTime?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  jrNumber4CathodeDefect?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  jrNumber4AnodeDefect?: number;
 
   // JR Number 5
   @ApiPropertyOptional()
@@ -313,16 +273,6 @@ export class CreateStackingWorklogDto extends BaseWorklogDto {
   @Matches(/^\d{2}:\d{2}~\d{2}:\d{2}$/, { message: '시간 형식은 HH:mm~HH:mm 이어야 합니다.' })
   jrNumber5WorkTime?: string;
 
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  jrNumber5CathodeDefect?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  jrNumber5AnodeDefect?: number;
-
   // JR Number 6
   @ApiPropertyOptional()
   @IsOptional()
@@ -353,16 +303,6 @@ export class CreateStackingWorklogDto extends BaseWorklogDto {
   @IsOptional()
   @Matches(/^\d{2}:\d{2}~\d{2}:\d{2}$/, { message: '시간 형식은 HH:mm~HH:mm 이어야 합니다.' })
   jrNumber6WorkTime?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  jrNumber6CathodeDefect?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  jrNumber6AnodeDefect?: number;
 
   // JR Number 7
   @ApiPropertyOptional()
@@ -395,16 +335,6 @@ export class CreateStackingWorklogDto extends BaseWorklogDto {
   @Matches(/^\d{2}:\d{2}~\d{2}:\d{2}$/, { message: '시간 형식은 HH:mm~HH:mm 이어야 합니다.' })
   jrNumber7WorkTime?: string;
 
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  jrNumber7CathodeDefect?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  jrNumber7AnodeDefect?: number;
-
   // JR Number 8
   @ApiPropertyOptional()
   @IsOptional()
@@ -436,15 +366,16 @@ export class CreateStackingWorklogDto extends BaseWorklogDto {
   @Matches(/^\d{2}:\d{2}~\d{2}:\d{2}$/, { message: '시간 형식은 HH:mm~HH:mm 이어야 합니다.' })
   jrNumber8WorkTime?: string;
 
-  @ApiPropertyOptional()
+  // 전극 파손 수량 (통합)
+  @ApiPropertyOptional({ description: '양극(+) 파손 수량' })
   @IsOptional()
   @IsNumber()
-  jrNumber8CathodeDefect?: number;
+  cathodeDefect?: number;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ description: '음극(-) 파손 수량' })
   @IsOptional()
   @IsNumber()
-  jrNumber8AnodeDefect?: number;
+  anodeDefect?: number;
 
   // ===== C. 공정 조건 =====
 
@@ -477,6 +408,16 @@ export class CreateStackingWorklogDto extends BaseWorklogDto {
   @IsOptional()
   @IsNumber()
   hipot1Voltage?: number;
+
+  @ApiPropertyOptional({ description: '양극(+) 두께 측정값 (㎛)' })
+  @IsOptional()
+  @IsNumber()
+  cathodeThickness?: number;
+
+  @ApiPropertyOptional({ description: '음극(-) 두께 측정값 (㎛)' })
+  @IsOptional()
+  @IsNumber()
+  anodeThickness?: number;
 }
 
 export class UpdateStackingWorklogDto extends PartialType(CreateStackingWorklogDto) {}

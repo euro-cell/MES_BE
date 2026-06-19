@@ -91,12 +91,6 @@ export class WorklogStacking extends WorklogBase {
   @Column({ type: 'varchar', length: 11, nullable: true })
   jr1WorkTime: string;
 
-  @Column({ type: 'smallint', nullable: true })
-  jr1CathodeDefect: number;
-
-  @Column({ type: 'smallint', nullable: true })
-  jr1AnodeDefect: number;
-
   // JR 번호 2
   @Column({ type: 'varchar', length: 50, nullable: true })
   jr2Range: string;
@@ -112,12 +106,6 @@ export class WorklogStacking extends WorklogBase {
 
   @Column({ type: 'varchar', length: 11, nullable: true })
   jr2WorkTime: string;
-
-  @Column({ type: 'smallint', nullable: true })
-  jr2CathodeDefect: number;
-
-  @Column({ type: 'smallint', nullable: true })
-  jr2AnodeDefect: number;
 
   // JR 번호 3
   @Column({ type: 'varchar', length: 50, nullable: true })
@@ -135,12 +123,6 @@ export class WorklogStacking extends WorklogBase {
   @Column({ type: 'varchar', length: 11, nullable: true })
   jr3WorkTime: string;
 
-  @Column({ type: 'smallint', nullable: true })
-  jr3CathodeDefect: number;
-
-  @Column({ type: 'smallint', nullable: true })
-  jr3AnodeDefect: number;
-
   // JR 번호 4
   @Column({ type: 'varchar', length: 50, nullable: true })
   jr4Range: string;
@@ -156,12 +138,6 @@ export class WorklogStacking extends WorklogBase {
 
   @Column({ type: 'varchar', length: 11, nullable: true })
   jr4WorkTime: string;
-
-  @Column({ type: 'smallint', nullable: true })
-  jr4CathodeDefect: number;
-
-  @Column({ type: 'smallint', nullable: true })
-  jr4AnodeDefect: number;
 
   // JR 번호 5
   @Column({ type: 'varchar', length: 50, nullable: true })
@@ -179,12 +155,6 @@ export class WorklogStacking extends WorklogBase {
   @Column({ type: 'varchar', length: 11, nullable: true })
   jr5WorkTime: string;
 
-  @Column({ type: 'smallint', nullable: true })
-  jr5CathodeDefect: number;
-
-  @Column({ type: 'smallint', nullable: true })
-  jr5AnodeDefect: number;
-
   // JR 번호 6
   @Column({ type: 'varchar', length: 50, nullable: true })
   jr6Range: string;
@@ -200,12 +170,6 @@ export class WorklogStacking extends WorklogBase {
 
   @Column({ type: 'varchar', length: 11, nullable: true })
   jr6WorkTime: string;
-
-  @Column({ type: 'smallint', nullable: true })
-  jr6CathodeDefect: number;
-
-  @Column({ type: 'smallint', nullable: true })
-  jr6AnodeDefect: number;
 
   // JR 번호 7
   @Column({ type: 'varchar', length: 50, nullable: true })
@@ -223,12 +187,6 @@ export class WorklogStacking extends WorklogBase {
   @Column({ type: 'varchar', length: 11, nullable: true })
   jr7WorkTime: string;
 
-  @Column({ type: 'smallint', nullable: true })
-  jr7CathodeDefect: number;
-
-  @Column({ type: 'smallint', nullable: true })
-  jr7AnodeDefect: number;
-
   // JR 번호 8
   @Column({ type: 'varchar', length: 50, nullable: true })
   jr8Range: string;
@@ -245,11 +203,12 @@ export class WorklogStacking extends WorklogBase {
   @Column({ type: 'varchar', length: 11, nullable: true })
   jr8WorkTime: string;
 
+  // 전극 파손 수량 (통합)
   @Column({ type: 'smallint', nullable: true })
-  jr8CathodeDefect: number;
+  cathodeDefect: number;
 
   @Column({ type: 'smallint', nullable: true })
-  jr8AnodeDefect: number;
+  anodeDefect: number;
 
   // ===== C. 공정 조건 (Process Conditions) =====
 
@@ -267,4 +226,10 @@ export class WorklogStacking extends WorklogBase {
 
   @Column({ type: 'smallint', nullable: true })
   hipotVoltage: number;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  cathodeThickness: number;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  anodeThickness: number;
 }
