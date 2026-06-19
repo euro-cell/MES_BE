@@ -343,7 +343,17 @@ export class LqcService {
 
     for (const vd of vds) {
       // 상부 행
-      const upperLots = [vd.upperLot1, vd.upperLot2, vd.upperLot3, vd.upperLot4, vd.upperLot5];
+      const upperLots = [
+        vd.upperLot11,
+        vd.upperLot12,
+        vd.upperLot13,
+        vd.upperLot21,
+        vd.upperLot22,
+        vd.upperLot23,
+        vd.upperLot31,
+        vd.upperLot32,
+        vd.upperLot33,
+      ];
 
       // electrode 필터링 (LOT 5번째 문자 기준)
       const upperHasElectrode = !electrode || upperLots.some((lot) => lot && lot.charAt(4) === electrode);
@@ -356,16 +366,30 @@ export class LqcService {
           moisture1: toNumber(vd.upperMoistureMeasurement1),
           moisture2: toNumber(vd.upperMoistureMeasurement2),
           moisture3: toNumber(vd.upperMoistureMeasurement3),
-          lot1: vd.upperLot1 ?? null,
-          lot2: vd.upperLot2 ?? null,
-          lot3: vd.upperLot3 ?? null,
-          lot4: vd.upperLot4 ?? null,
-          lot5: vd.upperLot5 ?? null,
+          lot11: vd.upperLot11 ?? null,
+          lot12: vd.upperLot12 ?? null,
+          lot13: vd.upperLot13 ?? null,
+          lot21: vd.upperLot21 ?? null,
+          lot22: vd.upperLot22 ?? null,
+          lot23: vd.upperLot23 ?? null,
+          lot31: vd.upperLot31 ?? null,
+          lot32: vd.upperLot32 ?? null,
+          lot33: vd.upperLot33 ?? null,
         });
       }
 
       // 하부 행
-      const lowerLots = [vd.lowerLot1, vd.lowerLot2, vd.lowerLot3, vd.lowerLot4, vd.lowerLot5];
+      const lowerLots = [
+        vd.lowerLot11,
+        vd.lowerLot12,
+        vd.lowerLot13,
+        vd.lowerLot21,
+        vd.lowerLot22,
+        vd.lowerLot23,
+        vd.lowerLot31,
+        vd.lowerLot32,
+        vd.lowerLot33,
+      ];
 
       const lowerHasElectrode = !electrode || lowerLots.some((lot) => lot && lot.charAt(4) === electrode);
 
@@ -377,11 +401,15 @@ export class LqcService {
           moisture1: toNumber(vd.lowerMoistureMeasurement1),
           moisture2: toNumber(vd.lowerMoistureMeasurement2),
           moisture3: toNumber(vd.lowerMoistureMeasurement3),
-          lot1: vd.lowerLot1 ?? null,
-          lot2: vd.lowerLot2 ?? null,
-          lot3: vd.lowerLot3 ?? null,
-          lot4: vd.lowerLot4 ?? null,
-          lot5: vd.lowerLot5 ?? null,
+          lot11: vd.lowerLot11 ?? null,
+          lot12: vd.lowerLot12 ?? null,
+          lot13: vd.lowerLot13 ?? null,
+          lot21: vd.lowerLot21 ?? null,
+          lot22: vd.lowerLot22 ?? null,
+          lot23: vd.lowerLot23 ?? null,
+          lot31: vd.lowerLot31 ?? null,
+          lot32: vd.lowerLot32 ?? null,
+          lot33: vd.lowerLot33 ?? null,
         });
       }
     }
@@ -427,13 +455,9 @@ export class LqcService {
       id: f.id,
       workDate: f.manufactureDate,
       lot: f.cellNumberRange ?? null,
-      thicknesses: [
-        f.sealingThickness1,
-        f.sealingThickness2,
-        f.sealingThickness3,
-        f.sealingThickness4,
-        f.sealingThickness5,
-      ].filter((v) => v != null),
+      thicknesses: [f.sealingThickness1, f.sealingThickness2, f.sealingThickness3, f.sealingThickness4, f.sealingThickness5].filter(
+        (v) => v != null,
+      ),
     }));
   }
 

@@ -124,16 +124,24 @@ export class VdProcessService {
 
       // 상부/하부 필드에서 데이터 수집 후 LOT 5번째 문자로 양/음극 구분
       const allFields = [
-        { lot: log.upperLot1, qty: log.upperInputQuantity1 },
-        { lot: log.upperLot2, qty: log.upperInputQuantity2 },
-        { lot: log.upperLot3, qty: log.upperInputQuantity3 },
-        { lot: log.upperLot4, qty: log.upperInputQuantity4 },
-        { lot: log.upperLot5, qty: log.upperInputQuantity5 },
-        { lot: log.lowerLot1, qty: log.lowerInputQuantity1 },
-        { lot: log.lowerLot2, qty: log.lowerInputQuantity2 },
-        { lot: log.lowerLot3, qty: log.lowerInputQuantity3 },
-        { lot: log.lowerLot4, qty: log.lowerInputQuantity4 },
-        { lot: log.lowerLot5, qty: log.lowerInputQuantity5 },
+        { lot: log.upperLot11, qty: log.upperInputQuantity1 },
+        { lot: log.upperLot12, qty: log.upperInputQuantity2 },
+        { lot: log.upperLot13, qty: log.upperInputQuantity3 },
+        { lot: log.upperLot21, qty: log.upperInputQuantity1 },
+        { lot: log.upperLot22, qty: log.upperInputQuantity2 },
+        { lot: log.upperLot23, qty: log.upperInputQuantity3 },
+        { lot: log.upperLot31, qty: log.upperInputQuantity1 },
+        { lot: log.upperLot32, qty: log.upperInputQuantity2 },
+        { lot: log.upperLot33, qty: log.upperInputQuantity3 },
+        { lot: log.lowerLot11, qty: log.lowerInputQuantity1 },
+        { lot: log.lowerLot12, qty: log.lowerInputQuantity2 },
+        { lot: log.lowerLot13, qty: log.lowerInputQuantity3 },
+        { lot: log.lowerLot21, qty: log.lowerInputQuantity1 },
+        { lot: log.lowerLot22, qty: log.lowerInputQuantity2 },
+        { lot: log.lowerLot23, qty: log.lowerInputQuantity3 },
+        { lot: log.lowerLot31, qty: log.lowerInputQuantity1 },
+        { lot: log.lowerLot32, qty: log.lowerInputQuantity2 },
+        { lot: log.lowerLot33, qty: log.lowerInputQuantity3 },
       ];
 
       for (const field of allFields) {

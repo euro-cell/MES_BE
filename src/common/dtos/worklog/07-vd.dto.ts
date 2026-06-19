@@ -4,298 +4,173 @@ import { PartialType } from '@nestjs/swagger';
 import { BaseWorklogDto, BaseWorklogListResponseDto } from './00-base-worklog.dto';
 
 export class CreateVdWorklogDto extends BaseWorklogDto {
-  // ===== A. 자재 투입 정보 =====
+  // ===== A. 자재 투입 정보 (섹션2) =====
+  // Lot: upper/lowerLot{오븐번호}{층번호}
 
-  // 양극 매거진 LOT 1~5
-  @ApiPropertyOptional()
+  // 상부 LOT (오븐1)
+  @ApiPropertyOptional() @IsOptional() @IsString() upperLot11?: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() upperLot12?: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() upperLot13?: string;
+
+  // 상부 LOT (오븐2)
+  @ApiPropertyOptional() @IsOptional() @IsString() upperLot21?: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() upperLot22?: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() upperLot23?: string;
+
+  // 상부 LOT (오븐3)
+  @ApiPropertyOptional() @IsOptional() @IsString() upperLot31?: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() upperLot32?: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() upperLot33?: string;
+
+  // 하부 LOT (오븐1)
+  @ApiPropertyOptional() @IsOptional() @IsString() lowerLot11?: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() lowerLot12?: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() lowerLot13?: string;
+
+  // 하부 LOT (오븐2)
+  @ApiPropertyOptional() @IsOptional() @IsString() lowerLot21?: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() lowerLot22?: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() lowerLot23?: string;
+
+  // 하부 LOT (오븐3)
+  @ApiPropertyOptional() @IsOptional() @IsString() lowerLot31?: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() lowerLot32?: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() lowerLot33?: string;
+
+  // 상부 투입량 (오븐1)
+  @ApiPropertyOptional() @IsOptional() @IsNumber() upperLotQty11?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() upperLotQty12?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() upperLotQty13?: number;
+
+  // 상부 투입량 (오븐2)
+  @ApiPropertyOptional() @IsOptional() @IsNumber() upperLotQty21?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() upperLotQty22?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() upperLotQty23?: number;
+
+  // 상부 투입량 (오븐3)
+  @ApiPropertyOptional() @IsOptional() @IsNumber() upperLotQty31?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() upperLotQty32?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() upperLotQty33?: number;
+
+  // 하부 투입량 (오븐1)
+  @ApiPropertyOptional() @IsOptional() @IsNumber() lowerLotQty11?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() lowerLotQty12?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() lowerLotQty13?: number;
+
+  // 하부 투입량 (오븐2)
+  @ApiPropertyOptional() @IsOptional() @IsNumber() lowerLotQty21?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() lowerLotQty22?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() lowerLotQty23?: number;
+
+  // 하부 투입량 (오븐3)
+  @ApiPropertyOptional() @IsOptional() @IsNumber() lowerLotQty31?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() lowerLotQty32?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() lowerLotQty33?: number;
+
+  // ===== B. 생산 정보 (섹션3) =====
+
+  // 상부 투입량 1~3층
+  @ApiPropertyOptional() @IsOptional() @IsNumber() upperInputQuantity1?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() upperInputQuantity2?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() upperInputQuantity3?: number;
+
+  // 상부 수분측정 1~3층
+  @ApiPropertyOptional() @IsOptional() @IsNumber() upperMoistureMeasurement1?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() upperMoistureMeasurement2?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() upperMoistureMeasurement3?: number;
+
+  // 하부 투입량 1~3층
+  @ApiPropertyOptional() @IsOptional() @IsNumber() lowerInputQuantity1?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() lowerInputQuantity2?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() lowerInputQuantity3?: number;
+
+  // 하부 수분측정 1~3층
+  @ApiPropertyOptional() @IsOptional() @IsNumber() lowerMoistureMeasurement1?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() lowerMoistureMeasurement2?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() lowerMoistureMeasurement3?: number;
+
+  // 상부 두께 before VD: upper/lowerThicknessBefore{층번호}F{오븐번호}
+  @ApiPropertyOptional() @IsOptional() @IsNumber() upperThicknessBefore1F1?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() upperThicknessBefore1F2?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() upperThicknessBefore1F3?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() upperThicknessBefore2F1?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() upperThicknessBefore2F2?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() upperThicknessBefore2F3?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() upperThicknessBefore3F1?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() upperThicknessBefore3F2?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() upperThicknessBefore3F3?: number;
+
+  // 상부 두께 after VD
+  @ApiPropertyOptional() @IsOptional() @IsNumber() upperThicknessAfter1F1?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() upperThicknessAfter1F2?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() upperThicknessAfter1F3?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() upperThicknessAfter2F1?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() upperThicknessAfter2F2?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() upperThicknessAfter2F3?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() upperThicknessAfter3F1?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() upperThicknessAfter3F2?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() upperThicknessAfter3F3?: number;
+
+  // 하부 두께 before VD
+  @ApiPropertyOptional() @IsOptional() @IsNumber() lowerThicknessBefore1F1?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() lowerThicknessBefore1F2?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() lowerThicknessBefore1F3?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() lowerThicknessBefore2F1?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() lowerThicknessBefore2F2?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() lowerThicknessBefore2F3?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() lowerThicknessBefore3F1?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() lowerThicknessBefore3F2?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() lowerThicknessBefore3F3?: number;
+
+  // 하부 두께 after VD
+  @ApiPropertyOptional() @IsOptional() @IsNumber() lowerThicknessAfter1F1?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() lowerThicknessAfter1F2?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() lowerThicknessAfter1F3?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() lowerThicknessAfter2F1?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() lowerThicknessAfter2F2?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() lowerThicknessAfter2F3?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() lowerThicknessAfter3F1?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() lowerThicknessAfter3F2?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() lowerThicknessAfter3F3?: number;
+
+  // 투입/배출 시간 (단일값, 예: "17:07 / 11:00")
+  @ApiPropertyOptional({ description: '상부 투입/배출 시간 (예: 17:07 / 11:00)', example: '17:07 / 11:00' })
   @IsOptional()
   @IsString()
-  cathodeMagazineLot1?: string;
+  upperInputOutputTime?: string;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ description: '하부 투입/배출 시간 (예: 17:07 / 11:00)', example: '17:07 / 11:00' })
   @IsOptional()
   @IsString()
-  cathodeMagazineLot2?: string;
+  lowerInputOutputTime?: string;
 
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  cathodeMagazineLot3?: string;
+  // ===== C. 공정 조건 (섹션4) =====
 
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  cathodeMagazineLot4?: string;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() vacuumDegreeSetting?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() upperSetTemperature?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() lowerSetTemperature?: number;
 
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  cathodeMagazineLot5?: string;
-
-  // 음극 매거진 LOT 1~5
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  anodeMagazineLot1?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  anodeMagazineLot2?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  anodeMagazineLot3?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  anodeMagazineLot4?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  anodeMagazineLot5?: string;
-
-  // ===== B. 생산 정보 (1~5차) =====
-
-  // 1차 - 상부
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  upperLot1?: string;
-
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ description: '상부 타이머 시간 (시간 단위 숫자, 예: 12)', example: 12 })
   @IsOptional()
   @IsNumber()
-  upperInputQuantity1?: number;
+  upperTimerTime?: number;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ description: '하부 타이머 시간 (시간 단위 숫자, 예: 12)', example: 12 })
+  @IsOptional()
+  @IsNumber()
+  lowerTimerTime?: number;
+
+  // ===== D. 설비 정보 (섹션5) =====
+
+  @ApiPropertyOptional({ description: '상부 설비번호' })
   @IsOptional()
   @IsString()
-  upperInputOutputTime1?: string;
+  equipmentUpperNumber?: string;
 
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  upperMoistureMeasurement1?: number;
-
-  // 1차 - 하부
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ description: '하부 설비번호' })
   @IsOptional()
   @IsString()
-  lowerLot1?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  lowerInputQuantity1?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  lowerInputOutputTime1?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  lowerMoistureMeasurement1?: number;
-
-  // 2차 - 상부
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  upperLot2?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  upperInputQuantity2?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  upperInputOutputTime2?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  upperMoistureMeasurement2?: number;
-
-  // 2차 - 하부
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  lowerLot2?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  lowerInputQuantity2?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  lowerInputOutputTime2?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  lowerMoistureMeasurement2?: number;
-
-  // 3차 - 상부
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  upperLot3?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  upperInputQuantity3?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  upperInputOutputTime3?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  upperMoistureMeasurement3?: number;
-
-  // 3차 - 하부
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  lowerLot3?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  lowerInputQuantity3?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  lowerInputOutputTime3?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  lowerMoistureMeasurement3?: number;
-
-  // 4차 - 상부
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  upperLot4?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  upperInputQuantity4?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  upperInputOutputTime4?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  upperMoistureMeasurement4?: number;
-
-  // 4차 - 하부
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  lowerLot4?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  lowerInputQuantity4?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  lowerInputOutputTime4?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  lowerMoistureMeasurement4?: number;
-
-  // 5차 - 상부
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  upperLot5?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  upperInputQuantity5?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  upperInputOutputTime5?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  upperMoistureMeasurement5?: number;
-
-  // 5차 - 하부
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  lowerLot5?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  lowerInputQuantity5?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  lowerInputOutputTime5?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  lowerMoistureMeasurement5?: number;
-
-  // ===== C. 공정 조건 =====
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  vacuumDegreeSetting?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  upperSetTemperature?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  lowerSetTemperature?: number;
-
-  @ApiPropertyOptional({ description: '상부 타이머 시간 (HH:mm)', example: '09:30' })
-  @IsOptional()
-  @IsString()
-  upperTimerTime?: string;
-
-  @ApiPropertyOptional({ description: '하부 타이머 시간 (HH:mm)', example: '14:45' })
-  @IsOptional()
-  @IsString()
-  lowerTimerTime?: string;
+  equipmentLowerNumber?: string;
 }
 
 export class UpdateVdWorklogDto extends PartialType(CreateVdWorklogDto) {}

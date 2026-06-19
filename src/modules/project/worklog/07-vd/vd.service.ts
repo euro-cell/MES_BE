@@ -7,8 +7,24 @@ import { EquipmentService } from 'src/modules/equipment/equipment.service';
 
 function getVdElectrodeType(worklog: WorklogVd): '양극' | '음극' | '양극/음극' | null {
   const lots = [
-    worklog.upperLot1, worklog.upperLot2, worklog.upperLot3, worklog.upperLot4, worklog.upperLot5,
-    worklog.lowerLot1, worklog.lowerLot2, worklog.lowerLot3, worklog.lowerLot4, worklog.lowerLot5,
+    worklog.upperLot11,
+    worklog.upperLot12,
+    worklog.upperLot13,
+    worklog.upperLot21,
+    worklog.upperLot22,
+    worklog.upperLot23,
+    worklog.upperLot31,
+    worklog.upperLot32,
+    worklog.upperLot33,
+    worklog.lowerLot11,
+    worklog.lowerLot12,
+    worklog.lowerLot13,
+    worklog.lowerLot21,
+    worklog.lowerLot22,
+    worklog.lowerLot23,
+    worklog.lowerLot31,
+    worklog.lowerLot32,
+    worklog.lowerLot33,
   ];
   let hasCathode = false;
   let hasAnode = false;
