@@ -5,6 +5,17 @@ import { BaseWorklogDto, BaseWorklogListResponseDto } from './00-base-worklog.dt
 
 export class CreateVdWorklogDto extends BaseWorklogDto {
   // ===== A. 자재 투입 정보 (섹션2) =====
+
+  @ApiPropertyOptional({ description: '상부 전극 종류 (양극/음극)' })
+  @IsOptional()
+  @IsString()
+  upperElectrode?: string;
+
+  @ApiPropertyOptional({ description: '하부 전극 종류 (양극/음극)' })
+  @IsOptional()
+  @IsString()
+  lowerElectrode?: string;
+
   // Lot: upper/lowerLot{오븐번호}{층번호}
 
   // 상부 LOT (오븐1)

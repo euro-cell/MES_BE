@@ -122,26 +122,26 @@ export class VdProcessService {
           }
         : null;
 
-      // 상부/하부 필드에서 데이터 수집 후 LOT 5번째 문자로 양/음극 구분
+      // 상부/하부 LOT별 투입량 매핑 (오븐번호×층번호 각각 독립 집계)
       const allFields = [
-        { lot: log.upperLot11, qty: log.upperInputQuantity1 },
-        { lot: log.upperLot12, qty: log.upperInputQuantity2 },
-        { lot: log.upperLot13, qty: log.upperInputQuantity3 },
-        { lot: log.upperLot21, qty: log.upperInputQuantity1 },
-        { lot: log.upperLot22, qty: log.upperInputQuantity2 },
-        { lot: log.upperLot23, qty: log.upperInputQuantity3 },
-        { lot: log.upperLot31, qty: log.upperInputQuantity1 },
-        { lot: log.upperLot32, qty: log.upperInputQuantity2 },
-        { lot: log.upperLot33, qty: log.upperInputQuantity3 },
-        { lot: log.lowerLot11, qty: log.lowerInputQuantity1 },
-        { lot: log.lowerLot12, qty: log.lowerInputQuantity2 },
-        { lot: log.lowerLot13, qty: log.lowerInputQuantity3 },
-        { lot: log.lowerLot21, qty: log.lowerInputQuantity1 },
-        { lot: log.lowerLot22, qty: log.lowerInputQuantity2 },
-        { lot: log.lowerLot23, qty: log.lowerInputQuantity3 },
-        { lot: log.lowerLot31, qty: log.lowerInputQuantity1 },
-        { lot: log.lowerLot32, qty: log.lowerInputQuantity2 },
-        { lot: log.lowerLot33, qty: log.lowerInputQuantity3 },
+        { lot: log.upperLot11, qty: log.upperLotQty11 },
+        { lot: log.upperLot12, qty: log.upperLotQty12 },
+        { lot: log.upperLot13, qty: log.upperLotQty13 },
+        { lot: log.upperLot21, qty: log.upperLotQty21 },
+        { lot: log.upperLot22, qty: log.upperLotQty22 },
+        { lot: log.upperLot23, qty: log.upperLotQty23 },
+        { lot: log.upperLot31, qty: log.upperLotQty31 },
+        { lot: log.upperLot32, qty: log.upperLotQty32 },
+        { lot: log.upperLot33, qty: log.upperLotQty33 },
+        { lot: log.lowerLot11, qty: log.lowerLotQty11 },
+        { lot: log.lowerLot12, qty: log.lowerLotQty12 },
+        { lot: log.lowerLot13, qty: log.lowerLotQty13 },
+        { lot: log.lowerLot21, qty: log.lowerLotQty21 },
+        { lot: log.lowerLot22, qty: log.lowerLotQty22 },
+        { lot: log.lowerLot23, qty: log.lowerLotQty23 },
+        { lot: log.lowerLot31, qty: log.lowerLotQty31 },
+        { lot: log.lowerLot32, qty: log.lowerLotQty32 },
+        { lot: log.lowerLot33, qty: log.lowerLotQty33 },
       ];
 
       for (const field of allFields) {

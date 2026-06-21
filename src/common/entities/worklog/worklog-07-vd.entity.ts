@@ -4,6 +4,13 @@ import { WorklogBase } from './worklog-00-base.entity';
 @Entity('worklog_vds')
 export class WorklogVd extends WorklogBase {
   // ===== A. 자재 투입 정보 (섹션2) =====
+
+  @Column({ type: 'varchar', length: 10, nullable: true })
+  upperElectrode: string;
+
+  @Column({ type: 'varchar', length: 10, nullable: true })
+  lowerElectrode: string;
+
   // Lot: upper/lowerLot{오븐번호}{층번호}, 오븐 1~3, 층 1~3
 
   // 상부 LOT (오븐1)
