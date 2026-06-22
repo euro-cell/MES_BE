@@ -87,11 +87,12 @@ export class MaterialController {
   }
 
   @Get('lots')
-  @ApiOperation({ summary: '카테고리별 자재 LOT 목록 조회 (재고 있는 것만, 선입선출 순서)' })
+  @ApiOperation({ summary: '카테고리별 자재 LOT 목록 조회 (선입선출 순서)' })
   @ApiQuery({ name: 'category', required: false, description: '자재 카테고리 (예: NMP, CMC, SBR)' })
   @ApiQuery({ name: 'type', required: false, description: '자재 타입 (예: Al Foil, Cu Foil)' })
-  async getLotsByCategory(@Query('category') category?: string, @Query('type') type?: string) {
-    return this.materialService.getLotsByCategory(category, type);
+  @ApiQuery({ name: 'isZeroStock', required: false, description: '재고 없는 LOT 포함 여부 (true/false)', example: false })
+  async getLotsByCategory(@Query('category') category?: string, @Query('type') type?: string, @Query('isZeroStock') isZeroStock?: string) {
+    return this.materialService.getLotsByCategory(category, type, isZeroStock === 'true');
   }
 
   @Post('electrode')

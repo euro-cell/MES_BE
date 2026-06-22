@@ -95,7 +95,7 @@ export class MaterialService {
    * - 재고가 있는(stock > 0) LOT만 조회
    * - 입고일(createdAt) 기준 오래된 순서로 정렬 (선입선출)
    */
-  async getLotsByCategory(category?: string, type?: string) {
+  async getLotsByCategory(category?: string, type?: string, isZeroStock: boolean = false) {
     const query = this.materialRepository
       .createQueryBuilder('material')
       .select([
@@ -108,8 +108,11 @@ export class MaterialService {
         'material.spec',
       ])
       .where('material.deletedAt IS NULL')
-      .andWhere('material.stock > 0')
       .andWhere('material.lotNo IS NOT NULL');
+
+    if (!isZeroStock) {
+      query.andWhere('material.stock > 0');
+    }
 
     if (type) {
       query.andWhere('material.type = :type', { type });
