@@ -95,7 +95,7 @@ export class MixingProcessService {
     const targetField = type === 'cathode' ? 'mixingCathode' : 'mixingAnode';
     const targetQuantity = productionTarget?.[targetField] || null;
 
-    const progress = targetQuantity ? Math.round((cumulativeOutput / targetQuantity) * 100 * 100) / 100 : null;
+    const progress = targetQuantity ? Math.round((cumulativeOutput / 1000 / targetQuantity) * 100 * 100) / 100 : null;
 
     return {
       data,
