@@ -6,7 +6,7 @@ export class WorklogStacking extends WorklogBase {
   // ===== A. 자재 투입 정보 (Material Input) =====
 
   // 분리막
-  @Column({ type: 'varchar', length: 20, nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true })
   separatorLot: string;
 
   @Column({ type: 'varchar', length: 100, nullable: true })
@@ -22,23 +22,23 @@ export class WorklogStacking extends WorklogBase {
   separatorUsage: number;
 
   // 양극 매거진 로트 1~3
-  @Column({ type: 'varchar', length: 20, nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true })
   cathodeMagazineLot1: string;
 
-  @Column({ type: 'varchar', length: 20, nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true })
   cathodeMagazineLot2: string;
 
-  @Column({ type: 'varchar', length: 20, nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true })
   cathodeMagazineLot3: string;
 
   // 음극 매거진 로트 1~3
-  @Column({ type: 'varchar', length: 20, nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true })
   anodeMagazineLot1: string;
 
-  @Column({ type: 'varchar', length: 20, nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true })
   anodeMagazineLot2: string;
 
-  @Column({ type: 'varchar', length: 20, nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true })
   anodeMagazineLot3: string;
 
   // ===== B. 생산 정보 (Production Info) =====
@@ -79,13 +79,13 @@ export class WorklogStacking extends WorklogBase {
   @Column({ type: 'varchar', length: 50, nullable: true })
   jr1Range: string;
 
-  @Column({ type: 'varchar', length: 20, nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true })
   jr1CathodeLot: string;
 
-  @Column({ type: 'varchar', length: 20, nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true })
   jr1AnodeLot: string;
 
-  @Column({ type: 'varchar', length: 20, nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true })
   jr1SeparatorLot: string;
 
   @Column({ type: 'varchar', length: 11, nullable: true })
@@ -95,13 +95,13 @@ export class WorklogStacking extends WorklogBase {
   @Column({ type: 'varchar', length: 50, nullable: true })
   jr2Range: string;
 
-  @Column({ type: 'varchar', length: 20, nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true })
   jr2CathodeLot: string;
 
-  @Column({ type: 'varchar', length: 20, nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true })
   jr2AnodeLot: string;
 
-  @Column({ type: 'varchar', length: 20, nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true })
   jr2SeparatorLot: string;
 
   @Column({ type: 'varchar', length: 11, nullable: true })
@@ -111,13 +111,13 @@ export class WorklogStacking extends WorklogBase {
   @Column({ type: 'varchar', length: 50, nullable: true })
   jr3Range: string;
 
-  @Column({ type: 'varchar', length: 20, nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true })
   jr3CathodeLot: string;
 
-  @Column({ type: 'varchar', length: 20, nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true })
   jr3AnodeLot: string;
 
-  @Column({ type: 'varchar', length: 20, nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true })
   jr3SeparatorLot: string;
 
   @Column({ type: 'varchar', length: 11, nullable: true })
@@ -127,13 +127,13 @@ export class WorklogStacking extends WorklogBase {
   @Column({ type: 'varchar', length: 50, nullable: true })
   jr4Range: string;
 
-  @Column({ type: 'varchar', length: 20, nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true })
   jr4CathodeLot: string;
 
-  @Column({ type: 'varchar', length: 20, nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true })
   jr4AnodeLot: string;
 
-  @Column({ type: 'varchar', length: 20, nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true })
   jr4SeparatorLot: string;
 
   @Column({ type: 'varchar', length: 11, nullable: true })
@@ -143,13 +143,13 @@ export class WorklogStacking extends WorklogBase {
   @Column({ type: 'varchar', length: 50, nullable: true })
   jr5Range: string;
 
-  @Column({ type: 'varchar', length: 20, nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true })
   jr5CathodeLot: string;
 
-  @Column({ type: 'varchar', length: 20, nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true })
   jr5AnodeLot: string;
 
-  @Column({ type: 'varchar', length: 20, nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true })
   jr5SeparatorLot: string;
 
   @Column({ type: 'varchar', length: 11, nullable: true })
@@ -159,13 +159,13 @@ export class WorklogStacking extends WorklogBase {
   @Column({ type: 'varchar', length: 50, nullable: true })
   jr6Range: string;
 
-  @Column({ type: 'varchar', length: 20, nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true })
   jr6CathodeLot: string;
 
-  @Column({ type: 'varchar', length: 20, nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true })
   jr6AnodeLot: string;
 
-  @Column({ type: 'varchar', length: 20, nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true })
   jr6SeparatorLot: string;
 
   @Column({ type: 'varchar', length: 11, nullable: true })
@@ -175,13 +175,13 @@ export class WorklogStacking extends WorklogBase {
   @Column({ type: 'varchar', length: 50, nullable: true })
   jr7Range: string;
 
-  @Column({ type: 'varchar', length: 20, nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true })
   jr7CathodeLot: string;
 
-  @Column({ type: 'varchar', length: 20, nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true })
   jr7AnodeLot: string;
 
-  @Column({ type: 'varchar', length: 20, nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true })
   jr7SeparatorLot: string;
 
   @Column({ type: 'varchar', length: 11, nullable: true })
@@ -191,13 +191,13 @@ export class WorklogStacking extends WorklogBase {
   @Column({ type: 'varchar', length: 50, nullable: true })
   jr8Range: string;
 
-  @Column({ type: 'varchar', length: 20, nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true })
   jr8CathodeLot: string;
 
-  @Column({ type: 'varchar', length: 20, nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true })
   jr8AnodeLot: string;
 
-  @Column({ type: 'varchar', length: 20, nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true })
   jr8SeparatorLot: string;
 
   @Column({ type: 'varchar', length: 11, nullable: true })
