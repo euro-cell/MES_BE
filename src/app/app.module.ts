@@ -21,6 +21,7 @@ import { DrawingModule } from 'src/modules/drawing/drawing.module';
 import { EquipmentModule } from 'src/modules/equipment/equipment.module';
 import { CommonModule } from 'src/common/common.module';
 import { DashboardModule } from 'src/modules/dashboard/dashboard.module';
+import { CustomerModule } from 'src/modules/customer/customer.module';
 import { RequestLoggerMiddleware } from 'src/common/middleware/request-logger.middleware';
 import { SessionRefreshMiddleware } from 'src/common/middleware/session-refresh.middleware';
 
@@ -46,6 +47,7 @@ import { SessionRefreshMiddleware } from 'src/common/middleware/session-refresh.
     DrawingModule,
     EquipmentModule,
     DashboardModule,
+    CustomerModule,
   ],
   controllers: [AppController],
   providers: [

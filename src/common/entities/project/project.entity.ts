@@ -1,10 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, OneToOne, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, OneToOne, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
 import { ProjectPlan } from './project-plan.entity';
 import { ProjectTarget } from './project-target.entity';
 import { Specification } from '../specification/specification.entity';
 import { ProjectMaterial } from './project-material.entity';
 import { ProjectSpecification } from './project-specifications.entity';
 import { ProjectBom } from '../bom/project-bom.entity';
+import { Customer } from '../shared/customer.entity';
 
 @Entity('projects')
 export class Project {
@@ -64,4 +65,8 @@ export class Project {
 
   @OneToMany(() => ProjectBom, (projectBom) => projectBom.project)
   projectBoms: ProjectBom[];
+
+  @ManyToOne(() => Customer, (customer) => customer.projects, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'customer_id' })
+  customer: Customer | null;
 }
