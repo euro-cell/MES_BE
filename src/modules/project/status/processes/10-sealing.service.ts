@@ -58,43 +58,43 @@ export class SealingProcessService {
     // Top remark parsing
     if (remarkTop) {
       // Top - Seal 돌출, 파우치 두께, 탑실 두께 → thickness
-      const sealProtrusionMatch = remarkTop.match(/Seal\s*돌출\s*:\s*([^\n]*)/);
+      const sealProtrusionMatch = remarkTop.match(/Seal[^\S\n\r]*돌출[^\S\n\r]*:[^\S\n\r]*([^\n\r]*)/);
       if (sealProtrusionMatch) result.thickness += countCellNumbers(sealProtrusionMatch[1]);
 
-      const pouchThicknessMatch = remarkTop.match(/파우치\s*두께\s*:\s*([^\n]*)/);
+      const pouchThicknessMatch = remarkTop.match(/파우치[^\S\n\r]*두께[^\S\n\r]*:[^\S\n\r]*([^\n\r]*)/);
       if (pouchThicknessMatch) result.thickness += countCellNumbers(pouchThicknessMatch[1]);
 
-      const topSealThicknessMatch = remarkTop.match(/탑실\s*두께\s*:\s*([^\n]*)/);
+      const topSealThicknessMatch = remarkTop.match(/탑실[^\S\n\r]*두께[^\S\n\r]*:[^\S\n\r]*([^\n\r]*)/);
       if (topSealThicknessMatch) result.thickness += countCellNumbers(topSealThicknessMatch[1]);
 
       // Top - 외관 → appearance
-      const topAppearanceMatch = remarkTop.match(/외관\s*:\s*([^\n]*)/);
+      const topAppearanceMatch = remarkTop.match(/외관[^\S\n\r]*:[^\S\n\r]*([^\n\r]*)/);
       if (topAppearanceMatch) result.appearance += countCellNumbers(topAppearanceMatch[1]);
 
       // Top - 기타 → etc
-      const topEtcMatch = remarkTop.match(/기타\s*:\s*([^\n]*)/);
+      const topEtcMatch = remarkTop.match(/기타[^\S\n\r]*:[^\S\n\r]*([^\n\r]*)/);
       if (topEtcMatch) result.etc += countCellNumbers(topEtcMatch[1]);
     }
 
     // Side remark parsing
     if (remarkSide) {
       // Side - 파우치 두께, 실 폭 → thickness
-      const sidePouchThicknessMatch = remarkSide.match(/파우치\s*두께\s*:\s*([^\n]*)/);
+      const sidePouchThicknessMatch = remarkSide.match(/파우치[^\S\n\r]*두께[^\S\n\r]*:[^\S\n\r]*([^\n\r]*)/);
       if (sidePouchThicknessMatch) result.thickness += countCellNumbers(sidePouchThicknessMatch[1]);
 
-      const sealWidthMatch = remarkSide.match(/실\s*폭\s*:\s*([^\n]*)/);
+      const sealWidthMatch = remarkSide.match(/실[^\S\n\r]*폭[^\S\n\r]*:[^\S\n\r]*([^\n\r]*)/);
       if (sealWidthMatch) result.thickness += countCellNumbers(sealWidthMatch[1]);
 
       // Side - 외관 → appearance
-      const sideAppearanceMatch = remarkSide.match(/외관\s*:\s*([^\n]*)/);
+      const sideAppearanceMatch = remarkSide.match(/외관[^\S\n\r]*:[^\S\n\r]*([^\n\r]*)/);
       if (sideAppearanceMatch) result.appearance += countCellNumbers(sideAppearanceMatch[1]);
 
       // Side - H-pot → hiPot
-      const hiPotMatch = remarkSide.match(/H-pot\s*:\s*([^\n]*)/i);
+      const hiPotMatch = remarkSide.match(/H-pot[^\S\n\r]*:[^\S\n\r]*([^\n\r]*)/i);
       if (hiPotMatch) result.hiPot += countCellNumbers(hiPotMatch[1]);
 
       // Side - 기타 → etc
-      const sideEtcMatch = remarkSide.match(/기타\s*:\s*([^\n]*)/);
+      const sideEtcMatch = remarkSide.match(/기타[^\S\n\r]*:[^\S\n\r]*([^\n\r]*)/);
       if (sideEtcMatch) result.etc += countCellNumbers(sideEtcMatch[1]);
     }
 
@@ -126,6 +126,8 @@ export class SealingProcessService {
       const output = Number(log.topWorkQuantity) || 0;
       cumulativeOutput += output;
 
+      const ncr = this.parseNcrFromRemarks(log.remarkTop, log.remarkSide);
+
       if (isCurrentMonth) {
         const current = dailyMap.get(day) || {
           output: 0,
@@ -134,7 +136,6 @@ export class SealingProcessService {
 
         current.output += output;
 
-        const ncr = this.parseNcrFromRemarks(log.remarkTop, log.remarkSide);
         current.ncr.hiPot += ncr.hiPot;
         current.ncr.appearance += ncr.appearance;
         current.ncr.thickness += ncr.thickness;
