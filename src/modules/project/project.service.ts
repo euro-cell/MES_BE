@@ -12,9 +12,10 @@ export class ProjectService {
   ) {}
 
   async findAll() {
-    const projects = await this.projectRepository.find({ order: { id: 'DESC' }, relations: ['plan'] });
-    return projects.map(({ plan, ...rest }) => ({
+    const projects = await this.projectRepository.find({ order: { id: 'DESC' }, relations: ['plan', 'customer'] });
+    return projects.map(({ plan, customer, ...rest }) => ({
       ...rest,
+      customerName: customer?.name ?? null,
       isPlan: !!plan,
       startDate: plan?.startDate || null,
       endDate: plan?.endDate || null,

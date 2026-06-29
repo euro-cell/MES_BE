@@ -13,6 +13,7 @@ export interface DashboardSummaryItem {
   batteryType: string;
   capacity: number;
   targetQuantity: number;
+  customerName: string | null;
   isPlan: boolean;
   startDate: string | null;
   endDate: string | null;
@@ -30,7 +31,7 @@ export class DashboardService {
   async getSummary(): Promise<DashboardSummaryItem[]> {
     const projects = await this.projectRepository.find({
       order: { id: 'DESC' },
-      relations: ['plan'],
+      relations: ['plan', 'customer'],
     });
 
     if (projects.length === 0) {
@@ -51,9 +52,10 @@ export class DashboardService {
     const progressResults = await Promise.all(progressPromises);
 
     return projects.map((project, index) => {
-      const { plan, ...rest } = project;
+      const { plan, customer, ...rest } = project;
       return {
         ...rest,
+        customerName: customer?.name ?? null,
         isPlan: !!plan,
         startDate: plan?.startDate || null,
         endDate: plan?.endDate || null,
