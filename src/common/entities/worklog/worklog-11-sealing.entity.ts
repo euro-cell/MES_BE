@@ -121,7 +121,7 @@ export class WorklogSealing extends WorklogBase {
   bottomChecklist: string;
 
   // 하이팟
-  @Column({ type: 'smallint', nullable: true })
+  @Column({ type: 'decimal', precision: 6, scale: 2, nullable: true })
   hipotVoltage: number;
 
   @Column({ type: 'decimal', precision: 6, scale: 2, nullable: true })

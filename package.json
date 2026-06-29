@@ -31,7 +31,9 @@
     "seed:import:cell-inventory": "ts-node -r tsconfig-paths/register scripts/import-cell-inventory-seed.ts",
     "seed:export:cell-ncr": "ts-node -r tsconfig-paths/register scripts/export-cell-ncr-seed.ts",
     "seed:import:cell-ncr": "ts-node -r tsconfig-paths/register scripts/import-cell-ncr-seed.ts",
-    "migrate:hash-passwords": "ts-node -r tsconfig-paths/register scripts/hash-existing-passwords.ts"
+    "migrate:hash-passwords": "ts-node -r tsconfig-paths/register scripts/hash-existing-passwords.ts",
+    "seed:export:sealing": "ts-node -r tsconfig-paths/register scripts/export-sealing-backup.ts",
+    "seed:import:sealing": "ts-node -r tsconfig-paths/register scripts/import-sealing-backup.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "3.1054.0",
