@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { RouterModule } from '@nestjs/core';
 import { MaterialService } from './material.service';
+import { MaterialHistoryCleanupService } from './material-history-cleanup.service';
 import { MaterialController } from './material.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Material } from 'src/common/entities/material/material.entity';
@@ -17,7 +18,7 @@ import { CoaModule } from './coa/coa.module';
     CoaModule,
   ],
   controllers: [MaterialController],
-  providers: [MaterialService],
+  providers: [MaterialService, MaterialHistoryCleanupService],
   exports: [MaterialService],
 })
 export class MaterialModule {}

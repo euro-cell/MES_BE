@@ -1,4 +1,5 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -33,6 +34,7 @@ import { SessionRefreshMiddleware } from 'src/common/middleware/session-refresh.
       inject: [ConfigService],
       useClass: TypeOrmConfig,
     }),
+    ScheduleModule.forRoot(),
     MulterModule.register(multerConfig),
     CommonModule,
     PermissionGuardModule,
