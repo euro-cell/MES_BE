@@ -15,21 +15,28 @@ import { StreamableFile } from '@nestjs/common';
 export class RustfsService {
   private readonly logger = new Logger(RustfsService.name);
   private readonly client: S3Client;
+  private readonly presignClient: S3Client;
   private readonly bucket: string;
-
-  private readonly publicEndpoint: string | undefined;
 
   constructor(private readonly configService: ConfigService) {
     this.bucket = this.configService.get<string>('RUSTFS_BUCKET')!;
-    this.publicEndpoint = this.configService.get<string>('RUSTFS_PUBLIC_ENDPOINT');
+    const region = this.configService.get<string>('RUSTFS_REGION') ?? 'us-east-1';
+    const credentials = {
+      accessKeyId: this.configService.get<string>('RUSTFS_ACCESS_KEY')!,
+      secretAccessKey: this.configService.get<string>('RUSTFS_SECRET_KEY')!,
+    };
     this.client = new S3Client({
       endpoint: this.configService.get<string>('RUSTFS_ENDPOINT')!,
-      region: this.configService.get<string>('RUSTFS_REGION') ?? 'us-east-1',
-      credentials: {
-        accessKeyId: this.configService.get<string>('RUSTFS_ACCESS_KEY')!,
-        secretAccessKey: this.configService.get<string>('RUSTFS_SECRET_KEY')!,
-      },
-      forcePathStyle: true, // RustFS 필수 옵션
+      region,
+      credentials,
+      forcePathStyle: true,
+    });
+    const publicEndpoint = this.configService.get<string>('RUSTFS_PUBLIC_ENDPOINT');
+    this.presignClient = new S3Client({
+      endpoint: publicEndpoint ?? this.configService.get<string>('RUSTFS_ENDPOINT')!,
+      region,
+      credentials,
+      forcePathStyle: true,
     });
   }
 
@@ -88,10 +95,7 @@ export class RustfsService {
    * @param expiresIn 유효 시간 (초, 기본 1시간)
    */
   async getPresignedUrl(key: string, expiresIn = 3600): Promise<string> {
-    const url = await getSignedUrl(this.client, new GetObjectCommand({ Bucket: this.bucket, Key: key }), { expiresIn });
-    if (!this.publicEndpoint) return url;
-    const internalEndpoint = this.configService.get<string>('RUSTFS_ENDPOINT')!;
-    return url.replace(internalEndpoint, this.publicEndpoint);
+    return getSignedUrl(this.presignClient, new GetObjectCommand({ Bucket: this.bucket, Key: key }), { expiresIn });
   }
 
   /**
