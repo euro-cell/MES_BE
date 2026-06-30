@@ -26,7 +26,7 @@ export class IqcService {
     const iqcs = await this.iqcRepository.find({
       where: { project: { id: projectId } },
       relations: ['results', 'coaRefs', 'images', 'files'],
-      order: { createdAt: 'ASC' },
+      order: { createdAt: 'ASC', coaRefs: { order: 'ASC' } },
     });
 
     return Promise.all(iqcs.map((iqc) => this.attachPresignedUrls(iqc)));
@@ -36,6 +36,7 @@ export class IqcService {
     const iqc = await this.iqcRepository.findOne({
       where: { id },
       relations: ['project', 'results', 'coaRefs', 'images', 'files'],
+      order: { coaRefs: { order: 'ASC' } },
     });
 
     if (!iqc) throw new NotFoundException(`IQC with ID ${id} not found`);
@@ -104,9 +105,10 @@ export class IqcService {
       }
 
       if (dto.coaRefs && dto.coaRefs.length > 0) {
-        const coaRefs = dto.coaRefs.map((c) =>
+        const coaRefs = dto.coaRefs.map((c, i) =>
           manager.create(IQCCoaRef, {
             iqc: { id: savedIqc.id },
+            order: c.order ?? i,
             attrName: c.attrName,
             attrValue: c.attrValue ?? null,
           }),
@@ -131,6 +133,7 @@ export class IqcService {
       return manager.findOneOrFail(IQC, {
         where: { id: savedIqc.id },
         relations: ['project', 'results', 'coaRefs', 'images', 'files'],
+        order: { coaRefs: { order: 'ASC' } },
       });
     });
   }
@@ -188,9 +191,10 @@ export class IqcService {
       if (dto.coaRefs !== undefined) {
         await manager.delete(IQCCoaRef, { iqc: { id } });
         if (dto.coaRefs.length > 0) {
-          const coaRefs = dto.coaRefs.map((c) =>
+          const coaRefs = dto.coaRefs.map((c, i) =>
             manager.create(IQCCoaRef, {
               iqc: { id },
+              order: c.order ?? i,
               attrName: c.attrName,
               attrValue: c.attrValue ?? null,
             }),
@@ -219,6 +223,7 @@ export class IqcService {
       return manager.findOneOrFail(IQC, {
         where: { id },
         relations: ['project', 'results', 'coaRefs', 'images', 'files'],
+        order: { coaRefs: { order: 'ASC' } },
       });
     });
   }

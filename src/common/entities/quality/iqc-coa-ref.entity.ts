@@ -16,6 +16,9 @@ export class IQCCoaRef {
   @JoinColumn({ name: 'iqc_id' })
   iqc: IQC;
 
+  @Column({ type: 'int', default: 0 })
+  order: number;
+
   @Column({ type: 'varchar', length: 100 })
   attrName: string;
 

@@ -76,6 +76,11 @@ export class CreateIQCResultDto {
 }
 
 export class CreateIQCCoaRefDto {
+  @ApiProperty({ required: false, description: '표시 순서' })
+  @IsOptional()
+  @IsNumber()
+  order?: number;
+
   @ApiProperty({ description: 'CoA 항목명 (BET(㎡/g), Fe(ppm) ...)' })
   @IsString()
   attrName: string;
