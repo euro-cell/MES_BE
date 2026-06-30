@@ -298,7 +298,7 @@ export class MaterialService {
       return null; // 자재를 찾지 못함
     }
 
-    const previousStock = material.stock || 0;
+    const previousStock = parseFloat(material.stock as any) || 0;
     const currentStock = previousStock - usageAmount;
 
     // 재고 업데이트
@@ -335,7 +335,7 @@ export class MaterialService {
       return null;
     }
 
-    const currentStock = material.stock || 0;
+    const currentStock = parseFloat(material.stock as any) || 0;
     // 이전 사용량을 재고에 복구한 뒤 새 사용량을 차감
     const updatedStock = Math.max(0, currentStock + previousUsageAmount - newUsageAmount);
     await this.materialRepository.update(material.id, { stock: updatedStock });
@@ -378,7 +378,7 @@ export class MaterialService {
     const actualUsage = existingHistory.previousStock - existingHistory.currentStock;
     if (actualUsage <= 0) return 0;
 
-    const restoredStock = (material.stock || 0) + actualUsage;
+    const restoredStock = (parseFloat(material.stock as any) || 0) + actualUsage;
     await this.materialRepository.update(material.id, { stock: restoredStock });
     await this.materialHistoryRepository.remove(existingHistory);
 
@@ -396,7 +396,7 @@ export class MaterialService {
       return null;
     }
 
-    const currentStock = material.stock || 0;
+    const currentStock = parseFloat(material.stock as any) || 0;
     const restoredStock = currentStock + usageAmount;
     await this.materialRepository.update(material.id, { stock: restoredStock });
 
