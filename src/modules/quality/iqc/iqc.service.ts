@@ -231,7 +231,7 @@ export class IqcService {
     }
   }
 
-  async uploadImages(iqcId: number, imageType: string, files: Express.Multer.File[], imageLabel?: string): Promise<IQCImage[]> {
+  async uploadImages(iqcId: number, imageType: string, files: Express.Multer.File[], imageLabel?: string): Promise<(IQCImage & { fileUrl: string | null })[]> {
     const iqc = await this.iqcRepository.findOne({ where: { id: iqcId } });
     if (!iqc) throw new NotFoundException(`IQC with ID ${iqcId} not found`);
 
@@ -249,7 +249,13 @@ export class IqcService {
       }),
     );
 
-    return this.iqcImageRepository.save(images);
+    const saved = await this.iqcImageRepository.save(images);
+    return Promise.all(
+      saved.map(async (img) => ({
+        ...img,
+        fileUrl: img.filePath ? await this.rustfsService.getPresignedUrl(img.filePath) : null,
+      })),
+    );
   }
 
   async uploadFile(iqcId: number, fileType: string, file: Express.Multer.File): Promise<IQCFile> {
@@ -266,7 +272,9 @@ export class IqcService {
       filePath: key,
     });
 
-    return this.iqcFileRepository.save(iqcFile);
+    const saved = await this.iqcFileRepository.save(iqcFile);
+    const fileUrl = saved.filePath ? await this.rustfsService.getPresignedUrl(saved.filePath) : null;
+    return { ...saved, fileUrl } as IQCFile & { fileUrl: string | null };
   }
 
   async removeFile(fileId: number): Promise<void> {
