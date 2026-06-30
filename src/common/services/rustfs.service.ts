@@ -17,8 +17,11 @@ export class RustfsService {
   private readonly client: S3Client;
   private readonly bucket: string;
 
+  private readonly publicEndpoint: string | undefined;
+
   constructor(private readonly configService: ConfigService) {
     this.bucket = this.configService.get<string>('RUSTFS_BUCKET')!;
+    this.publicEndpoint = this.configService.get<string>('RUSTFS_PUBLIC_ENDPOINT');
     this.client = new S3Client({
       endpoint: this.configService.get<string>('RUSTFS_ENDPOINT')!,
       region: this.configService.get<string>('RUSTFS_REGION') ?? 'us-east-1',
@@ -60,7 +63,7 @@ export class RustfsService {
       const res = await this.client.send(new GetObjectCommand({ Bucket: this.bucket, Key: key }));
       const stream = res.Body as Readable;
       return { stream: new StreamableFile(stream), fileName: originalFileName };
-    } catch (err) {
+    } catch (err: any) {
       this.logger.error(`다운로드 실패: ${key}`, err.stack);
       throw new NotFoundException('파일이 스토리지에 존재하지 않습니다.');
     }
@@ -73,7 +76,7 @@ export class RustfsService {
     try {
       const res = await this.client.send(new GetObjectCommand({ Bucket: this.bucket, Key: key }));
       return res.Body as Readable;
-    } catch (err) {
+    } catch (err: any) {
       this.logger.error(`스트림 조회 실패: ${key}`, err.stack);
       throw new NotFoundException('파일이 스토리지에 존재하지 않습니다.');
     }
@@ -85,7 +88,10 @@ export class RustfsService {
    * @param expiresIn 유효 시간 (초, 기본 1시간)
    */
   async getPresignedUrl(key: string, expiresIn = 3600): Promise<string> {
-    return getSignedUrl(this.client, new GetObjectCommand({ Bucket: this.bucket, Key: key }), { expiresIn });
+    const url = await getSignedUrl(this.client, new GetObjectCommand({ Bucket: this.bucket, Key: key }), { expiresIn });
+    if (!this.publicEndpoint) return url;
+    const internalEndpoint = this.configService.get<string>('RUSTFS_ENDPOINT')!;
+    return url.replace(internalEndpoint, this.publicEndpoint);
   }
 
   /**
@@ -95,7 +101,7 @@ export class RustfsService {
     try {
       await this.client.send(new DeleteObjectCommand({ Bucket: this.bucket, Key: key }));
       this.logger.log(`삭제 완료: ${key}`);
-    } catch (err) {
+    } catch (err: any) {
       this.logger.warn(`삭제 실패 (무시): ${key} - ${err.message}`);
     }
   }
