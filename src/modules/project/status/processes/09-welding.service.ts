@@ -55,13 +55,13 @@ export class WeldingProcessService {
       return value.split(',').filter((v) => v.trim()).length;
     };
 
-    const burningMatch = defectRemark.match(/소착\s*:\s*([^\n]*)/);
+    const burningMatch = defectRemark.match(/소착[^\S\n\r]*:[^\S\n\r]*([^\n\r]*)/);
     if (burningMatch) result.burning = countCellNumbers(burningMatch[1]);
 
-    const alignMatch = defectRemark.match(/Align\s*:\s*([^\n]*)/i);
+    const alignMatch = defectRemark.match(/Align[^\S\n\r]*:[^\S\n\r]*([^\n\r]*)/i);
     if (alignMatch) result.align = countCellNumbers(alignMatch[1]);
 
-    const etcMatch = defectRemark.match(/기타\s*:\s*([^\n]*)/);
+    const etcMatch = defectRemark.match(/기타[^\S\n\r]*:[^\S\n\r]*([^\n\r]*)/);
     if (etcMatch) result.etc = countCellNumbers(etcMatch[1]);
 
     return result;
