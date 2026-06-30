@@ -290,7 +290,26 @@ export class MaterialService {
 
   async deleteAllMaterialHistories(process: MaterialProcess): Promise<{ deleted: number }> {
     const result = await this.materialHistoryRepository.delete({ process });
-    return { deleted: result.affected ?? 0 };
+    const deleted = result.affected ?? 0;
+
+    if (deleted > 0) {
+      const manager = this.materialHistoryRepository.manager;
+      await manager.query(`
+        WITH reordered AS (
+          SELECT id, ROW_NUMBER() OVER (ORDER BY id) AS new_id
+          FROM material_histories
+        )
+        UPDATE material_histories
+        SET id = reordered.new_id
+        FROM reordered
+        WHERE material_histories.id = reordered.id
+      `);
+      await manager.query(`
+        SELECT setval('material_histories_id_seq', COALESCE((SELECT MAX(id) FROM material_histories), 0))
+      `);
+    }
+
+    return { deleted };
   }
 
   async findMaterialByLot(lotNo: string) {
