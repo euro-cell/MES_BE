@@ -90,6 +90,8 @@ export class VdProcessService {
 
   private processVdData(logs: WorklogVd[], month: string, productionTarget: ProjectTarget | null, notchingLotMap: Map<string, number>) {
     const [targetYear, targetMonth] = month.split('-').map(Number);
+    console.log(`[vd] 조회된 vd worklog 수=${logs.length}, month=${month}`);
+    console.log(`[vd] notchingLotMap:`, Object.fromEntries(notchingLotMap));
 
     const dailyMap = new Map<
       number,
@@ -112,6 +114,7 @@ export class VdProcessService {
       const logMonth = logDate.getMonth() + 1;
       const day = logDate.getDate();
       const isCurrentMonth = logYear === targetYear && logMonth === targetMonth;
+      console.log(`[vd] --- id=${log.id} date=${log.manufactureDate} isCurrentMonth=${isCurrentMonth}`);
 
       const current = isCurrentMonth
         ? dailyMap.get(day) || {
@@ -162,16 +165,20 @@ export class VdProcessService {
           const notchingQty = notchingLotMap.get(field.lot) || 0;
           const newVdQty = currentVdQty + qty;
 
+          console.log(`[vd]   lot=${field.lot} qty=${qty} isCathode=${isCathode} currentVdQty=${currentVdQty} newVdQty=${newVdQty} notchingQty=${notchingQty} alreadyProcessed=${processedLots.has(field.lot)}`);
+
           if (isCurrentMonth && current) {
             if (isCathode) {
               current.cathodeOutput += qty;
               if (!processedLots.has(field.lot) && newVdQty >= notchingQty && notchingQty > 0) {
+                console.log(`[vd]   -> cathodeNotching += ${notchingQty} (lot ${field.lot} 완료)`);
                 current.cathodeNotching += notchingQty;
                 processedLots.add(field.lot);
               }
             } else {
               current.anodeOutput += qty;
               if (!processedLots.has(field.lot) && newVdQty >= notchingQty && notchingQty > 0) {
+                console.log(`[vd]   -> anodeNotching += ${notchingQty} (lot ${field.lot} 완료)`);
                 current.anodeNotching += notchingQty;
                 processedLots.add(field.lot);
               }
@@ -185,9 +192,11 @@ export class VdProcessService {
       }
     }
 
+    console.log(`[vd] 2차 처리 (미완료 lot): processedLots=${JSON.stringify(Array.from(processedLots))}`);
     for (const [lot, notchingQty] of notchingLotMap) {
       if (!processedLots.has(lot) && vdLotQuantityMap.has(lot)) {
         const lastDayInfo = lotLastDay.get(lot);
+        console.log(`[vd]   미완료 lot=${lot} notchingQty=${notchingQty} lastDay=${JSON.stringify(lastDayInfo)} vdQty=${vdLotQuantityMap.get(lot)}`);
         if (lastDayInfo && lastDayInfo.isCurrentMonth) {
           const dayData = dailyMap.get(lastDayInfo.day) || {
             cathodeOutput: 0,
@@ -207,6 +216,8 @@ export class VdProcessService {
       }
     }
 
+    console.log(`[vd] dailyMap 최종:`, Object.fromEntries(Array.from(dailyMap.entries()).map(([k, v]) => [k, v])));
+    console.log(`[vd] cumulativeCathodeOutput=${cumulativeCathodeOutput} cumulativeAnodeOutput=${cumulativeAnodeOutput}`);
     return this.buildResult(dailyMap, month, productionTarget, cumulativeCathodeOutput, cumulativeAnodeOutput);
   }
 
