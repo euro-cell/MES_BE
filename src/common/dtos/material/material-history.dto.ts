@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsEnum, IsNumber } from 'class-validator';
+import { IsNotEmpty, IsEnum, IsNumber, IsArray, IsInt } from 'class-validator';
 import { Type } from 'class-transformer';
 import { MaterialHistoryType, MaterialProcess } from '../../enums/material.enum';
 
@@ -31,6 +31,13 @@ export class CreateMaterialHistoryDto {
   @Type(() => Number)
   @IsNumber()
   currentStock: number;
+}
+
+export class DeleteMaterialHistoriesDto {
+  @ApiProperty({ description: '삭제할 이력 ID 배열', example: [1, 2, 3] })
+  @IsArray()
+  @IsInt({ each: true })
+  ids: number[];
 }
 
 export class MaterialHistoryResponseDto {

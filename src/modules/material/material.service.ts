@@ -4,7 +4,7 @@ import { Material } from 'src/common/entities/material/material.entity';
 import { MaterialHistory } from 'src/common/entities/material/material-history.entity';
 import { Project } from 'src/common/entities/project/project.entity';
 import { MaterialProcess, MaterialHistoryType } from 'src/common/enums/material.enum';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { CreateMaterialDto, UpdateMaterialDto, ImportMaterialItemDto, ImportMaterialResultDto } from 'src/common/dtos/material/material.dto';
 import { MaterialOrigin, MaterialPurpose } from 'src/common/enums/material.enum';
 import { ExcelService } from 'src/common/services/excel.service';
@@ -280,6 +280,17 @@ export class MaterialService {
       limit,
       totalPages: Math.ceil(total / limit),
     };
+  }
+
+  async deleteMaterialHistories(process: MaterialProcess, ids: number[]): Promise<{ deleted: number }> {
+    if (!ids.length) return { deleted: 0 };
+    const result = await this.materialHistoryRepository.delete({ id: In(ids), process });
+    return { deleted: result.affected ?? 0 };
+  }
+
+  async deleteAllMaterialHistories(process: MaterialProcess): Promise<{ deleted: number }> {
+    const result = await this.materialHistoryRepository.delete({ process });
+    return { deleted: result.affected ?? 0 };
   }
 
   async findMaterialByLot(lotNo: string) {

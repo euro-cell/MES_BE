@@ -3,6 +3,7 @@ import type { Response } from 'express';
 import { MaterialService } from './material.service';
 import { ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { CreateMaterialDto, UpdateMaterialDto, ImportMaterialDto, ImportMaterialResultDto } from 'src/common/dtos/material/material.dto';
+import { DeleteMaterialHistoriesDto } from 'src/common/dtos/material/material-history.dto';
 import { MaterialProcess } from 'src/common/enums/material.enum';
 import { SessionAuthGuard } from 'src/common/guards/session-auth.guard';
 import { PermissionGuard } from 'src/common/guards/permission.guard';
@@ -133,6 +134,34 @@ export class MaterialController {
   async deleteAssemblyMaterial(@Param('id', ParseIntPipe) id: number, @Query('hardDelete') hardDelete?: string) {
     const isHardDelete = hardDelete === 'true';
     return this.materialService.deleteAssemblyMaterial(id, isHardDelete);
+  }
+
+  @Delete('history/electrode/all')
+  @RequirePermission(MenuName.MATERIAL_MANAGEMENT, PermissionAction.DELETE)
+  @ApiOperation({ summary: '전극 입/출고 이력 전체 삭제' })
+  async deleteAllElectrodeHistories() {
+    return this.materialService.deleteAllMaterialHistories(MaterialProcess.ELECTRODE);
+  }
+
+  @Delete('history/electrode')
+  @RequirePermission(MenuName.MATERIAL_MANAGEMENT, PermissionAction.DELETE)
+  @ApiOperation({ summary: '전극 입/출고 이력 선택 삭제' })
+  async deleteElectrodeHistories(@Body() dto: DeleteMaterialHistoriesDto) {
+    return this.materialService.deleteMaterialHistories(MaterialProcess.ELECTRODE, dto.ids);
+  }
+
+  @Delete('history/assembly/all')
+  @RequirePermission(MenuName.MATERIAL_MANAGEMENT, PermissionAction.DELETE)
+  @ApiOperation({ summary: '조립 입/출고 이력 전체 삭제' })
+  async deleteAllAssemblyHistories() {
+    return this.materialService.deleteAllMaterialHistories(MaterialProcess.ASSEMBLY);
+  }
+
+  @Delete('history/assembly')
+  @RequirePermission(MenuName.MATERIAL_MANAGEMENT, PermissionAction.DELETE)
+  @ApiOperation({ summary: '조립 입/출고 이력 선택 삭제' })
+  async deleteAssemblyHistories(@Body() dto: DeleteMaterialHistoriesDto) {
+    return this.materialService.deleteMaterialHistories(MaterialProcess.ASSEMBLY, dto.ids);
   }
 
   @Get('history/:process')
