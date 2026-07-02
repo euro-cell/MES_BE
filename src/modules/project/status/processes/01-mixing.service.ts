@@ -2,7 +2,6 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
 import { WorklogSlurry } from 'src/common/entities/worklog/worklog-02-slurry.entity';
-import { Material } from 'src/common/entities/material/material.entity';
 import { ProjectPlan } from 'src/common/entities/project/project-plan.entity';
 import { ProjectTarget } from 'src/common/entities/project/project-target.entity';
 
@@ -11,8 +10,6 @@ export class MixingProcessService {
   constructor(
     @InjectRepository(WorklogSlurry)
     private readonly slurryRepository: Repository<WorklogSlurry>,
-    @InjectRepository(Material)
-    private readonly materialRepository: Repository<Material>,
     @InjectRepository(ProjectPlan)
     private readonly projectPlanRepository: Repository<ProjectPlan>,
     @InjectRepository(ProjectTarget)
@@ -34,12 +31,8 @@ export class MixingProcessService {
     const { startDate, endDate } = this.getMonthRange(month);
     const projectStartDate = new Date(productionPlan.startDate);
 
-    const targetCategory = type === 'cathode' ? '양극재' : '음극재';
-
-    const materials = await this.materialRepository.find({
-      where: { category: targetCategory },
-    });
-    const materialLotNos = new Set(materials.map((m) => m.lotNo));
+    const targetChar = type === 'cathode' ? 'C' : 'A';
+    const activeMaterialName = type === 'cathode' ? '양극재' : '음극재';
 
     const slurryLogs = await this.slurryRepository.find({
       where: {
@@ -53,25 +46,23 @@ export class MixingProcessService {
     let cumulativeOutput = 0;
 
     for (const log of slurryLogs) {
+      if (!log.lot || log.lot.length < 5 || log.lot[4].toUpperCase() !== targetChar) continue;
+
       const logDate = new Date(log.manufactureDate);
       const isCurrentMonth = logDate >= startDate && logDate <= endDate;
       const day = logDate.getDate();
 
       const materialFields = [
-        { lot: log.material1Lot, input: log.material1ActualInput },
-        { lot: log.material2Lot, input: log.material2ActualInput },
-        { lot: log.material3Lot, input: log.material3ActualInput },
-        { lot: log.material4Lot, input: log.material4ActualInput },
-        { lot: log.material5Lot, input: log.material5ActualInput },
-        { lot: log.material6Lot, input: log.material6ActualInput },
+        { name: log.material1Name, input: log.material1ActualInput },
+        { name: log.material2Name, input: log.material2ActualInput },
+        { name: log.material3Name, input: log.material3ActualInput },
+        { name: log.material4Name, input: log.material4ActualInput },
+        { name: log.material5Name, input: log.material5ActualInput },
+        { name: log.material6Name, input: log.material6ActualInput },
       ];
-
-      let logTotal = 0;
-      for (const field of materialFields) {
-        if (field.lot && materialLotNos.has(field.lot)) {
-          logTotal += Number(field.input) || 0;
-        }
-      }
+      const logTotal = materialFields
+        .filter((f) => f.name === activeMaterialName)
+        .reduce((sum, f) => sum + (Number(f.input) || 0), 0);
 
       cumulativeOutput += logTotal;
 
