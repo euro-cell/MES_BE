@@ -90,42 +90,21 @@ export class VdProcessService {
 
   private processVdData(logs: WorklogVd[], month: string, productionTarget: ProjectTarget | null, notchingLotMap: Map<string, number>) {
     const [targetYear, targetMonth] = month.split('-').map(Number);
-    console.log(`[vd] 조회된 vd worklog 수=${logs.length}, month=${month}`);
-    console.log(`[vd] notchingLotMap:`, Object.fromEntries(notchingLotMap));
 
-    const dailyMap = new Map<
-      number,
-      {
-        cathodeOutput: number;
-        anodeOutput: number;
-        cathodeNotching: number;
-        anodeNotching: number;
-      }
-    >();
-    const processedLots = new Set<string>();
-    const lotLastDay = new Map<string, { day: number; isCurrentMonth: boolean }>();
-    const vdLotQuantityMap = new Map<string, number>();
+    const dailyMap = new Map<number, { cathodeOutput: number; anodeOutput: number; cathodeNotching: number; anodeNotching: number }>();
+    // lot별 { totalQty(전체), currentMonthQty(이번달), dayQty(날짜별), isCathode }
+    const lotMeta = new Map<string, { totalQty: number; dayQty: Map<number, number>; isCathode: boolean }>();
     let cumulativeCathodeOutput = 0;
     let cumulativeAnodeOutput = 0;
 
+    // 1패스: output 집계 + lotMeta 구축
     for (const log of logs) {
       const logDate = new Date(log.manufactureDate);
       const logYear = logDate.getFullYear();
       const logMonth = logDate.getMonth() + 1;
       const day = logDate.getDate();
       const isCurrentMonth = logYear === targetYear && logMonth === targetMonth;
-      console.log(`[vd] --- id=${log.id} date=${log.manufactureDate} isCurrentMonth=${isCurrentMonth}`);
 
-      const current = isCurrentMonth
-        ? dailyMap.get(day) || {
-            cathodeOutput: 0,
-            anodeOutput: 0,
-            cathodeNotching: 0,
-            anodeNotching: 0,
-          }
-        : null;
-
-      // 상부/하부 LOT별 투입량 매핑 (오븐번호×층번호 각각 독립 집계)
       const allFields = [
         { lot: log.upperLot11, qty: log.upperLotQty11 },
         { lot: log.upperLot12, qty: log.upperLotQty12 },
@@ -148,76 +127,70 @@ export class VdProcessService {
       ];
 
       for (const field of allFields) {
-        if (this.isValidLot(field.lot)) {
-          const qty = Number(field.qty) || 0;
-          const isCathode = field.lot[4] === 'C';
+        if (!this.isValidLot(field.lot)) continue;
+        const qty = Number(field.qty) || 0;
+        if (qty === 0) continue;
+        const isCathode = field.lot[4] === 'C';
 
-          if (isCathode) {
-            cumulativeCathodeOutput += qty;
-          } else {
-            cumulativeAnodeOutput += qty;
-          }
+        if (isCathode) cumulativeCathodeOutput += qty;
+        else cumulativeAnodeOutput += qty;
 
-          const currentVdQty = vdLotQuantityMap.get(field.lot) || 0;
-          vdLotQuantityMap.set(field.lot, currentVdQty + qty);
-          lotLastDay.set(field.lot, { day, isCurrentMonth });
-
-          const notchingQty = notchingLotMap.get(field.lot) || 0;
-          const newVdQty = currentVdQty + qty;
-
-          console.log(`[vd]   lot=${field.lot} qty=${qty} isCathode=${isCathode} currentVdQty=${currentVdQty} newVdQty=${newVdQty} notchingQty=${notchingQty} alreadyProcessed=${processedLots.has(field.lot)}`);
-
-          if (isCurrentMonth && current) {
-            if (isCathode) {
-              current.cathodeOutput += qty;
-              if (!processedLots.has(field.lot) && newVdQty >= notchingQty && notchingQty > 0) {
-                console.log(`[vd]   -> cathodeNotching += ${notchingQty} (lot ${field.lot} 완료)`);
-                current.cathodeNotching += notchingQty;
-                processedLots.add(field.lot);
-              }
-            } else {
-              current.anodeOutput += qty;
-              if (!processedLots.has(field.lot) && newVdQty >= notchingQty && notchingQty > 0) {
-                console.log(`[vd]   -> anodeNotching += ${notchingQty} (lot ${field.lot} 완료)`);
-                current.anodeNotching += notchingQty;
-                processedLots.add(field.lot);
-              }
-            }
-          }
+        const meta = lotMeta.get(field.lot) || { totalQty: 0, dayQty: new Map(), isCathode };
+        meta.totalQty += qty;
+        if (isCurrentMonth) {
+          meta.dayQty.set(day, (meta.dayQty.get(day) || 0) + qty);
         }
-      }
+        lotMeta.set(field.lot, meta);
 
-      if (isCurrentMonth && current) {
-        dailyMap.set(day, current);
-      }
-    }
-
-    console.log(`[vd] 2차 처리 (미완료 lot): processedLots=${JSON.stringify(Array.from(processedLots))}`);
-    for (const [lot, notchingQty] of notchingLotMap) {
-      if (!processedLots.has(lot) && vdLotQuantityMap.has(lot)) {
-        const lastDayInfo = lotLastDay.get(lot);
-        console.log(`[vd]   미완료 lot=${lot} notchingQty=${notchingQty} lastDay=${JSON.stringify(lastDayInfo)} vdQty=${vdLotQuantityMap.get(lot)}`);
-        if (lastDayInfo && lastDayInfo.isCurrentMonth) {
-          const dayData = dailyMap.get(lastDayInfo.day) || {
-            cathodeOutput: 0,
-            anodeOutput: 0,
-            cathodeNotching: 0,
-            anodeNotching: 0,
-          };
-
-          if (lot.length >= 5 && lot[4] === 'C') {
-            dayData.cathodeNotching += notchingQty;
-          } else if (lot.length >= 5 && lot[4] === 'A') {
-            dayData.anodeNotching += notchingQty;
-          }
-
-          dailyMap.set(lastDayInfo.day, dayData);
+        if (isCurrentMonth) {
+          const current = dailyMap.get(day) || { cathodeOutput: 0, anodeOutput: 0, cathodeNotching: 0, anodeNotching: 0 };
+          if (isCathode) current.cathodeOutput += qty;
+          else current.anodeOutput += qty;
+          dailyMap.set(day, current);
         }
       }
     }
 
-    console.log(`[vd] dailyMap 최종:`, Object.fromEntries(Array.from(dailyMap.entries()).map(([k, v]) => [k, v])));
-    console.log(`[vd] cumulativeCathodeOutput=${cumulativeCathodeOutput} cumulativeAnodeOutput=${cumulativeAnodeOutput}`);
+    // 2패스: lot별 notching qty를 날짜별 VD output 비율로 배분
+    for (const [lot, meta] of lotMeta) {
+      const notchingQty = notchingLotMap.get(lot) || 0;
+      if (notchingQty === 0 || meta.dayQty.size === 0) continue;
+
+      const currentMonthQty = Array.from(meta.dayQty.values()).reduce((s, v) => s + v, 0);
+      if (currentMonthQty === 0) continue;
+
+      const isComplete = meta.totalQty >= notchingQty;
+      const days = Array.from(meta.dayQty.entries()).sort((a, b) => a[0] - b[0]);
+      const lastDay = days[days.length - 1][0];
+
+      if (isComplete) {
+        // VD 완료 lot: notching qty를 날짜별 output 비율로 배분
+        const allocatable = Math.min(notchingQty, currentMonthQty);
+        let allocated = 0;
+
+        for (let i = 0; i < days.length; i++) {
+          const [day, dayQty] = days[i];
+          const dayData = dailyMap.get(day) || { cathodeOutput: 0, anodeOutput: 0, cathodeNotching: 0, anodeNotching: 0 };
+
+          const portion = i === days.length - 1
+            ? allocatable - allocated
+            : Math.round(allocatable * (dayQty / currentMonthQty));
+
+          if (meta.isCathode) dayData.cathodeNotching += portion;
+          else dayData.anodeNotching += portion;
+
+          dailyMap.set(day, dayData);
+          allocated += portion;
+        }
+      } else {
+        // VD 미완료 lot: notching qty 전체를 마지막 날에 반영 → ng로 잡힘
+        const dayData = dailyMap.get(lastDay) || { cathodeOutput: 0, anodeOutput: 0, cathodeNotching: 0, anodeNotching: 0 };
+        if (meta.isCathode) dayData.cathodeNotching += notchingQty;
+        else dayData.anodeNotching += notchingQty;
+        dailyMap.set(lastDay, dayData);
+      }
+    }
+
     return this.buildResult(dailyMap, month, productionTarget, cumulativeCathodeOutput, cumulativeAnodeOutput);
   }
 
@@ -264,7 +237,8 @@ export class VdProcessService {
 
       const cathodeYield =
         dayData.cathodeNotching > 0 ? Math.round((dayData.cathodeOutput / dayData.cathodeNotching) * 100 * 100) / 100 : null;
-      const anodeYield = dayData.anodeNotching > 0 ? Math.round((dayData.anodeOutput / dayData.anodeNotching) * 100 * 100) / 100 : null;
+      const anodeYield =
+        dayData.anodeNotching > 0 ? Math.round((dayData.anodeOutput / dayData.anodeNotching) * 100 * 100) / 100 : null;
 
       data.push({
         day,
