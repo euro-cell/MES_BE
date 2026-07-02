@@ -6,7 +6,8 @@ import { IQCResult } from 'src/common/entities/quality/iqc-result.entity';
 import { IQCCoaRef } from 'src/common/entities/quality/iqc-coa-ref.entity';
 import { IQCImage } from 'src/common/entities/quality/iqc-image.entity';
 import { IQCFile } from 'src/common/entities/quality/iqc-file.entity';
-import { CreateIQCDto, UpdateIQCDto } from 'src/common/dtos/quality/iqc.dto';
+import { IQCSummary } from 'src/common/entities/quality/iqc-summary.entity';
+import { CreateIQCDto, UpdateIQCDto, UpsertIQCSummaryDto } from 'src/common/dtos/quality/iqc.dto';
 import { RustfsService } from 'src/common/services/rustfs.service';
 
 @Injectable()
@@ -18,6 +19,8 @@ export class IqcService {
     private readonly iqcImageRepository: Repository<IQCImage>,
     @InjectRepository(IQCFile)
     private readonly iqcFileRepository: Repository<IQCFile>,
+    @InjectRepository(IQCSummary)
+    private readonly iqcSummaryRepository: Repository<IQCSummary>,
     private readonly dataSource: DataSource,
     private readonly rustfsService: RustfsService,
   ) {}
@@ -236,7 +239,12 @@ export class IqcService {
     }
   }
 
-  async uploadImages(iqcId: number, imageType: string, files: Express.Multer.File[], imageLabel?: string): Promise<(IQCImage & { fileUrl: string | null })[]> {
+  async uploadImages(
+    iqcId: number,
+    imageType: string,
+    files: Express.Multer.File[],
+    imageLabel?: string,
+  ): Promise<(IQCImage & { fileUrl: string | null })[]> {
     const iqc = await this.iqcRepository.findOne({ where: { id: iqcId } });
     if (!iqc) throw new NotFoundException(`IQC with ID ${iqcId} not found`);
 
@@ -304,6 +312,45 @@ export class IqcService {
 
     if (image.filePath) await this.rustfsService.delete(image.filePath);
     await this.iqcImageRepository.delete(imageId);
+  }
+
+  async findSummary(projectId: number): Promise<IQCSummary> {
+    const summary = await this.iqcSummaryRepository.findOne({
+      where: { project: { id: projectId } },
+    });
+
+    return (
+      summary ??
+      ({
+        modelName: null,
+        version: null,
+        lotNo: null,
+        usage: null,
+        manager: null,
+        specialNotes: null,
+        remark: null,
+      } as IQCSummary)
+    );
+  }
+
+  async upsertSummary(projectId: number, dto: UpsertIQCSummaryDto): Promise<IQCSummary> {
+    let summary = await this.iqcSummaryRepository.findOne({
+      where: { project: { id: projectId } },
+    });
+
+    if (!summary) {
+      summary = this.iqcSummaryRepository.create({ project: { id: projectId } });
+    }
+
+    if (dto.modelName !== undefined) summary.modelName = dto.modelName;
+    if (dto.version !== undefined) summary.version = dto.version;
+    if (dto.lotNo !== undefined) summary.lotNo = dto.lotNo;
+    if (dto.usage !== undefined) summary.usage = dto.usage;
+    if (dto.manager !== undefined) summary.manager = dto.manager;
+    if (dto.specialNotes !== undefined) summary.specialNotes = dto.specialNotes;
+    if (dto.remark !== undefined) summary.remark = dto.remark;
+
+    return this.iqcSummaryRepository.save(summary);
   }
 
   private async syncIsPassed(iqcId: number, manager: any): Promise<void> {

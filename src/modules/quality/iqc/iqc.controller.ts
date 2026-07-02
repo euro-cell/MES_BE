@@ -1,8 +1,28 @@
-import { Controller, Get, Post, Put, Patch, Delete, Body, Param, UseInterceptors, UploadedFiles, UploadedFile, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  UseInterceptors,
+  UploadedFiles,
+  UploadedFile,
+  UseGuards,
+} from '@nestjs/common';
 import { FileFieldsInterceptor, FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiOperation, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { IqcService } from './iqc.service';
-import { CreateIQCDto, UpdateIQCDto, UpdateImageLabelDto, UploadIQCFileDto, UploadIQCImagesDto } from 'src/common/dtos/quality/iqc.dto';
+import {
+  CreateIQCDto,
+  UpdateIQCDto,
+  UpdateImageLabelDto,
+  UploadIQCFileDto,
+  UploadIQCImagesDto,
+  UpsertIQCSummaryDto,
+} from 'src/common/dtos/quality/iqc.dto';
 import { multerConfig } from 'src/common/configs/multer.config';
 import { SessionAuthGuard } from 'src/common/guards/session-auth.guard';
 import { PermissionGuard } from 'src/common/guards/permission.guard';
@@ -25,6 +45,19 @@ export class IqcController {
   @ApiOperation({ summary: 'IQC 단건 조회' })
   async findOne(@Param('id') id: number) {
     return this.iqcService.findOne(id);
+  }
+
+  @Get('summary/:projectId')
+  @ApiOperation({ summary: 'IQC Summary 조회' })
+  async findSummary(@Param('projectId') projectId: number) {
+    return this.iqcService.findSummary(projectId);
+  }
+
+  @Put('summary/:projectId')
+  @RequirePermission(MenuName.IQC, PermissionAction.UPDATE)
+  @ApiOperation({ summary: 'IQC Summary 저장 (upsert)' })
+  async upsertSummary(@Param('projectId') projectId: number, @Body() dto: UpsertIQCSummaryDto) {
+    return this.iqcService.upsertSummary(projectId, dto);
   }
 
   @Post(':projectId')
@@ -94,11 +127,7 @@ export class IqcController {
   @ApiConsumes('multipart/form-data')
   @ApiBody({ type: UploadIQCFileDto })
   @UseInterceptors(FileInterceptor('file', multerConfig))
-  async uploadFile(
-    @Param('id') id: number,
-    @Body() dto: UploadIQCFileDto,
-    @UploadedFile() file: Express.Multer.File,
-  ) {
+  async uploadFile(@Param('id') id: number, @Body() dto: UploadIQCFileDto, @UploadedFile() file: Express.Multer.File) {
     return this.iqcService.uploadFile(id, dto.fileType, file);
   }
 

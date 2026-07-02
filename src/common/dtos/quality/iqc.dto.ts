@@ -1,13 +1,5 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
-import {
-  IsString,
-  IsOptional,
-  IsDateString,
-  IsBoolean,
-  IsArray,
-  IsNumber,
-  ValidateNested,
-} from 'class-validator';
+import { IsString, IsOptional, IsDateString, IsBoolean, IsArray, IsNumber, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class PsdDataItemDto {
@@ -203,6 +195,43 @@ export class UploadIQCFileDto {
 
   @ApiProperty({ type: 'string', format: 'binary', description: '업로드할 파일' })
   file: any;
+}
+
+export class UpsertIQCSummaryDto {
+  @ApiProperty({ required: false, description: '모델명' })
+  @IsOptional()
+  @IsString()
+  modelName?: string;
+
+  @ApiProperty({ required: false, description: 'Version' })
+  @IsOptional()
+  @IsString()
+  version?: string;
+
+  @ApiProperty({ required: false, description: 'Lot No.' })
+  @IsOptional()
+  @IsString()
+  lotNo?: string;
+
+  @ApiProperty({ required: false, description: '사용처' })
+  @IsOptional()
+  @IsString()
+  usage?: string;
+
+  @ApiProperty({ required: false, description: '책임자' })
+  @IsOptional()
+  @IsString()
+  manager?: string;
+
+  @ApiProperty({ required: false, description: '특이사항' })
+  @IsOptional()
+  @IsString()
+  specialNotes?: string;
+
+  @ApiProperty({ required: false, description: 'Remark' })
+  @IsOptional()
+  @IsString()
+  remark?: string;
 }
 
 export class UploadIQCImagesDto {
