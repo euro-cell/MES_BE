@@ -178,20 +178,25 @@ export class CoatingProcessService {
       }
     }
 
+    // 누적 NG: 양면 코팅이 진행된 단면 LOT 기준, 월 제한 없이 합산 (누적 투입량 = 누적 생산량 + 누적 NG)
+    let cumulativeNg = 0;
     for (const [singleLot, singleQty] of singleLotQuantityMap) {
       if (!processedSingleLots.has(singleLot)) {
         const doubleQty = doubleLotQuantityMap.get(singleLot) || 0;
         const ng = singleQty - doubleQty;
         const lastDayInfo = singleLotLastDay.get(singleLot);
 
-        if (ng > 0 && lastDayInfo && lastDayInfo.isCurrentMonth) {
-          const dayData = dailyMap.get(lastDayInfo.day) || { output: 0, ng: 0 };
-          dayData.ng += ng;
-          dailyMap.set(lastDayInfo.day, dayData);
+        if (ng > 0 && lastDayInfo) {
+          cumulativeNg += ng;
+          if (lastDayInfo.isCurrentMonth) {
+            const dayData = dailyMap.get(lastDayInfo.day) || { output: 0, ng: 0 };
+            dayData.ng += ng;
+            dailyMap.set(lastDayInfo.day, dayData);
+          }
         }
       }
     }
-    return this.buildResultWithNg(dailyMap, month, productionTarget, type, '양면', 0, cumulativeOutput);
+    return this.buildResultWithNg(dailyMap, month, productionTarget, type, '양면', 0, cumulativeOutput, cumulativeNg);
   }
 
   private buildResult(
@@ -238,6 +243,7 @@ export class CoatingProcessService {
     coatingType: '단면' | '양면',
     remainingNg: number,
     cumulativeOutput: number,
+    cumulativeNg = 0,
   ) {
     const daysInMonth = new Date(parseInt(month.split('-')[0]), parseInt(month.split('-')[1]), 0).getDate();
     const data: Array<{ day: number; output: number; ng: number | null; yield: number | null }> = [];
@@ -270,7 +276,7 @@ export class CoatingProcessService {
 
     return {
       data,
-      total: { totalOutput, cumulativeOutput, targetQuantity, progress, totalNg, totalYield },
+      total: { totalOutput, cumulativeOutput, cumulativeNg, targetQuantity, progress, totalNg, totalYield },
     };
   }
 

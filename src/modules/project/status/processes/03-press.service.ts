@@ -138,7 +138,14 @@ export class PressProcessService {
       });
     }
 
-    return this.buildResult(dailyMap, month, productionTarget, type, cumulativeOutput);
+    // 누적 NG: doubleLot별 코팅 투입량(m) 합계 - 누적 생산량, 월 제한 없이 계산
+    let cumulativeInputQty = 0;
+    for (const meta of doubleLotMeta.values()) {
+      cumulativeInputQty += meta.maxCoatingQty;
+    }
+    const cumulativeNg = cumulativeInputQty > cumulativeOutput ? cumulativeInputQty - cumulativeOutput : 0;
+
+    return this.buildResult(dailyMap, month, productionTarget, type, cumulativeOutput, cumulativeNg);
   }
 
   private buildResult(
@@ -147,6 +154,7 @@ export class PressProcessService {
     productionTarget: ProjectTarget | null,
     type: 'cathode' | 'anode',
     cumulativeOutput: number,
+    cumulativeNg = 0,
   ) {
     const daysInMonth = new Date(parseInt(month.split('-')[0]), parseInt(month.split('-')[1]), 0).getDate();
     const data: Array<{ day: number; output: number; ng: number | null; yield: number | null }> = [];
@@ -170,7 +178,7 @@ export class PressProcessService {
 
     return {
       data,
-      total: { totalOutput, cumulativeOutput, targetQuantity, progress, totalNg, totalYield },
+      total: { totalOutput, cumulativeOutput, cumulativeNg, targetQuantity, progress, totalNg, totalYield },
     };
   }
 

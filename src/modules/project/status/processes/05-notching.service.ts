@@ -100,6 +100,7 @@ export class NotchingProcessService {
     const pressLotLastDay = new Map<string, { day: number; isCurrentMonth: boolean }>();
     const processedPressLots = new Set<string>();
     let cumulativeOutput = 0;
+    let cumulativeNg = 0;
 
     for (const log of logs) {
       const logDate = new Date(log.manufactureDate);
@@ -122,6 +123,7 @@ export class NotchingProcessService {
           const notchingLengthM = (good * wide) / 1000;
 
           cumulativeOutput += good;
+          cumulativeNg += defect;
 
           if (isCurrentMonth) {
             const current = dailyMap.get(day) || { good: 0, defect: 0, notchingLengthM: 0, pressInputM: 0 };
@@ -165,7 +167,7 @@ export class NotchingProcessService {
       }
     }
 
-    return this.buildResult(dailyMap, month, productionTarget, type, cumulativeOutput);
+    return this.buildResult(dailyMap, month, productionTarget, type, cumulativeOutput, cumulativeNg);
   }
 
   private buildResult(
@@ -174,6 +176,7 @@ export class NotchingProcessService {
     productionTarget: ProjectTarget | null,
     type: 'cathode' | 'anode',
     cumulativeOutput: number,
+    cumulativeNg = 0,
   ) {
     const daysInMonth = new Date(parseInt(month.split('-')[0]), parseInt(month.split('-')[1]), 0).getDate();
     const data: Array<{ day: number; output: number; ng: number | null; yield: number | null }> = [];
@@ -202,7 +205,7 @@ export class NotchingProcessService {
 
     return {
       data,
-      total: { totalOutput, cumulativeOutput, targetQuantity, progress, totalNg: totalDefect > 0 ? totalDefect : null, totalYield },
+      total: { totalOutput, cumulativeOutput, cumulativeNg, targetQuantity, progress, totalNg: totalDefect > 0 ? totalDefect : null, totalYield },
     };
   }
 
