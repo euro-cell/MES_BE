@@ -22,6 +22,8 @@ export class MaterialHistoryCleanupService {
       createdAt: LessThan(sixMonthsAgo),
     });
 
-    this.logger.log(`원자재 이력 자동 삭제 완료: ${result.affected ?? 0}건 (기준일: ${sixMonthsAgo.toISOString()})`);
+    const sixMonthsAgoKst = sixMonthsAgo.toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' });
+
+    this.logger.log(`원자재 이력 자동 삭제 완료: ${result.affected ?? 0}건 (기준일: ${sixMonthsAgoKst} KST)`);
   }
 }
