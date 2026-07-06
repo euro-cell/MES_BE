@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThan } from 'typeorm';
 import { LotStacking } from '../../../../common/entities/lot/lot-05-stacking.entity';
@@ -7,6 +7,8 @@ import { WorklogStacking } from '../../../../common/entities/worklog/worklog-09-
 
 @Injectable()
 export class StackingService {
+  private readonly logger = new Logger(StackingService.name);
+
   constructor(
     @InjectRepository(LotStacking)
     private readonly lotStackingRepo: Repository<LotStacking>,
@@ -52,17 +54,29 @@ export class StackingService {
       };
 
       const parseRange = (range: string): number[] => {
-        const match = range?.match(/(\d+)\s*~\s*(\d+)/);
-        if (match) {
-          const start = Number(match[1]);
-          const end = Number(match[2]);
-          const numbers: number[] = [];
-          for (let i = start; i <= end; i++) {
-            numbers.push(i);
+        if (!range) return [];
+
+        const numbers: number[] = [];
+        const parts = range.split(',').map((part) => part.trim());
+
+        for (const part of parts) {
+          const rangeMatch = part.match(/^(\d+)\s*~\s*(\d+)$/);
+          if (rangeMatch) {
+            const start = Number(rangeMatch[1]);
+            const end = Number(rangeMatch[2]);
+            for (let i = start; i <= end; i++) {
+              numbers.push(i);
+            }
+            continue;
           }
-          return numbers;
+
+          const singleMatch = part.match(/^(\d+)$/);
+          if (singleMatch) {
+            numbers.push(Number(singleMatch[1]));
+          }
         }
-        return [];
+
+        return numbers;
       };
 
       // Parse defects from remark
@@ -115,8 +129,8 @@ export class StackingService {
             where: {
               lot: lotNumber,
               project: { id: projectId },
-              worklogStacking: { id: stacking.id },
             },
+            relations: ['worklogStacking'],
           });
 
           if (!exists) {
@@ -130,6 +144,14 @@ export class StackingService {
             });
             await this.lotStackingRepo.save(lotStacking);
           } else {
+            if (exists.worklogStacking && exists.worklogStacking.id !== stacking.id) {
+              this.logger.warn(
+                `[JR 구간 충돌] lot=${lotNumber} 이 worklogId=${exists.worklogStacking.id}(jrRange=${exists.jrRange})에 이미 연결되어 있었으나 worklogId=${stacking.id}(jrRange=${jr.jrRange})로 재연결됩니다`,
+              );
+              exists.worklogStacking = stacking;
+              exists.jrRange = jr.jrRange;
+              exists.processDate = stacking.manufactureDate;
+            }
             // Update existing record with defect status
             exists.isDefective = hasDefect;
             await this.lotStackingRepo.save(exists);
@@ -161,7 +183,7 @@ export class StackingService {
     const lots = await this.lotStackingRepo.find({
       where: { project: { id: projectId } },
       relations: ['worklogStacking'],
-      order: { processDate: 'DESC' },
+      order: { processDate: 'DESC', lot: 'DESC' },
     });
 
     return lots.map((lotEntry) => {
