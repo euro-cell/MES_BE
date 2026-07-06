@@ -1,6 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { QueryFailedError, Repository } from 'typeorm';
 import { WorklogStacking } from 'src/common/entities/worklog/worklog-09-stacking.entity';
 import {
   CreateStackingWorklogDto,
@@ -168,6 +168,13 @@ export class StackingService {
       await this.restoreSeparatorUsage(worklog.separatorLot, worklog.separatorUsage);
     }
 
-    await this.worklogStackingRepository.remove(worklog);
+    try {
+      await this.worklogStackingRepository.remove(worklog);
+    } catch (error) {
+      if (error instanceof QueryFailedError && (error as unknown as { code?: string }).code === '23503') {
+        throw new ConflictException('이 작업일지는 이미 Lot 관리로 동기화되어 삭제할 수 없습니다. 연결된 Lot을 먼저 확인해주세요.');
+      }
+      throw error;
+    }
   }
 }
