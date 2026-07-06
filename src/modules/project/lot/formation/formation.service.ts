@@ -72,6 +72,26 @@ export class FormationLotService {
     return isNaN(cellNumber) ? 0 : cellNumber;
   }
 
+  // "O1EE290003 ~ 0062" 형식에서 prefix("O1EE29")와 셀 번호 범위를 추출
+  private parseFormationCellNumberRange(range: string | null): { prefix: string; start: number; end: number } | null {
+    if (!range) return null;
+    const match = range.match(/^([A-Za-z0-9]+?)(\d{4})\s*[-~]\s*(\d{4})$/);
+    if (!match) return null;
+
+    const [, prefix, startStr, endStr] = match;
+    return { prefix, start: Number(startStr), end: Number(endStr) };
+  }
+
+  private findFormationLotNumberFromWorklogs(cellNumber: number, formationWorklogs: WorklogFormation[]): string | null {
+    for (const worklog of formationWorklogs) {
+      const parsed = this.parseFormationCellNumberRange(worklog.cellNumberRange);
+      if (parsed && cellNumber >= parsed.start && cellNumber <= parsed.end) {
+        return `${parsed.prefix}${String(cellNumber).padStart(4, '0')}`;
+      }
+    }
+    return null;
+  }
+
   async sync(projectId: number) {
     const lastSync = await this.getLastSync(projectId);
 
@@ -111,7 +131,8 @@ export class FormationLotService {
 
       const cellNumber = this.extractCellNumberFromSealingLot(sealingLot.lot);
       const processDate = sealingLot.fillingDate || sealingLot.processDate || new Date();
-      const formationLotNumber = this.generateFormationLot(processDate, cellNumber);
+      const fromWorklog = this.findFormationLotNumberFromWorklogs(cellNumber, formationWorklogs);
+      const formationLotNumber = fromWorklog ?? this.generateFormationLot(processDate, cellNumber);
 
       const lotFormation = this.lotFormationRepo.create({
         lot: formationLotNumber,
@@ -145,12 +166,17 @@ export class FormationLotService {
     const cellNumber = Number(formationLot.lot.slice(-4));
 
     if (!formationLot.worklogFormation) {
+      let matchedWorklog: WorklogFormation | null = null;
       for (const worklog of formationWorklogs) {
         if (this.isFormationWorklogMatch(worklog, cellNumber)) {
-          formationLot.worklogFormation = worklog;
-          updated = true;
+          matchedWorklog = worklog;
           break;
         }
+      }
+
+      if (matchedWorklog) {
+        formationLot.worklogFormation = matchedWorklog;
+        updated = true;
       }
     }
 
