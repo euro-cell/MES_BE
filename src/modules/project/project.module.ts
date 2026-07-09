@@ -3,6 +3,7 @@ import { ProjectService } from './project.service';
 import { ProjectController } from './project.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Project } from '../../common/entities/project/project.entity';
+import { Customer } from '../../common/entities/shared/customer.entity';
 import { PlanModule } from './plan/plan.module';
 import { RouterModule } from '@nestjs/core';
 import { ProductMaterialModule } from './material/material.module';
@@ -14,7 +15,7 @@ import { BomModule } from './bom/bom.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Project]),
+    TypeOrmModule.forFeature([Project, Customer]),
     RouterModule.register([
       { path: 'project', module: PlanModule },
       { path: 'project', module: ProductMaterialModule },

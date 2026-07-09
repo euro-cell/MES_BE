@@ -30,6 +30,9 @@ class ProjectDto {
 
   @ApiProperty()
   targetQuantity: number;
+
+  @ApiProperty({ required: false, nullable: true, description: '고객사 ID' })
+  customerId?: number | null;
 }
 
 export class CreateProjectDto extends OmitType(ProjectDto, ['id'] as const) {}

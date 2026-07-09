@@ -1,6 +1,7 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Project } from '../../common/entities/project/project.entity';
+import { Customer } from '../../common/entities/shared/customer.entity';
 import { Repository } from 'typeorm';
 import { CreateProjectDto, UpdateProjectDto } from 'src/common/dtos/project/project.dto';
 
@@ -9,6 +10,8 @@ export class ProjectService {
   constructor(
     @InjectRepository(Project)
     private readonly projectRepository: Repository<Project>,
+    @InjectRepository(Customer)
+    private readonly customerRepository: Repository<Customer>,
   ) {}
 
   async findAll() {
@@ -70,6 +73,12 @@ export class ProjectService {
     const existing = await this.projectRepository.findOne({ where: { name }, withDeleted: true });
     if (existing) throw new ConflictException(`이미 존재하는 프로젝트명입니다: ${name}`);
 
+    let customer: Customer | null = null;
+    if (dto.customerId != null) {
+      customer = await this.customerRepository.findOne({ where: { id: dto.customerId } });
+      if (!customer) throw new NotFoundException(`ID ${dto.customerId}번 고객사를 찾을 수 없습니다.`);
+    }
+
     const project = this.projectRepository.create({
       name,
       company,
@@ -80,13 +89,14 @@ export class ProjectService {
       batteryType,
       capacity: Number(dto.capacity),
       targetQuantity: Number(dto.targetQuantity),
+      customer,
     });
 
     return this.projectRepository.save(project);
   }
 
   async update(id: number, dto: UpdateProjectDto) {
-    const project = await this.projectRepository.findOne({ where: { id } });
+    const project = await this.projectRepository.findOne({ where: { id }, relations: ['customer'] });
     if (!project) {
       throw new NotFoundException(`ID ${id}번 프로젝트 항목을 찾을 수 없습니다.`);
     }
@@ -94,7 +104,18 @@ export class ProjectService {
     const nameFields = ['company', 'mode', 'year', 'month', 'round', 'batteryType', 'capacity'] as const;
     const affectsName = nameFields.some((f) => dto[f] !== undefined);
 
-    const updated = Object.assign(project, dto);
+    const { customerId, ...rest } = dto;
+    const updated = Object.assign(project, rest);
+
+    if (customerId !== undefined) {
+      if (customerId === null) {
+        updated.customer = null;
+      } else {
+        const customer = await this.customerRepository.findOne({ where: { id: customerId } });
+        if (!customer) throw new NotFoundException(`ID ${customerId}번 고객사를 찾을 수 없습니다.`);
+        updated.customer = customer;
+      }
+    }
 
     if (affectsName) {
       const company = updated.company.toUpperCase();
