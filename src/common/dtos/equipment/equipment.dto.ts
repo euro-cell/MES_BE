@@ -151,4 +151,7 @@ export class EquipmentResponseDto {
 
   @ApiPropertyOptional({ description: '검교정 기관' })
   calibrationAgency?: string;
+
+  @ApiProperty({ description: '매뉴얼 등록 여부', example: true })
+  hasManual: boolean;
 }

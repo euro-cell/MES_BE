@@ -22,11 +22,19 @@ export class EquipmentService {
     return this.equipmentRepository.save(equipment);
   }
 
-  async findByCategory(category: EquipmentCategory): Promise<Equipment[]> {
-    return this.equipmentRepository.find({
-      where: { category },
-      order: { id: 'ASC' },
-    });
+  /**
+   * equipment_manuals 존재 여부를 EXISTS 서브쿼리로 함께 조회 (N+1 방지)
+   * hasManual은 DB 컬럼이 아닌 조회 시 계산되는 파생 필드다.
+   */
+  async findByCategory(category: EquipmentCategory): Promise<(Equipment & { hasManual: boolean })[]> {
+    const { entities, raw } = await this.equipmentRepository
+      .createQueryBuilder('equipment')
+      .where('equipment.category = :category', { category })
+      .addSelect('EXISTS (SELECT 1 FROM equipment_manuals manual WHERE manual.equipment_id = equipment.id)', 'has_manual')
+      .orderBy('equipment.id', 'ASC')
+      .getRawAndEntities();
+
+    return entities.map((equipment, index) => Object.assign(equipment, { hasManual: raw[index].has_manual === true }));
   }
 
   async findMixersByCategory(category: EquipmentCategory): Promise<Equipment[]> {
