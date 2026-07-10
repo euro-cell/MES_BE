@@ -4,7 +4,7 @@ import { Material } from 'src/common/entities/material/material.entity';
 import { MaterialHistory } from 'src/common/entities/material/material-history.entity';
 import { Project } from 'src/common/entities/project/project.entity';
 import { MaterialProcess, MaterialHistoryType } from 'src/common/enums/material.enum';
-import { In, Repository } from 'typeorm';
+import { In, Repository, SelectQueryBuilder } from 'typeorm';
 import { CreateMaterialDto, UpdateMaterialDto, ImportMaterialItemDto, ImportMaterialResultDto } from 'src/common/dtos/material/material.dto';
 import { MaterialOrigin, MaterialPurpose } from 'src/common/enums/material.enum';
 import { ExcelService } from 'src/common/services/excel.service';
@@ -23,6 +23,18 @@ export class MaterialService {
     private readonly excelService: ExcelService,
   ) {}
 
+  /**
+   * material_coas 존재 여부를 EXISTS 서브쿼리로 함께 조회 (N+1 방지)
+   * hasCoa는 DB 컬럼이 아닌 조회 시 계산되는 파생 필드다.
+   */
+  private async getManyWithCoaFlag(query: SelectQueryBuilder<Material>): Promise<(Material & { hasCoa: boolean })[]> {
+    const { entities, raw } = await query
+      .addSelect('EXISTS (SELECT 1 FROM material_coas coa WHERE coa.material_id = material.id)', 'has_coa')
+      .getRawAndEntities();
+
+    return entities.map((material, index) => Object.assign(material, { hasCoa: raw[index].has_coa === true }));
+  }
+
   async findAllMaterials(category?: string) {
     const query = this.materialRepository.createQueryBuilder('material').where('material.deletedAt IS NULL');
 
@@ -33,7 +45,7 @@ export class MaterialService {
       query.orderBy('material.id', 'ASC');
     }
 
-    return query.getMany();
+    return this.getManyWithCoaFlag(query);
   }
 
   async findByElectrode(isZeroStock: boolean = false) {
@@ -47,7 +59,7 @@ export class MaterialService {
       query.andWhere('material.stock > 0');
     }
 
-    return query.orderBy('material.id', 'ASC').getMany();
+    return this.getManyWithCoaFlag(query.orderBy('material.id', 'ASC'));
   }
 
   async findByAssembly(isZeroStock: boolean = false) {
@@ -61,7 +73,7 @@ export class MaterialService {
       query.andWhere('material.stock > 0');
     }
 
-    return query.orderBy('material.id', 'ASC').getMany();
+    return this.getManyWithCoaFlag(query.orderBy('material.id', 'ASC'));
   }
 
   async findByMaterialProduction() {

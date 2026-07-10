@@ -45,6 +45,9 @@ export class MaterialDto {
 
   @ApiPropertyOptional({ description: '재고', example: 10 })
   stock?: number;
+
+  @ApiProperty({ description: 'CoA 등록 여부', example: true })
+  hasCoa: boolean;
 }
 
 export class MaterialListResponseDto extends OmitType(MaterialDto, ['id'] as const) {
@@ -52,7 +55,7 @@ export class MaterialListResponseDto extends OmitType(MaterialDto, ['id'] as con
   id: number;
 }
 
-export class CreateMaterialDto extends OmitType(MaterialDto, ['id'] as const) {
+export class CreateMaterialDto extends OmitType(MaterialDto, ['id', 'hasCoa'] as const) {
   @ApiProperty({ description: '공정 구분', example: '전극', enum: MaterialProcess })
   @IsNotEmpty()
   @IsEnum(MaterialProcess)
