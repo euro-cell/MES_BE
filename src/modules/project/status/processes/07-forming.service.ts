@@ -206,15 +206,8 @@ export class FormingProcessService {
     // 포밍 목표수량 (통합)
     const targetQuantity = productionTarget?.forming || null;
 
-    // 마지막으로 작업된 공정의 누적 합계로 진행률 계산 (역순으로 찾기)
-    let cumulativeLastProcessOutput = 0;
-    for (let i = processOrder.length - 1; i >= 0; i--) {
-      const process = processOrder[i];
-      if (cumulativeTotals[process] > 0) {
-        cumulativeLastProcessOutput = cumulativeTotals[process];
-        break;
-      }
-    }
+    // 가장 많이 진행된 공정의 누적 합계로 진행률 계산 (공정 순서상 상류 공정이 항상 하류보다 많거나 같음)
+    const cumulativeLastProcessOutput = Math.max(...processOrder.map((process) => cumulativeTotals[process]));
 
     // 진행률 계산 (누적 마지막 공정 합계 / 목표수량)
     const progress = targetQuantity && cumulativeLastProcessOutput > 0
