@@ -55,6 +55,45 @@ export class IqcProtoService {
   private readonly logger = new Logger(IqcProtoService.name);
   private readonly univerCommand = resolveUniverCommand();
 
+  async convertToXlsx(workbookData: Record<string, unknown>): Promise<{ buffer: Buffer; fileName: string }> {
+    if (!workbookData || typeof workbookData !== 'object') {
+      throw new BadRequestException('workbookData가 필요합니다.');
+    }
+
+    await fs.mkdir(UNIVER_TEMP_DIR, { recursive: true });
+
+    const uuid = randomUUID();
+    const univerFileName = `${uuid}.univer`;
+    const univerPath = path.join(UNIVER_TEMP_DIR, univerFileName);
+    const univerFileUrl = toFileUrl(univerPath);
+    const outputPath = path.join(UNIVER_TEMP_DIR, `${uuid}.xlsx`);
+    const scriptPath = path.join(UNIVER_TEMP_DIR, `${uuid}-inject.js`);
+
+    await this.runCli(['new', univerFileUrl, '--json']);
+
+    const worktreeId = await this.runWorktreeAdd(univerPath, 'export');
+
+    try {
+      const dummyUnitId = await this.runUnitAdd(univerFileUrl, worktreeId);
+
+      const injectScript = `const fWorkbook = univerAPI.createWorkbook(${JSON.stringify(workbookData)}); return { id: fWorkbook.getId(), name: fWorkbook.getName() };`;
+      await fs.writeFile(scriptPath, injectScript, 'utf-8');
+
+      const injected = await this.runInjectWorkbook(univerFileUrl, worktreeId, dummyUnitId, scriptPath);
+
+      await this.runExport(univerFileUrl, worktreeId, injected.unitId, outputPath);
+
+      const buffer = await fs.readFile(outputPath);
+      const baseName = injected.name || 'export';
+      const fileName = baseName.toLowerCase().endsWith('.xlsx') ? baseName : `${baseName}.xlsx`;
+      return { buffer, fileName };
+    } finally {
+      await this.runWorktreeDiscard(univerFileUrl, worktreeId);
+      await fs.rm(scriptPath, { force: true });
+      // TODO: 프로토타입 범위 - univerPath/outputPath 임시 파일은 정리하지 않음
+    }
+  }
+
   async convertToWorkbookData(file: Express.Multer.File): Promise<{ workbookData: unknown }> {
     if (!file) {
       throw new BadRequestException('업로드된 파일이 없습니다.');
@@ -151,6 +190,43 @@ export class IqcProtoService {
       throw new InternalServerErrorException(`워크북 스냅샷 추출에 실패했습니다: ${result.error ?? '알 수 없는 오류'}`);
     }
     return result.value;
+  }
+
+  private async runUnitAdd(univerFileUrl: string, worktreeId: string): Promise<string> {
+    const args = ['unit', 'add', univerFileUrl, '--worktree', worktreeId, '--type', 'sheet', '--name', 'dummy', '--json'];
+    const result = await this.runCli(args);
+    if (result.success === false || !result.unitId) {
+      throw new InternalServerErrorException(`임시 unit 생성에 실패했습니다: ${result.error ?? '알 수 없는 오류'}`);
+    }
+    return result.unitId;
+  }
+
+  private async runInjectWorkbook(
+    univerFileUrl: string,
+    worktreeId: string,
+    dummyUnitId: string,
+    scriptPath: string,
+  ): Promise<{ unitId: string; name: string }> {
+    const args = ['execute', univerFileUrl, '--worktree', worktreeId, '--unit', dummyUnitId, '--script', scriptPath, '--json'];
+
+    let lastError: string | undefined;
+    for (let attempt = 1; attempt <= IMPORT_MAX_ATTEMPTS; attempt++) {
+      const result = await this.runCli(args);
+      if (result.success !== false && result.value?.id) {
+        return { unitId: result.value.id, name: result.value.name };
+      }
+      lastError = result.error;
+      this.logger.warn(`워크북 주입 실패 (시도 ${attempt}/${IMPORT_MAX_ATTEMPTS}): ${lastError}`);
+    }
+    throw new InternalServerErrorException(`워크북 데이터 주입에 실패했습니다: ${lastError}`);
+  }
+
+  private async runExport(univerFileUrl: string, worktreeId: string, unitId: string, outputPath: string): Promise<void> {
+    const args = ['export', univerFileUrl, outputPath, '--worktree', worktreeId, '--unit', unitId, '--json'];
+    const result = await this.runCli(args);
+    if (result.success === false) {
+      throw new InternalServerErrorException(`xlsx 내보내기에 실패했습니다: ${result.error ?? '알 수 없는 오류'}`);
+    }
   }
 
   private async runWorktreeDiscard(univerFileUrl: string, worktreeId: string): Promise<void> {

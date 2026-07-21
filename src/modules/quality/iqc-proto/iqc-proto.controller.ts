@@ -1,7 +1,8 @@
-import { Controller, Post, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Body, Controller, Post, Res, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiOperation, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { memoryStorage } from 'multer';
+import type { Response } from 'express';
 import { IqcProtoService } from './iqc-proto.service';
 import { SessionAuthGuard } from 'src/common/guards/session-auth.guard';
 
@@ -23,5 +24,17 @@ export class IqcProtoController {
   )
   async upload(@UploadedFile() file: Express.Multer.File) {
     return this.iqcProtoService.convertToWorkbookData(file);
+  }
+
+  @Post('export')
+  @ApiOperation({ summary: 'Univer 워크북 JSON(IWorkbookData)을 xlsx 파일로 변환하여 다운로드' })
+  @ApiBody({ schema: { type: 'object', properties: { workbookData: { type: 'object' } } } })
+  async export(@Body('workbookData') workbookData: Record<string, unknown>, @Res() res: Response) {
+    const { buffer, fileName } = await this.iqcProtoService.convertToXlsx(workbookData);
+    res.set({
+      'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Disposition': `attachment; filename="${encodeURIComponent(fileName)}"`,
+    });
+    res.send(buffer);
   }
 }
