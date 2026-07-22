@@ -118,6 +118,11 @@ jobs:
 
             # 이전 버전 정리 (10초 후)
             sleep 10
+
+            # 이전 컨테이너 로그 백업
+            mkdir -p ~/logs
+            docker logs "$OLD" > ~/logs/${OLD}_$(date +%Y%m%d%H%M%S).log 2>&1 || true
+
             docker compose -f docker-compose.be.yml stop "$OLD" || true
             docker compose -f docker-compose.be.yml rm -f "$OLD" || true
 
