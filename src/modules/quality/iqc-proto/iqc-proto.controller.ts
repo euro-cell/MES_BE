@@ -33,7 +33,7 @@ export class IqcProtoController {
     const { buffer, fileName } = await this.iqcProtoService.convertToXlsx(workbookData);
     res.set({
       'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'Content-Disposition': `attachment; filename="${encodeURIComponent(fileName)}"`,
+      'Content-Disposition': `attachment; filename="${fileName.replace(/"/g, '')}"; filename*=UTF-8''${encodeURIComponent(fileName)}`,
     });
     res.send(buffer);
   }
