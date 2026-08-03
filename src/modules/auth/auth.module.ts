@@ -4,8 +4,8 @@ import { AuthController } from './auth.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../../common/entities/shared/user.entity';
 import { PassportModule } from '@nestjs/passport';
-import { LocalStrategy } from 'src/common/passport/local.strategy';
-import { SessionSerializer } from 'src/common/passport/session.serializer';
+import { LocalStrategy } from '../../common/passport/local.strategy';
+import { SessionSerializer } from '../../common/passport/session.serializer';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User]), PassportModule.register({ session: true })],

@@ -4,9 +4,9 @@ import { MaterialService } from './material.service';
 import { MaterialHistoryCleanupService } from './material-history-cleanup.service';
 import { MaterialController } from './material.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Material } from 'src/common/entities/material/material.entity';
-import { MaterialHistory } from 'src/common/entities/material/material-history.entity';
-import { Project } from 'src/common/entities/project/project.entity';
+import { Material } from '../../common/entities/material/material.entity';
+import { MaterialHistory } from '../../common/entities/material/material-history.entity';
+import { Project } from '../../common/entities/project/project.entity';
 import { CoaModule } from './coa/coa.module';
 
 @Module({

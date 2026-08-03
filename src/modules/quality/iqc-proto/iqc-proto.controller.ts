@@ -4,7 +4,7 @@ import { ApiTags, ApiOperation, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { memoryStorage } from 'multer';
 import type { Response } from 'express';
 import { IqcProtoService } from './iqc-proto.service';
-import { SessionAuthGuard } from 'src/common/guards/session-auth.guard';
+import { SessionAuthGuard } from '../../../common/guards/session-auth.guard';
 
 @ApiTags('Quality - IQC Proto (Univer 뷰어 프로토타입)')
 @Controller()

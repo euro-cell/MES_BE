@@ -1,12 +1,12 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Patch, Query, Res, UseGuards } from '@nestjs/common';
 import { StatusService } from './status.service';
 import { ApiQuery, ApiProduces } from '@nestjs/swagger';
-import { UpdateTargetByKeyDto } from 'src/common/dtos/project/project-target.dto';
+import { UpdateTargetByKeyDto } from '../../../common/dtos/project/project-target.dto';
 import type { Response } from 'express';
-import { SessionAuthGuard } from 'src/common/guards/session-auth.guard';
-import { PermissionGuard } from 'src/common/guards/permission.guard';
-import { RequirePermission } from 'src/common/decorators/permission.decorator';
-import { MenuName, PermissionAction } from 'src/common/enums/menu.enum';
+import { SessionAuthGuard } from '../../../common/guards/session-auth.guard';
+import { PermissionGuard } from '../../../common/guards/permission.guard';
+import { RequirePermission } from '../../../common/decorators/permission.decorator';
+import { MenuName, PermissionAction } from '../../../common/enums/menu.enum';
 
 @Controller(':projectId/status')
 @UseGuards(SessionAuthGuard, PermissionGuard)

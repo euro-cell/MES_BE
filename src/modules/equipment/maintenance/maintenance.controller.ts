@@ -2,11 +2,11 @@ import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Res, S
 import type { Response } from 'express';
 import { ApiOperation } from '@nestjs/swagger';
 import { MaintenanceService } from './maintenance.service';
-import { CreateMaintenanceDto, UpdateMaintenanceDto } from 'src/common/dtos/equipment/maintenance.dto';
-import { SessionAuthGuard } from 'src/common/guards/session-auth.guard';
-import { PermissionGuard } from 'src/common/guards/permission.guard';
-import { RequirePermission } from 'src/common/decorators/permission.decorator';
-import { MenuName, PermissionAction } from 'src/common/enums/menu.enum';
+import { CreateMaintenanceDto, UpdateMaintenanceDto } from '../../../common/dtos/equipment/maintenance.dto';
+import { SessionAuthGuard } from '../../../common/guards/session-auth.guard';
+import { PermissionGuard } from '../../../common/guards/permission.guard';
+import { RequirePermission } from '../../../common/decorators/permission.decorator';
+import { MenuName, PermissionAction } from '../../../common/enums/menu.enum';
 
 @Controller()
 @UseGuards(SessionAuthGuard, PermissionGuard)

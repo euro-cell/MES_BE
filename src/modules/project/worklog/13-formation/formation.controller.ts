@@ -1,11 +1,11 @@
 import { Controller, Post, Body, Param, Get, Patch, Delete, ParseIntPipe, UseGuards } from '@nestjs/common';
 import { FormationService } from './formation.service';
 import { ApiTags, ApiOkResponse } from '@nestjs/swagger';
-import { CreateFormationWorklogDto, FormationWorklogListResponseDto, UpdateFormationWorklogDto } from 'src/common/dtos/worklog/13-formation.dto';
-import { SessionAuthGuard } from 'src/common/guards/session-auth.guard';
-import { PermissionGuard } from 'src/common/guards/permission.guard';
-import { RequirePermission } from 'src/common/decorators/permission.decorator';
-import { MenuName, PermissionAction } from 'src/common/enums/menu.enum';
+import { CreateFormationWorklogDto, FormationWorklogListResponseDto, UpdateFormationWorklogDto } from '../../../../common/dtos/worklog/13-formation.dto';
+import { SessionAuthGuard } from '../../../../common/guards/session-auth.guard';
+import { PermissionGuard } from '../../../../common/guards/permission.guard';
+import { RequirePermission } from '../../../../common/decorators/permission.decorator';
+import { MenuName, PermissionAction } from '../../../../common/enums/menu.enum';
 
 @ApiTags('Production Worklog - Formation')
 @Controller(':projectId/worklog')

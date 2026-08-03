@@ -1,10 +1,10 @@
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
 import { PlanService } from './plan.service';
-import { CreateProjectPlanDto, UpdateProjectPlanDto } from 'src/common/dtos/project/project-plan.dto';
-import { SessionAuthGuard } from 'src/common/guards/session-auth.guard';
-import { PermissionGuard } from 'src/common/guards/permission.guard';
-import { RequirePermission } from 'src/common/decorators/permission.decorator';
-import { MenuName, PermissionAction } from 'src/common/enums/menu.enum';
+import { CreateProjectPlanDto, UpdateProjectPlanDto } from '../../../common/dtos/project/project-plan.dto';
+import { SessionAuthGuard } from '../../../common/guards/session-auth.guard';
+import { PermissionGuard } from '../../../common/guards/permission.guard';
+import { RequirePermission } from '../../../common/decorators/permission.decorator';
+import { MenuName, PermissionAction } from '../../../common/enums/menu.enum';
 
 @UseGuards(SessionAuthGuard, PermissionGuard)
 @Controller(':projectId/plan')

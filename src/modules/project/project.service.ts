@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Project } from '../../common/entities/project/project.entity';
 import { Customer } from '../../common/entities/shared/customer.entity';
 import { Repository } from 'typeorm';
-import { CreateProjectDto, UpdateProjectDto } from 'src/common/dtos/project/project.dto';
+import { CreateProjectDto, UpdateProjectDto } from '../../common/dtos/project/project.dto';
 
 @Injectable()
 export class ProjectService {

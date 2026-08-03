@@ -1,6 +1,6 @@
 import { ConflictException, Injectable, NotFoundException, StreamableFile } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ProjectPlan } from 'src/common/entities/project/project-plan.entity';
+import { ProjectPlan } from '../../../common/entities/project/project-plan.entity';
 import { Repository } from 'typeorm';
 import { join } from 'path';
 import * as ExcelJS from 'exceljs';
@@ -21,9 +21,9 @@ import {
   GradingProcessService,
   VisualInspectionProcessService,
 } from './processes';
-import { UpdateTargetByKeyDto } from 'src/common/dtos/project/project-target.dto';
-import { ProjectTarget } from 'src/common/entities/project/project-target.entity';
-import { ProjectProgressDto } from 'src/common/dtos/project/project-progress.dto';
+import { UpdateTargetByKeyDto } from '../../../common/dtos/project/project-target.dto';
+import { ProjectTarget } from '../../../common/entities/project/project-target.entity';
+import { ProjectProgressDto } from '../../../common/dtos/project/project-progress.dto';
 
 @Injectable()
 export class StatusService {

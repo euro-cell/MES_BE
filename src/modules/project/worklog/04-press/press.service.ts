@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { WorklogPress } from 'src/common/entities/worklog/worklog-04-press.entity';
-import { CreatePressWorklogDto, PressWorklogListResponseDto, UpdatePressWorklogDto } from 'src/common/dtos/worklog/04-press.dto';
-import { EquipmentService } from 'src/modules/equipment/equipment.service';
+import { WorklogPress } from '../../../../common/entities/worklog/worklog-04-press.entity';
+import { CreatePressWorklogDto, PressWorklogListResponseDto, UpdatePressWorklogDto } from '../../../../common/dtos/worklog/04-press.dto';
+import { EquipmentService } from '../../../equipment/equipment.service';
 
 function getElectrodeType(lot: string | null | undefined): '양극' | '음극' | null {
   if (!lot || lot.length < 5) return null;

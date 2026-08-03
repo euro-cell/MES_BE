@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { WorklogVd } from 'src/common/entities/worklog/worklog-07-vd.entity';
-import { CreateVdWorklogDto, VdWorklogListResponseDto, UpdateVdWorklogDto } from 'src/common/dtos/worklog/07-vd.dto';
-import { EquipmentService } from 'src/modules/equipment/equipment.service';
+import { WorklogVd } from '../../../../common/entities/worklog/worklog-07-vd.entity';
+import { CreateVdWorklogDto, VdWorklogListResponseDto, UpdateVdWorklogDto } from '../../../../common/dtos/worklog/07-vd.dto';
+import { EquipmentService } from '../../../equipment/equipment.service';
 
 function getVdElectrodeType(worklog: WorklogVd): '양극' | '음극' | '양극/음극' | null {
   const lots = [

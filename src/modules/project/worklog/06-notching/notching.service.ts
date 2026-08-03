@@ -1,13 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { WorklogNotching } from 'src/common/entities/worklog/worklog-06-notching.entity';
+import { WorklogNotching } from '../../../../common/entities/worklog/worklog-06-notching.entity';
 import {
   CreateNotchingWorklogDto,
   NotchingWorklogListResponseDto,
   UpdateNotchingWorklogDto,
-} from 'src/common/dtos/worklog/06-notching.dto';
-import { EquipmentService } from 'src/modules/equipment/equipment.service';
+} from '../../../../common/dtos/worklog/06-notching.dto';
+import { EquipmentService } from '../../../equipment/equipment.service';
 
 function getElectrodeType(lot: string | null | undefined): '양극' | '음극' | null {
   if (!lot || lot.length < 5) return null;

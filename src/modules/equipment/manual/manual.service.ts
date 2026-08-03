@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException, StreamableFile } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { EquipmentManual } from 'src/common/entities/equipment/equipment-manual.entity';
-import { CreateManualDto } from 'src/common/dtos/equipment/equipment-manual.dto';
-import { RustfsService } from 'src/common/services/rustfs.service';
+import { EquipmentManual } from '../../../common/entities/equipment/equipment-manual.entity';
+import { CreateManualDto } from '../../../common/dtos/equipment/equipment-manual.dto';
+import { RustfsService } from '../../../common/services/rustfs.service';
 
 @Injectable()
 export class ManualService {

@@ -1,10 +1,10 @@
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
 import { ProductSpecificationService } from './specification.service';
-import { CreateSpecificationDto, UpdateSpecificationDto } from 'src/common/dtos/specification/specification.dto';
-import { SessionAuthGuard } from 'src/common/guards/session-auth.guard';
-import { PermissionGuard } from 'src/common/guards/permission.guard';
-import { RequirePermission } from 'src/common/decorators/permission.decorator';
-import { MenuName, PermissionAction } from 'src/common/enums/menu.enum';
+import { CreateSpecificationDto, UpdateSpecificationDto } from '../../../common/dtos/specification/specification.dto';
+import { SessionAuthGuard } from '../../../common/guards/session-auth.guard';
+import { PermissionGuard } from '../../../common/guards/permission.guard';
+import { RequirePermission } from '../../../common/decorators/permission.decorator';
+import { MenuName, PermissionAction } from '../../../common/enums/menu.enum';
 
 @Controller(':projectId/specification')
 @UseGuards(SessionAuthGuard, PermissionGuard)

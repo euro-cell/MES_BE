@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CellNcr } from 'src/common/entities/cell/cell-ncr.entity';
-import { CellNcrDetail } from 'src/common/entities/cell/cell-ncr-detail.entity';
-import { CellInventory } from 'src/common/entities/cell/cell-inventory.entity';
+import { CellNcr } from '../../../common/entities/cell/cell-ncr.entity';
+import { CellNcrDetail } from '../../../common/entities/cell/cell-ncr-detail.entity';
+import { CellInventory } from '../../../common/entities/cell/cell-inventory.entity';
 import {
   NcrStatisticsResponseDto,
   NcrStatisticsDto,
@@ -11,7 +11,7 @@ import {
   NcrDetailResponseDto,
   NcrDetailDto,
   UpdateNcrDetailRequestDto,
-} from 'src/common/dtos/ncr/ncr-statistics.dto';
+} from '../../../common/dtos/ncr/ncr-statistics.dto';
 
 @Injectable()
 export class NcrService {

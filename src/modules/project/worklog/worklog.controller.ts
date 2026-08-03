@@ -2,11 +2,11 @@ import { Controller, Get, Post, Param, Body, Res, StreamableFile, UseGuards, Que
 import type { Response } from 'express';
 import { ProcessTemplateFile, WorklogService } from './worklog.service';
 import { ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiParam, ApiBody, ApiQuery } from '@nestjs/swagger';
-import { ExportWorklogRequestDto } from 'src/common/dtos/worklog/export-worklog.dto';
-import { SessionAuthGuard } from 'src/common/guards/session-auth.guard';
-import { PermissionGuard } from 'src/common/guards/permission.guard';
-import { RequirePermission } from 'src/common/decorators/permission.decorator';
-import { MenuName, PermissionAction } from 'src/common/enums/menu.enum';
+import { ExportWorklogRequestDto } from '../../../common/dtos/worklog/export-worklog.dto';
+import { SessionAuthGuard } from '../../../common/guards/session-auth.guard';
+import { PermissionGuard } from '../../../common/guards/permission.guard';
+import { RequirePermission } from '../../../common/decorators/permission.decorator';
+import { MenuName, PermissionAction } from '../../../common/enums/menu.enum';
 
 @Controller()
 @UseGuards(SessionAuthGuard, PermissionGuard)

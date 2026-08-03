@@ -1,12 +1,12 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
-import { BomTemplate } from 'src/common/entities/bom/bom-template.entity';
-import { BomTemplateRow } from 'src/common/entities/bom/bom-template-row.entity';
-import { ProjectBom } from 'src/common/entities/bom/project-bom.entity';
-import { Material } from 'src/common/entities/material/material.entity';
-import { Project } from 'src/common/entities/project/project.entity';
-import { CreateBomTemplateDto, LinkBomTemplateDto, UpdateBomTemplateDto } from 'src/common/dtos/bom/bom.dto';
+import { BomTemplate } from '../../../common/entities/bom/bom-template.entity';
+import { BomTemplateRow } from '../../../common/entities/bom/bom-template-row.entity';
+import { ProjectBom } from '../../../common/entities/bom/project-bom.entity';
+import { Material } from '../../../common/entities/material/material.entity';
+import { Project } from '../../../common/entities/project/project.entity';
+import { CreateBomTemplateDto, LinkBomTemplateDto, UpdateBomTemplateDto } from '../../../common/dtos/bom/bom.dto';
 
 @Injectable()
 export class BomService {

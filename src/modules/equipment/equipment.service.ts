@@ -2,11 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, ILike } from 'typeorm';
 import { StreamableFile } from '@nestjs/common';
-import { Equipment } from 'src/common/entities/equipment/equipment.entity';
-import { CreateEquipmentDto, UpdateEquipmentDto } from 'src/common/dtos/equipment/equipment.dto';
-import { EquipmentCategory, EquipmentProcess } from 'src/common/enums/equipment.enum';
-import { ExcelService } from 'src/common/services/excel.service';
-import { ExcelUtil } from 'src/common/utils/excel.util';
+import { Equipment } from '../../common/entities/equipment/equipment.entity';
+import { CreateEquipmentDto, UpdateEquipmentDto } from '../../common/dtos/equipment/equipment.dto';
+import { EquipmentCategory, EquipmentProcess } from '../../common/enums/equipment.enum';
+import { ExcelService } from '../../common/services/excel.service';
+import { ExcelUtil } from '../../common/utils/excel.util';
 import * as ExcelJS from 'exceljs';
 
 @Injectable()

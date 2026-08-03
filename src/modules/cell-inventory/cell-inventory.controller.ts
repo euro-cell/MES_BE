@@ -7,11 +7,11 @@ import {
   UpdateCellInventoryDto,
   ProjectStatisticsDto,
   CellInventoryResponseDto,
-} from 'src/common/dtos/cell/cell-inventory.dto';
-import { SessionAuthGuard } from 'src/common/guards/session-auth.guard';
-import { PermissionGuard } from 'src/common/guards/permission.guard';
-import { RequirePermission } from 'src/common/decorators/permission.decorator';
-import { MenuName, PermissionAction } from 'src/common/enums/menu.enum';
+} from '../../common/dtos/cell/cell-inventory.dto';
+import { SessionAuthGuard } from '../../common/guards/session-auth.guard';
+import { PermissionGuard } from '../../common/guards/permission.guard';
+import { RequirePermission } from '../../common/decorators/permission.decorator';
+import { MenuName, PermissionAction } from '../../common/enums/menu.enum';
 
 @ApiTags('Cell Inventory')
 @Controller('cell-inventory')

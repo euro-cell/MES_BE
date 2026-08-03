@@ -1,15 +1,15 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { QueryFailedError, Repository } from 'typeorm';
-import { WorklogStacking } from 'src/common/entities/worklog/worklog-09-stacking.entity';
+import { WorklogStacking } from '../../../../common/entities/worklog/worklog-09-stacking.entity';
 import {
   CreateStackingWorklogDto,
   StackingWorklogListResponseDto,
   UpdateStackingWorklogDto,
-} from 'src/common/dtos/worklog/09-stacking.dto';
-import { MaterialService } from 'src/modules/material/material.service';
-import { EquipmentService } from 'src/modules/equipment/equipment.service';
-import { MaterialProcess } from 'src/common/enums/material.enum';
+} from '../../../../common/dtos/worklog/09-stacking.dto';
+import { MaterialService } from '../../../material/material.service';
+import { EquipmentService } from '../../../equipment/equipment.service';
+import { MaterialProcess } from '../../../../common/enums/material.enum';
 
 @Injectable()
 export class StackingService {

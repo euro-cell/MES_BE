@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
-import { WorklogFilling } from 'src/common/entities/worklog/worklog-12-filling.entity';
-import { ProjectPlan } from 'src/common/entities/project/project-plan.entity';
-import { ProjectTarget } from 'src/common/entities/project/project-target.entity';
+import { WorklogFilling } from '../../../../common/entities/worklog/worklog-12-filling.entity';
+import { ProjectPlan } from '../../../../common/entities/project/project-plan.entity';
+import { ProjectTarget } from '../../../../common/entities/project/project-target.entity';
 
 @Injectable()
 export class FillingProcessService {

@@ -22,12 +22,12 @@ import {
   UploadIQCFileDto,
   UploadIQCImagesDto,
   UpsertIQCSummaryDto,
-} from 'src/common/dtos/quality/iqc.dto';
-import { multerConfig } from 'src/common/configs/multer.config';
-import { SessionAuthGuard } from 'src/common/guards/session-auth.guard';
-import { PermissionGuard } from 'src/common/guards/permission.guard';
-import { RequirePermission } from 'src/common/decorators/permission.decorator';
-import { MenuName, PermissionAction } from 'src/common/enums/menu.enum';
+} from '../../../common/dtos/quality/iqc.dto';
+import { multerConfig } from '../../../common/configs/multer.config';
+import { SessionAuthGuard } from '../../../common/guards/session-auth.guard';
+import { PermissionGuard } from '../../../common/guards/permission.guard';
+import { RequirePermission } from '../../../common/decorators/permission.decorator';
+import { MenuName, PermissionAction } from '../../../common/enums/menu.enum';
 
 @ApiTags('Quality - IQC')
 @Controller()

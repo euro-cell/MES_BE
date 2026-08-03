@@ -1,11 +1,11 @@
 import { Controller, Get, Patch, Query, Body, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 import { NcrService } from './ncr.service';
-import { NcrStatisticsResponseDto, NcrDetailResponseDto, UpdateNcrDetailRequestDto } from 'src/common/dtos/ncr/ncr-statistics.dto';
-import { SessionAuthGuard } from 'src/common/guards/session-auth.guard';
-import { PermissionGuard } from 'src/common/guards/permission.guard';
-import { RequirePermission } from 'src/common/decorators/permission.decorator';
-import { MenuName, PermissionAction } from 'src/common/enums/menu.enum';
+import { NcrStatisticsResponseDto, NcrDetailResponseDto, UpdateNcrDetailRequestDto } from '../../../common/dtos/ncr/ncr-statistics.dto';
+import { SessionAuthGuard } from '../../../common/guards/session-auth.guard';
+import { PermissionGuard } from '../../../common/guards/permission.guard';
+import { RequirePermission } from '../../../common/decorators/permission.decorator';
+import { MenuName, PermissionAction } from '../../../common/enums/menu.enum';
 
 @ApiTags('Cell NCR')
 @Controller()

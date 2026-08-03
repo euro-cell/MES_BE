@@ -1,11 +1,11 @@
 import { Controller, Post, Body, Param, Get, Patch, Delete, ParseIntPipe, UseGuards } from '@nestjs/common';
 import { VdService } from './vd.service';
 import { ApiTags, ApiOkResponse } from '@nestjs/swagger';
-import { CreateVdWorklogDto, VdWorklogListResponseDto, UpdateVdWorklogDto } from 'src/common/dtos/worklog/07-vd.dto';
-import { SessionAuthGuard } from 'src/common/guards/session-auth.guard';
-import { PermissionGuard } from 'src/common/guards/permission.guard';
-import { RequirePermission } from 'src/common/decorators/permission.decorator';
-import { MenuName, PermissionAction } from 'src/common/enums/menu.enum';
+import { CreateVdWorklogDto, VdWorklogListResponseDto, UpdateVdWorklogDto } from '../../../../common/dtos/worklog/07-vd.dto';
+import { SessionAuthGuard } from '../../../../common/guards/session-auth.guard';
+import { PermissionGuard } from '../../../../common/guards/permission.guard';
+import { RequirePermission } from '../../../../common/decorators/permission.decorator';
+import { MenuName, PermissionAction } from '../../../../common/enums/menu.enum';
 
 @ApiTags('Production Worklog - VD')
 @Controller(':projectId/worklog')

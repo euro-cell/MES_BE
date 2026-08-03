@@ -1,11 +1,11 @@
 import { Controller, Post, Body, Param, Get, Patch, Delete, ParseIntPipe, UseGuards } from '@nestjs/common';
 import { SlurryService } from './slurry.service';
 import { ApiTags, ApiOkResponse } from '@nestjs/swagger';
-import { CreateSlurryWorklogDto, SlurryWorklogListResponseDto, UpdateSlurryWorklogDto } from 'src/common/dtos/worklog/02-slurry.dto';
-import { SessionAuthGuard } from 'src/common/guards/session-auth.guard';
-import { PermissionGuard } from 'src/common/guards/permission.guard';
-import { RequirePermission } from 'src/common/decorators/permission.decorator';
-import { MenuName, PermissionAction } from 'src/common/enums/menu.enum';
+import { CreateSlurryWorklogDto, SlurryWorklogListResponseDto, UpdateSlurryWorklogDto } from '../../../../common/dtos/worklog/02-slurry.dto';
+import { SessionAuthGuard } from '../../../../common/guards/session-auth.guard';
+import { PermissionGuard } from '../../../../common/guards/permission.guard';
+import { RequirePermission } from '../../../../common/decorators/permission.decorator';
+import { MenuName, PermissionAction } from '../../../../common/enums/menu.enum';
 
 @ApiTags('Production Worklog - Slurry')
 @Controller(':projectId/worklog')

@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { WorklogFilling } from 'src/common/entities/worklog/worklog-12-filling.entity';
-import { CreateFillingWorklogDto, FillingWorklogListResponseDto, UpdateFillingWorklogDto } from 'src/common/dtos/worklog/12-filling.dto';
-import { MaterialService } from 'src/modules/material/material.service';
-import { EquipmentService } from 'src/modules/equipment/equipment.service';
-import { MaterialProcess } from 'src/common/enums/material.enum';
+import { WorklogFilling } from '../../../../common/entities/worklog/worklog-12-filling.entity';
+import { CreateFillingWorklogDto, FillingWorklogListResponseDto, UpdateFillingWorklogDto } from '../../../../common/dtos/worklog/12-filling.dto';
+import { MaterialService } from '../../../material/material.service';
+import { EquipmentService } from '../../../equipment/equipment.service';
+import { MaterialProcess } from '../../../../common/enums/material.enum';
 
 @Injectable()
 export class FillingService {

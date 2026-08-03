@@ -12,10 +12,10 @@ import { SealingLotService } from './assembly/sealing.service';
 import { FormationLotService } from './formation/formation.service';
 import { LotExportService } from './lot-export.service';
 import type { Response } from 'express';
-import { SessionAuthGuard } from 'src/common/guards/session-auth.guard';
-import { PermissionGuard } from 'src/common/guards/permission.guard';
-import { RequirePermission } from 'src/common/decorators/permission.decorator';
-import { MenuName, PermissionAction } from 'src/common/enums/menu.enum';
+import { SessionAuthGuard } from '../../../common/guards/session-auth.guard';
+import { PermissionGuard } from '../../../common/guards/permission.guard';
+import { RequirePermission } from '../../../common/decorators/permission.decorator';
+import { MenuName, PermissionAction } from '../../../common/enums/menu.enum';
 
 @ApiTags('Lot 관리')
 @Controller(':projectId/lot')

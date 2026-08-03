@@ -1,29 +1,29 @@
 import { Injectable, NotFoundException, StreamableFile } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
-import { MaterialService } from 'src/modules/material/material.service';
-import { MaterialProcess } from 'src/common/enums/material.enum';
+import { MaterialService } from '../../material/material.service';
+import { MaterialProcess } from '../../../common/enums/material.enum';
 import { join } from 'path';
 import * as ExcelJS from 'exceljs';
 import * as JSZip from 'jszip';
 
 // Worklog Entities
-import { WorklogBinder } from 'src/common/entities/worklog/worklog-01-binder.entity';
-import { WorklogSlurry } from 'src/common/entities/worklog/worklog-02-slurry.entity';
-import { WorklogCoating } from 'src/common/entities/worklog/worklog-03-coating.entity';
-import { WorklogPress } from 'src/common/entities/worklog/worklog-04-press.entity';
-import { WorklogNotching } from 'src/common/entities/worklog/worklog-06-notching.entity';
-import { WorklogVd } from 'src/common/entities/worklog/worklog-07-vd.entity';
-import { WorklogForming } from 'src/common/entities/worklog/worklog-08-forming.entity';
-import { WorklogStacking } from 'src/common/entities/worklog/worklog-09-stacking.entity';
-import { WorklogWelding } from 'src/common/entities/worklog/worklog-10-welding.entity';
-import { WorklogSealing } from 'src/common/entities/worklog/worklog-11-sealing.entity';
-import { WorklogFilling } from 'src/common/entities/worklog/worklog-12-filling.entity';
-import { WorklogFormation } from 'src/common/entities/worklog/worklog-13-formation.entity';
-import { WorklogGrading } from 'src/common/entities/worklog/worklog-14-grading.entity';
-import { WorklogVisualInspection } from 'src/common/entities/worklog/worklog-15-visual-inspection.entity';
+import { WorklogBinder } from '../../../common/entities/worklog/worklog-01-binder.entity';
+import { WorklogSlurry } from '../../../common/entities/worklog/worklog-02-slurry.entity';
+import { WorklogCoating } from '../../../common/entities/worklog/worklog-03-coating.entity';
+import { WorklogPress } from '../../../common/entities/worklog/worklog-04-press.entity';
+import { WorklogNotching } from '../../../common/entities/worklog/worklog-06-notching.entity';
+import { WorklogVd } from '../../../common/entities/worklog/worklog-07-vd.entity';
+import { WorklogForming } from '../../../common/entities/worklog/worklog-08-forming.entity';
+import { WorklogStacking } from '../../../common/entities/worklog/worklog-09-stacking.entity';
+import { WorklogWelding } from '../../../common/entities/worklog/worklog-10-welding.entity';
+import { WorklogSealing } from '../../../common/entities/worklog/worklog-11-sealing.entity';
+import { WorklogFilling } from '../../../common/entities/worklog/worklog-12-filling.entity';
+import { WorklogFormation } from '../../../common/entities/worklog/worklog-13-formation.entity';
+import { WorklogGrading } from '../../../common/entities/worklog/worklog-14-grading.entity';
+import { WorklogVisualInspection } from '../../../common/entities/worklog/worklog-15-visual-inspection.entity';
 
-import { ExportWorklogRequestDto } from 'src/common/dtos/worklog/export-worklog.dto';
+import { ExportWorklogRequestDto } from '../../../common/dtos/worklog/export-worklog.dto';
 
 export enum ProcessTemplateFile {
   binder = '01.Binder.xlsx',

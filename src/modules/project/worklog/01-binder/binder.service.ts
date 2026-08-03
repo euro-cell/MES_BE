@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { WorklogBinder } from 'src/common/entities/worklog/worklog-01-binder.entity';
-import { CreateBinderWorklogDto, BinderWorklogListResponseDto, UpdateBinderWorklogDto } from 'src/common/dtos/worklog/01-binder.dto';
-import { MaterialService } from 'src/modules/material/material.service';
-import { EquipmentService } from 'src/modules/equipment/equipment.service';
-import { MaterialProcess } from 'src/common/enums/material.enum';
+import { WorklogBinder } from '../../../../common/entities/worklog/worklog-01-binder.entity';
+import { CreateBinderWorklogDto, BinderWorklogListResponseDto, UpdateBinderWorklogDto } from '../../../../common/dtos/worklog/01-binder.dto';
+import { MaterialService } from '../../../material/material.service';
+import { EquipmentService } from '../../../equipment/equipment.service';
+import { MaterialProcess } from '../../../../common/enums/material.enum';
 
 function getElectrodeType(lot: string | null | undefined): '양극' | '음극' | null {
   if (!lot || lot.length < 5) return null;

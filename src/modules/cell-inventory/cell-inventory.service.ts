@@ -1,17 +1,17 @@
 import { Injectable, ConflictException, NotFoundException, StreamableFile } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CellInventory } from 'src/common/entities/cell/cell-inventory.entity';
-import { CellGrade } from 'src/common/enums/cell-inventory.enum';
+import { CellInventory } from '../../common/entities/cell/cell-inventory.entity';
+import { CellGrade } from '../../common/enums/cell-inventory.enum';
 import {
   CreateCellInventoryDto,
   UpdateCellInventoryDto,
   ProjectStatisticsDto,
   GradeStatisticsDto,
   StorageUsageItemDto,
-} from 'src/common/dtos/cell/cell-inventory.dto';
-import { ExcelService } from 'src/common/services/excel.service';
-import { ExcelUtil } from 'src/common/utils/excel.util';
+} from '../../common/dtos/cell/cell-inventory.dto';
+import { ExcelService } from '../../common/services/excel.service';
+import { ExcelUtil } from '../../common/utils/excel.util';
 import { NcrService } from './ncr/ncr.service';
 import * as ExcelJS from 'exceljs';
 

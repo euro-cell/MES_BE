@@ -3,9 +3,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ProjectPlan } from '../../../common/entities/project/project-plan.entity';
 import { Project } from '../../../common/entities/project/project.entity';
 import { Repository } from 'typeorm';
-import { CreateProjectPlanDto, UpdateProjectPlanDto } from 'src/common/dtos/project/project-plan.dto';
-import { PROJECT_PLAN_MAPPING } from 'src/common/utils/plan-transformer.util';
-import { PlanTransformerUtil } from 'src/common/utils/plan-transformer.util';
+import { CreateProjectPlanDto, UpdateProjectPlanDto } from '../../../common/dtos/project/project-plan.dto';
+import { PROJECT_PLAN_MAPPING } from '../../../common/utils/plan-transformer.util';
+import { PlanTransformerUtil } from '../../../common/utils/plan-transformer.util';
 
 @Injectable()
 export class PlanService {

@@ -1,13 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { WorklogVisualInspection } from 'src/common/entities/worklog/worklog-15-visual-inspection.entity';
+import { WorklogVisualInspection } from '../../../../common/entities/worklog/worklog-15-visual-inspection.entity';
 import {
   CreateVisualInspectionWorklogDto,
   VisualInspectionWorklogListResponseDto,
   UpdateVisualInspectionWorklogDto,
-} from 'src/common/dtos/worklog/15-visual-inspection.dto';
-import { EquipmentService } from 'src/modules/equipment/equipment.service';
+} from '../../../../common/dtos/worklog/15-visual-inspection.dto';
+import { EquipmentService } from '../../../equipment/equipment.service';
 
 @Injectable()
 export class VisualInspectionService {

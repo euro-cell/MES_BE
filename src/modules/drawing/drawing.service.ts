@@ -4,17 +4,17 @@ import { Repository, IsNull } from 'typeorm';
 import { mkdirSync, writeFileSync, readdirSync, readFileSync, rmSync, existsSync } from 'fs';
 import { join, extname } from 'path';
 import { tmpdir } from 'os';
-import { Drawing } from 'src/common/entities/drawing/drawing.entity';
-import { DrawingVersion } from 'src/common/entities/drawing/drawing-version.entity';
+import { Drawing } from '../../common/entities/drawing/drawing.entity';
+import { DrawingVersion } from '../../common/entities/drawing/drawing-version.entity';
 import {
   CreateDrawingDto,
   CreateDrawingVersionDto,
   UpdateDrawingDto,
   UpdateDrawingVersionDto,
   DrawingSearchDto,
-} from 'src/common/dtos/drawing/drawing.dto';
-import { RustfsService } from 'src/common/services/rustfs.service';
-import { convertPdfToImages } from 'src/common/utils/pdf-converter.util';
+} from '../../common/dtos/drawing/drawing.dto';
+import { RustfsService } from '../../common/services/rustfs.service';
+import { convertPdfToImages } from '../../common/utils/pdf-converter.util';
 
 @Injectable()
 export class DrawingService {

@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LessThan, Repository } from 'typeorm';
-import { MaterialHistory } from 'src/common/entities/material/material-history.entity';
+import { MaterialHistory } from '../../common/entities/material/material-history.entity';
 
 @Injectable()
 export class MaterialHistoryCleanupService {

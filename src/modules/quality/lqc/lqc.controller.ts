@@ -1,12 +1,12 @@
 import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { LqcService } from './lqc.service';
-import { LqcProcessType, LqcItemType } from 'src/common/enums/lqc.enum';
-import { CreateLqcSpecDto } from 'src/common/dtos/quality/lqc-spec.dto';
-import { SessionAuthGuard } from 'src/common/guards/session-auth.guard';
-import { PermissionGuard } from 'src/common/guards/permission.guard';
-import { RequirePermission } from 'src/common/decorators/permission.decorator';
-import { MenuName, PermissionAction } from 'src/common/enums/menu.enum';
+import { LqcProcessType, LqcItemType } from '../../../common/enums/lqc.enum';
+import { CreateLqcSpecDto } from '../../../common/dtos/quality/lqc-spec.dto';
+import { SessionAuthGuard } from '../../../common/guards/session-auth.guard';
+import { PermissionGuard } from '../../../common/guards/permission.guard';
+import { RequirePermission } from '../../../common/decorators/permission.decorator';
+import { MenuName, PermissionAction } from '../../../common/enums/menu.enum';
 
 @ApiTags('Quality - LQC')
 @Controller()

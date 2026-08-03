@@ -1,7 +1,7 @@
 import { IsArray, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, ValidateNested, ArrayMinSize } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { BomClassification, BomCurrency } from 'src/common/entities/bom/bom-template-row.entity';
+import { BomClassification, BomCurrency } from '../../entities/bom/bom-template-row.entity';
 
 export class CreateBomTemplateRowDto {
   @ApiProperty({ enum: BomClassification, description: '분류 (Cathode | Anode | Ass\'y)' })

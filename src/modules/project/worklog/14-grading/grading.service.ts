@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { WorklogGrading } from 'src/common/entities/worklog/worklog-14-grading.entity';
-import { CreateGradingWorklogDto, GradingWorklogListResponseDto, UpdateGradingWorklogDto } from 'src/common/dtos/worklog/14-grading.dto';
-import { EquipmentService } from 'src/modules/equipment/equipment.service';
+import { WorklogGrading } from '../../../../common/entities/worklog/worklog-14-grading.entity';
+import { CreateGradingWorklogDto, GradingWorklogListResponseDto, UpdateGradingWorklogDto } from '../../../../common/dtos/worklog/14-grading.dto';
+import { EquipmentService } from '../../../equipment/equipment.service';
 
 @Injectable()
 export class GradingService {

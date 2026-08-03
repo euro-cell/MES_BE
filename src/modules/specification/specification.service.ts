@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateBatteryDesignDto } from 'src/common/dtos/specification/specification.dto';
-import { Project } from 'src/common/entities/project/project.entity';
-import { Specification } from 'src/common/entities/specification/specification.entity';
+import { CreateBatteryDesignDto } from '../../common/dtos/specification/specification.dto';
+import { Project } from '../../common/entities/project/project.entity';
+import { Specification } from '../../common/entities/specification/specification.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()

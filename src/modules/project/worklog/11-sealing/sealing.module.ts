@@ -2,8 +2,8 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SealingService } from './sealing.service';
 import { SealingController } from './sealing.controller';
-import { WorklogSealing } from 'src/common/entities/worklog/worklog-11-sealing.entity';
-import { EquipmentModule } from 'src/modules/equipment/equipment.module';
+import { WorklogSealing } from '../../../../common/entities/worklog/worklog-11-sealing.entity';
+import { EquipmentModule } from '../../../equipment/equipment.module';
 
 @Module({
   imports: [TypeOrmModule.forFeature([WorklogSealing]), EquipmentModule],

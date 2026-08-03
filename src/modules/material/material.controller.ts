@@ -2,13 +2,13 @@ import { Controller, Get, Post, Patch, Delete, Body, Query, Param, ParseIntPipe,
 import type { Response } from 'express';
 import { MaterialService } from './material.service';
 import { ApiOperation, ApiQuery } from '@nestjs/swagger';
-import { CreateMaterialDto, UpdateMaterialDto, ImportMaterialDto, ImportMaterialResultDto } from 'src/common/dtos/material/material.dto';
-import { DeleteMaterialHistoriesDto } from 'src/common/dtos/material/material-history.dto';
-import { MaterialProcess } from 'src/common/enums/material.enum';
-import { SessionAuthGuard } from 'src/common/guards/session-auth.guard';
-import { PermissionGuard } from 'src/common/guards/permission.guard';
-import { RequirePermission } from 'src/common/decorators/permission.decorator';
-import { MenuName, PermissionAction } from 'src/common/enums/menu.enum';
+import { CreateMaterialDto, UpdateMaterialDto, ImportMaterialDto, ImportMaterialResultDto } from '../../common/dtos/material/material.dto';
+import { DeleteMaterialHistoriesDto } from '../../common/dtos/material/material-history.dto';
+import { MaterialProcess } from '../../common/enums/material.enum';
+import { SessionAuthGuard } from '../../common/guards/session-auth.guard';
+import { PermissionGuard } from '../../common/guards/permission.guard';
+import { RequirePermission } from '../../common/decorators/permission.decorator';
+import { MenuName, PermissionAction } from '../../common/enums/menu.enum';
 
 @Controller('material')
 @UseGuards(SessionAuthGuard, PermissionGuard)

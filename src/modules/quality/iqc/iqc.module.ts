@@ -2,12 +2,12 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { IqcService } from './iqc.service';
 import { IqcController } from './iqc.controller';
-import { IQC } from 'src/common/entities/quality/iqc.entity';
-import { IQCResult } from 'src/common/entities/quality/iqc-result.entity';
-import { IQCCoaRef } from 'src/common/entities/quality/iqc-coa-ref.entity';
-import { IQCImage } from 'src/common/entities/quality/iqc-image.entity';
-import { IQCFile } from 'src/common/entities/quality/iqc-file.entity';
-import { IQCSummary } from 'src/common/entities/quality/iqc-summary.entity';
+import { IQC } from '../../../common/entities/quality/iqc.entity';
+import { IQCResult } from '../../../common/entities/quality/iqc-result.entity';
+import { IQCCoaRef } from '../../../common/entities/quality/iqc-coa-ref.entity';
+import { IQCImage } from '../../../common/entities/quality/iqc-image.entity';
+import { IQCFile } from '../../../common/entities/quality/iqc-file.entity';
+import { IQCSummary } from '../../../common/entities/quality/iqc-summary.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([IQC, IQCResult, IQCCoaRef, IQCImage, IQCFile, IQCSummary])],

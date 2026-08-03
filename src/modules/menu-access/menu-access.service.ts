@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Menu } from 'src/common/entities/shared/menu.entity';
-import { User } from 'src/common/entities/shared/user.entity';
-import { MenuPermissionByUser } from 'src/common/entities/shared/menu-permission-user.entity';
-import { MenuPermissionByRole } from 'src/common/entities/shared/menu-permission-role.entity';
-import { UserRole } from 'src/common/enums/user.enum';
+import { Menu } from '../../common/entities/shared/menu.entity';
+import { User } from '../../common/entities/shared/user.entity';
+import { MenuPermissionByUser } from '../../common/entities/shared/menu-permission-user.entity';
+import { MenuPermissionByRole } from '../../common/entities/shared/menu-permission-role.entity';
+import { UserRole } from '../../common/enums/user.enum';
 
 @Injectable()
 export class MenuAccessService {

@@ -2,13 +2,13 @@ import { Controller, Get, Post, Delete, Param, Query, ParseIntPipe, UploadedFile
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiConsumes, ApiBody, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
-import { multerConfig } from 'src/common/configs/multer.config';
+import { multerConfig } from '../../../common/configs/multer.config';
 import { ManualService } from './manual.service';
-import { CreateManualDto, UploadManualDto } from 'src/common/dtos/equipment/equipment-manual.dto';
-import { SessionAuthGuard } from 'src/common/guards/session-auth.guard';
-import { PermissionGuard } from 'src/common/guards/permission.guard';
-import { RequirePermission } from 'src/common/decorators/permission.decorator';
-import { MenuName, PermissionAction } from 'src/common/enums/menu.enum';
+import { CreateManualDto, UploadManualDto } from '../../../common/dtos/equipment/equipment-manual.dto';
+import { SessionAuthGuard } from '../../../common/guards/session-auth.guard';
+import { PermissionGuard } from '../../../common/guards/permission.guard';
+import { RequirePermission } from '../../../common/decorators/permission.decorator';
+import { MenuName, PermissionAction } from '../../../common/enums/menu.enum';
 
 @ApiTags('Equipment - Manual')
 @Controller()

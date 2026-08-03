@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { WorklogSealing } from 'src/common/entities/worklog/worklog-11-sealing.entity';
-import { CreateSealingWorklogDto, SealingWorklogListResponseDto, UpdateSealingWorklogDto } from 'src/common/dtos/worklog/11-sealing.dto';
-import { EquipmentService } from 'src/modules/equipment/equipment.service';
+import { WorklogSealing } from '../../../../common/entities/worklog/worklog-11-sealing.entity';
+import { CreateSealingWorklogDto, SealingWorklogListResponseDto, UpdateSealingWorklogDto } from '../../../../common/dtos/worklog/11-sealing.dto';
+import { EquipmentService } from '../../../equipment/equipment.service';
 
 @Injectable()
 export class SealingService {

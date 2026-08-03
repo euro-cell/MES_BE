@@ -2,9 +2,9 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CoatingService } from './coating.service';
 import { CoatingController } from './coating.controller';
-import { WorklogCoating } from 'src/common/entities/worklog/worklog-03-coating.entity';
-import { MaterialModule } from 'src/modules/material/material.module';
-import { EquipmentModule } from 'src/modules/equipment/equipment.module';
+import { WorklogCoating } from '../../../../common/entities/worklog/worklog-03-coating.entity';
+import { MaterialModule } from '../../../material/material.module';
+import { EquipmentModule } from '../../../equipment/equipment.module';
 
 @Module({
   imports: [TypeOrmModule.forFeature([WorklogCoating]), MaterialModule, EquipmentModule],

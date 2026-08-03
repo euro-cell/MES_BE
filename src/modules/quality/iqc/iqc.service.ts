@@ -1,14 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
-import { IQC } from 'src/common/entities/quality/iqc.entity';
-import { IQCResult } from 'src/common/entities/quality/iqc-result.entity';
-import { IQCCoaRef } from 'src/common/entities/quality/iqc-coa-ref.entity';
-import { IQCImage } from 'src/common/entities/quality/iqc-image.entity';
-import { IQCFile } from 'src/common/entities/quality/iqc-file.entity';
-import { IQCSummary } from 'src/common/entities/quality/iqc-summary.entity';
-import { CreateIQCDto, UpdateIQCDto, UpsertIQCSummaryDto } from 'src/common/dtos/quality/iqc.dto';
-import { RustfsService } from 'src/common/services/rustfs.service';
+import { IQC } from '../../../common/entities/quality/iqc.entity';
+import { IQCResult } from '../../../common/entities/quality/iqc-result.entity';
+import { IQCCoaRef } from '../../../common/entities/quality/iqc-coa-ref.entity';
+import { IQCImage } from '../../../common/entities/quality/iqc-image.entity';
+import { IQCFile } from '../../../common/entities/quality/iqc-file.entity';
+import { IQCSummary } from '../../../common/entities/quality/iqc-summary.entity';
+import { CreateIQCDto, UpdateIQCDto, UpsertIQCSummaryDto } from '../../../common/dtos/quality/iqc.dto';
+import { RustfsService } from '../../../common/services/rustfs.service';
 
 @Injectable()
 export class IqcService {

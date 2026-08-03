@@ -1,11 +1,11 @@
 import { Controller, Post, Body, Param, Get, Patch, Delete, ParseIntPipe, UseGuards } from '@nestjs/common';
 import { WeldingService } from './welding.service';
 import { ApiTags, ApiOkResponse } from '@nestjs/swagger';
-import { CreateWeldingWorklogDto, WeldingWorklogListResponseDto, UpdateWeldingWorklogDto } from 'src/common/dtos/worklog/10-welding.dto';
-import { SessionAuthGuard } from 'src/common/guards/session-auth.guard';
-import { PermissionGuard } from 'src/common/guards/permission.guard';
-import { RequirePermission } from 'src/common/decorators/permission.decorator';
-import { MenuName, PermissionAction } from 'src/common/enums/menu.enum';
+import { CreateWeldingWorklogDto, WeldingWorklogListResponseDto, UpdateWeldingWorklogDto } from '../../../../common/dtos/worklog/10-welding.dto';
+import { SessionAuthGuard } from '../../../../common/guards/session-auth.guard';
+import { PermissionGuard } from '../../../../common/guards/permission.guard';
+import { RequirePermission } from '../../../../common/decorators/permission.decorator';
+import { MenuName, PermissionAction } from '../../../../common/enums/menu.enum';
 
 @ApiTags('Production Worklog - Welding')
 @Controller(':projectId/worklog')
