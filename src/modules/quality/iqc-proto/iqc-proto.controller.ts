@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Res, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Body, Controller, Get, Post, Res, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiOperation, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { memoryStorage } from 'multer';
@@ -24,6 +24,12 @@ export class IqcProtoController {
   )
   async upload(@UploadedFile() file: Express.Multer.File) {
     return this.iqcProtoService.convertToWorkbookData(file);
+  }
+
+  @Get('latest')
+  @ApiOperation({ summary: '마지막으로 업로드된 IQC 워크북 조회' })
+  async latest() {
+    return this.iqcProtoService.getLatestWorkbook();
   }
 
   @Post('export')

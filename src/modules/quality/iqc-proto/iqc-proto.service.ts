@@ -1,4 +1,6 @@
 import { BadRequestException, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { execFile } from 'child_process';
 import { promisify } from 'util';
 import { randomUUID } from 'crypto';
@@ -6,6 +8,7 @@ import * as fs from 'fs/promises';
 import * as fsSync from 'fs';
 import * as os from 'os';
 import * as path from 'path';
+import { IqcProtoWorkbook } from '../../../common/entities/quality/iqc-proto-workbook.entity';
 
 const execFileAsync = promisify(execFile);
 
@@ -54,6 +57,11 @@ function execFileSyncWhere(name: string): string | null {
 export class IqcProtoService {
   private readonly logger = new Logger(IqcProtoService.name);
   private readonly univerCommand = resolveUniverCommand();
+
+  constructor(
+    @InjectRepository(IqcProtoWorkbook)
+    private readonly iqcProtoWorkbookRepository: Repository<IqcProtoWorkbook>,
+  ) {}
 
   async convertToXlsx(workbookData: Record<string, unknown>): Promise<{ buffer: Buffer; fileName: string }> {
     if (!workbookData || typeof workbookData !== 'object') {
@@ -119,10 +127,22 @@ export class IqcProtoService {
 
     try {
       const workbookData = await this.runExtractSnapshot(univerFileUrl, worktreeId, unitId);
+      await this.iqcProtoWorkbookRepository.clear();
+      await this.iqcProtoWorkbookRepository.save(
+        this.iqcProtoWorkbookRepository.create({ workbookData, fileName: file.originalname }),
+      );
       return { workbookData };
     } finally {
       await this.runWorktreeDiscard(univerFileUrl, worktreeId);
     }
+  }
+
+  async getLatestWorkbook(): Promise<{ workbookData: unknown; fileName?: string; uploadedAt?: Date }> {
+    const latest = await this.iqcProtoWorkbookRepository.findOne({ where: {}, order: { uploadedAt: 'DESC' } });
+    if (!latest) {
+      return { workbookData: null };
+    }
+    return { workbookData: latest.workbookData, fileName: latest.fileName, uploadedAt: latest.uploadedAt };
   }
 
   private async runCli(args: string[], cwd?: string): Promise<any> {
