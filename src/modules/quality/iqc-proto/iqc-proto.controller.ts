@@ -27,7 +27,7 @@ export class IqcProtoController {
   }
 
   @Get('latest')
-  @ApiOperation({ summary: '마지막으로 업로드된 IQC 워크북 조회' })
+  @ApiOperation({ summary: '마지막으로 업로드된 IQC 워크북 조회 (RustFS presigned URL 반환)' })
   async latest() {
     return this.iqcProtoService.getLatestWorkbook();
   }

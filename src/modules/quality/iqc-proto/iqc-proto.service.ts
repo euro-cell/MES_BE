@@ -9,6 +9,7 @@ import * as fsSync from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import { IqcProtoWorkbook } from '../../../common/entities/quality/iqc-proto-workbook.entity';
+import { RustfsService } from '../../../common/services/rustfs.service';
 
 const execFileAsync = promisify(execFile);
 
@@ -17,6 +18,16 @@ const IMPORT_MAX_ATTEMPTS = 2;
 
 function toFileUrl(absolutePath: string): string {
   return `file://${absolutePath.replace(/\\/g, '/')}`;
+}
+
+/**
+ * multipart/form-data의 파일명은 Multer/busboy가 기본적으로 Latin-1로 디코딩하기 때문에,
+ * 브라우저가 UTF-8로 보낸 한글 파일명이 깨져서 들어온다 (예: "검사.xlsx" -> mojibake).
+ * Latin-1로 잘못 해석된 바이트를 원래 UTF-8 바이트로 되돌려 재디코딩한다.
+ */
+function fixLatin1FileName(originalName: string): string {
+  const fixed = Buffer.from(originalName, 'latin1').toString('utf-8');
+  return fixed.includes('�') ? originalName : fixed;
 }
 
 /**
@@ -61,6 +72,7 @@ export class IqcProtoService {
   constructor(
     @InjectRepository(IqcProtoWorkbook)
     private readonly iqcProtoWorkbookRepository: Repository<IqcProtoWorkbook>,
+    private readonly rustfsService: RustfsService,
   ) {}
 
   async convertToXlsx(workbookData: Record<string, unknown>): Promise<{ buffer: Buffer; fileName: string }> {
@@ -106,7 +118,8 @@ export class IqcProtoService {
     if (!file) {
       throw new BadRequestException('업로드된 파일이 없습니다.');
     }
-    const ext = path.extname(file.originalname).toLowerCase();
+    const originalName = fixLatin1FileName(file.originalname);
+    const ext = path.extname(originalName).toLowerCase();
     if (ext !== '.xlsx') {
       throw new BadRequestException('xlsx 파일만 업로드할 수 있습니다.');
     }
@@ -114,35 +127,48 @@ export class IqcProtoService {
     await fs.mkdir(UNIVER_TEMP_DIR, { recursive: true });
 
     const uuid = randomUUID();
-    const sourcePath = path.join(UNIVER_TEMP_DIR, `${uuid}_${file.originalname}`);
+    const sourcePath = path.join(UNIVER_TEMP_DIR, `${uuid}_${originalName}`);
     const univerFileName = `${uuid}.univer`;
     const univerPath = path.join(UNIVER_TEMP_DIR, univerFileName);
     const univerFileUrl = toFileUrl(univerPath);
 
     await fs.writeFile(sourcePath, file.buffer);
 
-    const unitId = await this.runImport(sourcePath, univerPath, file.originalname);
+    const unitId = await this.runImport(sourcePath, univerPath, originalName);
 
-    const worktreeId = await this.runWorktreeAdd(univerPath, file.originalname);
+    const worktreeId = await this.runWorktreeAdd(univerPath, originalName);
 
     try {
       const workbookData = await this.runExtractSnapshot(univerFileUrl, worktreeId, unitId);
+
+      const existing = await this.iqcProtoWorkbookRepository.findOne({ where: {} });
+
+      const key = `iqc-proto/workbook/${randomUUID()}.json`;
+      await this.rustfsService.upload(key, Buffer.from(JSON.stringify(workbookData)), 'application/json');
+
       await this.iqcProtoWorkbookRepository.clear();
       await this.iqcProtoWorkbookRepository.save(
-        this.iqcProtoWorkbookRepository.create({ workbookData, fileName: file.originalname }),
+        this.iqcProtoWorkbookRepository.create({ workbookDataPath: key, fileName: originalName }),
       );
+
+      if (existing) {
+        await this.rustfsService.delete(existing.workbookDataPath);
+      }
+
       return { workbookData };
     } finally {
       await this.runWorktreeDiscard(univerFileUrl, worktreeId);
     }
   }
 
-  async getLatestWorkbook(): Promise<{ workbookData: unknown; fileName?: string; uploadedAt?: Date }> {
+  async getLatestWorkbook(): Promise<{ workbookDataUrl: string | null; fileName?: string; uploadedAt?: Date }> {
     const latest = await this.iqcProtoWorkbookRepository.findOne({ where: {}, order: { uploadedAt: 'DESC' } });
     if (!latest) {
-      return { workbookData: null };
+      return { workbookDataUrl: null };
     }
-    return { workbookData: latest.workbookData, fileName: latest.fileName, uploadedAt: latest.uploadedAt };
+
+    const workbookDataUrl = await this.rustfsService.getPresignedUrl(latest.workbookDataPath);
+    return { workbookDataUrl, fileName: latest.fileName, uploadedAt: latest.uploadedAt };
   }
 
   private async runCli(args: string[], cwd?: string): Promise<any> {

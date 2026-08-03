@@ -5,8 +5,8 @@ export class IqcProtoWorkbook {
   @PrimaryGeneratedColumn({ type: 'bigint' })
   id: number;
 
-  @Column({ type: 'jsonb' })
-  workbookData: unknown;
+  @Column({ type: 'varchar', length: 500 })
+  workbookDataPath: string;
 
   @Column({ type: 'varchar', length: 255 })
   fileName: string;
