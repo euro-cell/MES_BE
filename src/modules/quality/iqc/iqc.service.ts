@@ -9,6 +9,7 @@ import { IQCFile } from '../../../common/entities/quality/iqc-file.entity';
 import { IQCSummary } from '../../../common/entities/quality/iqc-summary.entity';
 import { CreateIQCDto, UpdateIQCDto, UpsertIQCSummaryDto } from '../../../common/dtos/quality/iqc.dto';
 import { RustfsService } from '../../../common/services/rustfs.service';
+import { IqcWorkbookService } from './iqc-workbook.service';
 
 @Injectable()
 export class IqcService {
@@ -23,6 +24,7 @@ export class IqcService {
     private readonly iqcSummaryRepository: Repository<IQCSummary>,
     private readonly dataSource: DataSource,
     private readonly rustfsService: RustfsService,
+    private readonly iqcWorkbookService: IqcWorkbookService,
   ) {}
 
   async findAll(projectId: number) {
@@ -237,6 +239,8 @@ export class IqcService {
     if (result.affected === 0) {
       throw new NotFoundException(`IQC with ID ${id} not found`);
     }
+
+    await this.iqcWorkbookService.removeWorkbook(id);
   }
 
   async uploadImages(
