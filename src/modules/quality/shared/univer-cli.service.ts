@@ -64,6 +64,78 @@ function execFileSyncWhere(name: string): string | null {
 export class UniverCliService {
   private readonly logger = new Logger(UniverCliService.name);
   private readonly univerCommand = resolveUniverCommand();
+  private daemonEnsured: Promise<void> | null = null;
+
+  /**
+   * xlsx를 import하고 daemon 뷰어 URL을 반환한다 (읽기 전용 열람 화면, IQC Proto3 실험용).
+   * 워크북 JSON을 프론트로 내려보내지 않고, daemon이 서빙하는 뷰어를 iframe으로 임베드하는
+   * 용도. daemon은 Univer Pro 라이선스 게이트 없이 차트까지 렌더링하는 것으로 검증됨.
+   */
+  async convertXlsxToViewerUrl(file: Express.Multer.File): Promise<{ viewerUrl: string; originalName: string }> {
+    if (!file) {
+      throw new BadRequestException('업로드된 파일이 없습니다.');
+    }
+    const originalName = fixLatin1FileName(file.originalname);
+    const ext = path.extname(originalName).toLowerCase();
+    if (ext !== '.xlsx') {
+      throw new BadRequestException('xlsx 파일만 업로드할 수 있습니다.');
+    }
+
+    await this.ensureDaemonRunning();
+    await fs.mkdir(UNIVER_TEMP_DIR, { recursive: true });
+
+    const uuid = randomUUID();
+    const sourcePath = path.join(UNIVER_TEMP_DIR, `${uuid}_${originalName}`);
+    const univerFileName = `${uuid}.univer`;
+    const univerPath = path.join(UNIVER_TEMP_DIR, univerFileName);
+    const univerFileUrl = toFileUrl(univerPath);
+
+    await fs.writeFile(sourcePath, file.buffer);
+
+    const unitId = await this.runImport(sourcePath, univerPath, originalName);
+    const worktreeId = await this.runWorktreeAdd(univerPath, originalName);
+
+    const viewerUrl = await this.runOpen(univerPath, worktreeId, unitId);
+    return { viewerUrl, originalName };
+  }
+
+  /**
+   * `daemon start --json`은 항상 텍스트만 반환하므로(CLI 자체 사양), 먼저 `daemon status --json`으로
+   * 이미 떠 있는지 확인하고 없을 때만 시작한다. 서버 프로세스 생애주기 동안 1회만 보장하면 되므로
+   * 결과를 메모이즈한다.
+   */
+  private async ensureDaemonRunning(): Promise<void> {
+    if (!this.daemonEnsured) {
+      this.daemonEnsured = this.checkAndStartDaemon().catch((err: any) => {
+        this.daemonEnsured = null;
+        throw new InternalServerErrorException(`Univer daemon 시작에 실패했습니다: ${err.message}`);
+      });
+    }
+    await this.daemonEnsured;
+  }
+
+  private async checkAndStartDaemon(): Promise<void> {
+    const status = await this.runCli(['daemon', 'status', '--json']);
+    if (status.daemon?.state === 'running') {
+      return;
+    }
+    const { command, prependArgs } = this.univerCommand;
+    await execFileAsync(command, [...prependArgs, 'daemon', 'start'], { maxBuffer: 10 * 1024 * 1024 });
+  }
+
+  /**
+   * `open`만 다른 CLI 명령(import/status/execute 등)과 달리 `file://` 스킴을 인식하지 못하고
+   * 상대 경로로 취급해 실행 프로세스의 cwd 기준으로 잘못 재해석한다 (CLI 자체의 동작 불일치).
+   * 그래서 이 명령에는 file:// 접두사 없이 순수 OS 절대경로를 그대로 넘긴다.
+   */
+  private async runOpen(univerPath: string, worktreeId: string, unitId: string): Promise<string> {
+    const args = ['open', univerPath, '--worktree', worktreeId, '--unit', unitId, '--json'];
+    const result = await this.runCli(args);
+    if (result.ok === false || !result.openUrl) {
+      throw new InternalServerErrorException(`뷰어 URL 조회에 실패했습니다: ${result.error ?? '알 수 없는 오류'}`);
+    }
+    return result.openUrl;
+  }
 
   async convertXlsxToWorkbook(file: Express.Multer.File): Promise<{ workbookData: unknown; originalName: string }> {
     if (!file) {
