@@ -1,4 +1,12 @@
-import { CanActivate, ExecutionContext, Injectable, ForbiddenException, UnauthorizedException } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  ForbiddenException,
+  UnauthorizedException,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -11,6 +19,8 @@ import { PERMISSION_KEY } from '../decorators/permission.decorator';
 
 @Injectable()
 export class PermissionGuard implements CanActivate {
+  private readonly logger = new Logger(PermissionGuard.name);
+
   constructor(
     private reflector: Reflector,
     @InjectRepository(Menu) private readonly menuRepo: Repository<Menu>,
@@ -44,7 +54,10 @@ export class PermissionGuard implements CanActivate {
     const canAccess = await Promise.all(
       menus.map(async (menuName) => {
         const menu = await this.menuRepo.findOne({ where: { name: menuName } });
-        if (!menu) throw new ForbiddenException('잘못된 메뉴 이름입니다.');
+        if (!menu) {
+          this.logger.error(`@RequirePermission에 존재하지 않는 메뉴 이름이 지정됨: ${menuName}`);
+          throw new InternalServerErrorException('권한 설정 오류입니다. 관리자에게 문의하세요.');
+        }
 
         const userPerm = await this.userPermRepo.findOne({
           where: { user: { id: user.id }, menu: { id: menu.id } },

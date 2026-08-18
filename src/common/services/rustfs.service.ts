@@ -136,7 +136,7 @@ export class RustfsService {
    */
   async uploadFile(prefix: string, file: Express.Multer.File, customFileName?: string): Promise<{ key: string; originalName: string }> {
     const timestamp = Date.now();
-    const safeName = (customFileName ?? file.originalname).replace(/[<>:"/\\|?*]/g, '_');
+    const safeName = (customFileName ?? file.originalname).replace(/[<>:"/\\|?*]/g, '_').replace(/\.\./g, '_');
     const key = `${prefix}/${timestamp}_${safeName}`;
     await this.upload(key, file.buffer, file.mimetype);
     return { key, originalName: file.originalname };

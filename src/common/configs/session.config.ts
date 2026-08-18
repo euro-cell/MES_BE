@@ -28,7 +28,7 @@ export const createSessionConfig = (configService: ConfigService): session.Sessi
     cookie: {
       httpOnly: true,
       sameSite: 'lax',
-      secure: configService.get<string>('SESSION_SECURE') === 'true',
+      secure: configService.get<string>('SESSION_SECURE') !== 'false',
       maxAge: Number(configService.get<string>('SESSION_MAX_AGE')) || 1000 * 60 * 30,
     },
   };

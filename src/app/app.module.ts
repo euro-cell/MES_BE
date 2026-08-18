@@ -3,6 +3,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { validateEnv } from '../common/configs/env.validation';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TypeOrmConfig } from '../common/configs/typeorm.config';
 import { AuthModule } from '../modules/auth/auth.module';
@@ -28,7 +29,7 @@ import { SessionRefreshMiddleware } from '../common/middleware/session-refresh.m
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({ isGlobal: true, validate: validateEnv }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
