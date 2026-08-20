@@ -26,6 +26,7 @@ import { DashboardModule } from '../modules/dashboard/dashboard.module';
 import { CustomerModule } from '../modules/customer/customer.module';
 import { RequestLoggerMiddleware } from '../common/middleware/request-logger.middleware';
 import { SessionRefreshMiddleware } from '../common/middleware/session-refresh.middleware';
+import { UniverViewerProxyMiddleware } from '../common/middleware/univer-viewer-proxy.middleware';
 
 @Module({
   imports: [
@@ -64,6 +65,7 @@ import { SessionRefreshMiddleware } from '../common/middleware/session-refresh.m
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
+    consumer.apply(UniverViewerProxyMiddleware).forRoutes('univer-viewer*path');
     consumer.apply(RequestLoggerMiddleware, SessionRefreshMiddleware).forRoutes('*');
   }
 }
