@@ -96,7 +96,7 @@ export class UniverCliService {
     const worktreeId = await this.runWorktreeAdd(univerPath, originalName);
 
     const viewerUrl = await this.runOpen(univerPath, worktreeId, unitId);
-    return { viewerUrl, originalName };
+    return { viewerUrl: this.toExternalViewerUrl(viewerUrl), originalName };
   }
 
   /**
@@ -135,6 +135,22 @@ export class UniverCliService {
       throw new InternalServerErrorException(`뷰어 URL 조회에 실패했습니다: ${result.error ?? '알 수 없는 오류'}`);
     }
     return result.openUrl;
+  }
+
+  /**
+   * daemon은 자신이 리스닝하는 루프백 주소(예: http://127.0.0.1:9123)로 뷰어 URL을 만든다.
+   * 이건 daemon이 도는 컨테이너 자기 자신 기준 주소라 브라우저에서는 무의미하다(사용자 PC의
+   * 127.0.0.1로 요청이 감). nginx가 /univer-viewer/ 경로로 daemon을 프록시하고 있으므로,
+   * daemon이 준 origin을 FRONTEND_ORIGIN 기준의 그 경로로 치환해서 내려준다. 별도 환경변수
+   * 없이 이미 서버 도메인을 담고 있는 FRONTEND_ORIGIN을 재사용한다.
+   */
+  private toExternalViewerUrl(daemonViewerUrl: string): string {
+    const frontendOrigin = process.env.FRONTEND_ORIGIN;
+    if (!frontendOrigin) {
+      return daemonViewerUrl;
+    }
+    const daemonUrl = new URL(daemonViewerUrl);
+    return `${frontendOrigin.replace(/\/$/, '')}/univer-viewer${daemonUrl.pathname}${daemonUrl.search}`;
   }
 
   async convertXlsxToWorkbook(file: Express.Multer.File): Promise<{ workbookData: unknown; originalName: string }> {
