@@ -40,7 +40,13 @@ export class UniverViewerProxyMiddleware implements NestMiddleware {
         port: UNIVER_DAEMON_PORT,
         path: daemonPath,
         method: req.method,
-        headers: { ...req.headers, host: `${UNIVER_DAEMON_HOST}:${UNIVER_DAEMON_PORT}` },
+        headers: {
+          ...req.headers,
+          host: `${UNIVER_DAEMON_HOST}:${UNIVER_DAEMON_PORT}`,
+          // 압축된 응답 본문을 그대로 문자열로 재작성하면 깨지므로, daemon에는 압축 없는
+          // 응답만 요청한다. HTML/JS 재작성 로직이 원본 텍스트를 직접 다뤄야 하기 때문.
+          'accept-encoding': 'identity',
+        },
       },
       proxyRes => {
         const contentType = proxyRes.headers['content-type'] ?? '';
@@ -62,6 +68,11 @@ export class UniverViewerProxyMiddleware implements NestMiddleware {
             .replace(/(["'`])\/(assets|uf)\//g, `$1${PROXY_PATH_PREFIX}/$2/`);
           const headers = { ...proxyRes.headers };
           delete headers['content-length'];
+          // daemon은 정적 자산에 immutable/1년 캐시 헤더를 붙이는데, 우리가 본문을
+          // 재작성했으므로 브라우저가 그 예전 캐시를 계속 쓰면 재작성 이전 상태로
+          // 굳어버린다. 재작성 대상 응답은 캐시를 끈다.
+          headers['cache-control'] = 'no-store';
+          delete headers['etag'];
           res.writeHead(proxyRes.statusCode ?? 502, headers);
           res.end(body);
         });
