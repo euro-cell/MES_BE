@@ -65,7 +65,7 @@ import { UniverViewerProxyMiddleware } from '../common/middleware/univer-viewer-
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(UniverViewerProxyMiddleware).forRoutes('univer-viewer*path');
+    consumer.apply(UniverViewerProxyMiddleware).forRoutes('*');
     consumer.apply(RequestLoggerMiddleware, SessionRefreshMiddleware).forRoutes('*');
   }
 }
