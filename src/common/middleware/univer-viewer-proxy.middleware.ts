@@ -5,13 +5,14 @@ import * as http from 'http';
 const UNIVER_DAEMON_HOST = '127.0.0.1';
 const UNIVER_DAEMON_PORT = 9123;
 const PROXY_PATH_PREFIX = '/univer-viewer';
-// daemon 뷰어의 JS 번들(초기 스크립트와, 그 스크립트가 다시 동적 import하는 청크 양쪽 다)이
-// /assets/..., /uf/... 를 절대경로로 하드코딩해서 호출한다. 초기 HTML의 src/href는 재작성해서
-// /univer-viewer 접두사를 붙이지만, 동적 import 경로는 JS 코드 문자열 안에 있어 HTML 재작성으로
-// 잡을 수 없다. 이 두 접두사는 daemon 고유 경로라 프론트 앱과 겹칠 일이 없는 별도 컨테이너
-// 환경(nginx가 프론트/백엔드를 분리 라우팅)에서는 그대로 릴레이해도 안전하다.
-// (로컬 dev 서버(Vite)에서는 자체 정적 서빙이 /assets를 먼저 가로채 별도 프록시 설정 필요.)
+// daemon 뷰어 HTML과 그 HTML이 실행하는 JS 번들(초기 스크립트 + 동적 import 청크) 양쪽 모두
+// /assets/..., /uf/... 를 절대경로로 하드코딩해서 참조한다. 이 접두사들을 nginx에서 통째로
+// 백엔드/daemon으로 열어버리면 프론트 앱 자신도 빌드 결과물을 /assets/*.js로 서빙하고 있어
+// 충돌한다(실제로 프론트 화면이 깨짐). 그래서 nginx는 /univer-viewer 하나만 알면 되도록,
+// daemon이 반환하는 HTML과 JS 응답 본문 모두에서 이 절대경로 문자열을 /univer-viewer 접두사가
+// 붙은 경로로 재작성해서 내려준다.
 const DAEMON_NATIVE_PATH_PREFIXES = ['/assets/', '/uf/'];
+const REWRITABLE_CONTENT_TYPES = ['text/html', 'application/javascript', 'text/javascript'];
 
 /**
  * Univer CLI daemon은 컨테이너 루프백(127.0.0.1:9123)에만 바인딩되어 nginx 같은 다른
@@ -43,7 +44,8 @@ export class UniverViewerProxyMiddleware implements NestMiddleware {
       },
       proxyRes => {
         const contentType = proxyRes.headers['content-type'] ?? '';
-        if (!contentType.includes('text/html')) {
+        const isRewritable = REWRITABLE_CONTENT_TYPES.some(t => contentType.includes(t));
+        if (!isRewritable) {
           res.writeHead(proxyRes.statusCode ?? 502, proxyRes.headers);
           proxyRes.pipe(res);
           return;
@@ -52,13 +54,16 @@ export class UniverViewerProxyMiddleware implements NestMiddleware {
         const chunks: Buffer[] = [];
         proxyRes.on('data', chunk => chunks.push(chunk));
         proxyRes.on('end', () => {
-          const html = Buffer.concat(chunks)
+          const body = Buffer.concat(chunks)
             .toString('utf-8')
-            .replace(/((?:src|href)=")\/(?!univer-viewer)/g, `$1${PROXY_PATH_PREFIX}/`);
+            // HTML의 src="/...", href="/..."
+            .replace(/((?:src|href)=")\/(?!univer-viewer)/g, `$1${PROXY_PATH_PREFIX}/`)
+            // JS 코드 안의 "/assets/...", "/uf/..." 문자열 리터럴 (동적 import, fetch 호출 등)
+            .replace(/(["'`])\/(assets|uf)\//g, `$1${PROXY_PATH_PREFIX}/$2/`);
           const headers = { ...proxyRes.headers };
           delete headers['content-length'];
           res.writeHead(proxyRes.statusCode ?? 502, headers);
-          res.end(html);
+          res.end(body);
         });
       },
     );
