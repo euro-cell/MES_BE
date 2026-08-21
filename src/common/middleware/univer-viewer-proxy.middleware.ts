@@ -75,8 +75,12 @@ export class UniverViewerProxyMiddleware implements NestMiddleware {
             .toString('utf-8')
             // HTML의 src="/...", href="/..."
             .replace(/((?:src|href)=")\/(?!univer-viewer)/g, `$1${PROXY_PATH_PREFIX}/`)
-            // JS 코드 안의 "/assets/...", "/uf/..." 문자열 리터럴 (동적 import, fetch 호출 등)
-            .replace(/(["'`])\/(assets|uf)\//g, `$1${PROXY_PATH_PREFIX}/$2/`);
+            // JS 코드 안의 "/assets/...", "/uf/..." 절대경로 문자열 리터럴 (fetch 호출 등)
+            .replace(/(["'`])\/(assets|uf)\//g, `$1${PROXY_PATH_PREFIX}/$2/`)
+            // Vite의 동적 import 의존성 배열(__vite__mapDeps)은 슬래시 없는 상대경로
+            // 문자열("assets/xxx.js")로 청크를 나열하고, 런타임에 import.meta.url 기준으로
+            // 절대경로화한다. 이 형태도 같이 잡아야 동적 import 청크가 daemon으로 간다.
+            .replace(/(["'`])(assets|uf)\//g, `$1${PROXY_PATH_PREFIX}/$2/`);
           const headers = { ...proxyRes.headers };
           delete headers['content-length'];
           // daemon은 정적 자산에 immutable/1년 캐시 헤더를 붙이는데, 우리가 본문을
