@@ -71,21 +71,18 @@ export class UniverViewerProxyMiddleware implements NestMiddleware {
         const chunks: Buffer[] = [];
         proxyRes.on('data', chunk => chunks.push(chunk));
         proxyRes.on('end', () => {
-          let body = Buffer.concat(chunks)
+          const body = Buffer.concat(chunks)
             .toString('utf-8')
             // HTML의 src="/...", href="/..."
             .replace(/((?:src|href)=")\/(?!univer-viewer)/g, `$1${PROXY_PATH_PREFIX}/`)
             // JS 코드 안의 "/assets/...", "/uf/..." 절대경로 문자열 리터럴 (fetch 호출 등)
-            .replace(/(["'`])\/(assets|uf)\//g, `$1${PROXY_PATH_PREFIX}/$2/`);
-          // Vite의 동적 import 의존성 배열(__vite__mapDeps)에 있는 슬래시 없는 상대경로
-          // 문자열("assets/xxx.js")은 절대경로로 바꾸지 않는다 — 그 문자열을 쓰는 코드가
-          // import.meta.url 기준 상대 해석을 전제하고 있어서, 억지로 절대경로화하면 그
-          // 해석 로직 자체가 깨진다(관측: "//univer-viewer/assets/..." 같은 잘못된 URL로
-          // 귀결). 대신 HTML에 <base href="/univer-viewer/">를 넣어서, 상대경로 해석
-          // 자체가 항상 /univer-viewer 기준으로 이뤄지도록 만든다.
-          if (contentType.includes('text/html')) {
-            body = body.replace(/<head>/, `<head><base href="${PROXY_PATH_PREFIX}/">`);
-          }
+            .replace(/(["'`])\/(assets|uf)\//g, `$1${PROXY_PATH_PREFIX}/$2/`)
+            // Vite의 preload-helper(`t=e=>'/'+e`)와 __vite__mapDeps는 슬래시 없는 상대경로
+            // 문자열("assets/xxx.js")을 항상 "/"+그 문자열로 절대경로화한다(import.meta.url이나
+            // <base>는 전혀 안 봄, 빌드 시 고정된 로직). 그래서 이 문자열을 "/univer-viewer/..."로
+            // 바꾸면 최종적으로 "//univer-viewer/..."(슬래시 두 개)가 되어버린다. 앞에 슬래시를
+            // 붙이지 않고 "univer-viewer/assets/..."로 바꿔야 그 "/"+ 연산 후 정확한 경로가 된다.
+            .replace(/(["'`])(assets|uf)\//g, `$1${PROXY_PATH_PREFIX.slice(1)}/$2/`);
           const headers = { ...proxyRes.headers };
           delete headers['content-length'];
           // daemon은 정적 자산에 immutable/1년 캐시 헤더를 붙이는데, 우리가 본문을
