@@ -38,16 +38,18 @@ export class UniverViewerProxyMiddleware implements NestMiddleware {
     // 조합(Range, If-None-Match 등 조건부/부분요청 헤더)이 섞여 들어가 정적 자산 요청이
     // 400으로 실패하는 경우가 있었다(동적 import 청크에서 재현). 꼭 필요한 헤더만 선별해서
     // 전달한다.
+    // Node의 http.request는 헤더 값이 undefined면 예외를 던지므로(브라우저가 accept 등을
+    // 보내지 않는 요청, 예: 일부 동적 import), 값이 실제로 있는 헤더만 골라 담는다.
     const forwardHeaders: http.OutgoingHttpHeaders = {
       host: `${UNIVER_DAEMON_HOST}:${UNIVER_DAEMON_PORT}`,
-      accept: req.headers['accept'],
-      'user-agent': req.headers['user-agent'],
-      cookie: req.headers['cookie'],
       // 압축된 응답 본문을 그대로 문자열로 재작성하면 깨지므로, daemon에는 압축 없는
       // 응답만 요청한다. HTML/JS 재작성 로직이 원본 텍스트를 직접 다뤄야 하기 때문.
       'accept-encoding': 'identity',
     };
-    if (req.headers['content-type']) forwardHeaders['content-type'] = req.headers['content-type'];
+    for (const name of ['accept', 'user-agent', 'cookie', 'content-type'] as const) {
+      const value = req.headers[name];
+      if (value !== undefined) forwardHeaders[name] = value;
+    }
 
     const proxyReq = http.request(
       {
