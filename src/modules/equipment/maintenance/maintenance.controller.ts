@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Res, StreamableFile, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, Res, StreamableFile, UseGuards } from '@nestjs/common';
 import type { Response } from 'express';
 import { ApiOperation } from '@nestjs/swagger';
 import { MaintenanceService } from './maintenance.service';
@@ -14,8 +14,8 @@ export class MaintenanceController {
   constructor(private readonly maintenanceService: MaintenanceService) {}
 
   @Get()
-  async findAll() {
-    return this.maintenanceService.findAll();
+  async findAll(@Query('equipmentId', new ParseIntPipe({ optional: true })) equipmentId?: number) {
+    return this.maintenanceService.findAll(equipmentId);
   }
 
   @Post()
@@ -38,9 +38,7 @@ export class MaintenanceController {
 
   @Get('export')
   @ApiOperation({ summary: '유지보수 목록 Excel 내보내기' })
-  async exportMaintenance(
-    @Res({ passthrough: true }) res: Response
-  ): Promise<StreamableFile> {
+  async exportMaintenance(@Res({ passthrough: true }) res: Response): Promise<StreamableFile> {
     const file = await this.maintenanceService.exportMaintenance();
     const filename = this.maintenanceService.getMaintenanceExportFilename();
 

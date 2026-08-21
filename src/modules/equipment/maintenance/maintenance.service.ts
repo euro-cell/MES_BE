@@ -21,8 +21,9 @@ export class MaintenanceService {
     return this.maintenanceRepository.save(maintenance);
   }
 
-  async findAll() {
+  async findAll(equipmentId?: number) {
     const maintenances = await this.maintenanceRepository.find({
+      where: equipmentId ? { equipmentId } : {},
       relations: ['equipment'],
       order: { inspectionDate: 'ASC' },
     });
