@@ -119,8 +119,22 @@ export class UniverCliService {
     if (status.daemon?.state === 'running') {
       return;
     }
+    await this.applyLicenseIfConfigured();
     const { command, prependArgs } = this.univerCommand;
     await execFileAsync(command, [...prependArgs, 'daemon', 'start'], { maxBuffer: 10 * 1024 * 1024 });
+  }
+
+  /**
+   * daemon이 시작할 때마다 참조하는 로컬 config에 라이선스를 저장해야 한다. 배포 컨테이너는
+   * 매번 새로 뜨는 파일시스템이라 로컬에서 한 번 실행해둔 `univer config set` 결과가 남아있지
+   * 않으므로, daemon을 시작하기 직전 환경변수(UNIVER_LICENSE)로 매번 설정해준다.
+   */
+  private async applyLicenseIfConfigured(): Promise<void> {
+    const license = process.env.UNIVER_LICENSE;
+    if (!license) {
+      return;
+    }
+    await this.runCli(['config', 'set', 'univerRuntime.license', license, '--json']);
   }
 
   /**
