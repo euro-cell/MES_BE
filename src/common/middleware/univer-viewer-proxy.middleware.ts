@@ -12,6 +12,11 @@ const PROXY_PATH_PREFIX = '/univer-viewer';
 // daemon이 반환하는 HTML과 JS 응답 본문 모두에서 이 절대경로 문자열을 /univer-viewer 접두사가
 // 붙은 경로로 재작성해서 내려준다.
 const DAEMON_NATIVE_PATH_PREFIXES = ['/assets/', '/uf/'];
+// daemon 클라이언트 JS가 라이선스 등 런타임 설정을 가져올 때 프록시 접두사 없이 절대경로로
+// 호출하는 전역 API. 이 경로가 위 목록에 없으면 요청이 그대로 next()로 통과해버려 프론트
+// Vite dev 서버(또는 nginx의 프론트 서비스)가 SPA 폴백 HTML로 응답하게 되고, 결국 daemon
+// 뷰어는 license 값을 전혀 받지 못한 채 워터마크를 띄우게 된다.
+const DAEMON_NATIVE_EXACT_PATHS = ['/runtime-config'];
 const REWRITABLE_CONTENT_TYPES = ['text/html', 'application/javascript', 'text/javascript'];
 
 /**
@@ -26,7 +31,9 @@ export class UniverViewerProxyMiddleware implements NestMiddleware {
     // req.path가 전체 경로가 아니라 마운트 지점 기준 상대 경로(대부분 '/')로 찍힌다.
     // 그래서 경로 필터링은 반드시 req.originalUrl 기준으로 해야 한다.
     const isViewerRequest = req.originalUrl.startsWith(PROXY_PATH_PREFIX);
-    const isNativeRequest = DAEMON_NATIVE_PATH_PREFIXES.some(p => req.originalUrl.startsWith(p));
+    const isNativeRequest =
+      DAEMON_NATIVE_PATH_PREFIXES.some(p => req.originalUrl.startsWith(p)) ||
+      DAEMON_NATIVE_EXACT_PATHS.some(p => req.originalUrl === p || req.originalUrl.startsWith(`${p}?`));
     if (!isViewerRequest && !isNativeRequest) {
       next();
       return;
