@@ -30,6 +30,7 @@ SESSION_MAX_AGE=
 SESSION_SECURE=
 
 RUSTFS_ENDPOINT=
+RUSTFS_PUBLIC_ENDPOINT=
 RUSTFS_ACCESS_KEY=
 RUSTFS_SECRET_KEY=
 RUSTFS_BUCKET=
@@ -52,21 +53,36 @@ npm run build
 npm run start:prod
 ```
 
+## 시드 / 유틸리티 스크립트
+
+```bash
+# 비밀번호 초기화 / 해시 마이그레이션
+npm run reset:passwords
+npm run migrate:hash-passwords
+
+# 데이터 시드 export/import (material, equipment, maintenance, cell-inventory, cell-ncr, sealing)
+npm run seed:export:<대상>
+npm run seed:import:<대상>
+```
+
 ## 모듈 구조
 
-| 모듈             | 설명                                           |
-| ---------------- | ---------------------------------------------- |
-| `auth`           | 로그인/로그아웃, Passport LocalStrategy        |
-| `user`           | 사용자 CRUD                                    |
-| `project`        | 생산계획, 자재, 규격, 작업일지, 상태, LOT 관리 |
-| `material`       | 자재 마스터 데이터, COA                        |
-| `specification`  | 규격 및 인증서                                 |
-| `quality`        | IQC / LQC / OQC 품질 관리                      |
-| `drawing`        | 도면 및 버전 관리                              |
-| `equipment`      | 설비 및 유지보수 이력                          |
-| `cell-inventory` | 배터리 셀 재고, NCR                            |
-| `dashboard`      | 분석 대시보드                                  |
-| `menu-access`    | 메뉴 및 권한 관리                              |
+| 모듈             | 설명                                                    |
+| ---------------- | ------------------------------------------------------- |
+| `auth`           | 로그인/로그아웃, Passport LocalStrategy                 |
+| `user`           | 사용자 CRUD                                              |
+| `customer`       | 고객 CRUD                                                |
+| `project`        | 생산계획, 자재, 규격, BOM, 작업일지, 상태, LOT 관리      |
+| `material`       | 자재 마스터 데이터, COA                                  |
+| `specification`  | 규격 및 인증서                                           |
+| `quality`        | IQC / LQC / OQC 품질 관리                                |
+| `drawing`        | 도면 및 버전 관리                                        |
+| `equipment`      | 설비, 유지보수 이력, 설비 매뉴얼                         |
+| `cell-inventory` | 배터리 셀 재고, NCR                                      |
+| `dashboard`      | 분석 대시보드                                            |
+| `menu-access`    | 메뉴 및 권한 관리                                        |
+
+`project/worklog`는 배터리 셀 제조 공정 단계별로 세분화되어 있습니다: binder, slurry, coating, press, notching, vd, forming, stacking, welding, sealing, filling, formation, grading, visual-inspection.
 
 ## API 문서
 
