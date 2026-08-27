@@ -1,10 +1,8 @@
 import { Injectable, Logger, NestMiddleware } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import * as http from 'http';
+import { UNIVER_DAEMON_HOST, UNIVER_DAEMON_PORT, UNIVER_VIEWER_PATH_PREFIX as PROXY_PATH_PREFIX } from '../configs/univer-viewer.config';
 
-const UNIVER_DAEMON_HOST = '127.0.0.1';
-const UNIVER_DAEMON_PORT = 9123;
-const PROXY_PATH_PREFIX = '/univer-viewer';
 // daemon 뷰어 HTML과 그 HTML이 실행하는 JS 번들(초기 스크립트 + 동적 import 청크) 양쪽 모두
 // /assets/..., /uf/... 를 절대경로로 하드코딩해서 참조한다. 이 접두사들을 nginx에서 통째로
 // 백엔드/daemon으로 열어버리면 프론트 앱 자신도 빌드 결과물을 /assets/*.js로 서빙하고 있어
