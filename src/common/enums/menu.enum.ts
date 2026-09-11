@@ -6,6 +6,7 @@ export enum MenuName {
   PRODUCTION_STATUS = '생산 현황 (수율)',
   LOT_MANAGEMENT = 'Lot 관리',
   LOT_SEARCH = 'Lot 검색',
+  PROCESS_TEMPLATE = '공정 템플릿 관리',
   // 재고 관리
   MATERIAL_MANAGEMENT = '원자재 관리',
   CELL_MANAGEMENT = '셀 관리',

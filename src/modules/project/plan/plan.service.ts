@@ -1,10 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ProjectPlan } from '../../../common/entities/project/project-plan.entity';
+import { ProjectPlanItem } from '../../../common/entities/project/project-plan-item.entity';
 import { Project } from '../../../common/entities/project/project.entity';
+import { ProcessTemplate } from '../../../common/entities/project/process-template.entity';
 import { Repository } from 'typeorm';
 import { CreateProjectPlanDto, UpdateProjectPlanDto } from '../../../common/dtos/project/project-plan.dto';
-import { PROJECT_PLAN_MAPPING } from '../../../common/utils/plan-transformer.util';
 import { PlanTransformerUtil } from '../../../common/utils/plan-transformer.util';
 
 @Injectable()
@@ -12,51 +13,57 @@ export class PlanService {
   constructor(
     @InjectRepository(ProjectPlan)
     private readonly planRepository: Repository<ProjectPlan>,
+    @InjectRepository(ProjectPlanItem)
+    private readonly planItemRepository: Repository<ProjectPlanItem>,
     @InjectRepository(Project)
     private readonly projectRepository: Repository<Project>,
+    @InjectRepository(ProcessTemplate)
+    private readonly templateRepository: Repository<ProcessTemplate>,
   ) {}
 
+  private buildItems(plan: ProjectPlan, processPlans: Record<string, { start: string; end: string }>): ProjectPlanItem[] {
+    return Object.entries(processPlans || {})
+      .filter(([, value]) => value?.start || value?.end)
+      .map(([key, value]) =>
+        this.planItemRepository.create({
+          plan,
+          key,
+          startDate: value.start || value.end,
+          endDate: value.end || value.start,
+        }),
+      );
+  }
+
+  private async resolveTemplate(templateId?: number): Promise<ProcessTemplate | null> {
+    if (!templateId) return null;
+    const template = await this.templateRepository.findOne({ where: { id: templateId } });
+    if (!template) throw new NotFoundException('공정 템플릿을 찾을 수 없습니다.');
+    return template;
+  }
+
   async savePlan(projectId: number, dto: CreateProjectPlanDto) {
-    const project = await this.projectRepository.findOne({
-      where: { id: projectId },
-    });
+    const project = await this.projectRepository.findOne({ where: { id: projectId } });
     if (!project) throw new NotFoundException('프로젝트를 찾을 수 없습니다.');
 
-    const { startDate, endDate, processPlans } = dto;
+    const template = await this.resolveTemplate(dto.templateId);
 
-    const planData: Partial<Record<keyof ProjectPlan, any>> = {
-      project,
-      startDate,
-      endDate,
-    };
-
-    for (const [key, value] of Object.entries(processPlans)) {
-      const field = PROJECT_PLAN_MAPPING[key];
-      if (!field) {
-        console.warn(`⚠️ 매칭되지 않은 공정명: ${key}`);
-        continue;
-      }
-      const { start, end } = value;
-
-      let dateValue = '';
-      if (start && end) dateValue = `${start}~${end}`;
-      else if (start) dateValue = start;
-      else if (end) dateValue = end;
-      else continue;
-
-      planData[field] = dateValue;
-    }
-
-    let plan = await this.planRepository.findOne({
-      where: { project: { id: projectId } },
-    });
+    let plan = await this.planRepository.findOne({ where: { project: { id: projectId } } });
 
     if (plan) {
-      Object.assign(plan, planData);
+      await this.planItemRepository.delete({ plan: { id: plan.id } });
     } else {
-      plan = this.planRepository.create(planData);
+      plan = this.planRepository.create({ project });
     }
-    return await this.planRepository.save(plan);
+
+    plan.startDate = dto.startDate;
+    plan.endDate = dto.endDate;
+    plan.template = template;
+    plan = await this.planRepository.save(plan);
+
+    plan.items = this.buildItems(plan, dto.processPlans);
+    if (plan.items.length) await this.planItemRepository.save(plan.items);
+
+    return plan;
   }
 
   async searchPlans(filters: { projectId?: number }) {
@@ -65,49 +72,31 @@ export class PlanService {
 
     const plans = await this.planRepository.find({
       where: { project: { id: projectId } },
-      relations: ['project'],
+      relations: ['project', 'template', 'template.items', 'items'],
       order: { startDate: 'ASC' },
     });
     return plans.map((plan) => PlanTransformerUtil.transformPlanData(plan));
   }
 
   async updatePlan(projectId: number, dto: UpdateProjectPlanDto) {
-    const project = await this.projectRepository.findOne({
-      where: { id: projectId },
-    });
-    if (!project) throw new NotFoundException('프로젝트를 찾을 수 없습니다.');
-
-    const plan = await this.planRepository.findOne({
-      where: { project: { id: projectId } },
-    });
-
+    const plan = await this.planRepository.findOne({ where: { project: { id: projectId } } });
     if (!plan) throw new NotFoundException('등록된 생산계획이 없습니다.');
 
-    const { startDate, endDate, processPlans } = dto;
+    if (dto.templateId !== undefined) {
+      plan.template = await this.resolveTemplate(dto.templateId);
+    }
+    if (dto.startDate !== undefined) plan.startDate = dto.startDate;
+    if (dto.endDate !== undefined) plan.endDate = dto.endDate;
 
-    const updateData: Partial<Record<keyof ProjectPlan, any>> = {
-      startDate,
-      endDate,
-    };
+    await this.planRepository.save(plan);
 
-    for (const [key, value] of Object.entries(processPlans || {})) {
-      const field = PROJECT_PLAN_MAPPING[key];
-      if (!field) continue;
-
-      const { start, end } = value;
-
-      let dateValue = '';
-      if (start && end) dateValue = `${start}~${end}`;
-      else if (start) dateValue = start;
-      else if (end) dateValue = end;
-      else continue;
-
-      updateData[field] = dateValue;
+    if (dto.processPlans) {
+      await this.planItemRepository.delete({ plan: { id: plan.id } });
+      const items = this.buildItems(plan, dto.processPlans);
+      if (items.length) await this.planItemRepository.save(items);
     }
 
-    Object.assign(plan, updateData);
-
-    return await this.planRepository.save(plan);
+    return plan;
   }
 
   async deletePlan(projectId: number) {

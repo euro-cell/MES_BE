@@ -24,6 +24,7 @@ import { EquipmentModule } from '../modules/equipment/equipment.module';
 import { CommonModule } from '../common/common.module';
 import { DashboardModule } from '../modules/dashboard/dashboard.module';
 import { CustomerModule } from '../modules/customer/customer.module';
+import { ProcessTemplateModule } from '../modules/process-template/process-template.module';
 import { RequestLoggerMiddleware } from '../common/middleware/request-logger.middleware';
 import { SessionRefreshMiddleware } from '../common/middleware/session-refresh.middleware';
 import { UniverViewerProxyMiddleware } from '../common/middleware/univer-viewer-proxy.middleware';
@@ -52,6 +53,7 @@ import { UniverViewerProxyMiddleware } from '../common/middleware/univer-viewer-
     EquipmentModule,
     DashboardModule,
     CustomerModule,
+    ProcessTemplateModule,
   ],
   controllers: [AppController],
   providers: [

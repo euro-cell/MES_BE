@@ -1,26 +1,9 @@
-import { ProjectPlan } from '../entities/project/project-plan.entity';
+import { ProcessTemplateItem } from '../entities/project/process-template-item.entity';
+import { ProjectPlanItem } from '../entities/project/project-plan-item.entity';
 
-export const PROJECT_PLAN_MAPPING: Record<string, keyof ProjectPlan> = {
-  'Electrode_Slurry Mixing_Cathode': 'mixingCathode',
-  'Electrode_Slurry Mixing_Anode': 'mixingAnode',
-  Electrode_Coating_Cathode: 'coatingCathode',
-  Electrode_Coating_Anode: 'coatingAnode',
-  Electrode_Calendering_Cathode: 'calenderingCathode',
-  Electrode_Calendering_Anode: 'calenderingAnode',
-  Electrode_Notching_Cathode: 'notchingCathode',
-  Electrode_Notching_Anode: 'notchingAnode',
-
-  'Cell Assembly_Pouch Forming': 'pouchForming',
-  'Cell Assembly_Vacuum Drying_Cathode': 'vacuumDryingCathode',
-  'Cell Assembly_Vacuum Drying_Anode': 'vacuumDryingAnode',
-  'Cell Assembly_Stacking': 'stacking',
-  'Cell Assembly_Tab Welding': 'tabWelding',
-  'Cell Assembly_Sealing': 'sealing',
-  'Cell Assembly_E/L Filling': 'elFilling',
-
-  'Cell Formation_PF/MF': 'pfMf',
-  'Cell Formation_Grading': 'grading',
-};
+export function planItemKey(group: string, name: string, type?: string | null): string {
+  return type ? `${group}_${name}_${type}` : `${group}_${name}`;
+}
 
 export class PlanTransformerUtil {
   static weekHeaders(startDate: string, endDate: string) {
@@ -178,104 +161,63 @@ export class PlanTransformerUtil {
     return merged;
   }
 
-  static processes(processData: Record<string, string>, weekHeaders: { month: number; weeks: { week: number; range: number[] }[] }[]) {
-    const processList = [
-      {
-        group: 'Electrode',
-        items: [
-          { name: 'Slurry Mixing', types: ['Cathode', 'Anode'], fields: ['mixingCathode', 'mixingAnode'] },
-          { name: 'Coating', types: ['Cathode', 'Anode'], fields: ['coatingCathode', 'coatingAnode'] },
-          { name: 'Calendering', types: ['Cathode', 'Anode'], fields: ['calenderingCathode', 'calenderingAnode'] },
-          { name: 'Notching', types: ['Cathode', 'Anode'], fields: ['notchingCathode', 'notchingAnode'] },
-        ],
-      },
-      {
-        group: 'Cell Assembly',
-        items: [
-          { name: 'Pouch Forming', types: [], fields: ['pouchForming'] },
-          { name: 'Vacuum Drying', types: ['Cathode', 'Anode'], fields: ['vacuumDryingCathode', 'vacuumDryingAnode'] },
-          { name: 'Stacking', types: [], fields: ['stacking'] },
-          { name: 'Tab Welding', types: [], fields: ['tabWelding'] },
-          { name: 'Sealing', types: [], fields: ['sealing'] },
-          { name: 'E/L Filling', types: [], fields: ['elFilling'] },
-        ],
-      },
-      {
-        group: 'Cell Formation',
-        items: [
-          { name: 'PF/MF', types: [], fields: ['pfMf'] },
-          { name: 'Grading', types: [], fields: ['grading'] },
-        ],
-      },
-    ];
+  /**
+   * templateItems drive the process taxonomy (group/name/types/order) instead of a hardcoded list.
+   * planItems are the saved per-key date ranges (key = `${group}_${name}` or `${group}_${name}_${type}`).
+   */
+  static processes(
+    templateItems: ProcessTemplateItem[],
+    planItems: ProjectPlanItem[],
+    weekHeaders: { month: number; weeks: { week: number; range: number[] }[] }[],
+  ) {
+    const planByKey = new Map(planItems.map((item) => [item.key, item]));
+    const sorted = [...templateItems].sort((a, b) => a.order - b.order);
 
     const results: any[] = [];
 
-    processList.forEach((group) => {
-      group.items.forEach((item) => {
-        if (item.types.length === 0) {
-          const field = item.fields[0];
-          results.push({
-            group: group.group,
-            name: item.name,
-            type: null,
-            key: `${group.group}_${item.name}`,
-            hasElectrode: false,
-            cells: this.convertDateToCells(processData[field], weekHeaders),
-          });
-        } else {
-          item.types.forEach((type, idx) => {
-            const field = item.fields[idx];
-            results.push({
-              group: group.group,
-              name: item.name,
-              type,
-              key: `${group.group}_${item.name}_${type}`,
-              hasElectrode: true,
-              cells: this.convertDateToCells(processData[field], weekHeaders),
-            });
-          });
-        }
+    sorted.forEach((templateItem) => {
+      const types = templateItem.types?.length ? templateItem.types : [null];
+
+      types.forEach((type) => {
+        const key = planItemKey(templateItem.group, templateItem.name, type);
+        const planItem = planByKey.get(key);
+        const dateValue = planItem?.startDate ? `${planItem.startDate}~${planItem.endDate ?? planItem.startDate}` : null;
+
+        results.push({
+          group: templateItem.group,
+          name: templateItem.name,
+          type,
+          key,
+          hasElectrode: templateItem.types?.length > 0,
+          cells: this.convertDateToCells(dateValue, weekHeaders),
+        });
       });
     });
+
     return results;
   }
 
   static transformPlanData(plan: any) {
     const weekHeaders = this.weekHeaders(plan.startDate, plan.endDate);
+    const templateItems: ProcessTemplateItem[] = plan.template?.items ?? [];
+    const planItems: ProjectPlanItem[] = plan.items ?? [];
 
-    const processKeys = [
-      'mixingCathode',
-      'mixingAnode',
-      'coatingCathode',
-      'coatingAnode',
-      'calenderingCathode',
-      'calenderingAnode',
-      'notchingCathode',
-      'notchingAnode',
-      'pouchForming',
-      'vacuumDryingCathode',
-      'vacuumDryingAnode',
-      'stacking',
-      'tabWelding',
-      'sealing',
-      'elFilling',
-      'pfMf',
-      'grading',
-    ];
+    const processes = this.processes(templateItems, planItems, weekHeaders);
 
-    const processData = Object.fromEntries(Object.entries(plan).filter(([key]) => processKeys.includes(key))) as Record<string, string>;
-
-    const processes = this.processes(processData, weekHeaders);
+    const planData: Record<string, { start: string; end: string }> = {};
+    planItems.forEach((item) => {
+      planData[item.key] = { start: item.startDate, end: item.endDate };
+    });
 
     return {
       id: plan.id,
       startDate: plan.startDate,
       endDate: plan.endDate,
       project: plan.project,
+      templateId: plan.template?.id ?? null,
       weekHeaders,
       processes,
-      planData: processData,
+      planData,
     };
   }
 }

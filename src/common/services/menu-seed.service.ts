@@ -39,6 +39,7 @@ export class MenuSeedService implements OnApplicationBootstrap {
       { name: '생산 현황 (수율)', path: '/project/status', parentId: pid('생산 관리'), displayOrder: 4 },
       { name: 'Lot 관리', path: '/project/lot', parentId: pid('생산 관리'), displayOrder: 5 },
       { name: 'Lot 검색', path: '/project/search', parentId: pid('생산 관리'), displayOrder: 6 },
+      { name: '공정 템플릿 관리', path: '/project/process-templates', parentId: pid('생산 관리'), displayOrder: 7 },
       // 재고 관리
       { name: '원자재 관리', path: '/stock/material', parentId: pid('재고 관리'), displayOrder: 1 },
       { name: '셀 관리', path: '/stock/cell', parentId: pid('재고 관리'), displayOrder: 2 },
