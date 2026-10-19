@@ -555,14 +555,23 @@ export class MaterialService {
     try {
       for (const item of materials) {
         // lotNo + category 조합으로 기존 자재 조회
-        const existingMaterial = await queryRunner.manager.findOne(Material, {
-          where: {
-            lotNo: item.lotNo,
-            category: item.category,
-            process,
-            deletedAt: null,
-          } as any,
-        });
+        const where = { lotNo: item.lotNo, category: item.category, process };
+        let existingMaterial = await queryRunner.manager.findOne(Material, { where: where as any });
+
+        // 활성 자재가 없으면 소프트 삭제된 자재를 찾아 복구 (id 유지로 BOM 등 참조 보존)
+        let isRestored = false;
+        if (!existingMaterial) {
+          const deletedMaterial = await queryRunner.manager.findOne(Material, {
+            where: where as any,
+            withDeleted: true,
+            order: { id: 'DESC' },
+          });
+          if (deletedMaterial?.deletedAt) {
+            await queryRunner.manager.restore(Material, deletedMaterial.id);
+            existingMaterial = deletedMaterial;
+            isRestored = true;
+          }
+        }
 
         // origin 값 변환 (문자열 -> enum)
         const originValue = this.parseOrigin(item.origin);
@@ -575,6 +584,7 @@ export class MaterialService {
           const currentStock = Math.round(item.stock ?? 0);
 
           const hasChanges =
+            isRestored ||
             existingMaterial.type !== (item.type ?? '') ||
             existingMaterial.purpose !== purposeValue ||
             existingMaterial.name !== (item.name ?? '') ||
