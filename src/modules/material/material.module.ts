@@ -7,6 +7,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Material } from '../../common/entities/material/material.entity';
 import { MaterialHistory } from '../../common/entities/material/material-history.entity';
 import { Project } from '../../common/entities/project/project.entity';
+import { BomTemplateRow } from '../../common/entities/bom/bom-template-row.entity';
 import { CoaModule } from './coa/coa.module';
 
 @Module({
@@ -14,7 +15,7 @@ import { CoaModule } from './coa/coa.module';
     RouterModule.register([
       { path: 'material/coa', module: CoaModule },
     ]),
-    TypeOrmModule.forFeature([Material, MaterialHistory, Project]),
+    TypeOrmModule.forFeature([Material, MaterialHistory, Project, BomTemplateRow]),
     CoaModule,
   ],
   controllers: [MaterialController],

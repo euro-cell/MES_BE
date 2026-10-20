@@ -1,11 +1,17 @@
-import { Injectable, StreamableFile } from '@nestjs/common';
+import { ConflictException, Injectable, StreamableFile } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Material } from '../../common/entities/material/material.entity';
 import { MaterialHistory } from '../../common/entities/material/material-history.entity';
 import { Project } from '../../common/entities/project/project.entity';
+import { BomTemplateRow } from '../../common/entities/bom/bom-template-row.entity';
 import { MaterialProcess, MaterialHistoryType } from '../../common/enums/material.enum';
 import { In, Repository, SelectQueryBuilder } from 'typeorm';
-import { CreateMaterialDto, UpdateMaterialDto, ImportMaterialItemDto, ImportMaterialResultDto } from '../../common/dtos/material/material.dto';
+import {
+  CreateMaterialDto,
+  UpdateMaterialDto,
+  ImportMaterialItemDto,
+  ImportMaterialResultDto,
+} from '../../common/dtos/material/material.dto';
 import { MaterialOrigin, MaterialPurpose } from '../../common/enums/material.enum';
 import { ExcelService } from '../../common/services/excel.service';
 import { ExcelUtil } from '../../common/utils/excel.util';
@@ -20,6 +26,8 @@ export class MaterialService {
     private readonly materialHistoryRepository: Repository<MaterialHistory>,
     @InjectRepository(Project)
     private readonly projectRepository: Repository<Project>,
+    @InjectRepository(BomTemplateRow)
+    private readonly bomTemplateRowRepository: Repository<BomTemplateRow>,
     private readonly excelService: ExcelService,
   ) {}
 
@@ -200,9 +208,17 @@ export class MaterialService {
     return updatedMaterial;
   }
 
+  private async assertNotReferencedByBom(id: number) {
+    const isReferenced = await this.bomTemplateRowRepository.exists({ where: { material: { id } }, withDeleted: true });
+    if (isReferenced) {
+      throw new ConflictException('BOM 템플릿에서 사용 중인 자재는 완전 삭제할 수 없습니다.');
+    }
+  }
+
   async deleteElectrodeMaterial(id: number, isHardDelete: boolean = false) {
     if (isHardDelete) {
       // 하드 딜리트: 데이터 완전 삭제
+      await this.assertNotReferencedByBom(id);
       return this.materialRepository.delete(id);
     } else {
       // 소프트 딜리트: deletedAt 설정
@@ -268,6 +284,7 @@ export class MaterialService {
   async deleteAssemblyMaterial(id: number, isHardDelete: boolean = false) {
     if (isHardDelete) {
       // 하드 딜리트: 데이터 완전 삭제
+      await this.assertNotReferencedByBom(id);
       return this.materialRepository.delete(id);
     } else {
       // 소프트 딜리트: deletedAt 설정
@@ -333,8 +350,8 @@ export class MaterialService {
     // lotNo 우선 조회, 없으면 name으로 fallback
     let material = materialLot
       ? await this.materialRepository.findOne({ where: { lotNo: materialLot } })
-      : await this.materialRepository.findOne({ where: { lotNo: materialName } }) ||
-        await this.materialRepository.findOne({ where: { name: materialName } });
+      : (await this.materialRepository.findOne({ where: { lotNo: materialName } })) ||
+        (await this.materialRepository.findOne({ where: { name: materialName } }));
 
     if (!material) {
       return null; // 자재를 찾지 못함
@@ -370,8 +387,8 @@ export class MaterialService {
   ) {
     let material = materialLot
       ? await this.materialRepository.findOne({ where: { lotNo: materialLot } })
-      : await this.materialRepository.findOne({ where: { lotNo: materialName } }) ||
-        await this.materialRepository.findOne({ where: { name: materialName } });
+      : (await this.materialRepository.findOne({ where: { lotNo: materialName } })) ||
+        (await this.materialRepository.findOne({ where: { name: materialName } }));
 
     if (!material) {
       return null;
@@ -431,8 +448,8 @@ export class MaterialService {
   async restoreMaterialUsage(materialName: string, materialLot: string | undefined, usageAmount: number, process: MaterialProcess) {
     let material = materialLot
       ? await this.materialRepository.findOne({ where: { lotNo: materialLot } })
-      : await this.materialRepository.findOne({ where: { lotNo: materialName } }) ||
-        await this.materialRepository.findOne({ where: { name: materialName } });
+      : (await this.materialRepository.findOne({ where: { lotNo: materialName } })) ||
+        (await this.materialRepository.findOne({ where: { name: materialName } }));
 
     if (!material) {
       return null;
@@ -541,10 +558,7 @@ export class MaterialService {
   /**
    * 자재 일괄 등록/수정 공통 로직
    */
-  private async importMaterials(
-    materials: ImportMaterialItemDto[],
-    process: MaterialProcess,
-  ): Promise<ImportMaterialResultDto> {
+  private async importMaterials(materials: ImportMaterialItemDto[], process: MaterialProcess): Promise<ImportMaterialResultDto> {
     const queryRunner = this.materialRepository.manager.connection.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
