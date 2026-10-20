@@ -439,7 +439,7 @@ export class DrawingService {
           }
 
           this.logger.log(`PDF ${pdfIndex + 1} 변환 완료: ${imagePaths.length}페이지`);
-        } catch (err) {
+        } catch (err: any) {
           this.logger.error(`PDF 변환 실패 (${pdfKey}): ${err.message}`);
         }
       }
